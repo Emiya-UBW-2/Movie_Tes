@@ -1,0 +1,11 @@
+grass_level=4
+DoF=false
+bloom=true
+shadow=true
+usevr=false
+SSAO=true
+fov=65.000000
+vsync=true
+SE=0.980000
+VOICE=1.000000
+BGM=1.000000

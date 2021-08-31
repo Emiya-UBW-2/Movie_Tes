@@ -1,0 +1,5 @@
+PBS-4
+変更予定サプレッサー。
+mazzleid=1
+recoil=-10.0
+weight=0.1

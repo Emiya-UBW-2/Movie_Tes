@@ -1,0 +1,4 @@
+6P1 AK under handguard
+AKM用木製アンダーハンドガード。
+recoil=-0.5
+weight=0.24

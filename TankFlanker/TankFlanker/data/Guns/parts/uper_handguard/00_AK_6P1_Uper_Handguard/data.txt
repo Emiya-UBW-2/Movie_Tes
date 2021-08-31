@@ -1,0 +1,4 @@
+6P1 AK uper handguard
+AKM用木製アッパーハンドガード。
+recoil=-0.1
+weight=0.12

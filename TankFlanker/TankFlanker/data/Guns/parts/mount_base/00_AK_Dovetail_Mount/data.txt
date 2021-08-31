@@ -1,0 +1,6 @@
+AK DovetailSidemount
+AK用ドープテイルサイドマウント。
+recoil=-0.0
+weight=0.15
+00_AK_SideRailMount
+02_PSP_1_Scope

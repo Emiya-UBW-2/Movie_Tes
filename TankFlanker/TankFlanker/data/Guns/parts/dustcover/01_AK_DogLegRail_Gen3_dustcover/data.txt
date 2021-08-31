@@ -1,0 +1,6 @@
+Blemished  DogLegRail Gen3 AK dustcover
+AKM用レール付きダストカバー。
+recoil=-0.1
+weight=0.25
+00_Eotech_XPS3_HoloSight
+01_AIMPOINT_T1_DotSight

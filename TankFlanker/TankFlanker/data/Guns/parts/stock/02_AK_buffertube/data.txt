@@ -1,0 +1,5 @@
+Buffertube for AK
+AKM用バッファチューブアダプタ。
+stocktype=1
+recoil=-45.0
+weight=0.75

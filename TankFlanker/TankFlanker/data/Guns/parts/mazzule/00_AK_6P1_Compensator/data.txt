@@ -1,0 +1,5 @@
+6P1 AK compensator
+AKM用マズルコンペンセイター。
+mazzleid=0
+recoil=-15.0
+weight=0.03

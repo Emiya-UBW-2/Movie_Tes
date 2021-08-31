@@ -1,0 +1,6 @@
+NcSTAR Laser
+NcSTAR製レーザーサイト。
+type1=laser
+type=end
+recoil=-0.0
+weight=0.15

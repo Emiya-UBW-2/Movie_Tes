@@ -1,0 +1,6 @@
+AK Original uper handguard
+AKM用ポリマー製アッパーハンドガード。
+recoil=-0.2
+weight=0.23
+00_Eotech_XPS3_HoloSight
+01_AIMPOINT_T1_DotSight

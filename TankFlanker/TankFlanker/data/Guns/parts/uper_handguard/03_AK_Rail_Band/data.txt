@@ -1,0 +1,4 @@
+AK Rail Band
+AKM用レールマウントベース
+recoil=-0.0
+weight=0.08

@@ -1,0 +1,4 @@
+6P20 AK under handguard
+AK74用ポリマー製アンダーハンドガード。
+recoil=-0.45
+weight=0.21

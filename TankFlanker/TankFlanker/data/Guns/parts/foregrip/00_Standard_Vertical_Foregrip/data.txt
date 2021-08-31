@@ -1,0 +1,4 @@
+Standard Vertical Foregrip
+標準的バーティカルフォアグリップ。
+recoil=-2.0
+weight=0.072

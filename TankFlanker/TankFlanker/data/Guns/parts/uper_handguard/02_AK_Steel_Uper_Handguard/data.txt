@@ -1,0 +1,4 @@
+AK Steel uper handguard
+AK用鉄製アッパーカバー。
+recoil=-0.0
+weight=0.12

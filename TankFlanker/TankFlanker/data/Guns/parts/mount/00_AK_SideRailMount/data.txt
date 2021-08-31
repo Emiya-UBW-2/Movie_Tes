@@ -1,0 +1,6 @@
+AK　SideRailMount
+AK用サイドマウント式レール。
+recoil=-0.0
+weight=0.15
+00_Eotech_XPS3_HoloSight
+01_AIMPOINT_T1_DotSight

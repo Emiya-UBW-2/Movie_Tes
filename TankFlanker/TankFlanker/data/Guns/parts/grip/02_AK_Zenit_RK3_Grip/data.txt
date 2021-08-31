@@ -1,0 +1,4 @@
+Zenit RK3 AK grip
+AKM用カスタムグリップ。
+recoil=-0.5
+weight=0.14

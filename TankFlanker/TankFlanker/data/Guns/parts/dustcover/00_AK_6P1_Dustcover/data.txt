@@ -1,0 +1,4 @@
+6P1 AK dustcover
+AKM用ダストカバー。
+recoil=-0.0
+weight=0.14

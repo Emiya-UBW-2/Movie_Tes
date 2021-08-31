@@ -1,0 +1,7 @@
+type55 AK magazine(10 Round)
+AK47用10発マガジン。
+ammo_cap=10
+ammo_1=7.62x39
+ammo_end=end
+recoil=0.0
+weight=0.1

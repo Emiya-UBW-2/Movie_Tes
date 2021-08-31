@@ -1,0 +1,5 @@
+6P20 AK polymerstock
+AK74用ポリマー製ストック。
+stocktype=1
+recoil=-33.0
+weight=0.35

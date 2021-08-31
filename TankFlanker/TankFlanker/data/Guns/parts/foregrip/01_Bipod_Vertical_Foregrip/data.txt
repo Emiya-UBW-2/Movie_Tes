@@ -1,0 +1,4 @@
+Bipod Vertical Foregrip
+バイポッド付きバーティカルフォアグリップ。
+recoil=-6.0
+weight=0.2

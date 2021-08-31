@@ -1,0 +1,4 @@
+6P1 AK woodgrip
+AKM用木製グリップ。
+recoil=-0.35
+weight=0.12

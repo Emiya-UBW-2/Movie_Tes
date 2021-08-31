@@ -1,0 +1,7 @@
+PSO-1 SCOPE
+サイドマウント対応のスコープ。
+zoom=3.5
+reticlesize=640
+zoomsight=640
+recoil=-0.0
+weight=0.116
