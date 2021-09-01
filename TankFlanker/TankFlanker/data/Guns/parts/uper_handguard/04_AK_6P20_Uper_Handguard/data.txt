@@ -1,4 +1,0 @@
-6P20 AK uper handguard
-AK74用ポリマー製アッパーハンドガード。
-recoil=-0.12
-weight=0.11

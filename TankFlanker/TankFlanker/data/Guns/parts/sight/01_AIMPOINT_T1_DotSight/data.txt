@@ -1,7 +1,0 @@
-AIMPOINT T1 DotSight
-AimPoint製小型ドットサイト。
-zoom=1.0
-reticlesize=64
-zoomsight=600
-recoil=-0.0
-weight=0.116

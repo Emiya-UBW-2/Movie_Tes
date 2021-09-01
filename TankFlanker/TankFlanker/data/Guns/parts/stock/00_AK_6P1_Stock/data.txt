@@ -1,5 +1,0 @@
-6P1 AK woodstock
-AKM用木製ストック。
-stocktype=1
-recoil=-30.0
-weight=0.45

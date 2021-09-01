@@ -1,8 +1,0 @@
-Zenit B10M AK under handguard
-AK用B10Mアンダーハンドガード。
-recoil=-1.0
-weight=0.35
-00_Standard_Vertical_Foregrip
-01_Bipod_Vertical_Foregrip
-00_NcSTAR_Laser
-01_Tactical_Flashlight

@@ -1,4 +1,0 @@
-AK Polymer under handguard
-AK用ポリマーアンダーハンドガード。
-recoil=-0.5
-weight=0.23

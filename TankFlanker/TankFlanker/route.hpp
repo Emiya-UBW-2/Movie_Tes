@@ -146,7 +146,7 @@ namespace FPS_n2 {
 					//‰æ–Ê‚Ì”½‰f
 					DrawPts->Screen_Flip();
 					//I—¹”»’è
-					if (false) {
+					if (CheckHitKey(KEY_INPUT_ESCAPE) != 0) {
 						this->ending = false;
 						break;
 					}

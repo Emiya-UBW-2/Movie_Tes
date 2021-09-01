@@ -1,6 +1,0 @@
-Tactical Flashlight
-フラッシュライト。
-type1=light
-type=end
-recoil=-0.0
-weight=0.15

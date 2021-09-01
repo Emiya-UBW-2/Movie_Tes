@@ -1,7 +1,0 @@
-Eotech XPS3 HoloSight
-Eotech製ホログラフィックサイト。
-zoom=1.0
-reticlesize=64
-zoomsight=600
-recoil=-0.1
-weight=0.26
