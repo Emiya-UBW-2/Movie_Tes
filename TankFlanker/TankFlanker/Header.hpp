@@ -19,8 +19,6 @@
 #include "sub.hpp"
 #include "map.hpp"
 #include "Ptr_common.hpp"
-#include "chara.hpp"
-#include "UI.hpp"
 #include "scene.hpp"
 
 #include "route.hpp"

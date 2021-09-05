@@ -1,0 +1,34 @@
+[Info]
+Version = 3
+
+[Effect]
+Obj = none
+Obj[0] = Specialweek_face.fx
+Obj[1] = Specialweek_face.fx
+Obj[2] = Specialweek_face.fx
+Obj[3] = Specialweek_face.fx
+Obj[4] = Specialweek_face.fx
+Obj[5] = Specialweek_face.fx
+Obj[6] = Specialweek_face.fx
+Obj[7] = Specialweek_face.fx
+Obj[8] = Specialweek_face.fx
+Obj[9] = Specialweek_face.fx
+Obj[10] = Specialweek_face.fx
+Obj[11] = Specialweek_face.fx
+Obj[12] = Specialweek_face.fx
+Obj[13] = Specialweek_hair.fx
+Obj[14] = Specialweek_hair.fx
+Obj[15] = Specialweek_hair.fx
+Obj[16] = Specialweek_body.fx
+Obj[17] = Specialweek_body.fx
+Obj[18] = Specialweek_body.fx
+Obj[19] = Specialweek_body.fx
+Obj[20] = Specialweek_body.fx
+Obj[21] = Specialweek_body.fx
+Obj[22] = Specialweek_body.fx
+Obj[23] = Specialweek_body.fx
+Obj[24] = Specialweek_body.fx
+Obj[25] = Specialweek_body.fx
+Obj[30] = Specialweek_hair.fx
+Obj[31] = Specialweek_hair.fx
+
