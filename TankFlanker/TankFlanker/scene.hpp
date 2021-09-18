@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				//âπà íuéwíË
 				Set3DSoundListenerPosAndFrontPosAndUpVec(camera_main.campos.get(), camera_main.camvec.get(), camera_main.camup.get());
 				//âeópà”
-				DrawPts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(2.5f, 2.5f, 2.5f), VECTOR_ref::vget(15.f, 2.5f, 15.f));//MAIN_LOOPÇÃnearÇÕÇ±ÇÍ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
+				DrawPts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(40.5f, 40.5f, 42.5f), VECTOR_ref::vget(85.f, 8.5f, 85.f));//MAIN_LOOPÇÃnearÇÕÇ±ÇÍ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
 			}
 			virtual void UI_Draw(void) noexcept {}
 			virtual void BG_Draw(void) noexcept {
@@ -108,10 +108,21 @@ namespace FPS_n2 {
 		//
 		class MAINLOOP : public TEMPSCENE {
 		private:
+			MV1 Takion;
 			class Cut_Info {
 			public:
+				cam_info Aim_camera;
+				float cam_per = 0.0f;
 				GraphHandle handle;
 				LONGLONG TIME = 0;
+
+				Cut_Info() {
+					Aim_camera.campos = VECTOR_ref::vget(0, 10, -30);
+					Aim_camera.camvec = VECTOR_ref::vget(0, 10, 0);
+					Aim_camera.camup = VECTOR_ref::up();
+					Aim_camera.set_cam_info(deg2rad(15), 1.0f, 100.f);
+					cam_per = 0.95f;
+				}
 			};
 			//ÉfÅ[É^
 			SoundHandle BGM;
@@ -121,6 +132,18 @@ namespace FPS_n2 {
 
 			GraphHandle movie;
 		private:
+			void Sel_AnimNum(MV1&model,int sel) {
+				for (auto& anim : model.get_anime()) {
+					if (&anim - &model.get_anime().front() == sel) {
+						model.get_anime(&anim - &model.get_anime().front()).per = 1.0f;
+					}
+					else {
+						model.get_anime(&anim - &model.get_anime().front()).per = 0.0f;
+					}
+				}
+			}
+
+
 			bool Time_Over() {
 				return Cut >= Cut_Pic.size();
 			}
@@ -134,6 +157,13 @@ namespace FPS_n2 {
 			using TEMPSCENE::TEMPSCENE;
 			void Awake(void) noexcept override {
 				TEMPSCENE::Awake();
+
+				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion);
+
+				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
+				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
+				camera_main.camup = VECTOR_ref::up();
+				camera_main.set_cam_info(deg2rad(15), 1.0f, 100.f);
 			}
 		public:
 			void Set(void) noexcept override {
@@ -152,60 +182,162 @@ namespace FPS_n2 {
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/1.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 0.450f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
 				//âHçLÇ™ÇËíÜ
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/2.bmp");//2
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 2.714f);
-
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
 				//ãπ
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/3.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.021f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1, 13.82f, -2.08);
+				Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+					VECTOR_ref::vget(
+						-cos(deg2rad(20.1))*sin(-deg2rad(22.9)),
+						sin(deg2rad(20.1)),
+						-cos(deg2rad(20.1))*cos(-deg2rad(22.9))
+					)*10.3f;
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().cam_per = 0.f;
 				//îwíÜ
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/4.bmp");//2
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.258f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-2.57f, 10.04f,0.31f);
+				Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+					VECTOR_ref::vget(
+						-cos(deg2rad(6.3))*sin(-deg2rad(225.7)),
+						sin(deg2rad(6.3)),
+						-cos(deg2rad(6.3))*cos(-deg2rad(225.7))
+					)*10.3f;
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().cam_per = 0.f;
 				//âEë´Å®
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/5.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.512f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.85f, 16.69f, 0.61f);
+				Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+					VECTOR_ref::vget(
+						-cos(deg2rad(15.5))*sin(-deg2rad(202.8)),
+						sin(deg2rad(15.5)),
+						-cos(deg2rad(15.5))*cos(-deg2rad(202.8))
+					)*10.3f;
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().cam_per = 0.f;
 				//ì™Å©
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/6.bmp");//2
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.724f);
-
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.54f, 16.05f, -1.28f);
+				Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+					VECTOR_ref::vget(
+						-cos(deg2rad(8.6))*sin(-deg2rad(73.9)),
+						sin(deg2rad(8.6)),
+						-cos(deg2rad(8.6))*cos(-deg2rad(73.9))
+					)*10.3f;
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().cam_per = 0.f;
 				//âHêÿÇÈÇÕÇ∂Çﬂ
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/7.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 4.310f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
 				//âHêÿÇÈèIÇÌÇË
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/8.bmp");//2
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 5.086f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
+				Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+					VECTOR_ref::vget(
+						-cos(deg2rad(6.9))*sin(-deg2rad(19.5)),
+						sin(deg2rad(6.9)),
+						-cos(deg2rad(6.9))*cos(-deg2rad(19.5))
+					)*27.0f;
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().cam_per = 0.f;
 				//éaêV
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/9.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 6.448f);
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
+				Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+					VECTOR_ref::vget(
+						-cos(deg2rad(6.9))*sin(-deg2rad(19.5)),
+						sin(deg2rad(6.9)),
+						-cos(deg2rad(6.9))*cos(-deg2rad(19.5))
+					)*27.0f;
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().cam_per = 0.f;
 				//ÅÉÅÑ
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/10.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.096f);
+
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
+
 				//äÁ
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/11.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.288f);
+
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-4.494195f, 12.919953f, -28.361502f);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.366895f, 16.169621f, -21.344687f);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
+
 				//äÁ2
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/12.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.576f);
+
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.106448f, 3.030100f, -23.623045f);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.044426f, 4.483082f, -26.842037f);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
+
 				//äÁ3
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/13.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.864f);
+
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(2.589150f, 10.542250f, -24.661646f);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(3.584894f, 12.149980f, -20.973043f);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
+
 				//||
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/14.bmp");//1
 				Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 10.264f);
+
+				Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
+				Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
+				Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+				Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+				Cut_Pic.back().cam_per = 0.f;
+
 				//ÉoÉCÉN
 				Cut_Pic.resize(Cut_Pic.size() + 1);
 				Cut_Pic.back().handle = GraphHandle::Load("data/cut/15.bmp");//1
@@ -392,10 +524,43 @@ namespace FPS_n2 {
 				const auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 				{
 					if (!Time_Over()) {
+						easing_set(&camera_main.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
+						easing_set(&camera_main.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
+						easing_set(&camera_main.camup, Cut_Pic[Cut].Aim_camera.camup, Cut_Pic[Cut].cam_per);
+						easing_set(&camera_main.fov, Cut_Pic[Cut].Aim_camera.fov, Cut_Pic[Cut].cam_per);
+						camera_main.set_cam_info(camera_main.fov, 1.0f, 200.f);
+						if (Cut < 7) {
+							Sel_AnimNum(Takion, 0);
+						}
+						else if (Cut < 9) {
+							Sel_AnimNum(Takion, 1);
+							Takion.get_anime(2).time = 33.f;
+						}
+						else if (Cut < 15) {
+							Sel_AnimNum(Takion, 2);
+							if (Cut >= 9 && Cut <= 12) {
+								Takion.get_anime(2).Update(true, 0.01f);
+							}
+							if (Cut >= 13) {
+								if (NowTime > (LONGLONG)(1000000.f * 8.064f)) {
+									Takion.get_anime(2).Update(true, 0.6f);
+									Cut_Pic[Cut].Aim_camera.camvec = Takion.frame(6) + VECTOR_ref::vget(-3.f + float(GetRand(2 * 3 * 10)) / 10.f, -3.f + float(GetRand(2 * 3 * 10)) / 10.f, -3.f + float(2 * 3 * 10) / 10.f);
+									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(17.178366f, 4.319146f, -36.016518f);
+									Cut_Pic[Cut].cam_per = 0.9f;
+								}
+							}
+						}
+
+						Takion.get_anime(0).Update(true, 1.f);
+						Takion.get_anime(1).Update(true, 1.f);
+						//Takion.get_anime(2).Update(true, 1.f);
+					}
+					if (!Time_Over()) {
 						if (NowTime > GetCutTime()) {
 							AddCutNum();
 						}
 					}
+					Takion.work_anime();
 				}
 				if (Time_Over()) {
 					return false;
@@ -425,8 +590,10 @@ namespace FPS_n2 {
 			void Shadow_Draw_NearFar(void) noexcept override {
 			}
 			void Shadow_Draw(void) noexcept override {
+				Takion.DrawModel();
 			}
 			void Main_Draw(void) noexcept override {
+				Takion.DrawModel();
 			}
 			void Item_Draw(void) noexcept override {
 				TEMPSCENE::Item_Draw();
