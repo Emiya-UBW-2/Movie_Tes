@@ -135,6 +135,8 @@ namespace FPS_n2 {
 		std::array<EffectS, int(Effect::effects)> effcs;	/*エフェクト*/
 	public:
 		void Set_Effect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept { this->effcs[(int)ef_].Set(pos_t, nomal_t, scale); }
+		void Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
+		void SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
 		//エフェクトの更新
 		void Update_Effect(void) noexcept {
 			for (auto& t : this->effcs) {

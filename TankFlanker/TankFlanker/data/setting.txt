@@ -1,9 +1,9 @@
 grass_level=4
-DoF=false
+DoF=true
 bloom=true
 shadow=true
 usevr=false
-SSAO=true
+SSAO=false
 fov=65.000000
 vsync=true
 SE=0.980000

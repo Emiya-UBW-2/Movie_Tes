@@ -109,15 +109,19 @@ c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1623
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
-c:\users\yabushita_maki\documents\github\fps_n2\tankflanker\tankflanker\chara.hpp(1966): warning C4189: 'a': ローカル変数が初期化されましたが、参照されていません
-c:\users\yabushita_maki\documents\github\fps_n2\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
-c:\users\yabushita_maki\documents\github\fps_n2\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
-c:\users\yabushita_maki\documents\github\fps_n2\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
-c:\users\yabushita_maki\documents\github\fps_n2\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hInstance': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(986): warning C4244: '引数': 'LONGLONG' から 'int' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hInstance': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(77): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
+c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(80): warning C4505: 'Segment_Point_MinLen': 参照されていないローカル関数は削除されました。
+c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(156): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。
+c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(171): warning C4505: 'StringToWString': 参照されていないローカル関数は削除されました。
   コード生成しています。
-  2 of 6928 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  1 of 1334 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    3 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
-EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj) : warning LNK4099: PDB 'EffekseerForDXLib_vs2017.pdb' が 'EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj)' で、または 'C:\Users\Yabushita_Maki\Documents\GitHub\FPS_n2\TankFlanker\x64\Release\EffekseerForDXLib_vs2017.pdb' に見つかりません。デバッグ情報がないものとして、オブジェクトにリンクします。
-  TankFlanker.vcxproj -> C:\Users\Yabushita_Maki\Documents\GitHub\FPS_n2\TankFlanker\x64\Release\FPS_n2.exe
+EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj) : warning LNK4099: PDB 'EffekseerForDXLib_vs2017.pdb' が 'EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj)' で、または 'C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Release\EffekseerForDXLib_vs2017.pdb' に見つかりません。デバッグ情報がないものとして、オブジェクトにリンクします。
+  TankFlanker.vcxproj -> C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Release\FPS_n2.exe

@@ -9,9 +9,6 @@ namespace FPS_n2 {
 		std::shared_ptr<Sceneclass::TEMPSCENE> scenes_ptr{ nullptr };
 		bool selend{ true };
 		bool selpause{ true };
-		//シェーダー
-		shaders::shader_Vertex Screen_vertex;					// 頂点データ
-		std::array<shaders, 2> shader2D;
 	public:
 		main_c(void) noexcept {
 			auto OPTPTs = std::make_shared<OPTION>();								//設定読み込み
@@ -22,13 +19,10 @@ namespace FPS_n2 {
 			OPTPTs->Set_useVR(DrawPts->use_vr);
 			//シェーダー
 			auto HostpassPTs = std::make_shared<HostPassEffect>(OPTPTs, DrawPts->disp_x, DrawPts->disp_y);				//ホストパスエフェクト(VR、フルスクリーン共用)
-			//シェーダー
-			Screen_vertex.Set(DrawPts);																					// 頂点データの準備
-			shader2D[0].Init("VS_lens.vso", "PS_lens.pso");																//レンズ
-			shader2D[1].Init("ShaderPolygon3DTestVS.vso", "ShaderPolygon3DTestPS.pso");									//歪み
+
 			effectControl.Init();																						//エフェクト
 			//シーン
-			auto MAINLOOPscene = std::make_shared<Sceneclass::MAINLOOP>(DrawPts, OPTPTs);
+			auto MAINLOOPscene = std::make_shared<Sceneclass::MAINLOOP>(DrawPts, OPTPTs, HostpassPTs);
 			//開始処理
 			MAINLOOPscene->Awake();
 			//遷移先指定
@@ -44,9 +38,7 @@ namespace FPS_n2 {
 				selpause = false;
 				//
 				while (ProcessMessage() == 0) {
-#ifdef DEBUG
 					clsDx();
-#endif // DEBUG
 					const auto waits = GetNowHiPerformanceCount();
 					FPS = GetFPS();
 #ifdef DEBUG
@@ -82,34 +74,6 @@ namespace FPS_n2 {
 									//最終描画
 									HostpassPTs->Set_MAIN_Draw();
 								}
-								//*
-								GraphHandle::SetDraw_Screen(tmp);
-								{
-									SetUseTextureToShader(0, HostpassPTs->Get_MAIN_Screen().get());	//使用するテクスチャをセット
-									if (scenes_ptr->is_lens()) {
-										//レンズ描画
-										shader2D[0].Set_dispsize(DrawPts->disp_x, DrawPts->disp_y);
-										shader2D[0].Set_param(float(DrawPts->disp_x) / 2.f, float(DrawPts->disp_y) / 2.f, scenes_ptr->size_lens(), scenes_ptr->zoom_lens());
-										HostpassPTs->Get_BUF_Screen().SetDraw_Screen();
-										{
-											shader2D[0].Draw(Screen_vertex);
-										}
-										HostpassPTs->Set_MAIN_Draw_nohost();
-									}
-
-									if (scenes_ptr->is_bless()) {
-										//歪み描画
-										shader2D[1].Set_dispsize(DrawPts->disp_x, DrawPts->disp_y);
-										shader2D[1].Set_param(0, 0, scenes_ptr->ratio_bless(), (1.f - cos(scenes_ptr->time_bless())) / 2.f);
-										HostpassPTs->Get_BUF_Screen().SetDraw_Screen();
-										{
-											shader2D[1].Draw(Screen_vertex);
-										}
-										HostpassPTs->Set_MAIN_Draw_nohost();
-									}
-									SetUseTextureToShader(0, -1);	//使用するテクスチャをセット
-								}
-								//*/
 								GraphHandle::SetDraw_Screen(tmp, tmp_cam.campos, tmp_cam.camvec, tmp_cam.camup, tmp_cam.fov, tmp_cam.near_, tmp_cam.far_, false);
 								{
 									HostpassPTs->MAIN_Draw();											//デフォ描画

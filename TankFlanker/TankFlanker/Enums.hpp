@@ -13,6 +13,7 @@ namespace FPS_n2 {
 		ef_fire2,	//”­–C‰Š
 		ef_hitblood,//ŒŒ‚µ‚Ô‚«
 		ef_greexp,	//ƒOƒŒ”š”­
+		ef_greexp2,	//ƒOƒŒ”š”­2
 		effects,	//“Ç‚İ‚Ş
 	};
 	enum class scenes

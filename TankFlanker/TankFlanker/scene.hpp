@@ -15,6 +15,7 @@ namespace FPS_n2 {
 		protected:
 			//引き継ぐ
 			std::shared_ptr<OPTION> OPTPTs;
+			std::shared_ptr<HostPassEffect> HostpassPTs;
 			//カメラ
 			cam_info camera_main;
 			float fov_base = DX_PI_F / 2;
@@ -39,10 +40,12 @@ namespace FPS_n2 {
 
 			TEMPSCENE(
 				std::shared_ptr<DXDraw>& DrawPts_t,
-				const std::shared_ptr<OPTION>& OPTPTs_t
+				const std::shared_ptr<OPTION>& OPTPTs_t,
+				std::shared_ptr<HostPassEffect>& HostpassPTs_t
 			) noexcept {
 				PTR_COMMON::Set_Ptr_Common(DrawPts_t);
 				OPTPTs = OPTPTs_t;
+				HostpassPTs = HostpassPTs_t;
 			}
 			void Set_Next(const std::shared_ptr<Sceneclass::TEMPSCENE>& Next_scenes_ptr_t, scenes NEXT) {
 				Next_ptr = Next_scenes_ptr_t;
@@ -82,7 +85,7 @@ namespace FPS_n2 {
 				//音位置指定
 				Set3DSoundListenerPosAndFrontPosAndUpVec(camera_main.campos.get(), camera_main.camvec.get(), camera_main.camup.get());
 				//影用意
-				DrawPts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(200.5f, 200.5f, 202.5f), VECTOR_ref::vget(305.f, 38.5f, 305.f));//MAIN_LOOPのnearはこれ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
+				DrawPts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(100.f, 30.f, 100.f), VECTOR_ref::vget(camera_main.far_, 40.f, camera_main.far_));//MAIN_LOOPのnearはこれ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
 			}
 			virtual void UI_Draw(void) noexcept {}
 			virtual void BG_Draw(void) noexcept {
@@ -106,21 +109,60 @@ namespace FPS_n2 {
 			virtual void KeyOperation(void) noexcept {}
 		};
 		//
-		class MAINLOOP : public TEMPSCENE {
+		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
+			MV1 Gate;
+			MV1 Board;
 			MV1 Map;
-			MV1 Takion;
-			MV1 Takion2;
-			MV1 Cafe;
-			MV1 Takion3_1;
-			MV1 Takion3_2;
-			MV1 Takion3_3;
-			MV1 Takion3_4;
+			MV1 Map_school;
+			MV1 sky;							//空
+			MV1 Ship;
+			//太陽
+			GraphHandle sun_pic;				/*画像ハンドル*/
+			VECTOR_ref sun_pos;
 
+			MV1 Takion;
+			bool draw_t = true;
+			MV1 Takion2;
+			bool draw_t2 = true;
+			MV1 Takion3_1;
+			bool draw_t3_1 = true;
+			MV1 Takion3_2;
+			bool draw_t3_2 = true;
+			MV1 Takion3_3;
+			bool draw_t3_3 = true;
+			MV1 Takion3_4;
+			bool draw_t3_4 = true;
+
+			MV1 Cafe;
+			bool draw_cafe = true;
+			MV1 scarlet;
+			bool draw_scar = true;
+			MV1 vodka;
+			bool draw_vodka = true;
 			MV1 goldship;
+			bool draw_gold = true;
 			MV1 speweek;
+			bool draw_spe = true;
 			MV1 teio;
+			bool draw_te = true;
 			MV1 macin;
+			bool draw_mc = true;
+			MV1 karen;
+			bool draw_kr = true;
+			MV1 trainer;
+			bool draw_tnr = true;
+
+			MV1 opera;
+			bool draw_opr = true;
+			MV1 doto;
+			bool draw_dto = true;
+
+			MV1 mobu_b_Base;
+			std::vector<MV1> mobu_b;
+			std::vector<int> mobu_b_anim;
+			std::vector<float> mobu_b_run;
+			std::vector<float> mobu_b_runrange;
 
 			MV1 NewsPaper_Base;
 			class newsmov {
@@ -156,22 +198,41 @@ namespace FPS_n2 {
 
 			GraphHandle face;
 
+			int xp_n, yp_n;
+			class newspp {
+			public:
+				int xns_pos, yns_pos;
+				float rns_rad = 0.f;
+				GraphHandle graph;
+			};
+			std::vector<newspp> news_p;
+
 			class sodes {
 			public:
+				float xpos_base = 0;
+				float ypos_base = 0;
+				float rad_base = 0;
+
 				float xpos = 0;
 				float ypos = 0;
+				float rad = 0;
 				GraphHandle handle;
 			};
 
 			std::vector<sodes> sode;
+			std::vector<sodes> anim;
+			std::vector<sodes> sode_last;
+
+			GraphHandle Logo;
+			float per_logo = 100.f;
 		private:
-			void Sel_AnimNum(MV1&model,int sel) {
-				for (auto& anim : model.get_anime()) {
-					if (&anim - &model.get_anime().front() == sel) {
-						model.get_anime(&anim - &model.get_anime().front()).per = 1.0f;
+			void Sel_AnimNum(MV1&model, int sel) {
+				for (auto& anim_t : model.get_anime()) {
+					if (&anim_t - &model.get_anime().front() == sel) {
+						model.get_anime(&anim_t - &model.get_anime().front()).per = 1.0f;
 					}
 					else {
-						model.get_anime(&anim - &model.get_anime().front()).per = 0.0f;
+						model.get_anime(&anim_t - &model.get_anime().front()).per = 0.0f;
 					}
 				}
 			}
@@ -190,66 +251,197 @@ namespace FPS_n2 {
 			using TEMPSCENE::TEMPSCENE;
 			void Awake(void) noexcept override {
 				TEMPSCENE::Awake();
-				MV1::Load("data/map/model.mv1", &Map, false);
+				//
+				SetUseASyncLoadFlag(TRUE);
+				{
+					this->sun_pic = GraphHandle::Load("data/sun.png");					/*sun*/
+					MV1::LoadonAnime("data/umamusume/Cafe/model.mv1", &Cafe);
+					MV1::LoadonAnime("data/umamusume/scarlet/model.mv1", &scarlet);
+					MV1::LoadonAnime("data/umamusume/vodka/model.mv1", &vodka);
+					MV1::LoadonAnime("data/umamusume/spe/model.mv1", &speweek);
+					MV1::LoadonAnime("data/umamusume/gold/model.mv1", &goldship);
+					MV1::LoadonAnime("data/umamusume/teio/model.mv1", &teio);
+					MV1::LoadonAnime("data/umamusume/mac/model.mv1", &macin);
+					MV1::LoadonAnime("data/umamusume/karen/model.mv1", &karen);
 
-				Map.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
-					
-				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion);
+					MV1::LoadonAnime("data/umamusume/trainer/model.mv1", &trainer);
 
-				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion2);
-				Takion2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					MV1::LoadonAnime("data/umamusume/opera/model.mv1", &opera);
+					MV1::LoadonAnime("data/umamusume/doto/model.mv1", &doto);
 
-				MV1::LoadonAnime("data/umamusume/Cafe/model.mv1", &Cafe);
-				Cafe.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
 
-				MV1::Load("data/paper/news.mv1", &NewsPaper_Base, false);
-				for (int i = 0; i < 12; i++) {
-					Newspaper.resize(Newspaper.size() + 1);
-					Newspaper.back().model = NewsPaper_Base.Duplicate();
+					face = GraphHandle::Load("data/Cut.png");
+					news_p.resize(news_p.size() + 1);
+					for (int i = 1; i < 10; i++) {
+						news_p.resize(news_p.size() + 1);
+						news_p.back().graph = GraphHandle::Load("data/Cut2.png");
+					}
+					news_p.back().graph.GetSize(&xp_n, &yp_n);
+					MV1::LoadonAnime("data/map/model_gate.mv1", &Gate);
+					MV1::Load("data/map/model.mv1", &Map, true);
+					MV1::Load("data/board/model.mv1", &Board, true);
+					MV1::Load("data/school/model.mv1", &Map_school, true);
+					MV1::Load("data/sky/model.mv1", &sky, true);				//空
+					MV1::Load("data/ship/model.mv1", &Ship, true);				//空
 				}
+				SetUseASyncLoadFlag(FALSE);
+				{
+					MV1::LoadonAnime("data/umamusume/mobu_black/model.mv1", &mobu_b_Base);
+					mobu_b.resize(12);
+					mobu_b_run.resize(12);
+					mobu_b_runrange.resize(12);
+					mobu_b_anim.resize(12);
+					for (int i = 0; i < 12; i++) {
+						mobu_b_Base.DuplicateonAnime(&mobu_b[i], &mobu_b[i]);
+						mobu_b_run[i] = 0.8f + (float)(GetRand(195)) / 1000.f;
+						mobu_b_runrange[i] = (float)(GetRand(100)) / 10.f;
+						while (true)
+						{
+							mobu_b_anim[i] = GetRand(2);
+							if (i == 0 || mobu_b_anim[i] != mobu_b_anim[i - 1]) {
+								break;
+							}
+						}
+					}
 
-				Takion.PhysicsResetState();
-				Takion2.PhysicsResetState();
-				Cafe.PhysicsResetState();
+					MV1::Load("data/paper/news.mv1", &NewsPaper_Base, false);
+					for (int i = 0; i < 12; i++) {
+						Newspaper.resize(Newspaper.size() + 1);
+						Newspaper.back().model = NewsPaper_Base.Duplicate();
+					}
 
-				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion3_1);
-				Takion3_1.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
-				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion3_2);
-				Takion3_2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
-				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion3_3);
-				Takion3_3.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
-				MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion3_4);
-				Takion3_4.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					MV1::LoadonAnime("data/umamusume/Tachyon/model.mv1", &Takion);
+					Takion.DuplicateonAnime(&Takion2, &Takion2);
+					Takion.DuplicateonAnime(&Takion3_1, &Takion3_1);
+					Takion.DuplicateonAnime(&Takion3_2, &Takion3_2);
+					Takion.DuplicateonAnime(&Takion3_3, &Takion3_3);
+					Takion.DuplicateonAnime(&Takion3_4, &Takion3_4);
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/first_sode/1.png");
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(-DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/first_sode/2.png");
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/first_sode/3.png");
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(-DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/first_sode/4.png");
 
-				MV1::LoadonAnime("data/umamusume/spe/model.mv1", &speweek);
-				speweek.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
-				MV1::LoadonAnime("data/umamusume/gold/model.mv1", &goldship);
-				goldship.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
-				MV1::LoadonAnime("data/umamusume/teio/model.mv1", &teio);
-				teio.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
-				MV1::LoadonAnime("data/umamusume/mac/model.mv1", &macin);
-				macin.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(-DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/second_sode/1.png");
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/second_sode/2.png");
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(-DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/second_sode/1.png");
+					sode.resize(sode.size() + 1);
+					sode.back().xpos = (float)(DrawPts->disp_x / 5);
+					sode.back().ypos = (float)(DrawPts->disp_y);
+					sode.back().handle = GraphHandle::Load("data/second_sode/2.png");
 
-				face = GraphHandle::Load("data/Cut.png");
+					Logo = GraphHandle::Load("data/logo.png");
 
-				sode.resize(sode.size() + 1);
-				sode.back().xpos = (float)(DrawPts->disp_x / 5);
-				sode.back().ypos = (float)(DrawPts->disp_y);
-				sode.back().handle = GraphHandle::Load("data/first_sode/1.png");
-				sode.resize(sode.size() + 1);
-				sode.back().xpos = (float)(-DrawPts->disp_x / 5);
-				sode.back().ypos = (float)(DrawPts->disp_y);
-				sode.back().handle = GraphHandle::Load("data/first_sode/2.png");
-				sode.resize(sode.size() + 1);
-				sode.back().xpos = (float)(DrawPts->disp_x / 5);
-				sode.back().ypos = (float)(DrawPts->disp_y);
-				sode.back().handle = GraphHandle::Load("data/first_sode/3.png");
-				sode.resize(sode.size() + 1);
-				sode.back().xpos = (float)(-DrawPts->disp_x / 5);
-				sode.back().ypos = (float)(DrawPts->disp_y);
-				sode.back().handle = GraphHandle::Load("data/first_sode/4.png");
+					for (int i = 0; i < 10; i++) {
+						sode_last.resize(sode_last.size() + 1);
+						sode_last.back().xpos = (float)(DrawPts->disp_x / 2 + DrawPts->disp_x);
+						sode_last.back().ypos = (float)(DrawPts->disp_y / 2);
+						sode_last.back().rad = (float)(0.f);
+						sode_last.back().handle = GraphHandle::Load("data/second_sode/1.png");
+					}
 
+					sode_last[0].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(150));
+					sode_last[0].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
+					sode_last[0].rad_base = deg2rad(-350);
 
+					sode_last[1].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(300));
+					sode_last[1].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(500));
+					sode_last[1].rad_base = deg2rad(-320);
+
+					sode_last[2].xpos_base = (float)(DrawPts->disp_x / 2);
+					sode_last[2].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(600));
+					sode_last[2].rad_base = deg2rad(-270);
+
+					sode_last[3].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(500));
+					sode_last[3].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(300));
+					sode_last[3].rad_base = deg2rad(-360);
+
+					sode_last[4].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(400));
+					sode_last[4].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(550));
+					sode_last[4].rad_base = deg2rad(-230);
+
+					sode_last[5].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(500));
+					sode_last[5].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(500));
+					sode_last[5].rad_base = deg2rad(-100);
+
+					sode_last[6].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(600));
+					sode_last[6].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(300));
+					sode_last[6].rad_base = deg2rad(-200);
+
+					sode_last[7].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(700));
+					sode_last[7].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
+					sode_last[7].rad_base = deg2rad(-180);
+
+					sode_last[8].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(50));
+					sode_last[8].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(700));
+					sode_last[8].rad_base = deg2rad(-60);
+
+					sode_last[9].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(450));
+					sode_last[9].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(550));
+					sode_last[9].rad_base = deg2rad(-40);
+
+					for (auto& sl : sode_last) {
+						sl.xpos = (float)(DrawPts->disp_x / 2) + (sl.xpos_base - (float)(DrawPts->disp_x / 2)) * 10.f;
+						sl.ypos = (float)(DrawPts->disp_y / 2) + (sl.ypos_base - (float)(DrawPts->disp_y / 2)) * 10.f;
+						sl.rad = sl.rad_base + deg2rad(90);
+					}
+
+					anim.resize(anim.size() + 1);
+					anim.back().xpos = (float)(0.f);
+					anim.back().ypos = (float)(DrawPts->disp_y);
+					anim.back().handle = GraphHandle::Load("data/anime/0.png");
+					anim.resize(anim.size() + 1);
+					anim.back().xpos = (float)(0.f);
+					anim.back().ypos = (float)(DrawPts->disp_y);
+					anim.back().handle = GraphHandle::Load("data/anime/1.png");
+				}
+				//
+				{
+					Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+					Map.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
+					Board.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+					Map_school.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
+
+					Takion.PhysicsResetState();
+					draw_tnr = false;
+					draw_t = true;
+					draw_scar = false;
+					draw_cafe = false;
+					draw_vodka = false;
+					draw_t2 = false;
+					draw_dto = false;
+					draw_opr = false;
+					Takion3_1.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					Takion3_2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					Takion3_3.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					Takion3_4.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					speweek.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					goldship.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					teio.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					macin.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+					draw_kr = false;
+				}
+				//
 				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
 				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
 				camera_main.camup = VECTOR_ref::up();
@@ -257,17 +449,16 @@ namespace FPS_n2 {
 			}
 		public:
 			void Set(void) noexcept override {
-				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, -0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
+				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
-				SetMousePoint(DrawPts->disp_x / 2, DrawPts->disp_y / 2);											//
-
-
-				Cut = 0;//22;
+				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
+				Cut =  50;
+				Cut = 0;
 				BGM = SoundHandle::Load("data/base_movie.wav");
 				movie = GraphHandle::Load("data/base_movie.mp4");
-				PlayMovieToGraph(movie.get(),2, DX_MOVIEPLAYTYPE_BCANCEL);
+				PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
 				ChangeMovieVolumeToGraph(0, movie.get());
-				//SeekMovieToGraph(movie.get(), 876);
+				SetUseASyncLoadFlag(TRUE);
 				{
 					//羽広がり前
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -386,7 +577,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//顔
@@ -398,7 +589,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.366895f, 16.169621f, -21.344687f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//顔2
@@ -410,7 +601,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.044426f, 4.483082f, -26.842037f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//顔3
@@ -422,7 +613,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(3.584894f, 12.149980f, -16.973043f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//||
@@ -434,7 +625,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//バイク
@@ -446,7 +637,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-6.079808f, 12.230768f, -1.217081f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//君が願うことなら
@@ -465,7 +656,7 @@ namespace FPS_n2 {
 
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//全てが現
@@ -484,30 +675,30 @@ namespace FPS_n2 {
 
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
 
 					//実になるだろ(天道)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/18.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 19.0f);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					//う　選
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/19.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 20.334f);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					//ばれしもの(加賀美)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/20.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 21.452f);
-					Cut_Pic.back().Aim_camera.far_ = 1000.f;
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					//隕石
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/21.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 23.422f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 2, 0);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 20, -20);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
@@ -550,74 +741,297 @@ namespace FPS_n2 {
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/25.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 26.526f);
+
+					Cut_Pic.back().cam_per = 0.f;
+
 					//バイク戻る(る　世界を元に戻すにはぁ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/26.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 29.790);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -30.985756f);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
+							sin(deg2rad(-5.5)),
+							-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
+						)*108.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(25);
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//バンバイク①(もう　時か）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/27.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 31.670);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
+							sin(deg2rad(-5.5)),
+							-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
+						)*88.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
+					Cut_Pic.back().cam_per = 0.f;
+
 					//バンバイク②(んがな）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/28.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 32.52);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-cos(deg2rad(0.f))*sin(-deg2rad(float(0 - 10))),
+							sin(deg2rad(0.f)),
+							-cos(deg2rad(0.f))*cos(-deg2rad(float(0 - 10)))
+						)*88.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.far_ = 3000.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//寝る女(い　Moving First ここ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/29.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 34.654);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							2.f,
+							12.f,
+							6.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
+
 					//雨加賀美(ろのぉ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/30.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 35.522);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							2.f,
+							10.f,
+							8.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
+
+					Cut_Pic.back().cam_per = 0.f;
 					//雨加賀美②(時計）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/31.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.175);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-2.f,
+							12.f,
+							-6.f
+						)*2.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
+
 					//雨加賀美②(時計）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/32.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.775);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-10.f,
+							0.f,
+							0.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//クロス(走らせ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/33.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.173);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							20.f,
+							0.f,
+							0.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//陽(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/34.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.986);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							0.f,
+							6.f,
+							10.f
+						)*1.0f;
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 300.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//陰(明日の）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/35.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 40.11);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							0.f,
+							6.f,
+							-10.f
+						)*1.0f;
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 300.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//手①(その）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/36.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 41.226);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-10.f,
+							0.f,
+							0.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//手②(先へ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/37.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.317);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-10.f,
+							0.f,
+							0.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//ガチャ(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/38.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.726);
+
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 19.f, 0.f);
+
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-cos(deg2rad(-25.5f))*sin(-deg2rad(float(90 - 50))),
+							sin(deg2rad(-25.5f)),
+							-cos(deg2rad(-25.5f))*cos(-deg2rad(float(90 - 50)))
+						)*10.0f;
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(25);
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//握手(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/39.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.641);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-10.f,
+							0.f,
+							0.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//オフ(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/40.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.971);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.23f, 18, 0.0);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							0.f,
+							0.f,
+							10.f
+						)*1.0f;
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(4);
+					Cut_Pic.back().Aim_camera.near_ = 0.1f;
+					Cut_Pic.back().Aim_camera.far_ = 20.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//オフ2(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/41.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 44.311);
+
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0., 18, 0.);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							0.f,
+							0.f,
+							-10.f
+						)*1.0f;
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(19);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 100.f;
+					Cut_Pic.back().cam_per = 0.f;
+
 					//オフ離れる(君の存在）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/42.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 46.084);
+
+					Cut_Pic.back().cam_per = 0.f;
 					//オフ近付く(戦うた）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/43.bmp");//1
@@ -653,7 +1067,7 @@ namespace FPS_n2 {
 					//女(ン いったい自分以が)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/51.bmp");//1
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 57.071);
+					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 56.271);
 					//だばー(い　)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/52.bmp");//1
@@ -662,14 +1076,44 @@ namespace FPS_n2 {
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/53.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 58.004);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							-10.f,
+							0.f,
+							0.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 300.f;
+					Cut_Pic.back().cam_per = 0.f;
 					//雨加賀美(強さ　信じられる)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/54.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 60.290);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+						VECTOR_ref::vget(
+							0.f,
+							0.f,
+							-10.f
+						)*1.0f;
+
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(25);
+					Cut_Pic.back().Aim_camera.near_ = 1.f;
+					Cut_Pic.back().Aim_camera.far_ = 300.f;
+					Cut_Pic.back().cam_per = 0.9f;
 					//クロックアップ(ぅ　高速の)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/55.bmp");//1
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 62.775);
+					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 61.640);
+					//クロックアップ(ぅ　高速の)
+					Cut_Pic.resize(Cut_Pic.size() + 1);
+					Cut_Pic.back().handle = GraphHandle::Load("data/cut/55.bmp");//1
+					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 63.255);
 					//遠い(ビジョン)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/56.bmp");//1
@@ -684,14 +1128,19 @@ namespace FPS_n2 {
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 70.592);
 
 				}
+				SetUseASyncLoadFlag(FALSE);
+				//
 				BGM.play(DX_PLAYTYPE_BACK, TRUE);
-				BGM.vol(64);
+				//BGM.vol(64);
+				BaseTime = GetNowHiPerformanceCount() - (Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0);
+				SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000);
 
-				BaseTime = GetNowHiPerformanceCount();// -100000 * 24;
+				HostpassPTs->Set_Bright(226, 226, 216);
 			}
 
 			bool reset_p = true;
 			bool isNextreset = true;
+			float scarletOpac = 1.0f;
 			float TakiOpac = 1.0f;
 			float Taki2Opac = 1.0f;
 			float CafeOpac = 1.0f;
@@ -699,6 +1148,18 @@ namespace FPS_n2 {
 			float radc2 = 0.f;
 			float xradadd_r = 0.f;
 			float spd_takion = 0.6f;
+			bool return_walk = false;
+			float Gate_Xpos = 0;
+			float Line_ALPHA = 0.f;
+			float Box_ALPHA = 0.f;
+			float Line_time = 0.f;
+			float Thickness = 100.f;
+			float camzb_28 = 0.f;
+			float camzb_41 = 0.f;
+			float bright_43 = 0.f;
+			float ship_z = 0.f;
+			float ship_zadd = 0.f;
+			bool nex_cut = false;
 			bool Update(void) noexcept override {
 				float spd_taki = 1.f;
 				float spd_cafe = 1.f;
@@ -738,6 +1199,25 @@ namespace FPS_n2 {
 							sode[2].ypos = 0.f;
 							sode[3].xpos = 0.f;
 							sode[3].ypos = 0.f;
+							Line_ALPHA = 1.f;
+							if (Line_time < 1.f) {
+								Line_time += 5.f / GetFPS();
+							}
+							else {
+								Line_time = 1.5f;
+							}
+							Thickness = 5.f;
+						}
+						if (Cut == 7 || Cut == 8) {
+							Thickness += 6000.f / GetFPS();
+							if (Thickness > 700) {
+								if (Line_ALPHA > 2.f / 255.f) {
+									easing_set(&Line_ALPHA, 0.f, 0.95f);
+								}
+								else {
+									Line_ALPHA = 0.f;
+								}
+							}
 						}
 						if (Cut == 7) {
 							easing_set(&sode[0].xpos, (float)(DrawPts->disp_x), 0.9f);
@@ -829,7 +1309,7 @@ namespace FPS_n2 {
 
 								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
 								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-								Cut_Pic[Cut].Aim_camera.far_ = 1000.f;
+								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
 								Cut_Pic[Cut].cam_per = 0.f;
 								radc2 += 12.5f / GetFPS();
 							}
@@ -849,8 +1329,9 @@ namespace FPS_n2 {
 							}
 							else if (Cut < 16) {
 								if (Takion2.get_anime(2).time == 33.f) {
-									Takion.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
 									Takion2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									draw_t = false;
+									draw_t2 = true;
 								}
 
 								Sel_AnimNum(Takion2, 2);
@@ -867,6 +1348,8 @@ namespace FPS_n2 {
 								CafeOpac = 0.f;
 							}
 							else if (Cut < 20) {
+								draw_t = true;
+								draw_cafe = true;
 								if (Takion.get_anime(3).time == 33.f) {
 									Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 									Cafe.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
@@ -886,7 +1369,7 @@ namespace FPS_n2 {
 								else {
 									TakiOpac = 1.0f;
 								}
-								MV1SetOpacityRate(Takion.get(), CafeOpac);
+								MV1SetOpacityRate(Cafe.get(), CafeOpac);
 								if (CafeOpac < 1.f) {
 									CafeOpac += 2.0f / GetFPS();
 								}
@@ -956,12 +1439,19 @@ namespace FPS_n2 {
 
 							for (auto&n : Newspaper) {
 								n.move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(-30 + GetRand(2 * 30)));
-								n.move.pos = VECTOR_ref::vget((float)(-20 + GetRand(2 * 20)), (float)(5 + GetRand(10)), (float)(-20 + GetRand(2 * 20)));
+								n.move.pos = VECTOR_ref::vget((float)(-20 + GetRand(2 * 20)), (float)(7 + GetRand(10)), (float)(-20 + GetRand(2 * 20)));
+								n.move.vec.y(-(float)(GetRand(100)) / 1000.f);
 							}
+							isNextreset = true;
 						}
 						else if (Cut < 21) {
+							draw_t2 = false;
+							if (Cafe.get_anime(0).time != 0.f) {
+								Cafe.get_anime(0).time = 0.f;
+								draw_cafe = false;
+							}
 							for (auto&n : Newspaper) {
-								if (n.move.pos.y() >= 0.5f) {
+								if (n.move.pos.y() >= 3.5f) {
 									n.move.vec.yadd(M_GR / powf((FPS / 0.75f), 2.f));
 								}
 								else {
@@ -973,8 +1463,23 @@ namespace FPS_n2 {
 								n.move.pos += n.move.vec;
 								n.model.SetMatrix(n.move.mat*MATRIX_ref::Mtrans(n.move.pos));
 							}
+
+							for (auto& n : news_p) {
+								n.xns_pos = DrawPts->disp_x / 2 - DrawPts->disp_x;
+								n.yns_pos = DrawPts->disp_y / 2 - DrawPts->disp_y;
+								n.rns_rad = deg2rad(-30);
+							}
 						}
 						else if (Cut < 22) {
+							for (auto n = news_p.rbegin(); n != news_p.rend() - 1; n++) {
+								n->xns_pos = (n + 1)->xns_pos;
+								n->yns_pos = (n + 1)->yns_pos;
+								n->rns_rad = (n + 1)->rns_rad;
+							}
+							news_p[0].xns_pos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
+							news_p[0].yns_pos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
+							news_p[0].rns_rad += deg2rad(6) / GetFPS();
+
 							Sel_AnimNum(Takion3_1, 4);
 							Takion3_1.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, 1, -10)));
 							Sel_AnimNum(Takion3_2, 5);
@@ -985,6 +1490,15 @@ namespace FPS_n2 {
 							Takion3_4.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 						}
 						else if (Cut < 24) {
+							for (auto n = news_p.rbegin(); n != news_p.rend() - 1; n++) {
+								n->xns_pos = (n + 1)->xns_pos;
+								n->yns_pos = (n + 1)->yns_pos;
+								n->rns_rad = (n + 1)->rns_rad;
+							}
+							news_p[0].xns_pos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
+							news_p[0].yns_pos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
+							news_p[0].rns_rad += deg2rad(6) / GetFPS();
+
 							Takion3_1.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
 							Takion3_2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
 							Takion3_3.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
@@ -1000,18 +1514,851 @@ namespace FPS_n2 {
 							Sel_AnimNum(macin, 0);
 							macin.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 						}
+						else if (Cut < 25) {
+							goldship.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+							speweek.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+							teio.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+							macin.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
+							Takion.get_anime(8).time = 33.f;
+							isNextreset = true;
+							return_walk = false;
+						}
+						else if (Cut < 26) {
+							if (Takion.get_anime(8).time == 33.f) {
+								Takion.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+								draw_t2 = false;
+								Taki2Opac = 1.f;
+								MV1SetOpacityRate(Takion2.get(), Taki2Opac);
+							}
+							Sel_AnimNum(Takion, 8);
+							if (Takion.get_anime(8).time == Takion.get_anime(8).alltime) {
+								if (!return_walk) {
+									draw_t2 = true;
+									Takion2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									Sel_AnimNum(Takion2, 9);
+									Takion2.work_anime();
+									Takion2.PhysicsResetState();
+								}
+								return_walk = true;
+							}
+							Takion.get_anime(8).Update(false, return_walk ? -4.f : 4.f);
+							if (return_walk) {
+								Takion2.get_anime(9).Update(false, 0.7f);
+								Cut_Pic[Cut].Aim_camera.camvec = Takion2.frame(9);
+								Cut_Pic[Cut].cam_per = 0.95f;
+								Cut_Pic[Cut].Aim_camera.near_ = 5.f;
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(7);
+							}
+							else {
+								spd_taki = 4.f;
+							}
+							radc2 = 0.f;
+							isNextreset = true;
+						}
+						else if (Cut < 27) {
+							{
+								draw_t = false;
+								draw_t2= false;
+								return_walk = true;
 
+								//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(116.485695f, 18.346067f, -56.928761f);
+
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
+
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+									)*88.0f;
+
+								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+								Cut_Pic[Cut].cam_per = 0.f;
+								radc2 += 12.5f / GetFPS();
+							}
+							Gate_Xpos = -20.f;
+						}
+						else if (Cut < 28) {
+							Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							if (Gate_Xpos < 20.f) {
+								Gate_Xpos += 20.f *1.f / GetFPS();
+							}
+							isNextreset = true;
+							karen.get_anime(0).time = 6.25f;
+							camzb_28 = 0.f;
+							ship_z = -5.f;
+							ship_zadd = 0.f;
+						}
+						else if (Cut < 30) {
+							draw_kr = true;
+							Sel_AnimNum(karen, 0);
+							karen.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+							karen.get_anime(0).Update(false, 1.0f);
+
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									2.f,
+									12.f,
+									6.f
+								)*1.0f;
+
+							if (camzb_28 != 0.f) {
+								if (camzb_28 > -8.f) {
+									Cut_Pic[Cut].cam_per = 0.9f;
+								}
+								else {
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+							}
+							if (camzb_28 > -10.f) {
+								camzb_28 -= 100.f / GetFPS();
+							}
+							else {
+								camzb_28 = -10.f;
+							}
+
+							MV1SetOpacityRate(Ship.get(), 0.3f);
+							Ship.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
+							Ship.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
+							ship_z += ship_zadd / GetFPS();
+							if (ship_zadd <= 0.95f) {
+								easing_set(&ship_zadd, 1.f, 0.95f);
+							}
+							else {
+								ship_zadd = 1.f;
+							}
+							if (Cut == 29) {
+								isNextreset = true;
+							}
+						}
+						else if (Cut < 31) {
+							draw_t = false;
+							draw_kr = false;
+							draw_cafe = true;
+							Cafe.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							Sel_AnimNum(Cafe, 0);
+							Cafe.get_anime(0).Update(true, 0.f);
+						}
+						else if (Cut < 32) {
+							draw_t = true;
+							Sel_AnimNum(Cafe, 1);
+							Cafe.get_anime(1).Update(true, 0.f);
+							isNextreset = true;
+							scarletOpac = 0.5f;
+						}
+						else if (Cut < 33) {
+							draw_t = true;
+							draw_cafe = false;
+							draw_scar = true;
+							scarlet.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							Sel_AnimNum(scarlet, 0);
+							scarlet.get_anime(0).Update(false, 0.6f);
+							if (scarlet.get_anime(0).time > 10.f) {
+								easing_set(&scarletOpac, 1.f, 0.95f);
+							}
+							MV1SetOpacityRate(scarlet.get(), scarletOpac);
+
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
+							Sel_AnimNum(Takion, 10);
+							Takion.get_anime(10).Update(false, 0.6f);
+							isNextreset = true;
+						}
+						else if (Cut < 34) {
+							draw_vodka = true;
+							vodka.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -50)));
+							Sel_AnimNum(vodka, 0);
+							vodka.get_anime(0).Update(false, 1.f);
+						}
+						else if (Cut < 35) {
+							draw_vodka = false;
+							isNextreset = true;
+						}
+						else if (Cut < 36) {
+							draw_scar = false;
+							draw_t = false;
+							draw_cafe = true;
+							Sel_AnimNum(Cafe, 2);
+							Cafe.get_anime(2).Update(false, 0.6f);
+							CafeOpac = 1.f;
+							/*
+							Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+							Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-10.f,
+									0.f,
+									0.f
+								)*1.0f;
+
+							Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+							Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+							Cut_Pic.back().Aim_camera.near_ = 1.f;
+							Cut_Pic.back().Aim_camera.far_ = 100.f;
+							Cut_Pic.back().cam_per = 0.f;
+							*/
+							isNextreset = true;
+						}
+						else if (Cut < 37) {//手
+							Sel_AnimNum(Cafe, 2);
+							Cafe.get_anime(2).Update(false, 0.6f);
+							MV1SetOpacityRate(Cafe.get(), CafeOpac);
+							if (CafeOpac > 0.f) {
+								CafeOpac -= 2.0f / GetFPS();
+							}
+							else {
+								CafeOpac = 0.f;
+							}
+							draw_t = true;
+
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
+							Sel_AnimNum(Takion, 11);
+							Takion.get_anime(11).Update(false, 0.5f);
+							MV1SetOpacityRate(Takion.get(), TakiOpac);
+							if (TakiOpac < 1.f) {
+								TakiOpac += 2.0f / GetFPS();
+							}
+							else {
+								TakiOpac = 1.0f;
+							}
+
+							//Cut_Pic[Cut].Aim_camera.fov = deg2rad(95);
+						}
+						else if (Cut < 38) {//光るトレーナー
+							draw_t = false;
+							draw_cafe = false;
+							draw_tnr = true;
+							Sel_AnimNum(trainer, 0);
+							trainer.get_anime(0).Update(false, 1.2f);
+						}
+						else if (Cut < 39) {
+							draw_tnr = false;
+							draw_t = true;
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
+							Sel_AnimNum(Takion, 12);
+							Takion.get_anime(12).Update(false, 0.5f);
+							isNextreset = true;
+						}
+						else if (Cut < 40) {
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							Sel_AnimNum(Takion, 13);
+							Takion.get_anime(13).Update(false, 1.2f);
+							isNextreset = true;
+						}
+						else if (Cut < 41) {
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							Sel_AnimNum(Takion, 14);
+							Takion.get_anime(14).Update(false, 2.8f);
+							isNextreset = true;
+							camzb_28 = 0.f;
+							camzb_41 = 0.1f;
+							for (auto& m : mobu_b) {
+								int cnt = (int)(&m - &mobu_b.front());
+								Sel_AnimNum(m, mobu_b_anim[cnt]);
+								m.get_anime(mobu_b_anim[cnt]).Update(false, 0.f);
+							}
+						}
+						else if (Cut < 42) {
+							Gate_Xpos = 0.f;
+							Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							Sel_AnimNum(Gate, 0);
+							Gate.get_anime(0).Update(false, 0.f);
+
+							Gate_Xpos += -7.f;
+							for (auto& m : mobu_b) {
+								m.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f))*MATRIX_ref::RotY(deg2rad(0)));
+								Gate_Xpos += -14.f;
+							}
+
+							draw_t = false;
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
+									sin(deg2rad(0.f)),
+									-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
+								)*(20.f-camzb_28* 20.8f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
+							easing_set(&camzb_41, 0.3f, 0.995f);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							Cut_Pic[Cut].cam_per = 0.f;
+							if (camzb_28 != 0.f) {
+								if (camzb_28 > -8.f) {
+									Cut_Pic[Cut].cam_per = 0.9f;
+								}
+								else {
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+							}
+							if (camzb_28 > -10.f) {
+								camzb_28 -= 100.f / GetFPS();
+							}
+							else {
+								camzb_28 = -10.f;
+							}
+						}
+						else if (Cut < 43) {
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
+									sin(deg2rad(0.f)),
+									-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
+								)*(10.f - camzb_28 * 20.8f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
+							easing_set(&camzb_41, 0.3f, 0.995f);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							Cut_Pic[Cut].cam_per = 0.95f;
+							HostpassPTs->Set_Bright(
+								226 + (int)((float)(255 - 226)*bright_43),
+								226 + (int)((float)(255 - 226)*bright_43),
+								196 + (int)((float)(255 - 196)*bright_43)
+							);
+							easing_set(&bright_43, 1.f, 0.9f);
+							if (camzb_28 < 0.f) {
+								camzb_28 += 70.f / GetFPS();
+							}
+							else {
+								camzb_28 = 0.f;
+							}
+						}
+						else if (Cut < 44) {
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-120.f, 37.f, -20.f);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(-20.f))*sin(-deg2rad(float(0 - 10) + camzb_28)),
+									sin(deg2rad(-20.f)),
+									-cos(deg2rad(-20.f))*cos(-deg2rad(float(0 - 10) + camzb_28))
+								)*(20.f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
+							Cut_Pic[Cut].Aim_camera.far_ = 300.f;
+
+							Cut_Pic[Cut].cam_per = 0.f;
+
+							camzb_28 += 40.f / GetFPS();
+						}
+						else if (Cut < 45) {
+							if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
+								Sel_AnimNum(Gate, 1);
+								Gate.get_anime(1).Update(false, 1.f);
+
+								Gate_Xpos = 0.f;
+								Gate_Xpos += -7.f;
+								for (auto& m : mobu_b) {
+									int cnt = (int)(&m - &mobu_b.front());
+									easing_set(&m.get_anime(mobu_b_anim[cnt]).per, 0.f, mobu_b_run[cnt]);
+									easing_set(&m.get_anime(3).per, 1.f, mobu_b_run[cnt]);
+
+									m.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - mobu_b_runrange[cnt] * m.get_anime(3).per))*MATRIX_ref::RotY(deg2rad(0)));
+									Gate_Xpos += -14.f;
+								}
+							}
+							if (NowTime > (LONGLONG)(1000000.f * 49.681)) {
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(-40.67f + 1.f, 5.53f + -0.05f, -52.f + 0.2f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos +
+									VECTOR_ref::vget(
+										1,
+										-0.3f,
+										0.6f
+									)*(-1.f);
+
+								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+								Cut_Pic[Cut].cam_per = 0.9f;
+							}
+							else {
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-40.67f, 5.53f, -42.f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										1,
+										-0.1f,
+										-0.13f
+									)*(1.f);
+								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+								Cut_Pic[Cut].cam_per = 0.f;
+							}
+
+						}
+						else if (Cut < 46) {
+							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+							Cut_Pic[Cut].cam_per = 0.f;
+
+							if (anim[0].ypos != 0.f) {
+								VECTOR_ref vec_x = (Cut_Pic[Cut].Aim_camera.camvec - Cut_Pic[Cut].Aim_camera.campos).Norm().cross(Cut_Pic[Cut].Aim_camera.camup);
+
+								Set_Effect(Effect::ef_greexp, VECTOR_ref::vget(-4.f, 4.6f, -2.f) + vec_x * 13.f, VECTOR_ref::front(), 5.f);
+								Set_Effect(Effect::ef_greexp2, VECTOR_ref::vget(8.f, 5.5f, 4.f) - vec_x * 8.f, VECTOR_ref::front(), 4.f);
+							}
+							SetSpeed_Effect(Effect::ef_greexp, 0.5f);
+							SetSpeed_Effect(Effect::ef_greexp2, 0.5f);
+							anim[0].ypos = 0.f;
+						}
+						else if (Cut < 47) {
+							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+							Cut_Pic[Cut].cam_per = 0.f;
+
+							camzb_41 = (float)(DrawPts->disp_y)*0.4f;
+							sode[4].xpos += (float)(y_r(300)) / GetFPS();
+							sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
+							sode[5].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[5].ypos -= (float)(y_r(2400)) / GetFPS();
+							sode[6].xpos += (float)(y_r(300)) / GetFPS();
+							sode[6].ypos -= (float)(y_r(2200)) / GetFPS();
+							sode[7].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
+						}
+						else if (Cut < 48) {
+							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
+							Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos +
+								VECTOR_ref::vget(
+									-1.f,
+									0.3f,
+									0.f
+								)*(1.f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+							Cut_Pic[Cut].cam_per = 0.f;
+							anim[0].ypos = (float)(DrawPts->disp_y);
+							easing_set(&anim[1].ypos, camzb_41, 0.7f);
+							if (camzb_41 == (float)(DrawPts->disp_y)*0.4f) {
+								SetSpeed_Effect(Effect::ef_greexp, 0.1f);
+								SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
+							}
+							if (camzb_41 > 0.f) {
+								camzb_41 -= (float)(y_r(500)) / GetFPS();
+							}
+							sode[4].xpos += (float)(y_r(300)) / GetFPS();
+							sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
+							sode[5].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[5].ypos -= (float)(y_r(2400)) / GetFPS();
+							sode[6].xpos += (float)(y_r(300)) / GetFPS();
+							sode[6].ypos -= (float)(y_r(2200)) / GetFPS();
+							sode[7].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
+						}
+						else if (Cut < 49) {
+							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
+							Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos +
+								VECTOR_ref::vget(
+									-1.f,
+									0.3f,
+									0.f
+								)*(1.f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+							Cut_Pic[Cut].cam_per = 0.f;
+							if (anim[0].ypos == (float)(DrawPts->disp_y)) {
+
+								sode[4].xpos = (float)(0);
+								sode[4].ypos = (float)(-DrawPts->disp_y);
+								sode[5].xpos = (float)(0);
+								sode[5].ypos = (float)(-DrawPts->disp_y * 5 / 4);
+								sode[6].xpos = (float)(0);
+								sode[6].ypos = (float)(-DrawPts->disp_y * 6 / 4);
+								sode[7].xpos = (float)(0);
+								sode[7].ypos = (float)(-DrawPts->disp_y * 7 / 4);
+							}
+							anim[0].ypos = (float)(DrawPts->disp_y) + 2;
+							easing_set(&anim[1].ypos, camzb_41, 0.7f);
+							if (camzb_41 > 0.f) {
+								camzb_41 -= (float)(y_r(500)) / GetFPS();
+							}
+							sode[4].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[4].ypos += (float)(y_r(2800)) / GetFPS();
+							sode[5].xpos += (float)(y_r(300)) / GetFPS();
+							sode[5].ypos += (float)(y_r(2600)) / GetFPS();
+							sode[6].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[6].ypos += (float)(y_r(2400)) / GetFPS();
+							sode[7].xpos += (float)(y_r(300)) / GetFPS();
+							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
+							isNextreset = true;
+							Takion.get_anime(2).time = 35.f;
+						}
+						else if (Cut < 50) {
+
+							VECTOR_ref aim = Takion.frame(2);
+							aim.y(0.f);
+							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+
+							Cut_Pic[Cut].cam_per = 0.f;
+							anim[1].ypos = (float)(DrawPts->disp_y);
+							sode[4].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[4].ypos += (float)(y_r(2800)) / GetFPS();
+							sode[5].xpos += (float)(y_r(300)) / GetFPS();
+							sode[5].ypos += (float)(y_r(2600)) / GetFPS();
+							sode[6].xpos -= (float)(y_r(300)) / GetFPS();
+							sode[6].ypos += (float)(y_r(2400)) / GetFPS();
+							sode[7].xpos += (float)(y_r(300)) / GetFPS();
+							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
+
+							draw_t = true;
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
+							Sel_AnimNum(Takion, 2);
+							Takion.get_anime(2).Update(false, 0.1f);
+							isNextreset = true;
+							draw_kr = false;
+						}
+						else if (Cut < 51) {
+							Stop_Effect(Effect::ef_greexp);
+							Stop_Effect(Effect::ef_greexp2);
+							draw_t = false;
+
+							Sel_AnimNum(karen, 1);
+							karen.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+							karen.get_anime(1).Update(false, 0.95f);
+							if (!draw_kr) {
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
+
+								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-0.3f, 0.f, 28.f);
+
+								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
+								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+								Cut_Pic[Cut].cam_per = 0.f;
+							}
+							else {
+								Cut_Pic[Cut].Aim_camera.camvec = karen.frame(8);
+								Cut_Pic[Cut].cam_per = 0.995f;
+							}
+							draw_kr = true;
+							isNextreset = true;
+						}
+						else if (Cut < 52) {
+
+							Sel_AnimNum(karen, 2);
+							karen.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+							karen.get_anime(2).Update(false, 1.55f);
+
+							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
+							Cut_Pic[Cut].Aim_camera.camvec = karen.frame(10) + VECTOR_ref::vget(2.3f,0.f, 0.f);
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							Cut_Pic[Cut].cam_per = 0.f;
+							isNextreset = true;
+						}
+						else if (Cut < 54) {
+							draw_kr = false;
+							draw_cafe = true;
+							Cafe.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							Sel_AnimNum(Cafe, 3);
+							Cafe.get_anime(3).Update(false, 0.8f);
+							CafeOpac = 1.f;
+							MV1SetOpacityRate(Cafe.get(), CafeOpac);
+							if (Cut ==53) {
+								if (Cafe.get_anime(3).time > 30.f) {
+									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+										VECTOR_ref::vget(
+											-10.f,
+											-8.5f,
+											-20.f
+										)*1.0f;
+
+									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
+									Cut_Pic[Cut].Aim_camera.near_ = 1.f;
+									Cut_Pic[Cut].Aim_camera.far_ = 300.f;
+									Cut_Pic[Cut].cam_per = 0.975f;
+								}
+								else {
+									if (Cafe.get_anime(3).time > 15.f) {
+										Cut_Pic[Cut].cam_per = 0.f;
+									}
+									else {
+										Cut_Pic[Cut].cam_per = 1.f;
+									}
+								}
+								isNextreset = true;
+
+								mobu_b[0].get_anime(4).time = (float)GetRand(100) / 10.f;
+
+								mobu_b[2].get_anime(4).time = (float)GetRand(100) / 10.f;;
+
+								doto.get_anime(0).time = (float)GetRand(100) / 10.f;;
+
+								Cafe.get_anime(4).time = (float)GetRand(100) / 10.f;;
+
+								mobu_b[1].get_anime(4).time = (float)GetRand(100) / 10.f;;
+
+								opera.get_anime(0).time = (float)GetRand(100) / 10.f;;
+
+							}
+						}
+						else if (Cut < 55) {
+							mobu_b[0].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2233.f - 65.f)));
+							Sel_AnimNum(mobu_b[0], 4);
+							mobu_b[0].get_anime(4).Update(false, 0.37f*0.3f);
+
+							mobu_b[2].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2233.f - 50.f)));
+							Sel_AnimNum(mobu_b[2], 4);
+							mobu_b[2].get_anime(4).Update(false, 0.43f*0.3f);
+
+							doto.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2233.f - 40.f)));
+							Sel_AnimNum(doto, 0);
+							doto.get_anime(0).Update(false, 0.42f*0.3f);
+
+							Cafe.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2233.f - 30.f)));
+							Sel_AnimNum(Cafe, 4);
+							Cafe.get_anime(4).Update(false, 0.38f*0.3f);
+
+							mobu_b[1].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-5.f, 0.f, -2233.f - 15.f)));
+							Sel_AnimNum(mobu_b[1], 4);
+							mobu_b[1].get_anime(4).Update(false, 0.4f*0.3f);
+
+							opera.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2233.f + 10.f)));
+							Sel_AnimNum(opera, 0);
+							opera.get_anime(0).Update(false, 0.35f*0.3f);
+
+							if (draw_opr) {
+								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 0.f, -1.f);
+							}
+							else {
+								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 0.f, -30.f);
+							}
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(0.5f))*sin(-deg2rad(float(90 - 10 + 180))),
+									sin(deg2rad(0.5f)),
+									-cos(deg2rad(0.5f))*cos(-deg2rad(float(90 - 10 + 180)))
+								)*608.0f;
+
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(2);
+							Cut_Pic[Cut].Aim_camera.near_ = 300.f;
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+							if (draw_opr) {
+								Cut_Pic[Cut].cam_per = 0.95f;
+							}
+							else {
+								Cut_Pic[Cut].cam_per = 0.f;
+							}
+
+							isNextreset = true;
+							radc2 = -1.f;
+							draw_cafe = true;
+							draw_dto = true;
+							draw_opr = true;
+							nex_cut = false;
+						}
+						else if (Cut < 56) {
+							mobu_b[0].SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 5.f, 0.f, -2200.f - 45.f)));
+							Sel_AnimNum(mobu_b[0], 4);
+							mobu_b[0].get_anime(4).Update(false, 0.8f);
+
+							mobu_b[1].SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 7.f, 0.f, -2200.f - 70.f)));
+							Sel_AnimNum(mobu_b[1], 4);
+							mobu_b[1].get_anime(4).Update(false, 0.8f);
+
+							mobu_b[2].SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 10.f, 0.f, -2200.f - 65.f)));
+							Sel_AnimNum(mobu_b[2], 4);
+							mobu_b[2].get_anime(4).Update(false, 0.8f);
+
+							doto.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 6.f, 0.f, -2200.f - 35.f)));
+							Sel_AnimNum(doto, 0);
+							doto.get_anime(0).Update(false, 1.1f);
+
+							Cafe.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f -5.f, 0.f, -2200.f - 0.f)));
+							Sel_AnimNum(Cafe, 4);
+							Cafe.get_anime(4).Update(false, 0.98f);
+
+							opera.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 12.5f, 0.f, -2200.f - 40.f)));
+							Sel_AnimNum(opera, 0);
+							opera.get_anime(0).Update(false, 0.95f);
+
+
+							if (nex_cut) {
+								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f);
+							}
+							else {
+								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 10.f, 30.f);
+							}
+							if (radc2 < 0.f) {
+								Cut_Pic[Cut].Aim_camera.campos = Cafe.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f) +
+									VECTOR_ref::vget(
+										-cos(deg2rad(1.5f))*sin(-deg2rad(float(90 - 80 + 180) + radc2)),
+										sin(deg2rad(1.5f)),
+										-cos(deg2rad(1.5f))*cos(-deg2rad(float(90 - 80 + 180) + radc2))
+									)*468.0f;
+							}
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+							Cut_Pic[Cut].Aim_camera.near_ = 100.f;
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+
+							if (NowTime > (LONGLONG)(1000000.f * 62.755)) {
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(0.85f);
+							}
+							else {
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(2);
+							}
+
+							if (nex_cut) {
+								Cut_Pic[Cut].cam_per = 0.95f;
+							}
+							else {
+								Cut_Pic[Cut].cam_per = 0.f;
+							}
+							nex_cut = true;
+							radc2 = 0.f;
+							isNextreset = true;
+						}
+						else if (Cut < 57) {
+							draw_dto = false;
+							draw_opr = false;
+							draw_t = true;
+							//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(116.485695f, 18.346067f, -56.928761f);
+
+							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
+
+							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+							easing_set(&xradadd_r, xradadd, 0.975f);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+									sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+									-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+								)*88.0f;
+
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							Cut_Pic[Cut].cam_per = 0.f;
+							radc2 += 12.5f / GetFPS();
+
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(0 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+							Sel_AnimNum(Takion, 2);
+							Takion.get_anime(2).time = 0.f;
+							Takion.get_anime(2).Update(false, 0.0f);
+							isNextreset = true;
+						}
+						else if (Cut < 58) {
+							Cut_Pic[Cut].Aim_camera.camvec = Takion.frame(9);
+
+							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+							easing_set(&xradadd_r, xradadd, 0.975f);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+									sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+									-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+								)*88.0f;
+
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
+							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							Cut_Pic[Cut].cam_per = 0.f;
+							radc2 += 12.5f / GetFPS();
+
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+							Sel_AnimNum(Takion, 2);
+							Takion.get_anime(2).time = 0.f;
+							Takion.get_anime(2).Update(false, 0.0f);
+							Box_ALPHA = 0.f;
+						}
+						else if (Cut < 59) {
+							Cut_Pic[Cut].Aim_camera.camvec = Takion.frame(9);
+
+							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+							easing_set(&xradadd_r, xradadd, 0.975f);
+							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+								VECTOR_ref::vget(
+									-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+									sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+									-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+								)*88.0f;
+
+							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
+							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
+							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							Cut_Pic[Cut].cam_per = 0.f;
+							radc2 += 12.5f / GetFPS();
+
+							if (Box_ALPHA < 1.f) {
+								Box_ALPHA += 1.f / GetFPS();
+							}
+							else {
+								Box_ALPHA = 1.f;
+								if (per_logo > 0.f) {
+									per_logo -= 100.f / GetFPS()/1.5f;
+								}
+								else {
+									per_logo = 0.f;
+								}
+							}
+
+							for (auto& sl : sode_last) {
+								easing_set(&sl.xpos, sl.xpos_base, 0.945f);
+								easing_set(&sl.ypos, sl.ypos_base, 0.925f);
+								easing_set(&sl.rad, sl.rad_base, 0.925f);
+							}
+						}
 						easing_set(&camera_main.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camup, Cut_Pic[Cut].Aim_camera.camup, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.fov, Cut_Pic[Cut].Aim_camera.fov, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.far_, Cut_Pic[Cut].Aim_camera.far_, Cut_Pic[Cut].cam_per);
-						camera_main.set_cam_info(camera_main.fov, 1.0f, camera_main.far_);
+						easing_set(&camera_main.near_, Cut_Pic[Cut].Aim_camera.near_, Cut_Pic[Cut].cam_per);
+						camera_main.set_cam_info(camera_main.fov, camera_main.near_, camera_main.far_);
 					}
 
-					Takion.work_anime();
-					Takion2.work_anime();
-					Cafe.work_anime();
+					if (draw_opr) {
+						opera.work_anime();
+					}
+					if (draw_dto) {
+						doto.work_anime();
+					}
+					if (draw_t) {
+						Takion.work_anime();
+					}
+					if (draw_tnr) {
+						trainer.work_anime();
+					}
+					if (draw_t2) {
+						Takion2.work_anime();
+					}
+					if (draw_cafe) {
+						Cafe.work_anime();
+					}
+					if (draw_scar) {
+						scarlet.work_anime();
+					}
+					if (draw_vodka) {
+						vodka.work_anime();
+					}
 					Takion3_1.work_anime();
 					Takion3_2.work_anime();
 					Takion3_3.work_anime();
@@ -1021,7 +2368,13 @@ namespace FPS_n2 {
 					speweek.work_anime();
 					teio.work_anime();
 					macin.work_anime();
-
+					Gate.work_anime();
+					for (auto& m : mobu_b) {
+						m.work_anime();
+					}
+					if (draw_kr) {
+						karen.work_anime();
+					}
 					if (!Time_Over()) {
 						if (NowTime > GetCutTime()) {
 							AddCutNum();
@@ -1043,19 +2396,51 @@ namespace FPS_n2 {
 						else {
 							if (reset_p) {
 								reset_p = false;
-								Takion.PhysicsResetState();
-								Takion2.PhysicsResetState();
-								Cafe.PhysicsResetState();
+								if (draw_t) {
+									Takion.PhysicsResetState();
+								}
+								if (draw_t2) {
+									Takion2.PhysicsResetState();
+								}
+								if (draw_cafe) {
+									Cafe.PhysicsResetState();
+								}
+								if (draw_scar) {
+									scarlet.PhysicsResetState();
+								}
+								if (draw_vodka) {
+									vodka.PhysicsResetState();
+								}
+								if (draw_kr) {
+									karen.PhysicsResetState();
+								}
 							}
 							else {
-								Takion.PhysicsCalculation(30.f / GetFPS()*spd_taki);
-								Takion2.PhysicsCalculation(30.f / GetFPS()*spd_taki);
-								Cafe.PhysicsCalculation(30.f / GetFPS()*spd_cafe);
+								if (draw_t) {
+									Takion.PhysicsCalculation(30.f / GetFPS()*spd_taki);
+								}
+								if (draw_t2) {
+									Takion2.PhysicsCalculation(30.f / GetFPS()*spd_taki);
+								}
+								if (draw_cafe) {
+									Cafe.PhysicsCalculation(30.f / GetFPS()*spd_cafe);
+								}
+								if (draw_scar) {
+									scarlet.PhysicsCalculation(30.f / GetFPS());
+								}
+								if (draw_vodka) {
+									vodka.PhysicsCalculation(30.f / GetFPS());
+								}
+								if (draw_kr) {
+									karen.PhysicsCalculation(30.f / GetFPS());
+								}
 							}
 						}
 					}
 
 				}
+
+				Effect_UseControl::Update_Effect();
 				if (Time_Over()) {
 					return false;
 				}
@@ -1065,6 +2450,8 @@ namespace FPS_n2 {
 				return true;
 			}
 			void Dispose(void) noexcept override {
+				Effect_UseControl::Dispose_Effect();
+
 				for (auto& p : Cut_Pic) { p.handle.Dispose(); }
 				Cut_Pic.clear();
 				BGM.Dispose();
@@ -1075,25 +2462,70 @@ namespace FPS_n2 {
 			}
 			void BG_Draw(void) noexcept override {
 				if (!Time_Over()) {
+					if (Cut > 8 && Cut != 20 && !(Cut >= 30 && Cut <= 31) && !(Cut >= 35 && Cut <= 38) && !((Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53)) {
+						auto fog_e = GetFogEnable();
+						SetFogEnable(FALSE);
+						SetUseLighting(FALSE);
+						{
+							sky.DrawModel();
+							DrawBillboard3D(this->sun_pos.get(), 0.5f, 0.5f, 200.f, 0.f, this->sun_pic.get(), TRUE);
+						}
+						SetUseLighting(TRUE);
+						
+						SetFogEnable(fog_e);
+					}
 					//Cut_Pic[Cut].handle.DrawExtendGraph(0, 0, DrawPts->disp_x, DrawPts->disp_y, FALSE);
 				}
 			}
 			void Shadow_Draw_Far(void) noexcept override {
-				if (Cut >= 9 && Cut != 20) {
-					Map.DrawModel();
-				}
+				Map.DrawModel();
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
+				if (Cut == 25) {
+					Map_school.DrawModel();
+				}
+				if (Cut == 26 || Cut == 27 || Cut == 41 || Cut == 42 || Cut == 43 || Cut == 44 || Cut == 54 || Cut == 55 || Cut == 56) {
+					Gate.DrawModel();
+				}
 			}
 			void Shadow_Draw(void) noexcept override {
-				if (Taki2Opac > 0.f) {
-					Takion2.DrawModel();
+				if (Cut == 25) {
+					Map_school.DrawModel();
 				}
-				if (TakiOpac > 0.f) {
-					Takion.DrawModel();
+				if (Cut == 26 || Cut == 27 || Cut == 41 || Cut == 42 || Cut == 43 || Cut == 44 || Cut == 54 || Cut == 55 || Cut == 56) {
+					for (auto& m : mobu_b) {
+						m.DrawModel();
+					}
+					Gate.DrawModel();
 				}
-				if (CafeOpac > 0.f) {
-					Cafe.DrawModel();
+				if (draw_t2) {
+					if (Taki2Opac > 0.f) {
+						Takion2.DrawModel();
+					}
+				}
+				if (draw_vodka) {
+					vodka.DrawModel();
+				}
+				if (draw_opr) {
+					opera.DrawModel();
+				}
+				if (draw_dto) {
+					doto.DrawModel();
+				}
+				if (draw_scar) {
+					if (scarletOpac > 0.f) {
+						scarlet.DrawModel();
+					}
+				}
+				if (draw_t) {
+					if (TakiOpac > 0.f) {
+						Takion.DrawModel();
+					}
+				}
+				if (draw_cafe) {
+					if (CafeOpac > 0.f) {
+						Cafe.DrawModel();
+					}
 				}
 
 				Takion3_1.DrawModel();
@@ -1105,23 +2537,73 @@ namespace FPS_n2 {
 				speweek.DrawModel();
 				teio.DrawModel();
 				macin.DrawModel();
-
-				for (auto&n : Newspaper) {
-					n.model.DrawModel();
+				if (draw_kr) {
+					karen.DrawModel();
+				}
+				if (Cut == 20) {
+					for (auto&n : Newspaper) {
+						n.model.DrawModel();
+					}
 				}
 			}
 			void Main_Draw(void) noexcept override {
-				if (Cut >= 9 && Cut != 20) {
+				if (Cut == 34) {
+					SetFogEnable(TRUE);
+					SetFogColor(128, 128, 128);
+					SetFogStartEnd(10, 60);
+					SetFogDensity(0.01f);
+				}
+				if ((Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
+					SetFogEnable(TRUE);
+					SetFogColor(128, 128, 128);
+					SetFogStartEnd(10, 300);
+					SetFogDensity(0.01f);
+
+					Board.DrawModel();
+				}
+				if (Cut >= 9 && Cut != 20 && Cut != 25 && !(Cut >= 30 && Cut <= 31) && !(Cut >= 35 && Cut <= 38) && !((Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53)) {
 					Map.DrawModel();
 				}
-				if (Taki2Opac > 0.f) {
-					Takion2.DrawModel();
+				if (Cut == 25) {
+					Map_school.DrawModel();
 				}
-				if (TakiOpac > 0.f) {
-					Takion.DrawModel();
+				if (Cut == 26 || Cut == 27 || Cut == 41 || Cut == 42 || Cut == 43 || Cut == 44 || Cut == 54 || Cut == 55 || Cut == 56) {
+					for (auto& m : mobu_b) {
+						m.DrawModel();
+					}
+					Gate.DrawModel();
 				}
-				if (CafeOpac > 0.f) {
-					Cafe.DrawModel();
+				if (draw_t2) {
+					if (Taki2Opac > 0.f) {
+						Takion2.DrawModel();
+					}
+				}
+				if (draw_vodka) {
+					vodka.DrawModel();
+				}
+				if (draw_scar) {
+					if (scarletOpac > 0.f) {
+						scarlet.DrawModel();
+					}
+				}
+				if (draw_t) {
+					if (TakiOpac > 0.f) {
+						Takion.DrawModel();
+					}
+				}
+				if (draw_opr) {
+					opera.DrawModel();
+				}
+				if (draw_dto) {
+					doto.DrawModel();
+				}
+				if (draw_tnr) {
+					trainer.DrawModel();
+				}
+				if (draw_cafe) {
+					if (CafeOpac > 0.f) {
+						Cafe.DrawModel();
+					}
 				}
 
 				Takion3_1.DrawModel();
@@ -1133,24 +2615,74 @@ namespace FPS_n2 {
 				speweek.DrawModel();
 				teio.DrawModel();
 				macin.DrawModel();
-
-				for (auto&n : Newspaper) {
-					n.model.DrawModel();
+				if (draw_kr) {
+					karen.DrawModel();
 				}
-			}
-			void Item_Draw(void) noexcept override {
-				TEMPSCENE::Item_Draw();
+				if (Cut == 28 || Cut == 29) {
+					Ship.DrawModel();
+				}
+				if (Cut == 20) {
+					for (auto&n : Newspaper) {
+						n.model.DrawModel();
+					}
+				}
+
+				SetFogEnable(FALSE);
+
+				anim[0].handle.DrawExtendGraph((int)(anim[0].xpos), (int)(anim[0].ypos), DrawPts->disp_x + (int)(anim[0].xpos), DrawPts->disp_y + (int)(anim[0].ypos), true);
+				anim[1].handle.DrawExtendGraph((int)(anim[1].xpos), (int)(anim[1].ypos), DrawPts->disp_x + (int)(anim[1].xpos), DrawPts->disp_y + (int)(anim[1].ypos), true);
+
+				SetDrawBright(108, 108, 108);
+				sode[7].handle.DrawExtendGraph((int)(sode[7].xpos), (int)(sode[7].ypos), DrawPts->disp_x + (int)(sode[7].xpos), DrawPts->disp_y + (int)(sode[7].ypos), true);
+				SetDrawBright(144, 144, 144);
+				sode[6].handle.DrawExtendGraph((int)(sode[6].xpos), (int)(sode[6].ypos), DrawPts->disp_x + (int)(sode[6].xpos), DrawPts->disp_y + (int)(sode[6].ypos), true);
+				SetDrawBright(192, 192, 192);
+				sode[5].handle.DrawExtendGraph((int)(sode[5].xpos), (int)(sode[5].ypos), DrawPts->disp_x + (int)(sode[5].xpos), DrawPts->disp_y + (int)(sode[5].ypos), true);
+				SetDrawBright(255, 255, 255);
+				sode[4].handle.DrawExtendGraph((int)(sode[4].xpos), (int)(sode[4].ypos), DrawPts->disp_x + (int)(sode[4].xpos), DrawPts->disp_y + (int)(sode[4].ypos), true);
 				sode[3].handle.DrawExtendGraph((int)(sode[3].xpos), (int)(sode[3].ypos), DrawPts->disp_x + (int)(sode[3].xpos), DrawPts->disp_y + (int)(sode[3].ypos), true);
 				sode[2].handle.DrawExtendGraph((int)(sode[2].xpos), (int)(sode[2].ypos), DrawPts->disp_x + (int)(sode[2].xpos), DrawPts->disp_y + (int)(sode[2].ypos), true);
 				sode[1].handle.DrawExtendGraph((int)(sode[1].xpos), (int)(sode[1].ypos), DrawPts->disp_x + (int)(sode[1].xpos), DrawPts->disp_y + (int)(sode[1].ypos), true);
 				sode[0].handle.DrawExtendGraph((int)(sode[0].xpos), (int)(sode[0].ypos), DrawPts->disp_x + (int)(sode[0].xpos), DrawPts->disp_y + (int)(sode[0].ypos), true);
+				{
+					if (Box_ALPHA != 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
+						DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(0, 0, 0), TRUE);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					}
+					if (Box_ALPHA != 0.f) {
+						for (auto& sl : sode_last) {
+							sl.handle.DrawRotaGraph((int)(sl.xpos), (int)(sl.ypos), (float)(DrawPts->disp_y) / 540.f, sl.rad, true);
+						}
+					}
+					if ((int)per_logo <= GetRand(99)) {
+						Logo.DrawRotaGraph(DrawPts->disp_x / 2, DrawPts->disp_y / 2, (float)(DrawPts->disp_y) / 540.f / 2.f, 0.f, true);
+					}
+				}
+				if (Line_ALPHA != 0.f) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Line_ALPHA));
+					DrawLine(y_r(600) - y_r(288), -y_r(162), y_r(600) + (int)((float)(y_r(720))*Line_time), y_r(0) + (int)((float)(y_r(1080))*Line_time), GetColor(255, 255, 255), (int)Thickness);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				}
+			}
+			void Item_Draw(void) noexcept override {
+				TEMPSCENE::Item_Draw();
 
-				if (Cut == 21) {
+				if (Cut == 21 || Cut == 22 || Cut == 23) {
 					face.DrawExtendGraph(0, 0, DrawPts->disp_x, DrawPts->disp_y, true);
+					int cnt = 1;
+					for (auto n = news_p.rbegin(); n != news_p.rend(); n++) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255 * cnt / (int)news_p.size());
+						n->graph.DrawRotaGraph(n->xns_pos, n->yns_pos, (float)DrawPts->disp_x / (float)xp_n*1.5f, n->rns_rad, false);
+						cnt++;
+					}
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 			}
 			void LAST_Draw(void) noexcept override {
-				movie.DrawExtendGraph(0, 0, DrawPts->disp_x / 4, DrawPts->disp_y / 4, FALSE);
+				int xxx_m = DrawPts->disp_x * 3 / 4 - y_r(200);
+				int yyy_m = DrawPts->disp_y * 3 / 4;
+				movie.DrawExtendGraph(xxx_m, yyy_m, DrawPts->disp_x / 4 + xxx_m, DrawPts->disp_y / 4 + yyy_m, FALSE);
 			}
 		};
 	};
