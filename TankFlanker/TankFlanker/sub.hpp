@@ -41,7 +41,7 @@ namespace FPS_n2 {
 			void Set(int siz_t) {
 				this->size = siz_t;
 				SetUseASyncLoadFlag(TRUE);
-				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE);
+				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE,-1,2);
 				SetUseASyncLoadFlag(FALSE);
 			}
 		};
@@ -137,6 +137,7 @@ namespace FPS_n2 {
 		void Set_Effect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept { this->effcs[(int)ef_].Set(pos_t, nomal_t, scale); }
 		void Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
 		void SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
+		void SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
 		//エフェクトの更新
 		void Update_Effect(void) noexcept {
 			for (auto& t : this->effcs) {

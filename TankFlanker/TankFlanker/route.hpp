@@ -129,6 +129,7 @@ namespace FPS_n2 {
 						scenes_ptr = scenes_ptr->Next_ptr;
 					}
 				}
+				WaitKey();
 			} while (this->ending);
 			effectControl.Dispose();
 		}

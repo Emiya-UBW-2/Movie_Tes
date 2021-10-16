@@ -183,16 +183,36 @@ namespace FPS_n2 {
 					Aim_camera.campos = VECTOR_ref::vget(0, 10, -30);
 					Aim_camera.camvec = VECTOR_ref::vget(0, 10, 0);
 					Aim_camera.camup = VECTOR_ref::up();
-					Aim_camera.set_cam_info(deg2rad(15), 1.0f, 200.f);
+					Aim_camera.set_cam_info(deg2rad(15), 1.0f, 300.f);
 					cam_per = 0.95f;
 				}
 			};
+
+			class Cut_tex {
+			public:
+				int xpos = 0;
+				int ypos = 0;
+				int size = 0;
+				std::string str;
+				LONGLONG START_TIME = 0;
+				LONGLONG END_TIME = 0;
+
+				Cut_tex() {
+					xpos = 0;
+					ypos = 0;
+					size = 12;
+					str = "test";
+					START_TIME = (LONGLONG)(1000000.f * 0.01f);
+					END_TIME = (LONGLONG)(1000000.f * 1.01f);
+				}
+			};
+
 			//データ
 			SoundHandle BGM;
 			size_t Cut = 0;
 			std::vector<Cut_Info> Cut_Pic;
+			std::vector<Cut_tex> Texts;
 			LONGLONG BaseTime = 0;
-
 			GraphHandle movie;
 
 
@@ -213,18 +233,33 @@ namespace FPS_n2 {
 				float ypos_base = 0;
 				float rad_base = 0;
 
+				float xpos_rand = 0;
+				float ypos_rand = 0;
+				float rad_rand = 0;
+
 				float xpos = 0;
 				float ypos = 0;
 				float rad = 0;
+				float Alpha = 1.f;
+				float Alpha_R = 1.f;
+				float Scale = 1.f;
 				GraphHandle handle;
 			};
 
 			std::vector<sodes> sode;
 			std::vector<sodes> anim;
 			std::vector<sodes> sode_last;
+			std::vector<sodes> First;
+			std::vector<sodes> First2;
+			std::vector<sodes> First3;
 
 			GraphHandle Logo;
 			float per_logo = 100.f;
+			float size_rand = 0.f;
+			float xpos_rand = 0.f;
+			float xpos_rand2 = 0.f;
+			float ypos_rand = 0.f;
+			float ypos_rand2 = 0.f;
 		private:
 			void Sel_AnimNum(MV1&model, int sel) {
 				for (auto& anim_t : model.get_anime()) {
@@ -293,6 +328,7 @@ namespace FPS_n2 {
 					mobu_b_anim.resize(12);
 					for (int i = 0; i < 12; i++) {
 						mobu_b_Base.DuplicateonAnime(&mobu_b[i], &mobu_b[i]);
+						mobu_b[i].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, -100.f, 0.f)));
 						mobu_b_run[i] = 0.8f + (float)(GetRand(195)) / 1000.f;
 						mobu_b_runrange[i] = (float)(GetRand(100)) / 10.f;
 						while (true)
@@ -351,59 +387,116 @@ namespace FPS_n2 {
 					sode.back().handle = GraphHandle::Load("data/second_sode/2.png");
 
 					Logo = GraphHandle::Load("data/logo.png");
+					{
+						for (int i = 0; i < 10; i++) {
+							sode_last.resize(sode_last.size() + 1);
+							sode_last.back().xpos = (float)(DrawPts->disp_x / 2 + DrawPts->disp_x);
+							sode_last.back().ypos = (float)(DrawPts->disp_y / 2);
+							sode_last.back().rad = (float)(0.f);
+							sode_last.back().handle = GraphHandle::Load("data/second_sode/1.png");
+						}
 
-					for (int i = 0; i < 10; i++) {
-						sode_last.resize(sode_last.size() + 1);
-						sode_last.back().xpos = (float)(DrawPts->disp_x / 2 + DrawPts->disp_x);
-						sode_last.back().ypos = (float)(DrawPts->disp_y / 2);
-						sode_last.back().rad = (float)(0.f);
-						sode_last.back().handle = GraphHandle::Load("data/second_sode/1.png");
+						sode_last[0].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(150));
+						sode_last[0].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
+						sode_last[0].rad_base = deg2rad(-350);
+
+						sode_last[1].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(300));
+						sode_last[1].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(500));
+						sode_last[1].rad_base = deg2rad(-320);
+
+						sode_last[2].xpos_base = (float)(DrawPts->disp_x / 2);
+						sode_last[2].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(600));
+						sode_last[2].rad_base = deg2rad(-270);
+
+						sode_last[3].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(500));
+						sode_last[3].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(300));
+						sode_last[3].rad_base = deg2rad(-360);
+
+						sode_last[4].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(400));
+						sode_last[4].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(550));
+						sode_last[4].rad_base = deg2rad(-230);
+
+						sode_last[5].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(500));
+						sode_last[5].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(500));
+						sode_last[5].rad_base = deg2rad(-100);
+
+						sode_last[6].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(600));
+						sode_last[6].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(300));
+						sode_last[6].rad_base = deg2rad(-200);
+
+						sode_last[7].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(700));
+						sode_last[7].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
+						sode_last[7].rad_base = deg2rad(-180);
+
+						sode_last[8].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(50));
+						sode_last[8].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(700));
+						sode_last[8].rad_base = deg2rad(-60);
+
+						sode_last[9].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(450));
+						sode_last[9].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(550));
+						sode_last[9].rad_base = deg2rad(-40);
+
+						for (auto& sl : sode_last) {
+							sl.xpos = (float)(DrawPts->disp_x / 2) + (sl.xpos_base - (float)(DrawPts->disp_x / 2)) * 10.f;
+							sl.ypos = (float)(DrawPts->disp_y / 2) + (sl.ypos_base - (float)(DrawPts->disp_y / 2)) * 10.f;
+							sl.rad = sl.rad_base + deg2rad(90);
+						}
 					}
 
-					sode_last[0].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(150));
-					sode_last[0].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
-					sode_last[0].rad_base = deg2rad(-350);
+					{
+						for (int i = 0; i < 3; i++) {
+							First.resize(First.size() + 1);
+							First.back().xpos = (float)(DrawPts->disp_x / 2 + DrawPts->disp_x);
+							First.back().ypos = (float)(DrawPts->disp_y / 2);
+							First.back().rad = (float)(0.f);
+							First.back().handle = GraphHandle::Load("data/FIRST.png");
+						}
 
-					sode_last[1].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(300));
-					sode_last[1].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(500));
-					sode_last[1].rad_base = deg2rad(-320);
+						First[0].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10));
+						First[0].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
 
-					sode_last[2].xpos_base = (float)(DrawPts->disp_x / 2);
-					sode_last[2].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(600));
-					sode_last[2].rad_base = deg2rad(-270);
+						First[1].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(1920 / 4));
+						First[1].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10));
 
-					sode_last[3].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(500));
-					sode_last[3].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(300));
-					sode_last[3].rad_base = deg2rad(-360);
+						First[2].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(1920 / 6));
+						First[2].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10));
 
-					sode_last[4].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(400));
-					sode_last[4].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(550));
-					sode_last[4].rad_base = deg2rad(-230);
 
-					sode_last[5].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(500));
-					sode_last[5].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(500));
-					sode_last[5].rad_base = deg2rad(-100);
+						for (int i = 0; i < 3; i++) {
+							First2.resize(First2.size() + 1);
+							First2.back().xpos = (float)(DrawPts->disp_x / 2 + DrawPts->disp_x);
+							First2.back().ypos = (float)(DrawPts->disp_y / 2);
+							First2.back().rad = (float)(0.f);
+							First2.back().handle = GraphHandle::Load("data/sun.png");
+						}
 
-					sode_last[6].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(600));
-					sode_last[6].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(300));
-					sode_last[6].rad_base = deg2rad(-200);
+						First2[0].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10));
+						First2[0].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
 
-					sode_last[7].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(700));
-					sode_last[7].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
-					sode_last[7].rad_base = deg2rad(-180);
+						First2[1].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(1920 / 4));
+						First2[1].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10));
 
-					sode_last[8].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(50));
-					sode_last[8].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(700));
-					sode_last[8].rad_base = deg2rad(-60);
+						First2[2].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(1920 / 6));
+						First2[2].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10));
 
-					sode_last[9].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(450));
-					sode_last[9].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(550));
-					sode_last[9].rad_base = deg2rad(-40);
+						for (int i = 0; i < 3; i++) {
+							First3.resize(First3.size() + 1);
+							First3.back().xpos = (float)(DrawPts->disp_x / 2 + DrawPts->disp_x);
+							First3.back().ypos = (float)(DrawPts->disp_y / 2);
+							First3.back().Alpha = -1.f;
+							First3.back().Alpha_R = 0.5f;
+							First3.back().Scale = 1.f;
+							First3.back().handle = GraphHandle::Load("data/sun.png");
+						}
 
-					for (auto& sl : sode_last) {
-						sl.xpos = (float)(DrawPts->disp_x / 2) + (sl.xpos_base - (float)(DrawPts->disp_x / 2)) * 10.f;
-						sl.ypos = (float)(DrawPts->disp_y / 2) + (sl.ypos_base - (float)(DrawPts->disp_y / 2)) * 10.f;
-						sl.rad = sl.rad_base + deg2rad(90);
+						First3[0].xpos_base = (float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10));
+						First3[0].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(100));
+
+						First3[1].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(1920 / 4));
+						First3[1].ypos_base = (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10));
+
+						First3[2].xpos_base = (float)(DrawPts->disp_x / 2 + y_r(1920 / 6));
+						First3[2].ypos_base = (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10));
 					}
 
 					anim.resize(anim.size() + 1);
@@ -452,9 +545,11 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
 				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
-				Cut =  50;
+				Cut =  18;
 				Cut = 0;
-				BGM = SoundHandle::Load("data/base_movie.wav");
+				//BGM = SoundHandle::Load("data/base_movie.wav");
+				BGM = SoundHandle::Load("data/sound2.wav");
+				
 				movie = GraphHandle::Load("data/base_movie.mp4");
 				PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
 				ChangeMovieVolumeToGraph(0, movie.get());
@@ -492,6 +587,7 @@ namespace FPS_n2 {
 							-cos(deg2rad(20.1))*cos(-deg2rad(22.9))
 						)*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//背中
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -505,6 +601,7 @@ namespace FPS_n2 {
 							-cos(deg2rad(6.3))*cos(-deg2rad(225.7))
 						)*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//右足→
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -518,6 +615,7 @@ namespace FPS_n2 {
 							-cos(deg2rad(15.5))*cos(-deg2rad(202.8))
 						)*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//頭←
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -531,6 +629,7 @@ namespace FPS_n2 {
 							-cos(deg2rad(8.6))*cos(-deg2rad(73.9))
 						)*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//羽切るはじめ
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -549,11 +648,12 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
 						VECTOR_ref::vget(
-							-cos(deg2rad(6.9))*sin(-deg2rad(19.5)),
+							-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)),
 							sin(deg2rad(6.9)),
-							-cos(deg2rad(6.9))*cos(-deg2rad(19.5))
+							-cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5))
 						)*27.0f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.far_ = 40.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//斬新
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -562,11 +662,12 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
 						VECTOR_ref::vget(
-							-cos(deg2rad(6.9))*sin(-deg2rad(19.5)),
+							-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)),
 							sin(deg2rad(6.9)),
-							-cos(deg2rad(6.9))*cos(-deg2rad(19.5))
+							-cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5))
 						)*27.0f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.far_ = 40.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//＜＞
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -742,6 +843,10 @@ namespace FPS_n2 {
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/25.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 26.526f);
 
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, 0);
+					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 5, -20);
+					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
 					Cut_Pic.back().cam_per = 0.f;
 
 					//バイク戻る(る　世界を元に戻すにはぁ）
@@ -1087,7 +1192,7 @@ namespace FPS_n2 {
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
 					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 300.f;
+					Cut_Pic.back().Aim_camera.far_ = 30.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//雨加賀美(強さ　信じられる)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -1103,17 +1208,17 @@ namespace FPS_n2 {
 
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(25);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 300.f;
+					Cut_Pic.back().Aim_camera.near_ = 3.f;
+					Cut_Pic.back().Aim_camera.far_ = 1000.f;
 					Cut_Pic.back().cam_per = 0.9f;
 					//クロックアップ(ぅ　高速の)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/55.bmp");//1
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 61.640);
+					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 61.440);
 					//クロックアップ(ぅ　高速の)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/55.bmp");//1
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 63.255);
+					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 62.775);
 					//遠い(ビジョン)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/56.bmp");//1
@@ -1127,6 +1232,738 @@ namespace FPS_n2 {
 					Cut_Pic.back().handle = GraphHandle::Load("data/cut/58.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 70.592);
 
+				}
+				{}
+				{
+					LONGLONG StartF = 0;
+					LONGLONG ContiF = 0;
+
+					StartF = (LONGLONG)(1000000.f * 2.614f);
+					ContiF = (LONGLONG)(1000000.f * 1.5f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960-300);
+						Texts.back().ypos = y_r(1080-200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "原作";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960-300);
+						Texts.back().ypos = y_r(1080 - 200+12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "ウマ娘プリティーダービー";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 1.696f);//4.310
+					ContiF = (LONGLONG)(1000000.f * 3.290f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "皐月賞馬";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "アグネスタキオン";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 3.297f);//(LONGLONG)(1000000.f * 7.288f)
+					ContiF = (LONGLONG)(1000000.f * 2.97f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "菊花賞馬";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "マンハッタンカフェ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.976f);//(LONGLONG)(1000000.f * 9.264f)
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 180);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "クロフネの子";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 180);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "カレンチャン";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.146f);//(LONGLONG)(1000000.f * 11.410f)
+					ContiF = (LONGLONG)(1000000.f * 1.925f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 100);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "全身発行体";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 100);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "トレーナー";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 1.925f);//(LONGLONG)(1000000.f * 13.410f)
+					ContiF = (LONGLONG)(1000000.f * 1.925f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 100);
+						Texts.back().ypos = y_r(540);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "トレセン学園理事長";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 100);
+						Texts.back().ypos = y_r(540 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "秋川やよい";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 100);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "理事長秘書";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 100);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "駿川たづな";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 1.925f);
+					ContiF = (LONGLONG)(1000000.f * 1.925f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 100);
+						Texts.back().ypos = y_r(540);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "チームスピカ担当";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 100);
+						Texts.back().ypos = y_r(540 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "沖野T";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "あげません";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "スペシャルウィーク";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 1.925f);
+					ContiF = (LONGLONG)(1000000.f * 1.925f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(540 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "トウカイ テイオー";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(540 + 12 + 42);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "メジロマックイーン";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(540 + 12 + 42 * 3);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "ウオッカ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(540 + 12 + 42 * 4);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "ダイワスカーレット";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "ナレーション";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1560 - 190);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "ゴールドシップ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 1.925f);
+					ContiF = (LONGLONG)(1000000.f * 1.925f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 100);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "理事長代理";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 100);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "樫本理子";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 1.925f);//(LONGLONG)(1000000.f * 23.422f)
+					ContiF = (LONGLONG)(1000000.f * 1.925f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(480 - 100);
+						Texts.back().ypos = y_r(810);
+						Texts.back().size = y_r(32);
+						Texts.back().str = " ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 100);
+						Texts.back().ypos = y_r(810 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF = (LONGLONG)(1000000.f * 25.164f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "脚本";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "アグネスデジタル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "音楽";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 200);
+						Texts.back().ypos = y_r(1080 - 200 + 12);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "アグネスデジタル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 60);
+						Texts.back().ypos = y_r(720);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "オープニングテーマ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 120);
+						Texts.back().ypos = y_r(720 + 10);
+						Texts.back().size = y_r(36);
+						Texts.back().str = "『NEXT LEVEL』";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 90);
+						Texts.back().ypos = y_r(720 + 10 + 36);
+						Texts.back().size = y_r(36);
+						Texts.back().str = "YU-KI";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 + 50);
+						Texts.back().ypos = y_r(720 + 10 + 36 + 12);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "(TRF)";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 90);
+						Texts.back().ypos = y_r(720 + 10 + 36 + 4 + 32 + 11);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "作　　詞";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 90);
+						Texts.back().ypos = y_r(720 + 10 + 36 + 4 + 32*2 + 11);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "作・編曲";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 30);
+						Texts.back().ypos = y_r(720 + 10 + 36 + 4 + 32);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "藤田聖子";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 30);
+						Texts.back().ypos = y_r(720 + 10 + 36 + 4 + 32 * 2);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "渡部チェル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF = (LONGLONG)(1000000.f * 32.52);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 60);
+						Texts.back().ypos = y_r(650);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "使用モデル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 60);
+						Texts.back().ypos = y_r(650+10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "S.Aikawa氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 120);
+						Texts.back().ypos = y_r(650 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "[MMD] アグネスタキオン (ウマ娘)";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						//
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "使用モデル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "ShiniNet氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 120);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "マン〇ッタンカフェ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						//
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "使用モデル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "kachin氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "かれん";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF = (LONGLONG)(1000000.f * 38.986f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 60);
+						Texts.back().ypos = y_r(640 + 42 - 12);
+						Texts.back().size = y_r(12);
+						Texts.back().str = "ShiniNet氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 120);
+						Texts.back().ypos = y_r(640 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "ゴー〇ドシップ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 120);
+						Texts.back().ypos = y_r(640 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "メジ〇マoクイーン";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{//
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 60);
+						Texts.back().ypos = y_r(540 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "つかさ氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 120);
+						Texts.back().ypos = y_r(540 + 42 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "つかさ式ていおー";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						//
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(540 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "WARPSTAR氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 120);
+						Texts.back().ypos = y_r(540 + 42 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【ウマ娘】スペシャルウィーク";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "トレーナーモデル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "モノゾフ氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 120);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【モブモデル】モブ用親父セット【配布中】";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 60);
+						Texts.back().ypos = y_r(540 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "Jean氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 120);
+						Texts.back().ypos = y_r(540 + 42 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【MMDウマ娘】テイエムオペラオー【モデル配布】";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						//
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(540 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "EndressStorm氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 120);
+						Texts.back().ypos = y_r(540 + 42 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "メイショウドトウ";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF = (LONGLONG)(1000000.f * 47.200f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 60);
+						Texts.back().ypos = y_r(540 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "tomoyo氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(400 - 120);
+						Texts.back().ypos = y_r(540 + 42 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "tmy式ダスカ　ver.0.92";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						//
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 60);
+						Texts.back().ypos = y_r(540 + 42);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "Jean氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1500 - 120);
+						Texts.back().ypos = y_r(540 + 42 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【MMDウマ娘】ウオッカ【モデル配布】";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF = (LONGLONG)(1000000.f * 50.447f);
+					ContiF = (LONGLONG)(1000000.f * 1.800f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "黒子モデル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "神々の宴氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 120);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【ＭＭＤ】ウマ娘モブセット";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "競馬場モデル";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "Led/折鶴P氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 140);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "なんちゃって競馬場セット";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "トレセン学園モデル(代演)";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "じん氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 240);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【MMDギアス】アッシュフォード学園【ステージ配布】";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "クロフネ(代演)";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "Tansoku102cm-沼地人氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 180);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "MMD用モブ前弩級戦艦1890セット";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880);
+						Texts.back().size = y_r(10);
+						Texts.back().str = "客席";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 60);
+						Texts.back().ypos = y_r(880 + 10);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "ppp21氏";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(960 - 180);
+						Texts.back().ypos = y_r(880 + 10 + 48);
+						Texts.back().size = y_r(24);
+						Texts.back().str = "【MMD】笹かまスタジアム";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF += (LONGLONG)(1000000.f * 2.000f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 60);
+						Texts.back().ypos = y_r(720);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
+					StartF = (LONGLONG)(1000000.f * 62.775f);
+					ContiF = (LONGLONG)(1000000.f * 2.000f);
+					{
+						Texts.resize(Texts.size() + 1);
+						Texts.back().xpos = y_r(1440 - 60);
+						Texts.back().ypos = y_r(720);
+						Texts.back().size = y_r(32);
+						Texts.back().str = "";
+						Texts.back().START_TIME = StartF;
+						Texts.back().END_TIME = StartF + ContiF;
+					}
 				}
 				SetUseASyncLoadFlag(FALSE);
 				//
@@ -1155,11 +1992,15 @@ namespace FPS_n2 {
 			float Line_time = 0.f;
 			float Thickness = 100.f;
 			float camzb_28 = 0.f;
+			float camyup = 0.f;
 			float camzb_41 = 0.f;
 			float bright_43 = 0.f;
 			float ship_z = 0.f;
 			float ship_zadd = 0.f;
 			bool nex_cut = false;
+			float cam_yure = 0.f;
+			bool isfirst_14 = false;
+			VECTOR_ref rand_vp;
 			bool Update(void) noexcept override {
 				float spd_taki = 1.f;
 				float spd_cafe = 1.f;
@@ -1177,6 +2018,53 @@ namespace FPS_n2 {
 								easing_set(&sode[2].ypos, 0.f, 0.85f);
 								easing_set(&sode[3].xpos, 0.f, 0.825f);
 								easing_set(&sode[3].ypos, 0.f, 0.825f);
+								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
+									First[0].xpos = First[0].xpos_base;
+									First[0].ypos = First[0].ypos_base;
+									First2[0].xpos = First2[0].xpos_base;
+									First2[0].ypos = First2[0].ypos_base;
+									First3[0].xpos = First3[0].xpos_base;
+									First3[0].ypos = First3[0].ypos_base;
+									if (First3[0].Alpha < 0.f) {
+										First3[0].Alpha = 1.f;
+										First3[0].Scale = 1.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
+									First[1].xpos = First[1].xpos_base;
+									First[1].ypos = First[1].ypos_base;
+									First2[1].xpos = First2[1].xpos_base;
+									First2[1].ypos = First2[1].ypos_base;
+									First3[1].xpos = First3[1].xpos_base;
+									First3[1].ypos = First3[1].ypos_base;
+									if (First3[1].Alpha < 0.f) {
+										First3[1].Alpha = 1.f;
+										First3[1].Scale = 1.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
+									First[2].xpos = First[2].xpos_base;
+									First[2].ypos = First[2].ypos_base;
+									First2[2].xpos = First2[2].xpos_base;
+									First2[2].ypos = First2[2].ypos_base;
+									First3[2].xpos = First3[2].xpos_base;
+									First3[2].ypos = First3[2].ypos_base;
+									if (First3[2].Alpha < 0.f) {
+										First3[2].Alpha = 1.f;
+										First3[2].Scale = 1.f;
+									}
+								}
+							}
+							for (auto& sl : First3) {
+								if (sl.Alpha > 0.f) {
+									sl.Alpha -= 6.f / GetFPS();
+									if (sl.Alpha <= 0.f) {
+										sl.Alpha = 0.f;
+									}
+								}
+								if (sl.Scale < 3.f) {
+									sl.Scale += 6.f / GetFPS();
+								}
 							}
 						}
 						if (Cut == 2) {
@@ -1188,6 +2076,14 @@ namespace FPS_n2 {
 							sode[2].ypos = (float)(DrawPts->disp_y);
 							sode[3].xpos = (float)(-DrawPts->disp_x / 5);
 							sode[3].ypos = (float)(DrawPts->disp_y);
+							for (auto& sl : First) {
+								sl.xpos = DrawPts->disp_x*2;
+								sl.ypos = DrawPts->disp_y * 2;
+							}
+							for (auto& sl : First2) {
+								sl.xpos = DrawPts->disp_x * 2;
+								sl.ypos = DrawPts->disp_y * 2;
+							}
 						}
 
 						if (Cut == 6) {
@@ -1207,6 +2103,14 @@ namespace FPS_n2 {
 								Line_time = 1.5f;
 							}
 							Thickness = 5.f;
+							for (auto& sl : First) {
+								sl.xpos = sl.xpos_base;
+								sl.ypos = sl.ypos_base;
+							}
+							for (auto& sl : First2) {
+								sl.xpos = sl.xpos_base;
+								sl.ypos = sl.ypos_base;
+							}
 						}
 						if (Cut == 7 || Cut == 8) {
 							Thickness += 6000.f / GetFPS();
@@ -1228,6 +2132,14 @@ namespace FPS_n2 {
 							easing_set(&sode[2].ypos, (float)(DrawPts->disp_y / 5), 0.85f);
 							easing_set(&sode[3].xpos, (float)(-DrawPts->disp_x), 0.825f);
 							easing_set(&sode[3].ypos, (float)(DrawPts->disp_y / 5), 0.825f);
+							for (auto& sl : First) {
+								sl.xpos = DrawPts->disp_x * 2;
+								sl.ypos = DrawPts->disp_y * 2;
+							}
+							for (auto& sl : First2) {
+								sl.xpos = DrawPts->disp_x * 2;
+								sl.ypos = DrawPts->disp_y * 2;
+							}
 						}
 						if (Cut == 8) {
 							sode[0].xpos = (float)(DrawPts->disp_x);
@@ -1240,17 +2152,58 @@ namespace FPS_n2 {
 							sode[3].ypos = (float)(DrawPts->disp_y / 5);
 						}
 
-						if (Cut < 7) {
+						if (Cut < 2) {
+							isNextreset = true;
+						}
+						else if (Cut < 7) {
 							Sel_AnimNum(Takion, 0);
-							Takion.get_anime(0).Update(true, 1.f);
+							Takion.get_anime(0).Update(false, 0.8f);
+							if (Cut == 6) {
+								isNextreset = true;
+							}
 						}
 						else if (Cut < 9) {
+							Takion.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
+							if (Takion.get_anime(0).per > 0) {
+								Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
+								cam_yure = 0.f;
+							}
+							else {
+								SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
+
+								Cut_Pic[Cut].Aim_camera.far_ = 80.f;
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+								Cut_Pic[Cut].cam_per = 0.975f;
+								cam_yure += 5.f / GetFPS();
+
+								easing_set(&Cut_Pic[Cut].Aim_camera.campos,
+									Cut_Pic[Cut].Aim_camera.camvec
+									+
+									VECTOR_ref::vget(
+										-cos(deg2rad(6.9))*sin(-deg2rad(180.f + 19.5f)),
+										sin(deg2rad(6.9)),
+										-cos(deg2rad(6.9))*cos(-deg2rad(180.f + 19.5f))
+									)*(27.0f + cam_yure)
+									+
+									VECTOR_ref::vget(
+										-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
+										-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
+										-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f),
+									0.9f);
+								easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(-0.5f + (float)(GetRand((int)(2.f * 0.5f) * 10)) / 10.f + cam_yure/50.f, 1.f, 0.f).Norm(), 0.95f);
+							}
+							SetSpeed_Effect(Effect::ef_reco, 1.05f);
 							Sel_AnimNum(Takion, 1);
 							Takion.get_anime(1).Update(true, 1.f);
 
 							Takion.get_anime(2).time = 30.f;
 						}
 						else if (Cut < 14) {
+							if (Takion.get_anime(1).per > 0) {
+								Takion.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+								Stop_Effect(Effect::ef_reco);
+							}
 							Sel_AnimNum(Takion, 2);
 
 							if (Cut <= 12) {
@@ -1346,6 +2299,7 @@ namespace FPS_n2 {
 
 								TakiOpac = 0.f;
 								CafeOpac = 0.f;
+								isfirst_14 = false;
 							}
 							else if (Cut < 20) {
 								draw_t = true;
@@ -1391,7 +2345,12 @@ namespace FPS_n2 {
 								spd_cafe = 0.45f;
 
 								if (Cut == 17) {
-									Cut_Pic[Cut].Aim_camera.camvec = Takion.frame(9);
+									easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
+										Takion.frame(9) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
+										0.975f);
+									if (!isfirst_14) {
+										Cut_Pic[Cut].Aim_camera.camvec = Takion.frame(9);
+									}
 									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
 									easing_set(&xradadd_r, xradadd, 0.975f);
 									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
@@ -1401,12 +2360,28 @@ namespace FPS_n2 {
 											-cos(deg2rad(-8.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc))
 										)*38.0f;
 									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-									Cut_Pic[Cut].cam_per = 0.f;
+									if (!isfirst_14) {
+										Cut_Pic[Cut].cam_per = 0.f;
+										isfirst_14 = true;
+									}
+									else {
+										Cut_Pic[Cut].cam_per = 0.975f;
+									}
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
 									radc += 12.5f / GetFPS();
 								}
 								else if (Cut == 18) {
-									Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8);
+									if (isfirst_14) {
+										Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8);
+										Cut_Pic[Cut].cam_per = 0.f;
+										isfirst_14 = false;
+									}
+									else {
+										easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
+											Cafe.frame(8) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
+											0.975f);
+										Cut_Pic[Cut].cam_per = 0.975f;
+									}
 									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
 									easing_set(&xradadd_r, xradadd, 0.975f);
 									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
@@ -1416,7 +2391,6 @@ namespace FPS_n2 {
 											-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*cos(-deg2rad(float(90 + 180 - 10) + radc))
 										)*34.0f;
 									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-									Cut_Pic[Cut].cam_per = 0.f;
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
 									radc += 12.5f / GetFPS();
 								}
@@ -1504,8 +2478,13 @@ namespace FPS_n2 {
 							Takion3_3.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
 							Takion3_4.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -100, 0)));
 
-
-							Sel_AnimNum(goldship, 0);
+							if (news_p[0].yns_pos < DrawPts->disp_y / 2) {
+								Sel_AnimNum(goldship, 0);
+							}
+							else {
+								Sel_AnimNum(goldship, 1);
+								goldship.get_anime(1).Update(true, 0.45f);
+							}
 							goldship.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
 							Sel_AnimNum(speweek, 0);
 							speweek.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
@@ -1581,6 +2560,7 @@ namespace FPS_n2 {
 								radc2 += 12.5f / GetFPS();
 							}
 							Gate_Xpos = -20.f;
+							camzb_28 = 1.f;
 						}
 						else if (Cut < 28) {
 							Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
@@ -1589,6 +2569,16 @@ namespace FPS_n2 {
 							}
 							isNextreset = true;
 							karen.get_anime(0).time = 6.25f;
+							if (camzb_28 == 1.f) {
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
+								Cut_Pic[Cut].cam_per = 0.f;
+							}
+							else {
+								float pp = 7.f;
+								easing_set(&rand_vp, VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f), 0.9f);
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f) + rand_vp;
+								Cut_Pic[Cut].cam_per = 0.95f;
+							}
 							camzb_28 = 0.f;
 							ship_z = -5.f;
 							ship_zadd = 0.f;
@@ -1775,12 +2765,24 @@ namespace FPS_n2 {
 
 							draw_t = false;
 							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
+
+							float pp = 10.f;
+							if (camzb_28 < -9.5f) {
+								pp = 2.f;
+							}
+							if (camzb_28 <= -10.f) {
+								pp = 0.f;
+							}
+							rand_vp = VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f);
+
 							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
 								VECTOR_ref::vget(
 									-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
 									sin(deg2rad(0.f)),
 									-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
-								)*(20.f-camzb_28* 20.8f);
+								)*(20.f - camzb_28 * 20.8f) +
+								rand_vp;
+
 							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
 							easing_set(&camzb_41, 0.3f, 0.995f);
 							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
@@ -1803,12 +2805,20 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 43) {
 							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
+
+							float pp = 10.f;
+							if (camzb_28 > -5.f) {
+								pp = 2.f;
+							}
+							rand_vp = VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f);
+
 							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
 								VECTOR_ref::vget(
 									-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
 									sin(deg2rad(0.f)),
 									-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
-								)*(10.f - camzb_28 * 20.8f);
+								)*(10.f - camzb_28 * 20.8f) +
+								rand_vp;
 							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
 							easing_set(&camzb_41, 0.3f, 0.995f);
 							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
@@ -1842,6 +2852,7 @@ namespace FPS_n2 {
 							Cut_Pic[Cut].cam_per = 0.f;
 
 							camzb_28 += 40.f / GetFPS();
+							camyup = 0.f;
 						}
 						else if (Cut < 45) {
 							if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
@@ -1879,9 +2890,10 @@ namespace FPS_n2 {
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
 									VECTOR_ref::vget(
 										1,
-										-0.1f,
+										-0.1f-0.1f*camyup,
 										-0.13f
 									)*(1.f);
+								camyup += 1.f / GetFPS();
 								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
 								Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
 								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
@@ -2057,7 +3069,7 @@ namespace FPS_n2 {
 
 							Sel_AnimNum(karen, 2);
 							karen.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							karen.get_anime(2).Update(false, 1.55f);
+							karen.get_anime(2).Update(false, 1.15f);
 
 							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
 							Cut_Pic[Cut].Aim_camera.camvec = karen.frame(10) + VECTOR_ref::vget(2.3f,0.f, 0.f);
@@ -2080,16 +3092,16 @@ namespace FPS_n2 {
 									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
 									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
 										VECTOR_ref::vget(
-											-10.f,
-											-8.5f,
+											-5.f,
+											-3.5f,
 											-20.f
-										)*1.0f;
+										)*2.0f;
 
 									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
 									Cut_Pic[Cut].Aim_camera.near_ = 1.f;
-									Cut_Pic[Cut].Aim_camera.far_ = 300.f;
-									Cut_Pic[Cut].cam_per = 0.975f;
+									Cut_Pic[Cut].Aim_camera.far_ = 5000.f;
+									Cut_Pic[Cut].cam_per = 0.9975f;
 								}
 								else {
 									if (Cafe.get_anime(3).time > 15.f) {
@@ -2103,48 +3115,48 @@ namespace FPS_n2 {
 
 								mobu_b[0].get_anime(4).time = (float)GetRand(100) / 10.f;
 
-								mobu_b[2].get_anime(4).time = (float)GetRand(100) / 10.f;;
+								mobu_b[2].get_anime(4).time = (float)GetRand(100) / 10.f;
 
-								doto.get_anime(0).time = (float)GetRand(100) / 10.f;;
+								doto.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2000.f - 5.f)));
+								doto.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
 
-								Cafe.get_anime(4).time = (float)GetRand(100) / 10.f;;
+								Cafe.get_anime(4).time = (float)GetRand(100) / 10.f;
 
-								mobu_b[1].get_anime(4).time = (float)GetRand(100) / 10.f;;
+								mobu_b[1].get_anime(4).time = (float)GetRand(100) / 10.f;
 
-								opera.get_anime(0).time = (float)GetRand(100) / 10.f;;
+								opera.get_anime(0).time = (float)GetRand(100) / 10.f;
 
 							}
 						}
 						else if (Cut < 55) {
-							mobu_b[0].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2233.f - 65.f)));
+							mobu_b[0].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
 							Sel_AnimNum(mobu_b[0], 4);
-							mobu_b[0].get_anime(4).Update(false, 0.37f*0.3f);
+							mobu_b[0].get_anime(4).Update(false, 0.84f);
 
-							mobu_b[2].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2233.f - 50.f)));
+							mobu_b[2].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(20.f, 0.f, -2000.f - 40.f)));
 							Sel_AnimNum(mobu_b[2], 4);
-							mobu_b[2].get_anime(4).Update(false, 0.43f*0.3f);
+							mobu_b[2].get_anime(4).Update(false, 0.8f);
 
-							doto.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2233.f - 40.f)));
 							Sel_AnimNum(doto, 0);
-							doto.get_anime(0).Update(false, 0.42f*0.3f);
+							doto.get_anime(0).Update(false, 0.82f);
 
-							Cafe.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2233.f - 30.f)));
+							Cafe.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 30.f)));
 							Sel_AnimNum(Cafe, 4);
-							Cafe.get_anime(4).Update(false, 0.38f*0.3f);
+							Cafe.get_anime(4).Update(false, 0.85f);
 
-							mobu_b[1].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-5.f, 0.f, -2233.f - 15.f)));
+							mobu_b[1].SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 0.f, -2000.f - 5.f)));
 							Sel_AnimNum(mobu_b[1], 4);
-							mobu_b[1].get_anime(4).Update(false, 0.4f*0.3f);
+							mobu_b[1].get_anime(4).Update(false, 0.82f);
 
-							opera.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2233.f + 10.f)));
+							opera.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2000.f + 10.f)));
 							Sel_AnimNum(opera, 0);
-							opera.get_anime(0).Update(false, 0.35f*0.3f);
+							opera.get_anime(0).Update(false, 0.84f);
 
 							if (draw_opr) {
-								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 0.f, -1.f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(7+GetRand(3)) + VECTOR_ref::vget(0.f, 2.f, -30.f);
 							}
 							else {
-								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 0.f, -30.f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cafe.frame(8) + VECTOR_ref::vget(0.f, 2.f, -30.f);
 							}
 							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
 								VECTOR_ref::vget(
@@ -2154,12 +3166,12 @@ namespace FPS_n2 {
 								)*608.0f;
 
 							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(2);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(1.5);
 							Cut_Pic[Cut].Aim_camera.near_ = 300.f;
 							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
 
 							if (draw_opr) {
-								Cut_Pic[Cut].cam_per = 0.95f;
+								Cut_Pic[Cut].cam_per = 0.975f;
 							}
 							else {
 								Cut_Pic[Cut].cam_per = 0.f;
@@ -2258,9 +3270,8 @@ namespace FPS_n2 {
 							radc2 += 12.5f / GetFPS();
 
 							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(0 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							Sel_AnimNum(Takion, 2);
-							Takion.get_anime(2).time = 0.f;
-							Takion.get_anime(2).Update(false, 0.0f);
+							Sel_AnimNum(Takion, 15);
+							Takion.get_anime(15).Update(false, 0.2f);
 							isNextreset = true;
 						}
 						else if (Cut < 58) {
@@ -2276,16 +3287,15 @@ namespace FPS_n2 {
 								)*88.0f;
 
 							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(8);
 							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
 							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
 							Cut_Pic[Cut].cam_per = 0.f;
 							radc2 += 12.5f / GetFPS();
 
 							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							Sel_AnimNum(Takion, 2);
-							Takion.get_anime(2).time = 0.f;
-							Takion.get_anime(2).Update(false, 0.0f);
+							Sel_AnimNum(Takion, 15);
+							Takion.get_anime(15).Update(false, 0.75f);
 							Box_ALPHA = 0.f;
 						}
 						else if (Cut < 59) {
@@ -2301,30 +3311,48 @@ namespace FPS_n2 {
 								)*88.0f;
 
 							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
+							Cut_Pic[Cut].Aim_camera.fov = deg2rad(8);
 							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
 							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
 							Cut_Pic[Cut].cam_per = 0.f;
 							radc2 += 12.5f / GetFPS();
 
+							Takion.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+							Sel_AnimNum(Takion, 15);
+							Takion.get_anime(15).Update(false, 0.75f);
+
 							if (Box_ALPHA < 1.f) {
 								Box_ALPHA += 1.f / GetFPS();
+								per_logo = 100.f;
 							}
 							else {
 								Box_ALPHA = 1.f;
 								if (per_logo > 0.f) {
 									per_logo -= 100.f / GetFPS()/1.5f;
+									easing_set(&xpos_rand, xpos_rand2, 0.975f);
+									easing_set(&ypos_rand, ypos_rand2, 0.975f);
+									float per_pow = per_logo / 100.f;
+									easing_set(&size_rand, -((float)(0.1f) * per_pow) + (float)(GetRand((int)((float)(0.1f) * per_pow) * 2 * 100)) / 100.f, 0.975f);
+									easing_set(&xpos_rand2, -((float)(y_r(1000)) * per_pow) + (float)(GetRand((int)((float)(y_r(1000)) * per_pow) * 2 * 100)) / 100.f, 0.8f);
+									easing_set(&ypos_rand2, -((float)(y_r(1000)) * per_pow) + (float)(GetRand((int)((float)(y_r(1000)) * per_pow) * 2 * 100)) / 100.f, 0.8f);
 								}
 								else {
 									per_logo = 0.f;
+									easing_set(&size_rand, 0.f, 0.95f);
+									easing_set(&xpos_rand, 0.f, 0.95f);
+									easing_set(&ypos_rand, 0.f, 0.95f);
 								}
 							}
 
 							for (auto& sl : sode_last) {
-								easing_set(&sl.xpos, sl.xpos_base, 0.945f);
-								easing_set(&sl.ypos, sl.ypos_base, 0.925f);
-								easing_set(&sl.rad, sl.rad_base, 0.925f);
+								easing_set(&sl.xpos, sl.xpos_base + y_r(sl.xpos_rand), 0.945f);
+								easing_set(&sl.ypos, sl.ypos_base + y_r(sl.ypos_rand), 0.925f);
+								easing_set(&sl.rad, sl.rad_base + sl.rad_rand, 0.925f);
+								easing_set(&sl.xpos_rand, deg2rad(-50.f + (float)(GetRand(50 * 2 * 100)) / 100.f), 0.95f);
+								easing_set(&sl.ypos_rand, deg2rad(-50.f + (float)(GetRand(50 * 2 * 100)) / 100.f), 0.95f);
+								easing_set(&sl.rad_rand, deg2rad(-10.f + (float)(GetRand(10 * 2 * 100)) / 100.f), 0.95f);
 							}
+
 						}
 						easing_set(&camera_main.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
@@ -2414,6 +3442,12 @@ namespace FPS_n2 {
 								if (draw_kr) {
 									karen.PhysicsResetState();
 								}
+								if (draw_opr) {
+									opera.PhysicsResetState();
+								}
+								if (draw_dto) {
+									doto.PhysicsResetState();
+								}
 							}
 							else {
 								if (draw_t) {
@@ -2433,6 +3467,12 @@ namespace FPS_n2 {
 								}
 								if (draw_kr) {
 									karen.PhysicsCalculation(30.f / GetFPS());
+								}
+								if (draw_opr) {
+									opera.PhysicsCalculation(30.f / GetFPS());
+								}
+								if (draw_dto) {
+									doto.PhysicsCalculation(30.f / GetFPS());
 								}
 							}
 						}
@@ -2454,11 +3494,20 @@ namespace FPS_n2 {
 
 				for (auto& p : Cut_Pic) { p.handle.Dispose(); }
 				Cut_Pic.clear();
-				BGM.Dispose();
+				//BGM.Dispose();
 				movie.Dispose();
 			}
 			void UI_Draw(void) noexcept  override {
-				printfDx("Cut : %d\n", Cut);
+				//printfDx("Cut : %d\n", Cut);
+
+
+				const auto NowTime = GetNowHiPerformanceCount() - BaseTime;
+				for (auto& t : Texts) {
+					if (NowTime > t.START_TIME && NowTime < t.END_TIME) {
+						Fonts.Get(t.size).Get_handle().DrawString(t.xpos, t.ypos, t.str, GetColor(255, 255, 255));
+					}
+				}
+				//
 			}
 			void BG_Draw(void) noexcept override {
 				if (!Time_Over()) {
@@ -2553,7 +3602,15 @@ namespace FPS_n2 {
 					SetFogStartEnd(10, 60);
 					SetFogDensity(0.01f);
 				}
-				if ((Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
+				if (Cut == 2 || Cut == 3 || Cut == 4 || Cut == 6 || Cut == 7 || Cut == 8) {
+					SetFogEnable(TRUE);
+					SetFogColor(64, 64, 64);
+					SetFogStartEnd(10, 500);
+					SetFogDensity(0.01f);
+					Board.DrawModel();
+				}
+
+				if (Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
 					SetFogEnable(TRUE);
 					SetFogColor(128, 128, 128);
 					SetFogStartEnd(10, 300);
@@ -2644,6 +3701,25 @@ namespace FPS_n2 {
 				sode[2].handle.DrawExtendGraph((int)(sode[2].xpos), (int)(sode[2].ypos), DrawPts->disp_x + (int)(sode[2].xpos), DrawPts->disp_y + (int)(sode[2].ypos), true);
 				sode[1].handle.DrawExtendGraph((int)(sode[1].xpos), (int)(sode[1].ypos), DrawPts->disp_x + (int)(sode[1].xpos), DrawPts->disp_y + (int)(sode[1].ypos), true);
 				sode[0].handle.DrawExtendGraph((int)(sode[0].xpos), (int)(sode[0].ypos), DrawPts->disp_x + (int)(sode[0].xpos), DrawPts->disp_y + (int)(sode[0].ypos), true);
+
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(196.f));
+				for (auto& sl : First2) {
+					sl.handle.DrawRotaGraph((int)(sl.xpos), (int)(sl.ypos), (float)(DrawPts->disp_y) / 540.f*0.5f, sl.rad, true);
+				}
+
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				for (auto& sl : First) {
+					sl.handle.DrawRotaGraph((int)(sl.xpos), (int)(sl.ypos), (float)(DrawPts->disp_y) / 540.f*0.5f, sl.rad, true);
+				}
+
+				for (auto& sl : First3) {
+					easing_set(&sl.Alpha_R, sl.Alpha, 0.9f);
+					if (sl.Alpha_R > 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*sl.Alpha_R));
+						sl.handle.DrawRotaGraph((int)(sl.xpos), (int)(sl.ypos), (float)(DrawPts->disp_y) / 540.f*0.9f*sl.Scale, sl.rad, true);
+					}
+				}
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				{
 					if (Box_ALPHA != 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
@@ -2652,18 +3728,23 @@ namespace FPS_n2 {
 					}
 					if (Box_ALPHA != 0.f) {
 						for (auto& sl : sode_last) {
+							int per_b = 127 + (int)(128.f* (&sl - &sode_last.front()) / sode_last.size());
+							SetDrawBright(per_b, per_b, per_b);
 							sl.handle.DrawRotaGraph((int)(sl.xpos), (int)(sl.ypos), (float)(DrawPts->disp_y) / 540.f, sl.rad, true);
 						}
+						SetDrawBright(255, 255, 255);
 					}
 					if ((int)per_logo <= GetRand(99)) {
-						Logo.DrawRotaGraph(DrawPts->disp_x / 2, DrawPts->disp_y / 2, (float)(DrawPts->disp_y) / 540.f / 2.f, 0.f, true);
+						Logo.DrawRotaGraph(DrawPts->disp_x / 2 + (int)xpos_rand, DrawPts->disp_y / 2 + (int)ypos_rand, (float)(DrawPts->disp_y) / 540.f / 2.f*(1.f + size_rand), 0.f, true);
 					}
 				}
+				/*
 				if (Line_ALPHA != 0.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Line_ALPHA));
-					DrawLine(y_r(600) - y_r(288), -y_r(162), y_r(600) + (int)((float)(y_r(720))*Line_time), y_r(0) + (int)((float)(y_r(1080))*Line_time), GetColor(255, 255, 255), (int)Thickness);
+					DrawLine(y_r(600) - y_r(288*4), -y_r(162 * 4), y_r(600) + (int)((float)(y_r(720))*Line_time), y_r(0) + (int)((float)(y_r(1080))*Line_time), GetColor(255, 255, 255), (int)Thickness);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
+				*/
 			}
 			void Item_Draw(void) noexcept override {
 				TEMPSCENE::Item_Draw();
@@ -2682,7 +3763,7 @@ namespace FPS_n2 {
 			void LAST_Draw(void) noexcept override {
 				int xxx_m = DrawPts->disp_x * 3 / 4 - y_r(200);
 				int yyy_m = DrawPts->disp_y * 3 / 4;
-				movie.DrawExtendGraph(xxx_m, yyy_m, DrawPts->disp_x / 4 + xxx_m, DrawPts->disp_y / 4 + yyy_m, FALSE);
+				//movie.DrawExtendGraph(xxx_m, yyy_m, DrawPts->disp_x / 4 + xxx_m, DrawPts->disp_y / 4 + yyy_m, FALSE);
 			}
 		};
 	};

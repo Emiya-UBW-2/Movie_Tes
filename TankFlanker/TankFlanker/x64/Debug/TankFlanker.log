@@ -109,6 +109,16 @@ c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1623
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2078): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2079): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2082): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2083): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2134): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2135): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2138): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2139): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(3721): warning C4189: 'yyy_m': ローカル変数が初期化されましたが、参照されていません
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(3720): warning C4189: 'xxx_m': ローカル変数が初期化されましたが、参照されていません
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
