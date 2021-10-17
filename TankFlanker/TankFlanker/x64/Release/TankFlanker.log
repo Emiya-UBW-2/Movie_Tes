@@ -109,16 +109,6 @@ c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1623
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2079): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2080): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2083): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2084): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2135): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2136): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2139): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(2140): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(3719): warning C4189: 'yyy_m': ローカル変数が初期化されましたが、参照されていません
-c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(3718): warning C4189: 'xxx_m': ローカル変数が初期化されましたが、参照されていません
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
@@ -128,9 +118,9 @@ c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(156): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(171): warning C4505: 'StringToWString': 参照されていないローカル関数は削除されました。
   コード生成しています。
-  17 of 1709 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
-    4 functions were new in current compilation
-    18 functions had inline decision re-evaluated but remain unchanged
+  3 of 1619 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    2 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
 EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj) : warning LNK4099: PDB 'EffekseerForDXLib_vs2017.pdb' が 'EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj)' で、または 'C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Release\EffekseerForDXLib_vs2017.pdb' に見つかりません。デバッグ情報がないものとして、オブジェクトにリンクします。
   TankFlanker.vcxproj -> C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Release\FPS_n2.exe
