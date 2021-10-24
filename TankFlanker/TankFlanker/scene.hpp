@@ -111,16 +111,13 @@ namespace FPS_n2 {
 		//
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			MV1 Gate;
-			MV1 Board;
-			MV1 Map;
-			MV1 Map_school;
-			MV1 sky;						//空
-			MV1 Ship;
-			GraphHandle sun_pic;			//太陽
-			VECTOR_ref sun_pos;				//太陽
-
 			class Model {
+			private:
+				void Sel_AnimNum(MV1&model, int sel) {
+					for (auto& anim_t : model.get_anime()) {
+						model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? 1.f : 0.f;
+					}
+				}
 			public:
 				bool isBase = true;
 				size_t numBase = 0;
@@ -132,6 +129,10 @@ namespace FPS_n2 {
 				bool isDraw = true;
 				float OpacityRate = 1.f;
 				int Anim_Sel = 0;
+				void UpdateAnim(int ID, bool isloop, float speed) {
+					Sel_AnimNum(this->obj, ID);
+					this->obj.get_anime(ID).Update(isloop, speed);
+				}
 				void Update() {
 					MV1SetOpacityRate(this->obj.get(), this->OpacityRate);
 					if (this->isDraw) {
@@ -154,7 +155,6 @@ namespace FPS_n2 {
 					}
 				}
 			};
-
 			class ModelControl {
 				std::vector<Model> model;
 				size_t Max = 0;
@@ -207,32 +207,10 @@ namespace FPS_n2 {
 					}
 				}
 			};
-			ModelControl models;
-
-			std::string Tachyon = "data/umamusume/Tachyon/model.mv1";
-			std::string Cafe = "data/umamusume/Cafe/model.mv1";
-			std::string Scarlet = "data/umamusume/scarlet/model.mv1";
-			std::string Vodka = "data/umamusume/vodka/model.mv1";
-			std::string GoldShip = "data/umamusume/gold/model.mv1";
-			std::string Speweek = "data/umamusume/spe/model.mv1";
-			std::string Teio = "data/umamusume/teio/model.mv1";
-			std::string Macin = "data/umamusume/mac/model.mv1";
-			std::string Karen = "data/umamusume/karen/model.mv1";
-			std::string Trainer = "data/umamusume/trainer/model.mv1";
-			std::string Opera = "data/umamusume/opera/model.mv1";
-			std::string Doto = "data/umamusume/doto/model.mv1";
-			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
-
-			std::vector<float> mobu_b_run;
-			std::vector<float> mobu_b_runrange;
-
-			std::vector<Model> Newspaper;
-
 			class Cut_Info {
 			public:
 				cam_info Aim_camera;
 				float cam_per = 0.0f;
-				GraphHandle handle;
 				LONGLONG TIME = 0;
 
 				Cut_Info() {
@@ -242,8 +220,11 @@ namespace FPS_n2 {
 					Aim_camera.set_cam_info(deg2rad(15), 1.0f, 300.f);
 					cam_per = 0.95f;
 				}
-			};
 
+				void Dispose() {
+
+				}
+			};
 			class Cut_tex {
 			public:
 				int xpos = 0;
@@ -270,17 +251,6 @@ namespace FPS_n2 {
 					this->END_TIME = StartF + ContiF;;
 				}
 			};
-
-			//データ
-			SoundHandle BGM;
-			size_t Cut = 0;
-			std::vector<Cut_Info> Cut_Pic;
-			std::vector<Cut_tex> Texts;
-			LONGLONG BaseTime = 0;
-			//GraphHandle movie;
-
-			GraphHandle face;
-
 			class GraphControl {
 			public:
 				int xsize = -1;
@@ -332,6 +302,37 @@ namespace FPS_n2 {
 					}
 				}
 			};
+		private:
+			std::string Tachyon = "data/umamusume/Tachyon/model.mv1";
+			std::string Cafe = "data/umamusume/Cafe/model.mv1";
+			std::string Scarlet = "data/umamusume/scarlet/model.mv1";
+			std::string Vodka = "data/umamusume/vodka/model.mv1";
+			std::string GoldShip = "data/umamusume/gold/model.mv1";
+			std::string Speweek = "data/umamusume/spe/model.mv1";
+			std::string Teio = "data/umamusume/teio/model.mv1";
+			std::string Macin = "data/umamusume/mac/model.mv1";
+			std::string Karen = "data/umamusume/karen/model.mv1";
+			std::string Trainer = "data/umamusume/trainer/model.mv1";
+			std::string Opera = "data/umamusume/opera/model.mv1";
+			std::string Doto = "data/umamusume/doto/model.mv1";
+			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
+
+			Model Gate;
+			Model Board;
+			Model Map;
+			Model Map_school;
+			Model sky;						//空
+			Model Ship;
+			GraphHandle sun_pic;			//太陽
+			VECTOR_ref sun_pos;				//太陽
+			GraphHandle face;
+
+			ModelControl models;
+
+			std::vector<float> mobu_b_run;
+			std::vector<float> mobu_b_runrange;
+
+			std::vector<Model> Newspaper;
 			std::vector<GraphControl> news_p;
 			std::vector<GraphControl> sode;
 			std::vector<GraphControl> anim;
@@ -340,14 +341,35 @@ namespace FPS_n2 {
 			std::vector<GraphControl> First2;
 			std::vector<GraphControl> First3;
 			GraphControl Logo;
-
 			float per_logo = 1.f;
+			//データ
+			SoundHandle BGM;
+			size_t Cut = 0;
+			std::vector<Cut_Info> Cut_Pic;
+			std::vector<Cut_tex> Texts;
+			LONGLONG BaseTime = 0;
+			//GraphHandle movie;
+			bool reset_p = true;
+			bool isNextreset = true;
+
+			float radc = 0.f;
+			float radc2 = 0.f;
+			float xradadd_r = 0.f;
+			float spd_takion = 0.6f;
+			bool return_walk = false;
+			float Gate_Xpos = 0;
+			float Box_ALPHA = 0.f;
+			float camzb_28 = 0.f;
+			float camyup = 0.f;
+			float camzb_41 = 0.f;
+			float bright_43 = 0.f;
+			float ship_z = 0.f;
+			float ship_zadd = 0.f;
+			bool nex_cut = false;
+			float cam_yure = 0.f;
+			bool isfirst_14 = false;
+			VECTOR_ref rand_vp;
 		private:
-			void Sel_AnimNum(MV1&model, int sel) {
-				for (auto& anim_t : model.get_anime()) {
-					model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? 1.f : 0.f;
-				}
-			}
 			bool Time_Over() { return Cut >= Cut_Pic.size(); }
 			auto GetCutTime() { return Cut_Pic[Cut%Cut_Pic.size()].TIME; }
 			void AddCutNum() {
@@ -360,6 +382,7 @@ namespace FPS_n2 {
 				//
 				SetUseASyncLoadFlag(TRUE);
 				{
+					//3D
 					{
 						models.Load_onAnime(Tachyon);//origin
 						models.Load_onAnime(Tachyon);//1
@@ -396,13 +419,21 @@ namespace FPS_n2 {
 							}
 						}
 
+						MV1::LoadonAnime("data/map/model_gate.mv1", &Gate.obj);
+						MV1::Load("data/map/model.mv1", &Map.obj, true);
+						MV1::Load("data/board/model.mv1", &Board.obj, true);
+						MV1::Load("data/ship/model.mv1", &Ship.obj, true);				//空
+						MV1::Load("data/school/model.mv1", &Map_school.obj, true);
+
 						Newspaper.resize(12);
 						MV1::Load("data/paper/news.mv1", &(Newspaper[0].obj), false);
 						for (int i = 1; i < 12; i++) {
 							Newspaper[i].obj = Newspaper[0].obj.Duplicate();
 						}
-
-
+						MV1::Load("data/sky/model.mv1", &sky.obj, true);				//空
+					}
+					//2D
+					{
 						this->sun_pic = GraphHandle::Load("data/sun.png");					/*sun*/
 						face = GraphHandle::Load("data/Cut.png");
 						for (int i = 0; i < 10; i++) {
@@ -411,14 +442,6 @@ namespace FPS_n2 {
 							news_p.back().Alpha = (float)(i + 1) / 10.f;
 							news_p.back().Scale = (float)DrawPts->disp_x / (float)news_p.back().xsize*1.5f;
 						}
-						MV1::LoadonAnime("data/map/model_gate.mv1", &Gate);
-						MV1::Load("data/map/model.mv1", &Map, true);
-						MV1::Load("data/board/model.mv1", &Board, true);
-						MV1::Load("data/school/model.mv1", &Map_school, true);
-						MV1::Load("data/sky/model.mv1", &sky, true);				//空
-						MV1::Load("data/ship/model.mv1", &Ship, true);				//空
-					}
-					{
 						sode.resize(sode.size() + 1);
 						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/first_sode/1.png");
 						sode.resize(sode.size() + 1);
@@ -436,10 +459,8 @@ namespace FPS_n2 {
 						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/second_sode/1.png");
 						sode.resize(sode.size() + 1);
 						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/second_sode/2.png");
-					}
-					Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0.f, "data/logo.png");
-					Logo.Alpha = 1.f;
-					{
+						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0.f, "data/logo.png");
+						Logo.Alpha = 1.f;
 						for (int i = 0; i < 10; i++) {
 							sode_last.resize(sode_last.size() + 1);
 							sode_last.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, "data/second_sode/1.png");
@@ -459,8 +480,6 @@ namespace FPS_n2 {
 							sl.ypos = (float)(DrawPts->disp_y / 2) + (sl.ypos_base - (float)(DrawPts->disp_y / 2)) * 10.f;
 							sl.rad = sl.rad_base + deg2rad(90);
 						}
-					}
-					{
 						for (int i = 0; i < 3; i++) {
 							First.resize(First.size() + 1);
 							First.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, "data/FIRST.png");
@@ -487,32 +506,49 @@ namespace FPS_n2 {
 						First3[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
 						First3[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
 						First3[2].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f);
+						anim.resize(anim.size() + 1);
+						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, "data/anime/0.png");
+						anim.resize(anim.size() + 1);
+						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, "data/anime/1.png");
 					}
-					anim.resize(anim.size() + 1);
-					anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, "data/anime/0.png");
-					anim.resize(anim.size() + 1);
-					anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, "data/anime/1.png");
 				}
 				SetUseASyncLoadFlag(FALSE);
-				Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
-				Map.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
-				Board.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
-				Map_school.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
+				//
 				models.Set();
+				Gate.isDraw = false;
+				Map.isDraw = false;
+				Board.isDraw = false;
+				Map_school.isDraw = false;
+				Ship.isDraw = false;
+				//
 				models.Get(Tachyon, 0)->isDraw = true;
+				Gate.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+				Map.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
+				Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+				Map_school.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
 				//
 				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
 				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
 				camera_main.camup = VECTOR_ref::up();
 				camera_main.set_cam_info(deg2rad(15), 1.0f, 200.f);
 			}
+			void Common_Draw(void) {
+				Map_school.Draw();
+				models.Draw();
+				Gate.Draw();
+				if (Cut == 20) {
+					for (auto&n : Newspaper) {
+						n.Draw();
+					}
+				}
+			}
 		public:
 			void Set(void) noexcept override {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
 				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
-				Cut = 40;
-				//Cut = 0;
+				Cut = 39;
+				Cut = 0;
 				BGM = SoundHandle::Load("data/sound2.wav");
 				/*
 				movie = GraphHandle::Load("data/base_movie.mp4");
@@ -523,7 +559,6 @@ namespace FPS_n2 {
 				{
 					//羽広がり前
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/1.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 0.450f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
@@ -533,7 +568,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//羽広がり中
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/2.bmp");//2
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 2.614f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
@@ -543,63 +577,38 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//胸
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/3.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.021f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.f, 13.82f, -2.08f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(20.1))*sin(-deg2rad(22.9)),
-							sin(deg2rad(20.1)),
-							-cos(deg2rad(20.1))*cos(-deg2rad(22.9))
-						)*10.3f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(20.1))*sin(-deg2rad(22.9)), sin(deg2rad(20.1)), -cos(deg2rad(20.1))*cos(-deg2rad(22.9)))*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//背中
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/4.bmp");//2
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.258f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-2.57f, 10.04f, 0.31f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(6.3))*sin(-deg2rad(225.7)),
-							sin(deg2rad(6.3)),
-							-cos(deg2rad(6.3))*cos(-deg2rad(225.7))
-						)*10.3f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.3))*sin(-deg2rad(225.7)), sin(deg2rad(6.3)), -cos(deg2rad(6.3))*cos(-deg2rad(225.7)))*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//右足→
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/5.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.512f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.85f, 16.69f, 0.61f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(15.5))*sin(-deg2rad(202.8)),
-							sin(deg2rad(15.5)),
-							-cos(deg2rad(15.5))*cos(-deg2rad(202.8))
-						)*10.3f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(15.5))*sin(-deg2rad(202.8)), sin(deg2rad(15.5)), -cos(deg2rad(15.5))*cos(-deg2rad(202.8)))*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//頭←
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/6.bmp");//2
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.724f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.54f, 16.05f, -1.28f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(8.6))*sin(-deg2rad(73.9)),
-							sin(deg2rad(8.6)),
-							-cos(deg2rad(8.6))*cos(-deg2rad(73.9))
-						)*10.3f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(8.6))*sin(-deg2rad(73.9)), sin(deg2rad(8.6)), -cos(deg2rad(8.6))*cos(-deg2rad(73.9)))*10.3f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.far_ = 20.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//羽切るはじめ
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/7.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 4.310f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
@@ -609,71 +618,49 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//羽切る終わり
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/8.bmp");//2
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 5.086f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)),
-							sin(deg2rad(6.9)),
-							-cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5))
-						)*27.0f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.far_ = 40.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//斬新
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/9.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 6.448f);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)),
-							sin(deg2rad(6.9)),
-							-cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5))
-						)*27.0f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.far_ = 40.f;
 					Cut_Pic.back().cam_per = 0.f;
 					//＜＞
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/10.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.096f);
-
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
 					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
-
 					//顔
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/11.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.288f);
-
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-4.494195f, 12.919953f, -28.361502f);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.366895f, 16.169621f, -21.344687f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
 					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
-
 					//顔2
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/12.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.576f);
-
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.106448f, 3.030100f, -23.623045f);
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.044426f, 4.483082f, -26.842037f);
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
 					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					Cut_Pic.back().cam_per = 0.f;
-
 					//顔3
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/13.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.864f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(2.589150f, 10.542250f, -24.661646f);
@@ -685,7 +672,6 @@ namespace FPS_n2 {
 
 					//||
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/14.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 10.264f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
@@ -697,7 +683,6 @@ namespace FPS_n2 {
 
 					//バイク
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/15.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 13.410f);
 
 					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(-7.410444f, 11.652717f, 2.655200f);
@@ -709,7 +694,6 @@ namespace FPS_n2 {
 
 					//君が願うことなら
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/16.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 15.80f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
@@ -728,7 +712,6 @@ namespace FPS_n2 {
 
 					//全てが現
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/17.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 17.80f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
@@ -747,22 +730,18 @@ namespace FPS_n2 {
 
 					//実になるだろ(天道)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/18.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 19.0f);
 					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					//う　選
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/19.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 20.334f);
 					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					//ばれしもの(加賀美)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/20.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 21.452f);
 					Cut_Pic.back().Aim_camera.far_ = 3000.f;
 					//隕石
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/21.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 23.422f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 2, 0);
@@ -773,7 +752,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//ワーム①
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/22.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.252f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
@@ -784,7 +762,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//羽ワイプ
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/23.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.452f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
@@ -795,7 +772,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//ワーム②(暴そ)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/24.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 25.164f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
@@ -806,7 +782,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//東京タワー(うを始めて）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/25.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 26.526f);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, 0);
@@ -817,7 +792,6 @@ namespace FPS_n2 {
 
 					//バイク戻る(る　世界を元に戻すにはぁ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/26.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 29.790);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -30.985756f);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
@@ -833,7 +807,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//バンバイク①(もう　時か）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/27.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 31.670);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
@@ -851,7 +824,6 @@ namespace FPS_n2 {
 
 					//バンバイク②(んがな）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/28.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 32.52);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
@@ -868,7 +840,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//寝る女(い　Moving First ここ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/29.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 34.654);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
@@ -887,7 +858,6 @@ namespace FPS_n2 {
 
 					//雨加賀美(ろのぉ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/30.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 35.522);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
@@ -907,16 +877,10 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//雨加賀美②(時計）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/31.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.175);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-2.f,
-							12.f,
-							-6.f
-						)*2.0f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-2.f, 12.f, -6.f)*2.0f;
 
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
@@ -926,15 +890,9 @@ namespace FPS_n2 {
 
 					//雨加賀美②(時計）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/32.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.775);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-10.f,
-							0.f,
-							0.f
-						)*1.0f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-10.f, 0.f, 0.f)*1.0f;
 
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
@@ -943,15 +901,9 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//クロス(走らせ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/33.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.173);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							20.f,
-							0.f,
-							0.f
-						)*1.0f;
+					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(20.f, 0.f, 0.f)*1.0f;
 
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
 					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
@@ -960,7 +912,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//陽(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/34.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.986);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
@@ -976,7 +927,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//陰(明日の）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/35.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 40.11);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
@@ -992,7 +942,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//手①(その）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/36.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 41.226);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
@@ -1010,7 +959,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//手②(先へ）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/37.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.317);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
@@ -1028,12 +976,9 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//ガチャ(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/38.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.726);
 
-
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 19.f, 0.f);
-
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
 						VECTOR_ref::vget(
 							-cos(deg2rad(-25.5f))*sin(-deg2rad(float(90 - 50))),
@@ -1046,7 +991,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//握手(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/39.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.641);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
@@ -1064,7 +1008,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//オフ(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/40.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.971);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.23f, 18, 0.0);
@@ -1079,7 +1022,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//オフ2(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/41.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 44.311);
 
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0., 18, 0.);
@@ -1094,53 +1036,41 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//オフ離れる(君の存在）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/42.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 46.084);
 
 					Cut_Pic.back().cam_per = 0.f;
 					//オフ近付く(戦うた）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/43.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 47.122);
 					//オフガチャン(び　生ま）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/44.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 48.090);
 					//オフガチャン(れ変わる）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/45.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 49.761);
 					//爆発（目）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/46.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.024);
 					//ワイプ（に）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/47.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.447);
 					//爆発(見)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/48.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.830);
 					//ワイプ（える）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/49.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 51.601);
 					//走る(スピード超えてくモーショ)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/50.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 54.848);
 					//女(ン いったい自分以が)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/51.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 56.271);
 					//だばー(い　)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/52.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 57.462);
 					//雨加賀美(誰の)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/53.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 58.004);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
@@ -1155,7 +1085,6 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.f;
 					//雨加賀美(強さ　信じられる)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/54.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 60.290);
 					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
@@ -1169,25 +1098,19 @@ namespace FPS_n2 {
 					Cut_Pic.back().cam_per = 0.9f;
 					//クロックアップ(ぅ　高速の)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/55.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 61.440);
 					//クロックアップ(ぅ　高速の)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/55.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 62.775);
 					//遠い(ビジョン)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/56.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 64.074);
 					//近い(見逃すなぁ)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/57.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 66.165);
 					//覆う(付いてこれるなら)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().handle = GraphHandle::Load("data/cut/58.bmp");//1
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 70.592);
-
 				}
 				{}
 				{
@@ -1494,27 +1417,6 @@ namespace FPS_n2 {
 				//SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000);
 				HostpassPTs->Set_Bright(226, 226, 216);
 			}
-			bool reset_p = true;
-			bool isNextreset = true;
-
-			float radc = 0.f;
-			float radc2 = 0.f;
-			float xradadd_r = 0.f;
-			float spd_takion = 0.6f;
-			bool return_walk = false;
-			float Gate_Xpos = 0;
-			float Box_ALPHA = 0.f;
-			float camzb_28 = 0.f;
-			float camyup = 0.f;
-			float camzb_41 = 0.f;
-			float bright_43 = 0.f;
-			float ship_z = 0.f;
-			float ship_zadd = 0.f;
-			bool nex_cut = false;
-			float cam_yure = 0.f;
-			bool isfirst_14 = false;
-			VECTOR_ref rand_vp;
-
 			bool Update(void) noexcept override {
 				models.Get(Tachyon, 0)->PhysicsSpeed = 1.f;
 				models.Get(Cafe, 0)->PhysicsSpeed = 1.f;
@@ -1522,7 +1424,7 @@ namespace FPS_n2 {
 				const auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 				{
 					if (!Time_Over()) {
-						if (Cut <= 1) {
+						if (Cut < 2) {
 							if (NowTime > (LONGLONG)(1000000.f * 0.450f)) {
 								easing_set(&sode[0].xpos, 0.f, 0.9f);
 								easing_set(&sode[0].ypos, 0.f, 0.9f);
@@ -1568,82 +1470,81 @@ namespace FPS_n2 {
 									sl.Scale += 6.f / GetFPS();
 								}
 							}
-						}
-						if (Cut == 2) {
-							sode[0].xpos = (float)(DrawPts->disp_x / 5);
-							sode[0].ypos = (float)(DrawPts->disp_y);
-							sode[1].xpos = (float)(-DrawPts->disp_x / 5);
-							sode[1].ypos = (float)(DrawPts->disp_y);
-							sode[2].xpos = (float)(DrawPts->disp_x / 5);
-							sode[2].ypos = (float)(DrawPts->disp_y);
-							sode[3].xpos = (float)(-DrawPts->disp_x / 5);
-							sode[3].ypos = (float)(DrawPts->disp_y);
-							for (auto& sl : First) {
-								sl.xpos = (float)(DrawPts->disp_x * 2);
-								sl.ypos = (float)(DrawPts->disp_y * 2);
-							}
-							for (auto& sl : First2) {
-								sl.xpos = (float)(DrawPts->disp_x * 2);
-								sl.ypos = (float)(DrawPts->disp_y * 2);
-							}
-						}
-
-						if (Cut == 6) {
-							sode[0].xpos = 0.f;
-							sode[0].ypos = 0.f;
-							sode[1].xpos = 0.f;
-							sode[1].ypos = 0.f;
-							sode[2].xpos = 0.f;
-							sode[2].ypos = 0.f;
-							sode[3].xpos = 0.f;
-							sode[3].ypos = 0.f;
-							for (auto& sl : First) {
-								sl.Goto_Aim();
-							}
-							for (auto& sl : First2) {
-								sl.Goto_Aim();
-							}
-						}
-						if (Cut == 7) {
-							easing_set(&sode[0].xpos, (float)(DrawPts->disp_x), 0.9f);
-							easing_set(&sode[0].ypos, (float)(DrawPts->disp_y / 5), 0.9f);
-							easing_set(&sode[1].xpos, (float)(-DrawPts->disp_x), 0.875f);
-							easing_set(&sode[1].ypos, (float)(DrawPts->disp_y / 5), 0.875f);
-							easing_set(&sode[2].xpos, (float)(DrawPts->disp_x), 0.85f);
-							easing_set(&sode[2].ypos, (float)(DrawPts->disp_y / 5), 0.85f);
-							easing_set(&sode[3].xpos, (float)(-DrawPts->disp_x), 0.825f);
-							easing_set(&sode[3].ypos, (float)(DrawPts->disp_y / 5), 0.825f);
-							for (auto& sl : First) {
-								sl.xpos = (float)(DrawPts->disp_x * 2);
-								sl.ypos = (float)(DrawPts->disp_y * 2);
-							}
-							for (auto& sl : First2) {
-								sl.xpos = (float)(DrawPts->disp_x * 2);
-								sl.ypos = (float)(DrawPts->disp_y * 2);
-							}
-						}
-						if (Cut == 8) {
-							sode[0].xpos = (float)(DrawPts->disp_x);
-							sode[0].ypos = (float)(DrawPts->disp_y / 5);
-							sode[1].xpos = (float)(-DrawPts->disp_x);
-							sode[1].ypos = (float)(DrawPts->disp_y / 5);
-							sode[2].xpos = (float)(DrawPts->disp_x);
-							sode[2].ypos = (float)(DrawPts->disp_y / 5);
-							sode[3].xpos = (float)(-DrawPts->disp_x);
-							sode[3].ypos = (float)(DrawPts->disp_y / 5);
-						}
-
-						if (Cut < 2) {
 							isNextreset = true;
 						}
 						else if (Cut < 7) {
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 0);
-							models.Get(Tachyon, 0)->obj.get_anime(0).Update(false, 0.8f);
-							if (Cut == 6) {
-								isNextreset = true;
+							if (Cut == 2) {
+								sode[0].xpos = (float)(DrawPts->disp_x / 5);
+								sode[0].ypos = (float)(DrawPts->disp_y);
+								sode[1].xpos = (float)(-DrawPts->disp_x / 5);
+								sode[1].ypos = (float)(DrawPts->disp_y);
+								sode[2].xpos = (float)(DrawPts->disp_x / 5);
+								sode[2].ypos = (float)(DrawPts->disp_y);
+								sode[3].xpos = (float)(-DrawPts->disp_x / 5);
+								sode[3].ypos = (float)(DrawPts->disp_y);
+								for (auto& sl : First) {
+									sl.xpos = (float)(DrawPts->disp_x * 2);
+									sl.ypos = (float)(DrawPts->disp_y * 2);
+								}
+								for (auto& sl : First2) {
+									sl.xpos = (float)(DrawPts->disp_x * 2);
+									sl.ypos = (float)(DrawPts->disp_y * 2);
+								}
+								Board.isDraw = true;
 							}
+							if (Cut == 5) {
+								Board.isDraw = false;
+							}
+							if (Cut == 6) {
+								sode[0].xpos = 0.f;
+								sode[0].ypos = 0.f;
+								sode[1].xpos = 0.f;
+								sode[1].ypos = 0.f;
+								sode[2].xpos = 0.f;
+								sode[2].ypos = 0.f;
+								sode[3].xpos = 0.f;
+								sode[3].ypos = 0.f;
+								for (auto& sl : First) {
+									sl.Goto_Aim();
+								}
+								for (auto& sl : First2) {
+									sl.Goto_Aim();
+								}
+								isNextreset = true;
+								Board.isDraw = true;
+							}
+							models.Get(Tachyon, 0)->UpdateAnim(0, false, 0.8f);
 						}
 						else if (Cut < 9) {
+							if (Cut == 7) {
+								easing_set(&sode[0].xpos, (float)(DrawPts->disp_x), 0.9f);
+								easing_set(&sode[0].ypos, (float)(DrawPts->disp_y / 5), 0.9f);
+								easing_set(&sode[1].xpos, (float)(-DrawPts->disp_x), 0.875f);
+								easing_set(&sode[1].ypos, (float)(DrawPts->disp_y / 5), 0.875f);
+								easing_set(&sode[2].xpos, (float)(DrawPts->disp_x), 0.85f);
+								easing_set(&sode[2].ypos, (float)(DrawPts->disp_y / 5), 0.85f);
+								easing_set(&sode[3].xpos, (float)(-DrawPts->disp_x), 0.825f);
+								easing_set(&sode[3].ypos, (float)(DrawPts->disp_y / 5), 0.825f);
+								for (auto& sl : First) {
+									sl.xpos = (float)(DrawPts->disp_x * 2);
+									sl.ypos = (float)(DrawPts->disp_y * 2);
+								}
+								for (auto& sl : First2) {
+									sl.xpos = (float)(DrawPts->disp_x * 2);
+									sl.ypos = (float)(DrawPts->disp_y * 2);
+								}
+							}
+							if (Cut == 8) {
+								sode[0].xpos = (float)(DrawPts->disp_x);
+								sode[0].ypos = (float)(DrawPts->disp_y / 5);
+								sode[1].xpos = (float)(-DrawPts->disp_x);
+								sode[1].ypos = (float)(DrawPts->disp_y / 5);
+								sode[2].xpos = (float)(DrawPts->disp_x);
+								sode[2].ypos = (float)(DrawPts->disp_y / 5);
+								sode[3].xpos = (float)(-DrawPts->disp_x);
+								sode[3].ypos = (float)(DrawPts->disp_y / 5);
+								isNextreset = true;
+							}
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
 							if (models.Get(Tachyon, 0)->obj.get_anime(0).per > 0) {
 								Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
@@ -1675,18 +1576,17 @@ namespace FPS_n2 {
 								easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(-0.5f + (float)(GetRand((int)(2.f * 0.5f) * 10)) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
 							}
 							SetSpeed_Effect(Effect::ef_reco, 1.05f);
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 1);
-							models.Get(Tachyon, 0)->obj.get_anime(1).Update(true, 1.f);
+							models.Get(Tachyon, 0)->UpdateAnim(1, true, 1.f);
 
 							models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
 						}
 						else if (Cut < 14) {
+							Board.isDraw = false;
+							Map.isDraw = true;
 							if (models.Get(Tachyon, 0)->obj.get_anime(1).per > 0) {
 								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
 								Stop_Effect(Effect::ef_reco);
 							}
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 2);
-
 							if (Cut <= 12) {
 								if (models.Get(Tachyon, 0)->obj.get_anime(2).time == 30.f) {
 									models.Get(Tachyon, 0)->OpacityRate = 0.f;
@@ -1694,25 +1594,25 @@ namespace FPS_n2 {
 								}
 								easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
 								if (models.Get(Tachyon, 0)->obj.get_anime(2).time <= 32.f) {
-									models.Get(Tachyon, 0)->obj.get_anime(2).Update(true, spd_takion);
+									models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
 								}
 								else {
 									easing_set(&spd_takion, 0.01f, 0.9f);
 									models.Get(Tachyon, 0)->OpacityRate = 1.f;
-									models.Get(Tachyon, 0)->obj.get_anime(2).Update(true, spd_takion);
+									models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
 								}
 								models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
 							}
 							else {
 								if (NowTime > (LONGLONG)(1000000.f * 8.864f)) {
-									models.Get(Tachyon, 0)->obj.get_anime(2).Update(true, 0.6f);
+									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.6f);
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(6);
 									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(17.178366f, 4.319146f, -36.016518f);
 									Cut_Pic[Cut].cam_per = 0.9f;
 									models.Get(Tachyon, 0)->PhysicsSpeed = 0.02f;
 								}
 								else {
-									models.Get(Tachyon, 0)->obj.get_anime(2).Update(true, 0.01f);
+									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.01f);
 									models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
 								}
 							}
@@ -1747,8 +1647,7 @@ namespace FPS_n2 {
 
 
 							if (Cut < 15) {
-								Sel_AnimNum(models.Get(Tachyon, 0)->obj, 3);
-								models.Get(Tachyon, 0)->obj.get_anime(3).Update(true, 0.6f);
+								models.Get(Tachyon, 0)->UpdateAnim(3, true, 0.6f);
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(6);
 								Cut_Pic[Cut].cam_per = 0.f;
 
@@ -1765,8 +1664,7 @@ namespace FPS_n2 {
 									models.Get(Tachyon, 1)->isDraw = true;
 								}
 
-								Sel_AnimNum(models.Get(Tachyon, 1)->obj, 2);
-								models.Get(Tachyon, 1)->obj.get_anime(2).Update(true, 0.45f);
+								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
 								models.Get(Tachyon, 0)->PhysicsSpeed = 0.45f;
 
 								models.Get(Tachyon, 0)->obj.get_anime(3).time = 33.f;
@@ -1789,14 +1687,12 @@ namespace FPS_n2 {
 								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
 								models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-								models.Get(Tachyon, 1)->obj.get_anime(2).Update(true, 0.45f);
+								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
 
-								Sel_AnimNum(models.Get(Tachyon, 0)->obj, 3);
-								models.Get(Tachyon, 0)->obj.get_anime(3).Update(true, 0.45f);
+								models.Get(Tachyon, 0)->UpdateAnim(3, true, 0.45f);
 								models.Get(Tachyon, 0)->PhysicsSpeed = 0.45f;
 
-								Sel_AnimNum(models.Get(Cafe, 0)->obj, 0);
-								models.Get(Cafe, 0)->obj.get_anime(0).Update(true, 0.45f);
+								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 								models.Get(Cafe, 0)->PhysicsSpeed = 0.45f;
 
 								if (Cut == 17) {
@@ -1874,6 +1770,7 @@ namespace FPS_n2 {
 							isNextreset = true;
 						}
 						else if (Cut < 21) {
+							Map.isDraw = false;
 							models.Get(Tachyon, 1)->isDraw = false;
 							if (models.Get(Cafe, 0)->obj.get_anime(0).time != 0.f) {
 								models.Get(Cafe, 0)->obj.get_anime(0).time = 0.f;
@@ -1901,6 +1798,7 @@ namespace FPS_n2 {
 							*/
 						}
 						else if (Cut < 24) {
+							Map.isDraw = true;
 							for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
 								n->xpos = (n + 1)->xpos;
 								n->ypos = (n + 1)->ypos;
@@ -1911,19 +1809,19 @@ namespace FPS_n2 {
 							news_p.back().rad += deg2rad(6) / GetFPS();
 							if (Cut < 22) {
 								models.Get(Tachyon, 2)->isDraw = true;
-								Sel_AnimNum(models.Get(Tachyon, 2)->obj, 4);
+								models.Get(Tachyon, 2)->UpdateAnim(4, false, 0.f);
 								models.Get(Tachyon, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, 1, -10)));
 
 								models.Get(Tachyon, 3)->isDraw = true;
-								Sel_AnimNum(models.Get(Tachyon, 3)->obj, 5);
+								models.Get(Tachyon, 3)->UpdateAnim(5, false, 0.f);
 								models.Get(Tachyon, 3)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
 
 								models.Get(Tachyon, 4)->isDraw = true;
-								Sel_AnimNum(models.Get(Tachyon, 4)->obj, 6);
+								models.Get(Tachyon, 4)->UpdateAnim(6, false, 0.f);
 								models.Get(Tachyon, 4)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
 
 								models.Get(Tachyon, 5)->isDraw = true;
-								Sel_AnimNum(models.Get(Tachyon, 5)->obj, 7);
+								models.Get(Tachyon, 5)->UpdateAnim(7, false, 0.f);
 								models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 							}
 							else {
@@ -1934,28 +1832,28 @@ namespace FPS_n2 {
 
 								models.Get(GoldShip, 0)->isDraw = true;
 								if (news_p.back().ypos < DrawPts->disp_y / 2) {
-									Sel_AnimNum(models.Get(GoldShip, 0)->obj, 0);
+									models.Get(GoldShip, 0)->UpdateAnim(0, false, 0.f);
 								}
 								else {
-									Sel_AnimNum(models.Get(GoldShip, 0)->obj, 1);
-									models.Get(GoldShip, 0)->obj.get_anime(1).Update(true, 0.45f);
+									models.Get(GoldShip, 0)->UpdateAnim(1, true, 0.45f);
 								}
 								models.Get(GoldShip, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
 
 								models.Get(Speweek, 0)->isDraw = true;
-								Sel_AnimNum(models.Get(Speweek, 0)->obj, 0);
+								models.Get(Speweek, 0)->UpdateAnim(0, false, 0.f);
 								models.Get(Speweek, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
 
 								models.Get(Teio, 0)->isDraw = true;
-								Sel_AnimNum(models.Get(Teio, 0)->obj, 0);
+								models.Get(Teio, 0)->UpdateAnim(0, false, 0.f);
 								models.Get(Teio, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
 
 								models.Get(Macin, 0)->isDraw = true;
-								Sel_AnimNum(models.Get(Macin, 0)->obj, 0);
+								models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
 								models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 							}
 						}
 						else if (Cut < 25) {
+							Map.isDraw = false;
 							models.Get(GoldShip, 0)->isDraw = false;
 							models.Get(Speweek, 0)->isDraw = false;
 							models.Get(Teio, 0)->isDraw = false;
@@ -1965,25 +1863,25 @@ namespace FPS_n2 {
 							return_walk = false;
 						}
 						else if (Cut < 26) {
+							Map_school.isDraw = true;
 							if (models.Get(Tachyon, 0)->obj.get_anime(8).time == 33.f) {
 								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
 								models.Get(Tachyon, 1)->isDraw = false;
 								models.Get(Tachyon, 1)->OpacityRate = 1.f;
 							}
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 8);
 							if (models.Get(Tachyon, 0)->obj.get_anime(8).time == models.Get(Tachyon, 0)->obj.get_anime(8).alltime) {
 								if (!return_walk) {
 									models.Get(Tachyon, 1)->isDraw = true;
 									models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-									Sel_AnimNum(models.Get(Tachyon, 1)->obj, 9);
+									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.f);
 									models.Get(Tachyon, 1)->obj.work_anime();
 									models.Get(Tachyon, 1)->obj.PhysicsResetState();
 								}
 								return_walk = true;
 							}
-							models.Get(Tachyon, 0)->obj.get_anime(8).Update(false, return_walk ? -4.f : 4.f);
+							models.Get(Tachyon, 0)->UpdateAnim(8, false, return_walk ? -4.f : 4.f);
 							if (return_walk) {
-								models.Get(Tachyon, 1)->obj.get_anime(9).Update(false, 0.7f);
+								models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.7f);
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 1)->obj.frame(9);
 								Cut_Pic[Cut].cam_per = 0.95f;
 								Cut_Pic[Cut].Aim_camera.near_ = 5.f;
@@ -1996,7 +1894,10 @@ namespace FPS_n2 {
 							isNextreset = true;
 						}
 						else if (Cut < 27) {
+							Map.isDraw = true;
+							Map_school.isDraw = false;
 							{
+								Gate.isDraw = true;
 								models.Get(Tachyon, 0)->isDraw = false;
 								models.Get(Tachyon, 1)->isDraw = false;
 								return_walk = true;
@@ -2024,7 +1925,7 @@ namespace FPS_n2 {
 							camzb_28 = 1.f;
 						}
 						else if (Cut < 28) {
-							Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							Gate.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
 							if (Gate_Xpos < 20.f) {
 								Gate_Xpos += 20.f *1.f / GetFPS();
 							}
@@ -2045,10 +1946,12 @@ namespace FPS_n2 {
 							ship_zadd = 0.f;
 						}
 						else if (Cut < 30) {
+							if (Cut == 28) {
+								Gate.isDraw = false;
+							}
 							models.Get(Karen, 0)->isDraw = true;
-							Sel_AnimNum(models.Get(Karen, 0)->obj, 0);
 							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							models.Get(Karen, 0)->obj.get_anime(0).Update(false, 1.0f);
+							models.Get(Karen, 0)->UpdateAnim(0, false, 1.0f);
 
 							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
 							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
@@ -2073,9 +1976,10 @@ namespace FPS_n2 {
 								camzb_28 = -10.f;
 							}
 
-							MV1SetOpacityRate(Ship.get(), 0.3f);
-							Ship.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
-							Ship.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
+							Ship.isDraw = true;
+							Ship.OpacityRate = 0.3f;
+							Ship.obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
+							Ship.obj.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
 							ship_z += ship_zadd / GetFPS();
 							if (ship_zadd <= 0.95f) {
 								easing_set(&ship_zadd, 1.f, 0.95f);
@@ -2088,104 +1992,97 @@ namespace FPS_n2 {
 							}
 						}
 						else if (Cut < 31) {
+							Board.isDraw = true;
+							Ship.isDraw = false;
+							Map.isDraw = false;
 							models.Get(Tachyon, 0)->isDraw = false;
 							models.Get(Karen, 0)->isDraw = false;
 							models.Get(Cafe, 0)->isDraw = true;
 							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 0);
-							models.Get(Cafe, 0)->obj.get_anime(0).Update(true, 0.f);
+							models.Get(Cafe, 0)->UpdateAnim(0, true, 0.f);
 						}
 						else if (Cut < 32) {
+							Board.isDraw = false;
 							models.Get(Tachyon, 0)->isDraw = true;
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 1);
-							models.Get(Cafe, 0)->obj.get_anime(1).Update(true, 0.f);
+							models.Get(Cafe, 0)->UpdateAnim(1, true, 0.f);
 							isNextreset = true;
 							models.Get(Scarlet, 0)->OpacityRate = 0.5f;
 						}
 						else if (Cut < 33) {
+							Map.isDraw = true;
 							models.Get(Tachyon, 0)->isDraw = true;
 							models.Get(Cafe, 0)->isDraw = false;
 							models.Get(Scarlet, 0)->isDraw = true;
 							models.Get(Scarlet, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							Sel_AnimNum(models.Get(Scarlet, 0)->obj, 0);
-							models.Get(Scarlet, 0)->obj.get_anime(0).Update(false, 0.6f);
+							models.Get(Scarlet, 0)->UpdateAnim(0, false, 0.6f);
 							if (models.Get(Scarlet, 0)->obj.get_anime(0).time > 10.f) {
 								easing_set(&models.Get(Scarlet, 0)->OpacityRate, 1.f, 0.95f);
 							}
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 10);
-							models.Get(Tachyon, 0)->obj.get_anime(10).Update(false, 0.6f);
+							models.Get(Tachyon, 0)->UpdateAnim(10, false, 0.6f);
 							isNextreset = true;
 						}
 						else if (Cut < 34) {
 							models.Get(Vodka, 0)->isDraw = true;
 							models.Get(Vodka, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -50)));
-							Sel_AnimNum(models.Get(Vodka, 0)->obj, 0);
-							models.Get(Vodka, 0)->obj.get_anime(0).Update(false, 1.f);
+							models.Get(Vodka, 0)->UpdateAnim(0, false, 1.f);
 						}
 						else if (Cut < 35) {
 							models.Get(Vodka, 0)->isDraw = false;
 							isNextreset = true;
 						}
 						else if (Cut < 36) {
+							Map.isDraw = false;
 							models.Get(Scarlet, 0)->isDraw = false;
 							models.Get(Tachyon, 0)->isDraw = false;
 							models.Get(Cafe, 0)->isDraw = true;
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 2);
-							models.Get(Cafe, 0)->obj.get_anime(2).Update(false, 0.6f);
+							models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
 							models.Get(Cafe, 0)->OpacityRate = 1.f;
 							isNextreset = true;
 						}
 						else if (Cut < 37) {//手
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 2);
-							models.Get(Cafe, 0)->obj.get_anime(2).Update(false, 0.6f);
+							models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
 							models.Get(Cafe, 0)->OpacityRate = std::max(models.Get(Cafe, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
 							models.Get(Tachyon, 0)->isDraw = true;
 
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 11);
-							models.Get(Tachyon, 0)->obj.get_anime(11).Update(false, 0.5f);
+							models.Get(Tachyon, 0)->UpdateAnim(11, false, 0.5f);
 							models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 						}
 						else if (Cut < 38) {//光るトレーナー
 							models.Get(Tachyon, 0)->isDraw = false;
 							models.Get(Cafe, 0)->isDraw = false;
 							models.Get(Trainer, 0)->isDraw = true;
-							Sel_AnimNum(models.Get(Trainer, 0)->obj, 0);
-							models.Get(Trainer, 0)->obj.get_anime(0).Update(false, 1.2f);
+							models.Get(Trainer, 0)->UpdateAnim(0, false, 1.2f);
 						}
 						else if (Cut < 39) {
 							models.Get(Trainer, 0)->isDraw = false;
 							models.Get(Tachyon, 0)->isDraw = true;
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 12);
-							models.Get(Tachyon, 0)->obj.get_anime(12).Update(false, 0.5f);
+							models.Get(Tachyon, 0)->UpdateAnim(12, false, 0.5f);
 							isNextreset = true;
 						}
 						else if (Cut < 40) {
+							Map.isDraw = true;
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 13);
-							models.Get(Tachyon, 0)->obj.get_anime(13).Update(false, 1.2f);
+							models.Get(Tachyon, 0)->UpdateAnim(13, false, 1.2f);
 							isNextreset = true;
 						}
 						else if (Cut < 41) {
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 14);
-							models.Get(Tachyon, 0)->obj.get_anime(14).Update(false, 2.8f);
+							models.Get(Tachyon, 0)->UpdateAnim(14, false, 2.8f);
 							isNextreset = true;
 							camzb_28 = 0.f;
 							camzb_41 = 0.1f;
 							for (int i = 0; i < 12; i++) {
-								//models.Get(Mobu, i)->
-								Sel_AnimNum(models.Get(Mobu, i)->obj, models.Get(Mobu, i)->Anim_Sel);
-								models.Get(Mobu, i)->obj.get_anime(models.Get(Mobu, i)->Anim_Sel).Update(false, 0.f);
+								models.Get(Mobu, i)->UpdateAnim(models.Get(Mobu, i)->Anim_Sel, false, 0.f);
 							}
 						}
 						else if (Cut < 42) {
 							Gate_Xpos = 0.f;
-							Gate.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
-							Sel_AnimNum(Gate, 0);
-							Gate.get_anime(0).Update(false, 0.f);
+							Gate.isDraw = true;
+							Gate.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							Gate.UpdateAnim(0, false, 0.f);
 
 							Gate_Xpos += -7.f;
 							for (int i = 0; i < 12; i++) {
@@ -2287,8 +2184,7 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 45) {
 							if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
-								Sel_AnimNum(Gate, 1);
-								Gate.get_anime(1).Update(false, 1.f);
+								Gate.UpdateAnim(1, false, 1.f);
 
 								Gate_Xpos = 0.f;
 								Gate_Xpos += -7.f;
@@ -2335,6 +2231,9 @@ namespace FPS_n2 {
 
 						}
 						else if (Cut < 46) {
+							Board.isDraw = true;
+							Map.isDraw = false;
+							Gate.isDraw = false;
 							for (int i = 0; i < 12; i++) {
 								//models.Get(Mobu, i)->
 								models.Get(Mobu, i)->isDraw = false;
@@ -2471,19 +2370,19 @@ namespace FPS_n2 {
 
 							models.Get(Tachyon, 0)->isDraw = true;
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 2);
-							models.Get(Tachyon, 0)->obj.get_anime(2).Update(false, 0.1f);
+							models.Get(Tachyon, 0)->UpdateAnim(2, false, 0.1f);
 							isNextreset = true;
 							models.Get(Karen, 0)->isDraw = false;
 						}
 						else if (Cut < 51) {
+							Board.isDraw = false;
+							Map.isDraw = true;
 							Stop_Effect(Effect::ef_greexp);
 							Stop_Effect(Effect::ef_greexp2);
 							models.Get(Tachyon, 0)->isDraw = false;
 
-							Sel_AnimNum(models.Get(Karen, 0)->obj, 1);
 							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							models.Get(Karen, 0)->obj.get_anime(1).Update(false, 0.95f);
+							models.Get(Karen, 0)->UpdateAnim(1, false, 0.95f);
 							if (!models.Get(Karen, 0)->isDraw) {
 								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
 
@@ -2503,9 +2402,8 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 52) {
 
-							Sel_AnimNum(models.Get(Karen, 0)->obj, 2);
 							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							models.Get(Karen, 0)->obj.get_anime(2).Update(false, 1.15f);
+							models.Get(Karen, 0)->UpdateAnim(2, false, 1.15f);
 
 							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
 							Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(10) + VECTOR_ref::vget(2.3f, 0.f, 0.f);
@@ -2516,22 +2414,17 @@ namespace FPS_n2 {
 							isNextreset = true;
 						}
 						else if (Cut < 54) {
+							Board.isDraw = true;
+							Map.isDraw = false;
 							models.Get(Karen, 0)->isDraw = false;
 							models.Get(Cafe, 0)->isDraw = true;
 							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 3);
-							models.Get(Cafe, 0)->obj.get_anime(3).Update(false, 0.8f);
+							models.Get(Cafe, 0)->UpdateAnim(3, false, 0.8f);
 							models.Get(Cafe, 0)->OpacityRate = 1.f;
 							if (Cut == 53) {
 								if (models.Get(Cafe, 0)->obj.get_anime(3).time > 30.f) {
 									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-										VECTOR_ref::vget(
-											-5.f,
-											-3.5f,
-											-20.f
-										)*2.0f;
-
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(-5.f, -3.5f, -20.f)*2.0f;
 									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
 									Cut_Pic[Cut].Aim_camera.near_ = 1.f;
@@ -2547,48 +2440,38 @@ namespace FPS_n2 {
 									}
 								}
 								isNextreset = true;
-
 								models.Get(Mobu, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
 								models.Get(Mobu, 2)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
 								models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2000.f - 5.f)));
 								models.Get(Doto, 0)->obj.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
-
 								models.Get(Cafe, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
 								models.Get(Mobu, 1)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
 								models.Get(Opera, 0)->obj.get_anime(0).time = (float)GetRand(100) / 10.f;
-
 							}
 						}
 						else if (Cut < 55) {
+							Board.isDraw = false;
+							Map.isDraw = true;
+							Gate.isDraw = true;
 							models.Get(Mobu, 0)->isDraw = true;
 							models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
-							Sel_AnimNum(models.Get(Mobu, 0)->obj, 4);
-							models.Get(Mobu, 0)->obj.get_anime(4).Update(false, 0.84f);
+							models.Get(Mobu, 0)->UpdateAnim(4, false, 0.84f);
 
 							models.Get(Mobu, 2)->isDraw = true;
 							models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(20.f, 0.f, -2000.f - 40.f)));
-							Sel_AnimNum(models.Get(Mobu, 2)->obj, 4);
-							models.Get(Mobu, 2)->obj.get_anime(4).Update(false, 0.8f);
+							models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
 
-							Sel_AnimNum(models.Get(Doto, 0)->obj, 0);
-							models.Get(Doto, 0)->obj.get_anime(0).Update(false, 0.82f);
+							models.Get(Doto, 0)->UpdateAnim(0, false, 0.82f);
 
 							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 30.f)));
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 4);
-							models.Get(Cafe, 0)->obj.get_anime(4).Update(false, 0.85f);
+							models.Get(Cafe, 0)->UpdateAnim(4, false, 0.85f);
 
 							models.Get(Mobu, 1)->isDraw = true;
 							models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 0.f, -2000.f - 5.f)));
-							Sel_AnimNum(models.Get(Mobu, 1)->obj, 4);
-							models.Get(Mobu, 1)->obj.get_anime(4).Update(false, 0.82f);
+							models.Get(Mobu, 1)->UpdateAnim(4, false, 0.82f);
 
 							models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2000.f + 10.f)));
-							Sel_AnimNum(models.Get(Opera, 0)->obj, 0);
-							models.Get(Opera, 0)->obj.get_anime(0).Update(false, 0.84f);
+							models.Get(Opera, 0)->UpdateAnim(0, false, 0.84f);
 
 							if (models.Get(Opera, 0)->isDraw) {
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(7 + GetRand(3)) + VECTOR_ref::vget(0.f, 2.f, -30.f);
@@ -2624,29 +2507,17 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 56) {
 							models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 5.f, 0.f, -2200.f - 45.f)));
-							Sel_AnimNum(models.Get(Mobu, 0)->obj, 4);
-							models.Get(Mobu, 0)->obj.get_anime(4).Update(false, 0.8f);
-
+							models.Get(Mobu, 0)->UpdateAnim(4, false, 0.8f);
 							models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 7.f, 0.f, -2200.f - 70.f)));
-							Sel_AnimNum(models.Get(Mobu, 1)->obj, 4);
-							models.Get(Mobu, 1)->obj.get_anime(4).Update(false, 0.8f);
-
+							models.Get(Mobu, 1)->UpdateAnim(4, false, 0.8f);
 							models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 10.f, 0.f, -2200.f - 65.f)));
-							Sel_AnimNum(models.Get(Mobu, 2)->obj, 4);
-							models.Get(Mobu, 2)->obj.get_anime(4).Update(false, 0.8f);
-
+							models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
 							models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 6.f, 0.f, -2200.f - 35.f)));
-							Sel_AnimNum(models.Get(Doto, 0)->obj, 0);
-							models.Get(Doto, 0)->obj.get_anime(0).Update(false, 1.1f);
-
+							models.Get(Doto, 0)->UpdateAnim(0, false, 1.1f);
 							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 5.f, 0.f, -2200.f - 0.f)));
-							Sel_AnimNum(models.Get(Cafe, 0)->obj, 4);
-							models.Get(Cafe, 0)->obj.get_anime(4).Update(false, 0.98f);
-
+							models.Get(Cafe, 0)->UpdateAnim(4, false, 0.98f);
 							models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 12.5f, 0.f, -2200.f - 40.f)));
-							Sel_AnimNum(models.Get(Opera, 0)->obj, 0);
-							models.Get(Opera, 0)->obj.get_anime(0).Update(false, 0.95f);
-
+							models.Get(Opera, 0)->UpdateAnim(0, false, 0.95f);
 
 							if (nex_cut) {
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f);
@@ -2711,11 +2582,11 @@ namespace FPS_n2 {
 							radc2 += 12.5f / GetFPS();
 
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 15);
-							models.Get(Tachyon, 0)->obj.get_anime(15).Update(false, 0.2f);
+							models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.2f);
 							isNextreset = true;
 						}
 						else if (Cut < 58) {
+							Gate.isDraw = false;
 							Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
 
 							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
@@ -2735,8 +2606,7 @@ namespace FPS_n2 {
 							radc2 += 12.5f / GetFPS();
 
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 15);
-							models.Get(Tachyon, 0)->obj.get_anime(15).Update(false, 0.75f);
+							models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
 							Box_ALPHA = 0.f;
 						}
 						else if (Cut < 59) {
@@ -2759,8 +2629,7 @@ namespace FPS_n2 {
 							radc2 += 12.5f / GetFPS();
 
 							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							Sel_AnimNum(models.Get(Tachyon, 0)->obj, 15);
-							models.Get(Tachyon, 0)->obj.get_anime(15).Update(false, 0.75f);
+							models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
 
 							if (Box_ALPHA < 1.f) {
 								Box_ALPHA += 1.f / GetFPS();
@@ -2791,6 +2660,7 @@ namespace FPS_n2 {
 							}
 
 						}
+
 						easing_set(&camera_main.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camup, Cut_Pic[Cut].Aim_camera.camup, Cut_Pic[Cut].cam_per);
@@ -2799,22 +2669,12 @@ namespace FPS_n2 {
 						easing_set(&camera_main.near_, Cut_Pic[Cut].Aim_camera.near_, Cut_Pic[Cut].cam_per);
 						camera_main.set_cam_info(camera_main.fov, camera_main.near_, camera_main.far_);
 					}
-
 					models.Update();
-					Gate.work_anime();
-
+					Gate.Update();
+					Ship.Update();
 					if (!Time_Over()) {
 						if (NowTime > GetCutTime()) {
 							AddCutNum();
-							if (Cut == 6) {
-								isNextreset = true;
-							}
-
-							if (Cut == 9) {
-								isNextreset = true;
-							}
-
-
 							if (isNextreset) {
 								reset_p = true;
 								isNextreset = false;
@@ -2833,7 +2693,6 @@ namespace FPS_n2 {
 							reset_p = false;
 						}
 					}
-
 				}
 
 				Effect_UseControl::Update_Effect();
@@ -2847,8 +2706,7 @@ namespace FPS_n2 {
 			}
 			void Dispose(void) noexcept override {
 				Effect_UseControl::Dispose_Effect();
-
-				for (auto& p : Cut_Pic) { p.handle.Dispose(); }
+				for (auto& p : Cut_Pic) { p.Dispose(); }
 				Cut_Pic.clear();
 				//BGM.Dispose();
 				//movie.Dispose();
@@ -2872,45 +2730,22 @@ namespace FPS_n2 {
 						SetFogEnable(FALSE);
 						SetUseLighting(FALSE);
 						{
-							sky.DrawModel();
+							sky.obj.DrawModel();
 							DrawBillboard3D(this->sun_pos.get(), 0.5f, 0.5f, 200.f, 0.f, this->sun_pic.get(), TRUE);
 						}
 						SetUseLighting(TRUE);
 
 						SetFogEnable(fog_e);
 					}
-					//Cut_Pic[Cut].handle.DrawExtendGraph(0, 0, DrawPts->disp_x, DrawPts->disp_y, FALSE);
 				}
 			}
 			void Shadow_Draw_Far(void) noexcept override {
-				Map.DrawModel();
+				Map.obj.DrawModel();
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
-				if (Cut == 25) {
-					Map_school.DrawModel();
-				}
-				if (Cut == 26 || Cut == 27 || Cut == 41 || Cut == 42 || Cut == 43 || Cut == 44 || Cut == 54 || Cut == 55 || Cut == 56) {
-					Gate.DrawModel();
-				}
+				Map_school.Draw();
+				Gate.Draw();
 			}
-
-			void Common_Draw() {
-				if (Cut == 25) {
-					Map_school.DrawModel();
-				}
-
-				models.Draw();
-
-				if (Cut == 26 || Cut == 27 || Cut == 41 || Cut == 42 || Cut == 43 || Cut == 44 || Cut == 54 || Cut == 55 || Cut == 56) {
-					Gate.DrawModel();
-				}
-				if (Cut == 20) {
-					for (auto&n : Newspaper) {
-						n.Draw();
-					}
-				}
-			}
-
 			void Shadow_Draw(void) noexcept override {
 				Common_Draw();
 			}
@@ -2926,82 +2761,74 @@ namespace FPS_n2 {
 					SetFogColor(64, 64, 64);
 					SetFogStartEnd(10, 500);
 					SetFogDensity(0.01f);
-					Board.DrawModel();
 				}
 				if (Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
 					SetFogEnable(TRUE);
 					SetFogColor(128, 128, 128);
 					SetFogStartEnd(10, 300);
 					SetFogDensity(0.01f);
-					Board.DrawModel();
 				}
-
-				if (Cut >= 9 && Cut != 20 && Cut != 25 && !(Cut >= 30 && Cut <= 31) && !(Cut >= 35 && Cut <= 38) && !((Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53)) {
-					Map.DrawModel();
-				}
+				Board.Draw();
+				Map.Draw();
 				Common_Draw();
-				if (Cut == 28 || Cut == 29) {
-					Ship.DrawModel();
-				}
-				SetFogEnable(FALSE);
+				Ship.Draw();
 
-				anim[0].handle.DrawExtendGraph((int)(anim[0].xpos), (int)(anim[0].ypos), DrawPts->disp_x + (int)(anim[0].xpos), DrawPts->disp_y + (int)(anim[0].ypos), true);
-				anim[1].handle.DrawExtendGraph((int)(anim[1].xpos), (int)(anim[1].ypos), DrawPts->disp_x + (int)(anim[1].xpos), DrawPts->disp_y + (int)(anim[1].ypos), true);
-				SetDrawBright(108, 108, 108);
-				sode[7].handle.DrawExtendGraph((int)(sode[7].xpos), (int)(sode[7].ypos), DrawPts->disp_x + (int)(sode[7].xpos), DrawPts->disp_y + (int)(sode[7].ypos), true);
-				SetDrawBright(144, 144, 144);
-				sode[6].handle.DrawExtendGraph((int)(sode[6].xpos), (int)(sode[6].ypos), DrawPts->disp_x + (int)(sode[6].xpos), DrawPts->disp_y + (int)(sode[6].ypos), true);
-				SetDrawBright(192, 192, 192);
-				sode[5].handle.DrawExtendGraph((int)(sode[5].xpos), (int)(sode[5].ypos), DrawPts->disp_x + (int)(sode[5].xpos), DrawPts->disp_y + (int)(sode[5].ypos), true);
-				SetDrawBright(255, 255, 255);
-				sode[4].handle.DrawExtendGraph((int)(sode[4].xpos), (int)(sode[4].ypos), DrawPts->disp_x + (int)(sode[4].xpos), DrawPts->disp_y + (int)(sode[4].ypos), true);
-				sode[3].handle.DrawExtendGraph((int)(sode[3].xpos), (int)(sode[3].ypos), DrawPts->disp_x + (int)(sode[3].xpos), DrawPts->disp_y + (int)(sode[3].ypos), true);
-				sode[2].handle.DrawExtendGraph((int)(sode[2].xpos), (int)(sode[2].ypos), DrawPts->disp_x + (int)(sode[2].xpos), DrawPts->disp_y + (int)(sode[2].ypos), true);
-				sode[1].handle.DrawExtendGraph((int)(sode[1].xpos), (int)(sode[1].ypos), DrawPts->disp_x + (int)(sode[1].xpos), DrawPts->disp_y + (int)(sode[1].ypos), true);
-				sode[0].handle.DrawExtendGraph((int)(sode[0].xpos), (int)(sode[0].ypos), DrawPts->disp_x + (int)(sode[0].xpos), DrawPts->disp_y + (int)(sode[0].ypos), true);
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(196.f));
-				for (auto& sl : First2) {
-					sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f);
-				}
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				for (auto& sl : First) {
-					sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f);
-				}
-				for (auto& sl : First3) {
-					easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
-					sl.Draw((float)(DrawPts->disp_y) / 540.f*0.9f);
-				}
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				SetFogEnable(FALSE);
 				{
-					if (Box_ALPHA != 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
-						DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(0, 0, 0), TRUE);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					anim[0].handle.DrawExtendGraph((int)(anim[0].xpos), (int)(anim[0].ypos), DrawPts->disp_x + (int)(anim[0].xpos), DrawPts->disp_y + (int)(anim[0].ypos), true);
+					anim[1].handle.DrawExtendGraph((int)(anim[1].xpos), (int)(anim[1].ypos), DrawPts->disp_x + (int)(anim[1].xpos), DrawPts->disp_y + (int)(anim[1].ypos), true);
+					SetDrawBright(108, 108, 108);
+					sode[7].handle.DrawExtendGraph((int)(sode[7].xpos), (int)(sode[7].ypos), DrawPts->disp_x + (int)(sode[7].xpos), DrawPts->disp_y + (int)(sode[7].ypos), true);
+					SetDrawBright(144, 144, 144);
+					sode[6].handle.DrawExtendGraph((int)(sode[6].xpos), (int)(sode[6].ypos), DrawPts->disp_x + (int)(sode[6].xpos), DrawPts->disp_y + (int)(sode[6].ypos), true);
+					SetDrawBright(192, 192, 192);
+					sode[5].handle.DrawExtendGraph((int)(sode[5].xpos), (int)(sode[5].ypos), DrawPts->disp_x + (int)(sode[5].xpos), DrawPts->disp_y + (int)(sode[5].ypos), true);
+					SetDrawBright(255, 255, 255);
+					sode[4].handle.DrawExtendGraph((int)(sode[4].xpos), (int)(sode[4].ypos), DrawPts->disp_x + (int)(sode[4].xpos), DrawPts->disp_y + (int)(sode[4].ypos), true);
+					sode[3].handle.DrawExtendGraph((int)(sode[3].xpos), (int)(sode[3].ypos), DrawPts->disp_x + (int)(sode[3].xpos), DrawPts->disp_y + (int)(sode[3].ypos), true);
+					sode[2].handle.DrawExtendGraph((int)(sode[2].xpos), (int)(sode[2].ypos), DrawPts->disp_x + (int)(sode[2].xpos), DrawPts->disp_y + (int)(sode[2].ypos), true);
+					sode[1].handle.DrawExtendGraph((int)(sode[1].xpos), (int)(sode[1].ypos), DrawPts->disp_x + (int)(sode[1].xpos), DrawPts->disp_y + (int)(sode[1].ypos), true);
+					sode[0].handle.DrawExtendGraph((int)(sode[0].xpos), (int)(sode[0].ypos), DrawPts->disp_x + (int)(sode[0].xpos), DrawPts->disp_y + (int)(sode[0].ypos), true);
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(196.f));
+					for (auto& sl : First2) {
+						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f);
 					}
-					if (Box_ALPHA != 0.f) {
-						for (auto& sl : sode_last) {
-							int per_b = 127 + (int)(128.f* (&sl - &sode_last.front()) / sode_last.size());
-							SetDrawBright(per_b, per_b, per_b);
-							sl.Draw((float)(DrawPts->disp_y) / 540.f);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					for (auto& sl : First) {
+						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f);
+					}
+					for (auto& sl : First3) {
+						easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
+						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.9f);
+					}
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					{
+						if (Box_ALPHA != 0.f) {
+							SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
+							DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(0, 0, 0), TRUE);
+							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 						}
-						SetDrawBright(255, 255, 255);
+						if (Box_ALPHA != 0.f) {
+							for (auto& sl : sode_last) {
+								int per_b = 127 + (int)(128.f* (&sl - &sode_last.front()) / sode_last.size());
+								SetDrawBright(per_b, per_b, per_b);
+								sl.Draw((float)(DrawPts->disp_y) / 540.f);
+							}
+							SetDrawBright(255, 255, 255);
+						}
+						if ((int)(per_logo*100.f) <= GetRand(99)) {
+							Logo.Draw((float)(DrawPts->disp_y) / 540.f / 2.f);
+						}
 					}
-					if ((int)(per_logo*100.f) <= GetRand(99)) {
-						Logo.Draw((float)(DrawPts->disp_y) / 540.f / 2.f);
+					if (Cut == 21 || Cut == 22 || Cut == 23) {
+						face.DrawExtendGraph(0, 0, DrawPts->disp_x, DrawPts->disp_y, true);
+						for (auto&n : news_p) { n.Draw(1.f); }
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
 				}
 			}
 			void Item_Draw(void) noexcept override {
 				TEMPSCENE::Item_Draw();
-
-				if (Cut == 21 || Cut == 22 || Cut == 23) {
-					face.DrawExtendGraph(0, 0, DrawPts->disp_x, DrawPts->disp_y, true);
-					for (auto&n : news_p) {
-						//n.Alpha = (int)(&n - &news_p.front() + 1) / (int)news_p.size();
-						n.Draw(1.f);
-					}
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				}
 			}
 			void LAST_Draw(void) noexcept override {
 				/*
