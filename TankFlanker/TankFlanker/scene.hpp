@@ -160,7 +160,7 @@ namespace FPS_n2 {
 				size_t Max = 0;
 			public:
 				ModelControl() {
-					model.resize(32);
+					model.resize(64);
 					Max = 0;
 				}
 				void Load_onAnime(std::string_view Path) {
@@ -230,6 +230,7 @@ namespace FPS_n2 {
 				int xpos = 0;
 				int ypos = 0;
 				int size = 0;
+				int LMR = 1;
 				std::string str;
 				LONGLONG START_TIME = 0;
 				LONGLONG END_TIME = 0;
@@ -242,13 +243,32 @@ namespace FPS_n2 {
 					START_TIME = (LONGLONG)(1000000.f * 0.01f);
 					END_TIME = (LONGLONG)(1000000.f * 1.01f);
 				}
-				void Set(int xp, int yp, int Fontsize, std::string_view mag, LONGLONG StartF, LONGLONG ContiF) {
+				void Set(int xp, int yp, int Fontsize, std::string_view mag, LONGLONG StartF, LONGLONG ContiF, int m_LMR) {
 					this->xpos = xp;
 					this->ypos = yp;
 					this->size = Fontsize;
 					this->str = mag;
 					this->START_TIME = StartF;
 					this->END_TIME = StartF + ContiF;;
+					this->LMR = m_LMR;
+				}
+				void Draw(LONGLONG NowTime) {
+					if (NowTime > this->START_TIME && NowTime < this->END_TIME) {
+						switch (this->LMR)
+						{
+						case 0:
+							Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+							break;
+						case 1:
+							Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+							break;
+						case 2:
+							Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+							break;
+						default:
+							break;
+						}
+					}
 				}
 			};
 			class GraphControl {
@@ -273,10 +293,11 @@ namespace FPS_n2 {
 				float Scale = 1.f;
 				GraphHandle handle;
 
-				void Set(float xp, float yp, float rd, std::string_view Path) {
+				void Set(float xp, float yp, float rd, float al, std::string_view Path) {
 					xpos = xp;
 					ypos = yp;
 					rad = rd;
+					Alpha = al;
 					handle = GraphHandle::Load(Path);
 					handle.GetSize(&xsize, &ysize);
 				}
@@ -295,15 +316,28 @@ namespace FPS_n2 {
 					easing_set(&ypos, ypos_base, easing);
 					easing_set(&rad, rad_base, easing);
 				}
-				void Draw(float scale_) {
+				void Draw(float scale_, int b_r, int b_g, int b_b) {
 					if (this->Alpha > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*this->Alpha));
+						SetDrawBright(b_r, b_g, b_b);
 						this->handle.DrawRotaGraph((int)(this->xpos), (int)(this->ypos), scale_*this->Scale, this->rad, true);
+						SetDrawBright(255, 255, 255);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					}
+				}
+				void Draw_Ex(int disp_x, int disp_y, int b_r, int b_g, int b_b) {
+					if (this->Alpha > 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*this->Alpha));
+						SetDrawBright(b_r, b_g, b_b);
+						this->handle.DrawExtendGraph((int)(this->xpos), (int)(this->ypos), disp_x + (int)(this->xpos), disp_y + (int)(this->ypos), true);
+						SetDrawBright(255, 255, 255);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
 				}
 			};
 		private:
 			std::string Tachyon = "data/umamusume/Tachyon/model.mv1";
+			std::string Tachyon2 = "data/umamusume/Tachyon2/model.mv1";
 			std::string Cafe = "data/umamusume/Cafe/model.mv1";
 			std::string Scarlet = "data/umamusume/scarlet/model.mv1";
 			std::string Vodka = "data/umamusume/vodka/model.mv1";
@@ -317,22 +351,28 @@ namespace FPS_n2 {
 			std::string Doto = "data/umamusume/doto/model.mv1";
 			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
 
-			Model Gate;
+			std::string GATE = "data/map/model_gate.mv1";
+			std::string MAP = "data/map/model.mv1";
+			std::string BOARD = "data/board/model.mv1";
+			std::string SHIP = "data/ship/model.mv1";
+			std::string SCHOOL = "data/school/model.mv1";
+			std::string NEWS = "data/paper/news.mv1";
+			std::string SKY = "data/sky/model.mv1";
+
 			Model Board;
 			Model Map;
-			Model Map_school;
 			Model sky;						//空
 			Model Ship;
 			GraphHandle sun_pic;			//太陽
 			VECTOR_ref sun_pos;				//太陽
-			GraphHandle face;
+
+			GraphControl face;
 
 			ModelControl models;
 
 			std::vector<float> mobu_b_run;
 			std::vector<float> mobu_b_runrange;
 
-			std::vector<Model> Newspaper;
 			std::vector<GraphControl> news_p;
 			std::vector<GraphControl> sode;
 			std::vector<GraphControl> anim;
@@ -384,12 +424,16 @@ namespace FPS_n2 {
 				{
 					//3D
 					{
+						models.Load_onAnime(SCHOOL);//origin
+
 						models.Load_onAnime(Tachyon);//origin
 						models.Load_onAnime(Tachyon);//1
 						models.Load_onAnime(Tachyon);//2
 						models.Load_onAnime(Tachyon);//3
 						models.Load_onAnime(Tachyon);//4
 						models.Load_onAnime(Tachyon);//5
+
+						models.Load_onAnime(Tachyon2);//origin
 
 						models.Load_onAnime(Cafe);//origin
 						models.Load_onAnime(Scarlet);//origin
@@ -407,7 +451,6 @@ namespace FPS_n2 {
 						mobu_b_runrange.resize(12);
 						for (int i = 0; i < 12; i++) {
 							models.Load_onAnime(Mobu);
-							models.Get(Mobu, i)->isDraw = false;
 							mobu_b_run[i] = 0.8f + (float)(GetRand(195)) / 1000.f;
 							mobu_b_runrange[i] = (float)(GetRand(100)) / 10.f;
 							while (true)
@@ -419,51 +462,47 @@ namespace FPS_n2 {
 							}
 						}
 
-						MV1::LoadonAnime("data/map/model_gate.mv1", &Gate.obj);
-						MV1::Load("data/map/model.mv1", &Map.obj, true);
-						MV1::Load("data/board/model.mv1", &Board.obj, true);
-						MV1::Load("data/ship/model.mv1", &Ship.obj, true);				//空
-						MV1::Load("data/school/model.mv1", &Map_school.obj, true);
+						models.Load_onAnime(GATE);//origin
 
-						Newspaper.resize(12);
-						MV1::Load("data/paper/news.mv1", &(Newspaper[0].obj), false);
-						for (int i = 1; i < 12; i++) {
-							Newspaper[i].obj = Newspaper[0].obj.Duplicate();
+						MV1::LoadonAnime(MAP, &Map.obj, 0);
+						MV1::LoadonAnime(BOARD, &Board.obj, 0);
+						MV1::LoadonAnime(SHIP, &Ship.obj, 0);				//空
+
+						for (int i = 0; i < 12; i++) {
+							models.Load_onAnime(NEWS);//origin
 						}
-						MV1::Load("data/sky/model.mv1", &sky.obj, true);				//空
+						MV1::LoadonAnime(SKY, &sky.obj, 0);				//空
 					}
 					//2D
 					{
 						this->sun_pic = GraphHandle::Load("data/sun.png");					/*sun*/
-						face = GraphHandle::Load("data/Cut.png");
+						face.Set(0, 0, 0, 1.f, "data/Cut.png");
 						for (int i = 0; i < 10; i++) {
 							news_p.resize(news_p.size() + 1);
-							news_p.back().Set((float)(DrawPts->disp_x / 2 - DrawPts->disp_x), (float)(DrawPts->disp_y / 2 - DrawPts->disp_y), deg2rad(-30), "data/Cut2.png");
-							news_p.back().Alpha = (float)(i + 1) / 10.f;
+							news_p.back().Set((float)(DrawPts->disp_x / 2 - DrawPts->disp_x), (float)(DrawPts->disp_y / 2 - DrawPts->disp_y), deg2rad(-30), (float)(i + 1) / 10.f, "data/Cut2.png");
 							news_p.back().Scale = (float)DrawPts->disp_x / (float)news_p.back().xsize*1.5f;
 						}
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/first_sode/1.png");
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/1.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/first_sode/2.png");
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/2.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/first_sode/3.png");
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/3.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/first_sode/4.png");
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/4.png");
 
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/second_sode/1.png");
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/1.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/second_sode/2.png");
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/2.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/second_sode/1.png");
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/1.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, "data/second_sode/2.png");
-						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0.f, "data/logo.png");
-						Logo.Alpha = 1.f;
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/2.png");
+						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/logo.png");
 						for (int i = 0; i < 10; i++) {
 							sode_last.resize(sode_last.size() + 1);
-							sode_last.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, "data/second_sode/1.png");
+							sode_last.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/second_sode/1.png");
 						}
 						sode_last[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(150)), (float)(DrawPts->disp_y / 2 + y_r(100)), deg2rad(-350));
 						sode_last[1].Set_Base((float)(DrawPts->disp_x / 2 - y_r(300)), (float)(DrawPts->disp_y / 2 - y_r(500)), deg2rad(-320));
@@ -482,7 +521,7 @@ namespace FPS_n2 {
 						}
 						for (int i = 0; i < 3; i++) {
 							First.resize(First.size() + 1);
-							First.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, "data/FIRST.png");
+							First.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/FIRST.png");
 						}
 						First[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
 						First[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
@@ -490,7 +529,7 @@ namespace FPS_n2 {
 
 						for (int i = 0; i < 3; i++) {
 							First2.resize(First2.size() + 1);
-							First2.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, "data/sun.png");
+							First2.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 196.f / 255.f, "data/sun.png");
 						}
 						First2[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
 						First2[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
@@ -498,34 +537,30 @@ namespace FPS_n2 {
 
 						for (int i = 0; i < 3; i++) {
 							First3.resize(First3.size() + 1);
-							First3.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, "data/sun.png");
+							First3.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 0.f, "data/sun.png");
 							First3.back().Alpha_base = -1.f;
-							First3.back().Alpha = 0.5f;
 							First3.back().Scale = 1.f;
 						}
 						First3[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
 						First3[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
 						First3[2].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f);
 						anim.resize(anim.size() + 1);
-						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, "data/anime/0.png");
+						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, 1.f, "data/anime/0.png");
 						anim.resize(anim.size() + 1);
-						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, "data/anime/1.png");
+						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, 1.f, "data/anime/1.png");
 					}
 				}
 				SetUseASyncLoadFlag(FALSE);
 				//
 				models.Set();
-				Gate.isDraw = false;
 				Map.isDraw = false;
 				Board.isDraw = false;
-				Map_school.isDraw = false;
 				Ship.isDraw = false;
 				//
-				models.Get(Tachyon, 0)->isDraw = true;
-				Gate.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+				models.Get(Tachyon2, 0)->isDraw = true;
 				Map.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
 				Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
-				Map_school.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
+				models.Get(SCHOOL, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
 				//
 				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
 				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
@@ -533,21 +568,14 @@ namespace FPS_n2 {
 				camera_main.set_cam_info(deg2rad(15), 1.0f, 200.f);
 			}
 			void Common_Draw(void) {
-				Map_school.Draw();
 				models.Draw();
-				Gate.Draw();
-				if (Cut == 20) {
-					for (auto&n : Newspaper) {
-						n.Draw();
-					}
-				}
 			}
 		public:
 			void Set(void) noexcept override {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
 				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
-				Cut = 39;
+				Cut = 36;
 				Cut = 0;
 				BGM = SoundHandle::Load("data/sound2.wav");
 				/*
@@ -1010,7 +1038,7 @@ namespace FPS_n2 {
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.971);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.23f, 18, 0.0);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.3f, 17.75f, 0.0);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
 						VECTOR_ref::vget(
 							0.f,
@@ -1018,21 +1046,21 @@ namespace FPS_n2 {
 							10.f
 						)*1.0f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(4), 0.1f, 20.f);
+					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(4), 1.0f, 20.f);
 					Cut_Pic.back().cam_per = 0.f;
 					//オフ2(）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 44.311);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0., 18, 0.);
+					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 18, 0.);
 					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
 						VECTOR_ref::vget(
 							0.f,
 							0.f,
-							-10.f
+							20.f
 						)*1.0f;
 					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(19), 1.f, 100.f);
+					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(10), 1.f, 40.f);
 					Cut_Pic.back().cam_per = 0.f;
 					//オフ離れる(君の存在）
 					Cut_Pic.resize(Cut_Pic.size() + 1);
@@ -1121,292 +1149,294 @@ namespace FPS_n2 {
 					ContiF = (LONGLONG)(1000000.f * 1.5f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 300), y_r(1080 - 200), y_r(12), "原作", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 300), y_r(1080 - 200), y_r(12), "原作", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 300), y_r(1080 - 200 + 12), y_r(32), "ウマ娘プリティーダービー", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 300), y_r(1080 - 200 + 12), y_r(32), "ウマ娘プリティーダービー", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 1.696f);//4.310
 					ContiF = (LONGLONG)(1000000.f * 3.290f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "皐月賞馬", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "皐月賞馬", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスタキオン", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスタキオン", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 3.297f);//(LONGLONG)(1000000.f * 7.288f)
 					ContiF = (LONGLONG)(1000000.f * 2.97f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "菊花賞馬", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "菊花賞馬", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "マンハッタンカフェ", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "マンハッタンカフェ", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.976f);//(LONGLONG)(1000000.f * 9.264f)
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 180), y_r(1080 - 200), y_r(12), "クロフネの子", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 180), y_r(1080 - 200), y_r(12), "クロフネの子", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 180), y_r(1080 - 200 + 12), y_r(32), "カレンチャン", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 180), y_r(1080 - 200 + 12), y_r(32), "カレンチャン", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.146f);//(LONGLONG)(1000000.f * 11.410f)
 					ContiF = (LONGLONG)(1000000.f * 1.925f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200), y_r(12), "全身発行体", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200), y_r(12), "全身発行体", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200 + 12), y_r(32), "トレーナー", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200 + 12), y_r(32), "トレーナー", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 1.925f);//(LONGLONG)(1000000.f * 13.410f)
 					ContiF = (LONGLONG)(1000000.f * 1.925f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540), y_r(12), "トレセン学園理事長", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 100), y_r(540), y_r(12), "トレセン学園理事長", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540 + 12), y_r(32), "秋川やよい", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 100), y_r(540 + 12), y_r(32), "秋川やよい", StartF, ContiF, 0);
 
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(1080 - 200), y_r(12), "理事長秘書", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 100), y_r(1080 - 200), y_r(12), "理事長秘書", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(1080 - 200 + 12), y_r(32), "駿川たづな", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 100), y_r(1080 - 200 + 12), y_r(32), "駿川たづな", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 1.925f);
 					ContiF = (LONGLONG)(1000000.f * 1.925f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540), y_r(12), "チームスピカ担当", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 100), y_r(540), y_r(12), "チームスピカ担当", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540 + 12), y_r(32), "沖野T", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 100), y_r(540 + 12), y_r(32), "沖野T", StartF, ContiF, 0);
 
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200), y_r(12), "あげません", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200), y_r(12), "あげません", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200 + 12), y_r(32), "スペシャルウィーク", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200 + 12), y_r(32), "スペシャルウィーク", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 1.925f);
 					ContiF = (LONGLONG)(1000000.f * 1.925f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12), y_r(32), "トウカイ テイオー", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12), y_r(32), "トウカイ テイオー", StartF, ContiF, 0);
 
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42), y_r(32), "メジロマックイーン", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42), y_r(32), "メジロマックイーン", StartF, ContiF, 0);
 
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42 * 3), y_r(32), "ウオッカ", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42 * 3), y_r(32), "ウオッカ", StartF, ContiF, 0);
 
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42 * 4), y_r(32), "ダイワスカーレット", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42 * 4), y_r(32), "ダイワスカーレット", StartF, ContiF, 0);
 
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200), y_r(12), "ナレーション", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200), y_r(12), "ナレーション", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200 + 12), y_r(32), "ゴールドシップ", StartF, ContiF);
+						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200 + 12), y_r(32), "ゴールドシップ", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 1.925f);
 					ContiF = (LONGLONG)(1000000.f * 1.925f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200), y_r(12), "理事長代理", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200), y_r(12), "理事長代理", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200 + 12), y_r(32), "樫本理子", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200 + 12), y_r(32), "樫本理子", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 1.925f);//(LONGLONG)(1000000.f * 23.422f)
 					ContiF = (LONGLONG)(1000000.f * 1.925f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(480 - 100), y_r(810), y_r(32), "", StartF, ContiF);
+						Texts.back().Set(y_r(480 - 100), y_r(810), y_r(32), "", StartF, ContiF, 0);
 						//
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 100), y_r(810), y_r(32), "", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 100), y_r(810), y_r(32), "", StartF, ContiF, 0);
 					}
 					StartF = (LONGLONG)(1000000.f * 25.164f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "脚本", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "脚本", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスデジタル", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスデジタル", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "音楽", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "音楽", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスデジタル", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスデジタル", StartF, ContiF, 0);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(10), "オープニングテーマ", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(10), "オープニングテーマ", StartF, ContiF, 0);
 						Texts.back().xpos = y_r(1440 - 60), y_r(720), y_r(10), "オープニングテーマ";
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 120), y_r(720 + 10), y_r(36), "『NEXT LEVEL』", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 120), y_r(720 + 10), y_r(36), "『NEXT LEVEL』", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36), y_r(36), "YU-KI", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36), y_r(36), "YU-KI", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 + 50), y_r(720 + 10 + 36 + 12), y_r(24), "(TRF)", StartF, ContiF);
+						Texts.back().Set(y_r(1440 + 50), y_r(720 + 10 + 36 + 12), y_r(24), "(TRF)", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36 + 4 + 32 + 11), y_r(10), "作　　詞", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36 + 4 + 32 + 11), y_r(10), "作　　詞", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36 + 4 + 32 * 2 + 11), y_r(10), "作・編曲", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36 + 4 + 32 * 2 + 11), y_r(10), "作・編曲", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 30), y_r(720 + 10 + 36 + 4 + 32), y_r(32), "藤田聖子", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 30), y_r(720 + 10 + 36 + 4 + 32), y_r(32), "藤田聖子", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 30), y_r(720 + 10 + 36 + 4 + 32 * 2), y_r(32), "渡部チェル", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 30), y_r(720 + 10 + 36 + 4 + 32 * 2), y_r(32), "渡部チェル", StartF, ContiF, 0);
 					}
 					StartF = (LONGLONG)(1000000.f * 32.52);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(650), y_r(10), "使用モデル", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 60), y_r(650), y_r(10), "使用モデル", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(650 + 10), y_r(24), "S.Aikawa氏", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 60), y_r(650 + 10), y_r(24), "S.Aikawa氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 120), y_r(650 + 10 + 48), y_r(24), "[MMD] アグネスタキオン (ウマ娘)", StartF, ContiF);
+						Texts.back().Set(y_r(400), y_r(650 + 10 + 48), y_r(24), "[MMD] アグネスタキオン (ウマ娘)", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880), y_r(10), "使用モデル", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(880), y_r(10), "使用モデル", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10), y_r(24), "ShiniNet氏", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10), y_r(24), "ShiniNet氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 120), y_r(880 + 10 + 48), y_r(24), "マン〇ッタンカフェ", StartF, ContiF);
+						Texts.back().Set(y_r(1500), y_r(880 + 10 + 48), y_r(24), "マン〇ッタンカフェ", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880), y_r(10), "使用モデル", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(880), y_r(10), "使用モデル", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10), y_r(24), "kachin氏", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10), y_r(24), "kachin氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10 + 48), y_r(24), "かれん", StartF, ContiF);
+						Texts.back().Set(y_r(1500), y_r(880 + 10 + 48), y_r(24), "かれん", StartF, ContiF, 1);
 					}
 					StartF = (LONGLONG)(1000000.f * 38.986f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(640 + 42 - 12), y_r(12), "ShiniNet氏", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 60), y_r(640 + 42 - 12), y_r(12), "ShiniNet氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 120), y_r(640 + 42), y_r(24), "ゴー〇ドシップ", StartF, ContiF);
+						Texts.back().Set(y_r(400), y_r(640 + 42), y_r(24), "ゴー〇ドシップ", StartF, ContiF, 1);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 120), y_r(640 + 42), y_r(24), "メジ〇マoクイーン", StartF, ContiF);
+						Texts.back().Set(y_r(1500), y_r(640 + 42), y_r(24), "メジ〇マoクイーン", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "つかさ氏", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "つかさ氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 120), y_r(540 + 42 + 48), y_r(24), "つかさ式ていおー", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 120), y_r(540 + 42 + 48), y_r(24), "つかさ式ていおー", StartF, ContiF, 0);
 						//
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "WARPSTAR氏", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "WARPSTAR氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 120), y_r(540 + 42 + 48), y_r(24), "【ウマ娘】スペシャルウィーク", StartF, ContiF);
+						Texts.back().Set(y_r(1500), y_r(540 + 42 + 48), y_r(24), "【ウマ娘】スペシャルウィーク", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "トレーナーモデル", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "トレーナーモデル", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "モノゾフ氏", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "モノゾフ氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 120), y_r(880 + 10 + 48), y_r(24), "【モブモデル】モブ用親父セット【配布中】", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【モブモデル】モブ用親父セット【配布中】", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "Jean氏", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "Jean氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 120), y_r(540 + 42 + 48), y_r(24), "【MMDウマ娘】テイエムオペラオー【モデル配布】", StartF, ContiF);
+						Texts.back().Set(y_r(400), y_r(540 + 42 + 48), y_r(24), "【MMDウマ娘】テイエムオペラオー【モデル配布】", StartF, ContiF, 1);
 						//
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "EndressStorm氏", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "EndressStorm氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 120), y_r(540 + 42 + 48), y_r(24), "メイショウドトウ", StartF, ContiF);
+						Texts.back().Set(y_r(1500), y_r(540 + 42 + 48), y_r(24), "メイショウドトウ", StartF, ContiF, 1);
 					}
 					StartF = (LONGLONG)(1000000.f * 47.200f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "tomoyo氏", StartF, ContiF);
+						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "tomoyo氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 120), y_r(540 + 42 + 48), y_r(24), "tmy式ダスカ　ver.0.92", StartF, ContiF);
+						Texts.back().Set(y_r(400), y_r(540 + 42 + 48), y_r(24), "tmy式ダスカ　ver.0.92", StartF, ContiF, 1);
 						//
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "Jean氏", StartF, ContiF);
+						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "Jean氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 120), y_r(540 + 42 + 48), y_r(24), "【MMDウマ娘】ウオッカ【モデル配布】", StartF, ContiF);
+						Texts.back().Set(y_r(1500), y_r(540 + 42 + 48), y_r(24), "【MMDウマ娘】ウオッカ【モデル配布】", StartF, ContiF, 1);
 					}
 					StartF = (LONGLONG)(1000000.f * 50.447f);
 					ContiF = (LONGLONG)(1000000.f * 1.800f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "黒子モデル", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "黒子モデル", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "神々の宴氏", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "神々の宴氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 120), y_r(880 + 10 + 48), y_r(24), "【ＭＭＤ】ウマ娘モブセット", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【ＭＭＤ】ウマ娘モブセット", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "競馬場モデル", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "競馬場モデル", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "Led/折鶴P氏", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "Led/折鶴P氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 140), y_r(880 + 10 + 48), y_r(24), "なんちゃって競馬場セット", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "なんちゃって競馬場セット", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "トレセン学園モデル(代演)", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "トレセン学園モデル(代演)", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "じん氏", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "じん氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 240), y_r(880 + 10 + 48), y_r(24), "【MMDギアス】アッシュフォード学園【ステージ配布】", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【MMDギアス】アッシュフォード学園【ステージ配布】", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "クロフネ(代演)", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "クロフネ(代演)", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "Tansoku102cm-沼地人氏", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "Tansoku102cm-沼地人氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 180), y_r(880 + 10 + 48), y_r(24), "MMD用モブ前弩級戦艦1890セット", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "MMD用モブ前弩級戦艦1890セット", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "客席", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "客席", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "ppp21氏", StartF, ContiF);
+						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "ppp21氏", StartF, ContiF, 0);
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 180), y_r(880 + 10 + 48), y_r(24), "【MMD】笹かまスタジアム", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【MMD】笹かまスタジアム", StartF, ContiF, 1);
 					}
 					StartF += (LONGLONG)(1000000.f * 2.000f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(32), "", StartF, ContiF);
+						Texts.back().Set(y_r(960), y_r(880 + 10), y_r(24), "まっちさん氏", StartF, ContiF, 1);
+						Texts.resize(Texts.size() + 1);
+						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "アグネスタキオン モデル", StartF, ContiF, 1);
 					}
 					StartF = (LONGLONG)(1000000.f * 62.775f);
 					ContiF = (LONGLONG)(1000000.f * 2.000f);
 					{
 						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(32), "", StartF, ContiF);
+						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(32), "", StartF, ContiF, 0);
 					}
 				}
 				SetUseASyncLoadFlag(FALSE);
@@ -1419,6 +1449,7 @@ namespace FPS_n2 {
 			}
 			bool Update(void) noexcept override {
 				models.Get(Tachyon, 0)->PhysicsSpeed = 1.f;
+				models.Get(Tachyon2, 0)->PhysicsSpeed = 1.f;
 				models.Get(Cafe, 0)->PhysicsSpeed = 1.f;
 				TEMPSCENE::Update();
 				const auto NowTime = GetNowHiPerformanceCount() - BaseTime;
@@ -1470,6 +1501,11 @@ namespace FPS_n2 {
 									sl.Scale += 6.f / GetFPS();
 								}
 							}
+							for (auto& sl : First3) {
+								if (sl.Alpha_base >= 0.f) {
+									easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
+								}
+							}
 							isNextreset = true;
 						}
 						else if (Cut < 7) {
@@ -1513,7 +1549,7 @@ namespace FPS_n2 {
 								isNextreset = true;
 								Board.isDraw = true;
 							}
-							models.Get(Tachyon, 0)->UpdateAnim(0, false, 0.8f);
+							models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
 						}
 						else if (Cut < 9) {
 							if (Cut == 7) {
@@ -1545,8 +1581,8 @@ namespace FPS_n2 {
 								sode[3].ypos = (float)(DrawPts->disp_y / 5);
 								isNextreset = true;
 							}
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
-							if (models.Get(Tachyon, 0)->obj.get_anime(0).per > 0) {
+							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
+							if (models.Get(Tachyon2, 0)->obj.get_anime(0).per > 0) {
 								Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
 								Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
 								cam_yure = 0.f;
@@ -1576,11 +1612,14 @@ namespace FPS_n2 {
 								easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(-0.5f + (float)(GetRand((int)(2.f * 0.5f) * 10)) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
 							}
 							SetSpeed_Effect(Effect::ef_reco, 1.05f);
-							models.Get(Tachyon, 0)->UpdateAnim(1, true, 1.f);
+							models.Get(Tachyon2, 0)->UpdateAnim(1, true, 1.f);
 
+							models.Get(Tachyon, 0)->UpdateAnim(1, true, 0.f);
 							models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
 						}
 						else if (Cut < 14) {
+							models.Get(Tachyon2, 0)->isDraw = false;
+							models.Get(Tachyon, 0)->isDraw = true;
 							Board.isDraw = false;
 							Map.isDraw = true;
 							if (models.Get(Tachyon, 0)->obj.get_anime(1).per > 0) {
@@ -1617,7 +1656,7 @@ namespace FPS_n2 {
 								}
 							}
 
-							models.Get(Tachyon, 0)->obj.get_anime(3).time = 33.f;
+							models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
 							if (Cut == 13) {
 								isNextreset = true;
 							}
@@ -1647,12 +1686,15 @@ namespace FPS_n2 {
 
 
 							if (Cut < 15) {
-								models.Get(Tachyon, 0)->UpdateAnim(3, true, 0.6f);
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(6);
+								models.Get(Tachyon, 0)->isDraw = false;
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.6f);
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(6);
 								Cut_Pic[Cut].cam_per = 0.f;
 
 								models.Get(Tachyon, 1)->obj.get_anime(2).time = 33.f;
-								models.Get(Tachyon, 0)->PhysicsSpeed = 0.6f;
+								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.6f;
 								if (Cut == 14) {
 									isNextreset = true;
 								}
@@ -1660,47 +1702,47 @@ namespace FPS_n2 {
 							else if (Cut < 16) {
 								if (models.Get(Tachyon, 1)->obj.get_anime(2).time == 33.f) {
 									models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-									models.Get(Tachyon, 0)->isDraw = false;
+									models.Get(Tachyon2, 0)->isDraw = false;
 									models.Get(Tachyon, 1)->isDraw = true;
 								}
 
 								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
-								models.Get(Tachyon, 0)->PhysicsSpeed = 0.45f;
+								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.45f;
 
-								models.Get(Tachyon, 0)->obj.get_anime(3).time = 33.f;
+								models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
 								models.Get(Cafe, 0)->obj.get_anime(0).time = 33.f;
 								if (Cut == 15) {
 									isNextreset = true;
 								}
 
-								models.Get(Tachyon, 0)->OpacityRate = 0.f;
+								models.Get(Tachyon2, 0)->OpacityRate = 0.f;
 								models.Get(Cafe, 0)->OpacityRate = 0.f;
 								isfirst_14 = false;
 							}
 							else if (Cut < 20) {
-								models.Get(Tachyon, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->isDraw = true;
 								models.Get(Cafe, 0)->isDraw = true;
-								if (models.Get(Tachyon, 0)->obj.get_anime(3).time == 33.f) {
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+								if (models.Get(Tachyon2, 0)->obj.get_anime(3).time == 33.f) {
+									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 								}
 								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
+								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
 
-								models.Get(Tachyon, 0)->UpdateAnim(3, true, 0.45f);
-								models.Get(Tachyon, 0)->PhysicsSpeed = 0.45f;
+								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.45f);
+								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.45f;
 
 								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 								models.Get(Cafe, 0)->PhysicsSpeed = 0.45f;
 
 								if (Cut == 17) {
 									easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
-										models.Get(Tachyon, 0)->obj.frame(9) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
+										models.Get(Tachyon2, 0)->obj.frame(9) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
 										0.975f);
 									if (!isfirst_14) {
-										Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
+										Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(9);
 									}
 									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
 									easing_set(&xradadd_r, xradadd, 0.975f);
@@ -1746,7 +1788,7 @@ namespace FPS_n2 {
 									radc += 12.5f / GetFPS();
 								}
 								else if (Cut == 19) {
-									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(133);
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(103);
 									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
 									easing_set(&xradadd_r, xradadd, 0.975f);
 									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
@@ -1761,33 +1803,34 @@ namespace FPS_n2 {
 									radc += 12.5f / GetFPS();
 								}
 							}
-
-							for (auto&n : Newspaper) {
-								n.move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(-30 + GetRand(2 * 30)));
-								n.move.pos = VECTOR_ref::vget((float)(-20 + GetRand(2 * 20)), (float)(7 + GetRand(10)), (float)(-20 + GetRand(2 * 20)));
-								n.move.vec.y(-(float)(GetRand(100)) / 1000.f);
+							for (int i = 0; i < 12; i++) {
+								models.Get(NEWS, i)->move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(-30 + GetRand(2 * 30)));
+								models.Get(NEWS, i)->move.pos = VECTOR_ref::vget((float)(-20 + GetRand(2 * 20)), (float)(7 + GetRand(10)), (float)(-20 + GetRand(2 * 20)));
+								models.Get(NEWS, i)->move.vec.y(-(float)(GetRand(100)) / 1000.f);
 							}
 							isNextreset = true;
 						}
 						else if (Cut < 21) {
 							Map.isDraw = false;
+							models.Get(Tachyon2, 0)->isDraw = false;
 							models.Get(Tachyon, 1)->isDraw = false;
 							if (models.Get(Cafe, 0)->obj.get_anime(0).time != 0.f) {
 								models.Get(Cafe, 0)->obj.get_anime(0).time = 0.f;
 								models.Get(Cafe, 0)->isDraw = false;
 							}
-							for (auto&n : Newspaper) {
-								if (n.move.pos.y() >= 3.5f) {
-									n.move.vec.yadd(M_GR / powf((FPS / 0.75f), 2.f));
+							for (int i = 0; i < 12; i++) {
+								models.Get(NEWS, i)->isDraw = true;
+								if (models.Get(NEWS, i)->move.pos.y() >= 3.5f) {
+									models.Get(NEWS, i)->move.vec.yadd(M_GR / powf((FPS / 0.75f), 2.f));
 								}
 								else {
-									float yp = n.move.vec.y();
+									float yp = models.Get(NEWS, i)->move.vec.y();
 									easing_set(&yp, 0.f, 0.995f);
-									n.move.vec.y(yp);
+									models.Get(NEWS, i)->move.vec.y(yp);
 								}
 
-								n.move.pos += n.move.vec;
-								n.obj.SetMatrix(n.move.mat*MATRIX_ref::Mtrans(n.move.pos));
+								models.Get(NEWS, i)->move.pos += models.Get(NEWS, i)->move.vec;
+								models.Get(NEWS, i)->obj.SetMatrix(models.Get(NEWS, i)->move.mat*MATRIX_ref::Mtrans(models.Get(NEWS, i)->move.pos));
 							}
 							/*
 							for (auto& n : news_p) {
@@ -1798,6 +1841,9 @@ namespace FPS_n2 {
 							*/
 						}
 						else if (Cut < 24) {
+							for (int i = 0; i < 12; i++) {
+								models.Get(NEWS, i)->isDraw = false;
+							}
 							Map.isDraw = true;
 							for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
 								n->xpos = (n + 1)->xpos;
@@ -1863,7 +1909,8 @@ namespace FPS_n2 {
 							return_walk = false;
 						}
 						else if (Cut < 26) {
-							Map_school.isDraw = true;
+							models.Get(SCHOOL, 0)->isDraw = true;
+							models.Get(Tachyon, 0)->isDraw = true;
 							if (models.Get(Tachyon, 0)->obj.get_anime(8).time == 33.f) {
 								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
 								models.Get(Tachyon, 1)->isDraw = false;
@@ -1895,9 +1942,10 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 27) {
 							Map.isDraw = true;
-							Map_school.isDraw = false;
+							models.Get(SCHOOL, 0)->isDraw = false;
 							{
-								Gate.isDraw = true;
+								models.Get(GATE, 0)->isDraw = true;
+								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
 								models.Get(Tachyon, 0)->isDraw = false;
 								models.Get(Tachyon, 1)->isDraw = false;
 								return_walk = true;
@@ -1925,7 +1973,7 @@ namespace FPS_n2 {
 							camzb_28 = 1.f;
 						}
 						else if (Cut < 28) {
-							Gate.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
 							if (Gate_Xpos < 20.f) {
 								Gate_Xpos += 20.f *1.f / GetFPS();
 							}
@@ -1947,7 +1995,7 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 30) {
 							if (Cut == 28) {
-								Gate.isDraw = false;
+								models.Get(GATE, 0)->isDraw = false;
 							}
 							models.Get(Karen, 0)->isDraw = true;
 							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
@@ -2009,8 +2057,9 @@ namespace FPS_n2 {
 							models.Get(Scarlet, 0)->OpacityRate = 0.5f;
 						}
 						else if (Cut < 33) {
+							models.Get(Tachyon, 0)->isDraw = false;
 							Map.isDraw = true;
-							models.Get(Tachyon, 0)->isDraw = true;
+							models.Get(Tachyon2, 0)->isDraw = true;
 							models.Get(Cafe, 0)->isDraw = false;
 							models.Get(Scarlet, 0)->isDraw = true;
 							models.Get(Scarlet, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
@@ -2018,8 +2067,8 @@ namespace FPS_n2 {
 							if (models.Get(Scarlet, 0)->obj.get_anime(0).time > 10.f) {
 								easing_set(&models.Get(Scarlet, 0)->OpacityRate, 1.f, 0.95f);
 							}
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
-							models.Get(Tachyon, 0)->UpdateAnim(10, false, 0.6f);
+							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
+							models.Get(Tachyon2, 0)->UpdateAnim(10, false, 0.6f);
 							isNextreset = true;
 						}
 						else if (Cut < 34) {
@@ -2034,7 +2083,7 @@ namespace FPS_n2 {
 						else if (Cut < 36) {
 							Map.isDraw = false;
 							models.Get(Scarlet, 0)->isDraw = false;
-							models.Get(Tachyon, 0)->isDraw = false;
+							models.Get(Tachyon2, 0)->isDraw = false;
 							models.Get(Cafe, 0)->isDraw = true;
 							models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
 							models.Get(Cafe, 0)->OpacityRate = 1.f;
@@ -2064,13 +2113,15 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 40) {
 							Map.isDraw = true;
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Tachyon, 0)->UpdateAnim(13, false, 1.2f);
+							models.Get(Tachyon, 0)->isDraw = false;
+							models.Get(Tachyon2, 0)->isDraw = true;
+							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							models.Get(Tachyon2, 0)->UpdateAnim(13, false, 1.2f);
 							isNextreset = true;
 						}
 						else if (Cut < 41) {
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Tachyon, 0)->UpdateAnim(14, false, 2.8f);
+							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							models.Get(Tachyon2, 0)->UpdateAnim(14, false, 2.8f);
 							isNextreset = true;
 							camzb_28 = 0.f;
 							camzb_41 = 0.1f;
@@ -2080,9 +2131,9 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 42) {
 							Gate_Xpos = 0.f;
-							Gate.isDraw = true;
-							Gate.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
-							Gate.UpdateAnim(0, false, 0.f);
+							models.Get(GATE, 0)->isDraw = true;
+							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							models.Get(GATE, 0)->UpdateAnim(0, false, 0.f);
 
 							Gate_Xpos += -7.f;
 							for (int i = 0; i < 12; i++) {
@@ -2091,7 +2142,7 @@ namespace FPS_n2 {
 								Gate_Xpos += -14.f;
 							}
 
-							models.Get(Tachyon, 0)->isDraw = false;
+							models.Get(Tachyon2, 0)->isDraw = false;
 							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
 
 							float pp = 10.f;
@@ -2184,7 +2235,7 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 45) {
 							if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
-								Gate.UpdateAnim(1, false, 1.f);
+								models.Get(GATE, 0)->UpdateAnim(1, false, 1.f);
 
 								Gate_Xpos = 0.f;
 								Gate_Xpos += -7.f;
@@ -2231,9 +2282,10 @@ namespace FPS_n2 {
 
 						}
 						else if (Cut < 46) {
+							models.Get(Tachyon2, 0)->isDraw = false;
 							Board.isDraw = true;
 							Map.isDraw = false;
-							Gate.isDraw = false;
+							models.Get(GATE, 0)->isDraw = false;
 							for (int i = 0; i < 12; i++) {
 								//models.Get(Mobu, i)->
 								models.Get(Mobu, i)->isDraw = false;
@@ -2344,11 +2396,11 @@ namespace FPS_n2 {
 							sode[7].xpos += (float)(y_r(300)) / GetFPS();
 							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
 							isNextreset = true;
-							models.Get(Tachyon, 0)->obj.get_anime(2).time = 35.f;
+							models.Get(Tachyon2, 0)->obj.get_anime(2).time = 35.f;
 						}
 						else if (Cut < 50) {
 
-							VECTOR_ref aim = models.Get(Tachyon, 0)->obj.frame(2);
+							VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
 							aim.y(0.f);
 							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
 							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
@@ -2368,9 +2420,9 @@ namespace FPS_n2 {
 							sode[7].xpos += (float)(y_r(300)) / GetFPS();
 							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
 
-							models.Get(Tachyon, 0)->isDraw = true;
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
-							models.Get(Tachyon, 0)->UpdateAnim(2, false, 0.1f);
+							models.Get(Tachyon2, 0)->isDraw = true;
+							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
+							models.Get(Tachyon2, 0)->UpdateAnim(2, false, 0.1f);
 							isNextreset = true;
 							models.Get(Karen, 0)->isDraw = false;
 						}
@@ -2379,7 +2431,7 @@ namespace FPS_n2 {
 							Map.isDraw = true;
 							Stop_Effect(Effect::ef_greexp);
 							Stop_Effect(Effect::ef_greexp2);
-							models.Get(Tachyon, 0)->isDraw = false;
+							models.Get(Tachyon2, 0)->isDraw = false;
 
 							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
 							models.Get(Karen, 0)->UpdateAnim(1, false, 0.95f);
@@ -2452,7 +2504,7 @@ namespace FPS_n2 {
 						else if (Cut < 55) {
 							Board.isDraw = false;
 							Map.isDraw = true;
-							Gate.isDraw = true;
+							models.Get(GATE, 0)->isDraw = true;
 							models.Get(Mobu, 0)->isDraw = true;
 							models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
 							models.Get(Mobu, 0)->UpdateAnim(4, false, 0.84f);
@@ -2586,7 +2638,7 @@ namespace FPS_n2 {
 							isNextreset = true;
 						}
 						else if (Cut < 58) {
-							Gate.isDraw = false;
+							models.Get(GATE, 0)->isDraw = false;
 							Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
 
 							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
@@ -2670,7 +2722,6 @@ namespace FPS_n2 {
 						camera_main.set_cam_info(camera_main.fov, camera_main.near_, camera_main.far_);
 					}
 					models.Update();
-					Gate.Update();
 					Ship.Update();
 					if (!Time_Over()) {
 						if (NowTime > GetCutTime()) {
@@ -2684,6 +2735,7 @@ namespace FPS_n2 {
 						else {
 							models.Get(Tachyon, 0)->SetPhysics(reset_p);
 							models.Get(Tachyon, 1)->SetPhysics(reset_p);
+							models.Get(Tachyon2, 0)->SetPhysics(reset_p);
 							models.Get(Cafe, 0)->SetPhysics(reset_p);
 							models.Get(Scarlet, 0)->SetPhysics(reset_p);
 							models.Get(Vodka, 0)->SetPhysics(reset_p);
@@ -2713,13 +2765,9 @@ namespace FPS_n2 {
 			}
 			void UI_Draw(void) noexcept  override {
 				//printfDx("Cut : %d\n", Cut);
-
-
 				const auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 				for (auto& t : Texts) {
-					if (NowTime > t.START_TIME && NowTime < t.END_TIME) {
-						Fonts.Get(t.size).Get_handle().DrawString(t.xpos, t.ypos, t.str, GetColor(255, 255, 255));
-					}
+					t.Draw(NowTime);
 				}
 				//
 			}
@@ -2730,7 +2778,7 @@ namespace FPS_n2 {
 						SetFogEnable(FALSE);
 						SetUseLighting(FALSE);
 						{
-							sky.obj.DrawModel();
+							sky.Draw();
 							DrawBillboard3D(this->sun_pos.get(), 0.5f, 0.5f, 200.f, 0.f, this->sun_pic.get(), TRUE);
 						}
 						SetUseLighting(TRUE);
@@ -2743,30 +2791,28 @@ namespace FPS_n2 {
 				Map.obj.DrawModel();
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
-				Map_school.Draw();
-				Gate.Draw();
+				models.Get(SCHOOL, 0)->Draw();
+				models.Get(GATE, 0)->Draw();
 			}
 			void Shadow_Draw(void) noexcept override {
 				Common_Draw();
 			}
 			void Main_Draw(void) noexcept override {
-				if (Cut == 34) {
+				if (Cut == 2 || Cut == 3 || Cut == 4 || Cut == 6 || Cut == 7 || Cut == 8 || Cut == 34 || Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
 					SetFogEnable(TRUE);
-					SetFogColor(128, 128, 128);
-					SetFogStartEnd(10, 60);
 					SetFogDensity(0.01f);
-				}
-				if (Cut == 2 || Cut == 3 || Cut == 4 || Cut == 6 || Cut == 7 || Cut == 8) {
-					SetFogEnable(TRUE);
-					SetFogColor(64, 64, 64);
-					SetFogStartEnd(10, 500);
-					SetFogDensity(0.01f);
-				}
-				if (Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
-					SetFogEnable(TRUE);
-					SetFogColor(128, 128, 128);
-					SetFogStartEnd(10, 300);
-					SetFogDensity(0.01f);
+					if (Cut == 34) {
+						SetFogColor(128, 128, 128);
+						SetFogStartEnd(10, 60);
+					}
+					if (Cut == 2 || Cut == 3 || Cut == 4 || Cut == 6 || Cut == 7 || Cut == 8) {
+						SetFogColor(64, 64, 64);
+						SetFogStartEnd(10, 500);
+					}
+					if (Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
+						SetFogColor(128, 128, 128);
+						SetFogStartEnd(10, 300);
+					}
 				}
 				Board.Draw();
 				Map.Draw();
@@ -2775,57 +2821,43 @@ namespace FPS_n2 {
 
 				SetFogEnable(FALSE);
 				{
-					anim[0].handle.DrawExtendGraph((int)(anim[0].xpos), (int)(anim[0].ypos), DrawPts->disp_x + (int)(anim[0].xpos), DrawPts->disp_y + (int)(anim[0].ypos), true);
-					anim[1].handle.DrawExtendGraph((int)(anim[1].xpos), (int)(anim[1].ypos), DrawPts->disp_x + (int)(anim[1].xpos), DrawPts->disp_y + (int)(anim[1].ypos), true);
-					SetDrawBright(108, 108, 108);
-					sode[7].handle.DrawExtendGraph((int)(sode[7].xpos), (int)(sode[7].ypos), DrawPts->disp_x + (int)(sode[7].xpos), DrawPts->disp_y + (int)(sode[7].ypos), true);
-					SetDrawBright(144, 144, 144);
-					sode[6].handle.DrawExtendGraph((int)(sode[6].xpos), (int)(sode[6].ypos), DrawPts->disp_x + (int)(sode[6].xpos), DrawPts->disp_y + (int)(sode[6].ypos), true);
-					SetDrawBright(192, 192, 192);
-					sode[5].handle.DrawExtendGraph((int)(sode[5].xpos), (int)(sode[5].ypos), DrawPts->disp_x + (int)(sode[5].xpos), DrawPts->disp_y + (int)(sode[5].ypos), true);
-					SetDrawBright(255, 255, 255);
-					sode[4].handle.DrawExtendGraph((int)(sode[4].xpos), (int)(sode[4].ypos), DrawPts->disp_x + (int)(sode[4].xpos), DrawPts->disp_y + (int)(sode[4].ypos), true);
-					sode[3].handle.DrawExtendGraph((int)(sode[3].xpos), (int)(sode[3].ypos), DrawPts->disp_x + (int)(sode[3].xpos), DrawPts->disp_y + (int)(sode[3].ypos), true);
-					sode[2].handle.DrawExtendGraph((int)(sode[2].xpos), (int)(sode[2].ypos), DrawPts->disp_x + (int)(sode[2].xpos), DrawPts->disp_y + (int)(sode[2].ypos), true);
-					sode[1].handle.DrawExtendGraph((int)(sode[1].xpos), (int)(sode[1].ypos), DrawPts->disp_x + (int)(sode[1].xpos), DrawPts->disp_y + (int)(sode[1].ypos), true);
-					sode[0].handle.DrawExtendGraph((int)(sode[0].xpos), (int)(sode[0].ypos), DrawPts->disp_x + (int)(sode[0].xpos), DrawPts->disp_y + (int)(sode[0].ypos), true);
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(196.f));
+					anim[0].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					anim[1].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					sode[7].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 108, 108, 108);
+					sode[6].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 144, 144, 144);
+					sode[5].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 192, 192, 192);
+					sode[4].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					sode[3].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					sode[2].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					sode[1].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					sode[0].Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
 					for (auto& sl : First2) {
-						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f);
+						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f, 255, 255, 255);
 					}
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					for (auto& sl : First) {
-						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f);
+						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.5f, 255, 255, 255);
 					}
 					for (auto& sl : First3) {
-						easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
-						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.9f);
+						sl.Draw((float)(DrawPts->disp_y) / 540.f*0.9f, 255, 255, 255);
 					}
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-					{
-						if (Box_ALPHA != 0.f) {
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
-							DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(0, 0, 0), TRUE);
-							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					if (Box_ALPHA != 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
+						DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(0, 0, 0), TRUE);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+						for (auto& sl : sode_last) {
+							int per_b = 127 + (int)(128.f* (&sl - &sode_last.front()) / sode_last.size());
+							sl.Draw((float)(DrawPts->disp_y) / 540.f, per_b, per_b, per_b);
 						}
-						if (Box_ALPHA != 0.f) {
-							for (auto& sl : sode_last) {
-								int per_b = 127 + (int)(128.f* (&sl - &sode_last.front()) / sode_last.size());
-								SetDrawBright(per_b, per_b, per_b);
-								sl.Draw((float)(DrawPts->disp_y) / 540.f);
-							}
-							SetDrawBright(255, 255, 255);
-						}
-						if ((int)(per_logo*100.f) <= GetRand(99)) {
-							Logo.Draw((float)(DrawPts->disp_y) / 540.f / 2.f);
-						}
+					}
+					if ((int)(per_logo*100.f) <= GetRand(99)) {
+						Logo.Draw((float)(DrawPts->disp_y) / 540.f / 2.f, 255, 255, 255);
 					}
 					if (Cut == 21 || Cut == 22 || Cut == 23) {
-						face.DrawExtendGraph(0, 0, DrawPts->disp_x, DrawPts->disp_y, true);
-						for (auto&n : news_p) { n.Draw(1.f); }
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+						face.Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+						for (auto&n : news_p) { n.Draw(1.f, 255, 255, 255); }
 					}
 				}
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 			void Item_Draw(void) noexcept override {
 				TEMPSCENE::Item_Draw();
