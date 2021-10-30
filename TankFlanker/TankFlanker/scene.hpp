@@ -123,6 +123,9 @@ namespace FPS_n2 {
 				size_t numBase = 0;
 				float PhysicsSpeed = 1.f;
 
+				float b_run = 0;
+				float b_runrange = 0;
+
 				std::string Path;
 				MV1 obj;
 				moves move;
@@ -273,6 +276,8 @@ namespace FPS_n2 {
 			};
 			class GraphControl {
 			public:
+				bool isDraw = true;
+
 				int xsize = -1;
 				int ysize = -1;
 
@@ -317,7 +322,7 @@ namespace FPS_n2 {
 					easing_set(&rad, rad_base, easing);
 				}
 				void Draw(float scale_, int b_r, int b_g, int b_b) {
-					if (this->Alpha > 0.f) {
+					if (this->isDraw && this->Alpha > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*this->Alpha));
 						SetDrawBright(b_r, b_g, b_b);
 						this->handle.DrawRotaGraph((int)(this->xpos), (int)(this->ypos), scale_*this->Scale, this->rad, true);
@@ -326,7 +331,7 @@ namespace FPS_n2 {
 					}
 				}
 				void Draw_Ex(int disp_x, int disp_y, int b_r, int b_g, int b_b) {
-					if (this->Alpha > 0.f) {
+					if (this->isDraw && this->Alpha > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*this->Alpha));
 						SetDrawBright(b_r, b_g, b_b);
 						this->handle.DrawExtendGraph((int)(this->xpos), (int)(this->ypos), disp_x + (int)(this->xpos), disp_y + (int)(this->ypos), true);
@@ -369,9 +374,6 @@ namespace FPS_n2 {
 			GraphControl face;
 
 			ModelControl models;
-
-			std::vector<float> mobu_b_run;
-			std::vector<float> mobu_b_runrange;
 
 			std::vector<GraphControl> news_p;
 			std::vector<GraphControl> sode;
@@ -421,6 +423,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Awake();
 				//
 				SetUseASyncLoadFlag(TRUE);
+				//*
 				{
 					//3D
 					{
@@ -432,9 +435,7 @@ namespace FPS_n2 {
 						models.Load_onAnime(Tachyon);//3
 						models.Load_onAnime(Tachyon);//4
 						models.Load_onAnime(Tachyon);//5
-
 						models.Load_onAnime(Tachyon2);//origin
-
 						models.Load_onAnime(Cafe);//origin
 						models.Load_onAnime(Scarlet);//origin
 						models.Load_onAnime(Vodka);//origin
@@ -447,14 +448,12 @@ namespace FPS_n2 {
 						models.Load_onAnime(Opera);//origin
 						models.Load_onAnime(Doto);//origin
 
-						mobu_b_run.resize(12);
-						mobu_b_runrange.resize(12);
 						for (int i = 0; i < 12; i++) {
 							models.Load_onAnime(Mobu);
-							mobu_b_run[i] = 0.8f + (float)(GetRand(195)) / 1000.f;
-							mobu_b_runrange[i] = (float)(GetRand(100)) / 10.f;
-							while (true)
-							{
+
+							models.Get(Mobu, i)->b_run = 0.8f + (float)(GetRand(195)) / 1000.f;
+							models.Get(Mobu, i)->b_runrange = (float)(GetRand(100)) / 10.f;
+							while (true) {
 								models.Get(Mobu, i)->Anim_Sel = GetRand(2);
 								if (i == 0 || models.Get(Mobu, i)->Anim_Sel != models.Get(Mobu, i - 1)->Anim_Sel) {
 									break;
@@ -463,19 +462,18 @@ namespace FPS_n2 {
 						}
 
 						models.Load_onAnime(GATE);//origin
+						for (int i = 0; i < 12; i++) {
+							models.Load_onAnime(NEWS);					//origin
+						}
 
 						MV1::LoadonAnime(MAP, &Map.obj, 0);
 						MV1::LoadonAnime(BOARD, &Board.obj, 0);
-						MV1::LoadonAnime(SHIP, &Ship.obj, 0);				//空
-
-						for (int i = 0; i < 12; i++) {
-							models.Load_onAnime(NEWS);//origin
-						}
+						MV1::LoadonAnime(SHIP, &Ship.obj, 0);			//空
 						MV1::LoadonAnime(SKY, &sky.obj, 0);				//空
 					}
 					//2D
 					{
-						this->sun_pic = GraphHandle::Load("data/sun.png");					/*sun*/
+						this->sun_pic = GraphHandle::Load("data/sun.png");					//sun
 						face.Set(0, 0, 0, 1.f, "data/Cut.png");
 						for (int i = 0; i < 10; i++) {
 							news_p.resize(news_p.size() + 1);
@@ -499,6 +497,16 @@ namespace FPS_n2 {
 						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/1.png");
 						sode.resize(sode.size() + 1);
 						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/2.png");
+
+						sode[0].isDraw = false;
+						sode[1].isDraw = false;
+						sode[2].isDraw = false;
+						sode[3].isDraw = false;
+						sode[4].isDraw = false;
+						sode[5].isDraw = false;
+						sode[6].isDraw = false;
+						sode[7].isDraw = false;
+
 						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/logo.png");
 						for (int i = 0; i < 10; i++) {
 							sode_last.resize(sode_last.size() + 1);
@@ -545,11 +553,14 @@ namespace FPS_n2 {
 						First3[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
 						First3[2].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f);
 						anim.resize(anim.size() + 1);
-						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, 1.f, "data/anime/0.png");
+						anim.back().Set(0.f, 0.f, 0, 1.f, "data/anime/0.png");
 						anim.resize(anim.size() + 1);
 						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, 1.f, "data/anime/1.png");
+						anim[0].isDraw = false;
+						anim[1].isDraw = false;
 					}
 				}
+				//*/
 				SetUseASyncLoadFlag(FALSE);
 				//
 				models.Set();
@@ -557,10 +568,12 @@ namespace FPS_n2 {
 				Board.isDraw = false;
 				Ship.isDraw = false;
 				//
+				//*
 				models.Get(Tachyon2, 0)->isDraw = true;
 				Map.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
-				Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+				Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
 				models.Get(SCHOOL, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
+				//*/
 				//
 				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
 				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
@@ -571,6 +584,23 @@ namespace FPS_n2 {
 				models.Draw();
 			}
 		public:
+			void Sub_Func(std::string& func, const char& in_str) {
+				size_t str_switch = 0;
+				size_t str_in = std::string::npos;
+				bool in = false;
+				while (true) {
+					if (str_switch != std::string::npos) { str_switch = func.find('\"', str_switch + 1); in ^= 1; }
+					str_in = func.find(in_str, str_in + 1);
+					if (str_in != std::string::npos) {
+						if (str_switch != std::string::npos && str_switch < str_in && in) {
+							continue;
+						}
+						func = func.erase(str_in, 1);
+						continue;
+					}
+					break;
+				}
+			}
 			void Set(void) noexcept override {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
@@ -585,512 +615,544 @@ namespace FPS_n2 {
 				*/
 				SetUseASyncLoadFlag(TRUE);
 				{
-					//羽広がり前
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 0.450f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 10.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//羽広がり中
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 2.614f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 10.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//胸
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.021f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.f, 13.82f, -2.08f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(20.1))*sin(-deg2rad(22.9)), sin(deg2rad(20.1)), -cos(deg2rad(20.1))*cos(-deg2rad(22.9)))*10.3f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.far_ = 20.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//背中
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.258f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-2.57f, 10.04f, 0.31f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.3))*sin(-deg2rad(225.7)), sin(deg2rad(6.3)), -cos(deg2rad(6.3))*cos(-deg2rad(225.7)))*10.3f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.far_ = 20.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//右足→
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.512f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.85f, 16.69f, 0.61f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(15.5))*sin(-deg2rad(202.8)), sin(deg2rad(15.5)), -cos(deg2rad(15.5))*cos(-deg2rad(202.8)))*10.3f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.far_ = 20.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//頭←
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.724f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.54f, 16.05f, -1.28f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(8.6))*sin(-deg2rad(73.9)), sin(deg2rad(8.6)), -cos(deg2rad(8.6))*cos(-deg2rad(73.9)))*10.3f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.far_ = 20.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//羽切るはじめ
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 4.310f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 10.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//羽切る終わり
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 5.086f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.far_ = 40.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//斬新
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 6.448f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.far_ = 40.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//＜＞
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.096f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//顔
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.288f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-4.494195f, 12.919953f, -28.361502f);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.366895f, 16.169621f, -21.344687f);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//顔2
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.576f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.106448f, 3.030100f, -23.623045f);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.044426f, 4.483082f, -26.842037f);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//顔3
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.864f);
+					{
+						//羽広がり前
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 0.450f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 10.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//羽広がり中
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 2.614f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 10.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//胸
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.021f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.f, 13.82f, -2.08f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(20.1))*sin(-deg2rad(22.9)), sin(deg2rad(20.1)), -cos(deg2rad(20.1))*cos(-deg2rad(22.9)))*10.3f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.far_ = 20.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//背中
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.258f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-2.57f, 10.04f, 0.31f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.3))*sin(-deg2rad(225.7)), sin(deg2rad(6.3)), -cos(deg2rad(6.3))*cos(-deg2rad(225.7)))*10.3f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.far_ = 20.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//右足→
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.512f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.85f, 16.69f, 0.61f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(15.5))*sin(-deg2rad(202.8)), sin(deg2rad(15.5)), -cos(deg2rad(15.5))*cos(-deg2rad(202.8)))*10.3f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.far_ = 20.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//頭←
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.724f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.54f, 16.05f, -1.28f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(8.6))*sin(-deg2rad(73.9)), sin(deg2rad(8.6)), -cos(deg2rad(8.6))*cos(-deg2rad(73.9)))*10.3f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.far_ = 20.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//羽切るはじめ
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 4.310f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 10.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//羽切る終わり
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 5.086f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.far_ = 40.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//斬新
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 6.448f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.far_ = 40.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//＜＞
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.096f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+					}
+					{
+						//顔
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.288f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-4.494195f, 12.919953f, -28.361502f);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.366895f, 16.169621f, -21.344687f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//顔2
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.576f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.106448f, 3.030100f, -23.623045f);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.044426f, 4.483082f, -26.842037f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//顔3
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.864f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(2.589150f, 10.542250f, -24.661646f);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(3.584894f, 12.149980f, -16.973043f);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(2.589150f, 10.542250f, -24.661646f);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(3.584894f, 12.149980f, -16.973043f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//||
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 10.264f);
+						//||
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 10.264f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//バイク
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 13.410f);
+						//バイク
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 13.410f);
 
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(-7.410444f, 11.652717f, 2.655200f);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-6.079808f, 12.230768f, -1.217081f);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(-7.410444f, 11.652717f, 2.655200f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-6.079808f, 12.230768f, -1.217081f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//君が願うことなら
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 15.80f);
+						//君が願うことなら
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 15.80f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
 
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-							sin(deg2rad(-5.5)),
-							-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-						)*88.0f;
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
+								sin(deg2rad(-5.5)),
+								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
+							)*88.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//全てが現
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 17.80f);
+						//全てが現
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 17.80f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
 
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-							sin(deg2rad(-5.5)),
-							-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-						)*88.0f;
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
+								sin(deg2rad(-5.5)),
+								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
+							)*88.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//実になるだろ(天道)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 19.0f);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					//う　選
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 20.334f);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					//ばれしもの(加賀美)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 21.452f);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					//隕石
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 23.422f);
+						//実になるだろ(天道)
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 19.0f);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						//う　選
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 20.334f);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						//ばれしもの(加賀美)
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 21.452f);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+					}
+					{}
+					{
+						//隕石
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 23.422f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 2, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 20, -20);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 200.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//ワーム①
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.252f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 2, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 20, -20);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 200.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//ワーム①
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.252f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 200.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//羽ワイプ
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.452f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 200.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//羽ワイプ
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.452f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 200.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//ワーム②(暴そ)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 25.164f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 200.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//ワーム②(暴そ)
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 25.164f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 200.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//東京タワー(うを始めて）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 26.526f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 200.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//東京タワー(うを始めて）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 26.526f);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, 0);
-					Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 5, -20);
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, 0);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 5, -20);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().cam_per = 0.f;
 
-					//バイク戻る(る　世界を元に戻すにはぁ）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 29.790);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -30.985756f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-							sin(deg2rad(-5.5)),
-							-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-						)*108.0f;
+						//バイク戻る(る　世界を元に戻すにはぁ）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 29.790);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -30.985756f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
+								sin(deg2rad(-5.5)),
+								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
+							)*108.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(25);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//バンバイク①(もう　時か）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 31.670);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(25);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//バンバイク①(もう　時か）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 31.670);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-							sin(deg2rad(-5.5)),
-							-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-						)*88.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
+								sin(deg2rad(-5.5)),
+								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
+							)*88.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//バンバイク②(んがな）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 32.52);
+						//バンバイク②(んがな）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 32.52);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(0.f))*sin(-deg2rad(float(0 - 10))),
-							sin(deg2rad(0.f)),
-							-cos(deg2rad(0.f))*cos(-deg2rad(float(0 - 10)))
-						)*88.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-cos(deg2rad(0.f))*sin(-deg2rad(float(0 - 10))),
+								sin(deg2rad(0.f)),
+								-cos(deg2rad(0.f))*cos(-deg2rad(float(0 - 10)))
+							)*88.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//寝る女(い　Moving First ここ）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 34.654);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//寝る女(い　Moving First ここ）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 34.654);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							2.f,
-							12.f,
-							6.f
-						)*1.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								2.f,
+								12.f,
+								6.f
+							)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//雨加賀美(ろのぉ）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 35.522);
+						//雨加賀美(ろのぉ）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 35.522);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							2.f,
-							10.f,
-							8.f
-						)*1.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								2.f,
+								10.f,
+								8.f
+							)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					Cut_Pic.back().cam_per = 0.f;
-					//雨加賀美②(時計）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.175);
+						Cut_Pic.back().cam_per = 0.f;
+					}
+					{}
+					{
+						//雨加賀美②(時計）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.175);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-2.f, 12.f, -6.f)*2.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-2.f, 12.f, -6.f)*2.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
 
-					//雨加賀美②(時計）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.775);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-10.f, 0.f, 0.f)*1.0f;
+						//雨加賀美②(時計）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.775);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-10.f, 0.f, 0.f)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//クロス(走らせ）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.173);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(20.f, 0.f, 0.f)*1.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//クロス(走らせ）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.173);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(20.f, 0.f, 0.f)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//陽(）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.986);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							0.f,
-							6.f,
-							10.f
-						)*1.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 300.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//陰(明日の）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 40.11);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							0.f,
-							6.f,
-							-10.f
-						)*1.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 300.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//手①(その）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 41.226);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//陽(）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.986);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								0.f,
+								6.f,
+								10.f
+							)*1.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 300.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//陰(明日の）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 40.11);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								0.f,
+								6.f,
+								-10.f
+							)*1.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 300.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//手①(その）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 41.226);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-10.f,
-							0.f,
-							0.f
-						)*1.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-10.f,
+								0.f,
+								0.f
+							)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//手②(先へ）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.317);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//手②(先へ）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.317);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-10.f,
-							0.f,
-							0.f
-						)*1.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-10.f,
+								0.f,
+								0.f
+							)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//ガチャ(）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.726);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//ガチャ(）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.726);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 19.f, 0.f);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-cos(deg2rad(-25.5f))*sin(-deg2rad(float(90 - 50))),
-							sin(deg2rad(-25.5f)),
-							-cos(deg2rad(-25.5f))*cos(-deg2rad(float(90 - 50)))
-						)*10.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(25);
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//握手(）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.641);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 19.f, 0.f);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-cos(deg2rad(-25.5f))*sin(-deg2rad(float(90 - 50))),
+								sin(deg2rad(-25.5f)),
+								-cos(deg2rad(-25.5f))*cos(-deg2rad(float(90 - 50)))
+							)*10.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(25);
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//握手(）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.641);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-10.f,
-							0.f,
-							0.f
-						)*1.0f;
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								-10.f,
+								0.f,
+								0.f
+							)*1.0f;
 
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-					Cut_Pic.back().Aim_camera.near_ = 1.f;
-					Cut_Pic.back().Aim_camera.far_ = 100.f;
-					Cut_Pic.back().cam_per = 0.f;
-					//オフ(）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.971);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
+						Cut_Pic.back().Aim_camera.near_ = 1.f;
+						Cut_Pic.back().Aim_camera.far_ = 100.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//オフ(）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.971);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.3f, 17.75f, 0.0);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							0.f,
-							0.f,
-							10.f
-						)*1.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(4), 1.0f, 20.f);
-					Cut_Pic.back().cam_per = 0.f;
-					//オフ2(）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 44.311);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.3f, 17.75f, 0.0);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
+							VECTOR_ref::vget(
+								0.f,
+								0.f,
+								10.f
+							)*1.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(4), 1.0f, 20.f);
+						Cut_Pic.back().cam_per = 0.f;
+					}
+					{}
+					{
+						//オフ2(）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 44.311);
 
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 18, 0.);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							0.f,
-							0.f,
-							20.f
-						)*1.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(10), 1.f, 40.f);
-					Cut_Pic.back().cam_per = 0.f;
-					//オフ離れる(君の存在）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 46.084);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 18, 0.);
+						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(0.f, 0.f, 20.f)*1.0f;
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
+						Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(10), 1.f, 40.f);
+						Cut_Pic.back().cam_per = 0.f;
+						//オフ離れる(君の存在）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 46.084);
 
-					Cut_Pic.back().cam_per = 0.f;
-					//オフ近付く(戦うた）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 47.122);
-					//オフガチャン(び　生ま）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 48.090);
-					//オフガチャン(れ変わる）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 49.761);
-					//爆発（目）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.024);
-					//ワイプ（に）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.447);
-					//爆発(見)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.830);
-					//ワイプ（える）
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 51.601);
-					//走る(スピード超えてくモーショ)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 54.848);
+						Cut_Pic.back().cam_per = 0.f;
+						//オフ近付く(戦うた）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 47.122);
+						//オフガチャン(び　生ま）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 48.090);
+						//オフガチャン(れ変わる）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 49.761);
+						//爆発（目）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.024);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//ワイプ（に）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.447);
+						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
+						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//爆発(見)
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.830);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//ワイプ（える）
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 51.601);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+						//走る(スピード超えてくモーショ)
+						Cut_Pic.resize(Cut_Pic.size() + 1);
+						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 54.848);
+						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
+						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
+						Cut_Pic.back().Aim_camera.far_ = 3000.f;
+						Cut_Pic.back().cam_per = 0.f;
+					}
 					//女(ン いったい自分以が)
 					Cut_Pic.resize(Cut_Pic.size() + 1);
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 56.271);
@@ -1141,303 +1203,72 @@ namespace FPS_n2 {
 					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 70.592);
 				}
 				{}
+				SetUseASyncLoadFlag(FALSE);
 				{
 					LONGLONG StartF = 0;
 					LONGLONG ContiF = 0;
 
-					StartF = (LONGLONG)(1000000.f * 2.614f);
-					ContiF = (LONGLONG)(1000000.f * 1.5f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 300), y_r(1080 - 200), y_r(12), "原作", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 300), y_r(1080 - 200 + 12), y_r(32), "ウマ娘プリティーダービー", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 1.696f);//4.310
-					ContiF = (LONGLONG)(1000000.f * 3.290f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "皐月賞馬", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスタキオン", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 3.297f);//(LONGLONG)(1000000.f * 7.288f)
-					ContiF = (LONGLONG)(1000000.f * 2.97f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "菊花賞馬", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "マンハッタンカフェ", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.976f);//(LONGLONG)(1000000.f * 9.264f)
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 180), y_r(1080 - 200), y_r(12), "クロフネの子", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 180), y_r(1080 - 200 + 12), y_r(32), "カレンチャン", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.146f);//(LONGLONG)(1000000.f * 11.410f)
-					ContiF = (LONGLONG)(1000000.f * 1.925f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200), y_r(12), "全身発行体", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200 + 12), y_r(32), "トレーナー", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 1.925f);//(LONGLONG)(1000000.f * 13.410f)
-					ContiF = (LONGLONG)(1000000.f * 1.925f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540), y_r(12), "トレセン学園理事長", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540 + 12), y_r(32), "秋川やよい", StartF, ContiF, 0);
-
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(1080 - 200), y_r(12), "理事長秘書", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(1080 - 200 + 12), y_r(32), "駿川たづな", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 1.925f);
-					ContiF = (LONGLONG)(1000000.f * 1.925f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540), y_r(12), "チームスピカ担当", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 100), y_r(540 + 12), y_r(32), "沖野T", StartF, ContiF, 0);
-
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200), y_r(12), "あげません", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200 + 12), y_r(32), "スペシャルウィーク", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 1.925f);
-					ContiF = (LONGLONG)(1000000.f * 1.925f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12), y_r(32), "トウカイ テイオー", StartF, ContiF, 0);
-
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42), y_r(32), "メジロマックイーン", StartF, ContiF, 0);
-
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42 * 3), y_r(32), "ウオッカ", StartF, ContiF, 0);
-
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(540 + 12 + 42 * 4), y_r(32), "ダイワスカーレット", StartF, ContiF, 0);
-
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200), y_r(12), "ナレーション", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1560 - 190), y_r(1080 - 200 + 12), y_r(32), "ゴールドシップ", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 1.925f);
-					ContiF = (LONGLONG)(1000000.f * 1.925f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200), y_r(12), "理事長代理", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 100), y_r(1080 - 200 + 12), y_r(32), "樫本理子", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 1.925f);//(LONGLONG)(1000000.f * 23.422f)
-					ContiF = (LONGLONG)(1000000.f * 1.925f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(480 - 100), y_r(810), y_r(32), "", StartF, ContiF, 0);
+					std::vector<std::string> args;
+					int mdata = FileRead_open("data/telop.txt", FALSE);
+					while (FileRead_eof(mdata) == 0){
+						args.clear();
+						std::string func = getparams::get_str(mdata);
+						// //を削除
+						{
+							size_t sls = func.find("//");
+							if (sls != std::string::npos) { func = func.substr(0, sls); }
+						}
+						//いらない要素を排除
+						{
+							Sub_Func(func, '{');
+							Sub_Func(func, '}');
+							Sub_Func(func, ' ');
+							Sub_Func(func, '\t');
+							Sub_Func(func, ';');
+							Sub_Func(func, '\"');
+						}
+						if (func == "") { continue; }
+						//()と,で囲われた部分から引数を取得
+						{
+							std::string tmp_func = func;
+							size_t left = tmp_func.find("(");
+							size_t right = tmp_func.rfind(")");
+							if (left != std::string::npos && right != std::string::npos) {
+								tmp_func = tmp_func.substr(left + 1, right - 1 - left);
+							}
+							while (true) {
+								size_t in_str = tmp_func.find(",");
+								if (in_str == std::string::npos) {
+									args.emplace_back(tmp_func);
+									break;
+								}
+								else {
+									std::string arg = tmp_func.substr(0, in_str);
+									tmp_func = tmp_func.substr(in_str + 1);
+									args.emplace_back(arg);
+								}
+							}
+						}
 						//
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 100), y_r(810), y_r(32), "", StartF, ContiF, 0);
+						if (func.find("SetTime") != std::string::npos) {
+							StartF = (LONGLONG)(1000000.f * std::stof(args[0]));
+							ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
+						}
+						if (func.find("AddTime") != std::string::npos) {
+							StartF += (LONGLONG)(1000000.f * std::stof(args[0]));
+							ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
+						}
+						else if (func.find("SetTelop") != std::string::npos) {
+							int t = 0;
+							if (args[4].find("LEFT") != std::string::npos) { t = 0; }
+							else if (args[4].find("MIDDLE") != std::string::npos) { t = 1; }
+							else if (args[4].find("RIGHT") != std::string::npos) { t = 2; }
+							Texts.resize(Texts.size() + 1);
+							Texts.back().Set(y_r(std::stoi(args[0])), y_r(std::stoi(args[1])), y_r(std::stoi(args[2])), args[3], StartF, ContiF, t);
+						}
+
 					}
-					StartF = (LONGLONG)(1000000.f * 25.164f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "脚本", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスデジタル", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200), y_r(12), "音楽", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 200), y_r(1080 - 200 + 12), y_r(32), "アグネスデジタル", StartF, ContiF, 0);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(10), "オープニングテーマ", StartF, ContiF, 0);
-						Texts.back().xpos = y_r(1440 - 60), y_r(720), y_r(10), "オープニングテーマ";
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 120), y_r(720 + 10), y_r(36), "『NEXT LEVEL』", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36), y_r(36), "YU-KI", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 + 50), y_r(720 + 10 + 36 + 12), y_r(24), "(TRF)", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36 + 4 + 32 + 11), y_r(10), "作　　詞", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 90), y_r(720 + 10 + 36 + 4 + 32 * 2 + 11), y_r(10), "作・編曲", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 30), y_r(720 + 10 + 36 + 4 + 32), y_r(32), "藤田聖子", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 30), y_r(720 + 10 + 36 + 4 + 32 * 2), y_r(32), "渡部チェル", StartF, ContiF, 0);
-					}
-					StartF = (LONGLONG)(1000000.f * 32.52);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(650), y_r(10), "使用モデル", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(650 + 10), y_r(24), "S.Aikawa氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400), y_r(650 + 10 + 48), y_r(24), "[MMD] アグネスタキオン (ウマ娘)", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880), y_r(10), "使用モデル", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10), y_r(24), "ShiniNet氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500), y_r(880 + 10 + 48), y_r(24), "マン〇ッタンカフェ", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880), y_r(10), "使用モデル", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(880 + 10), y_r(24), "kachin氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500), y_r(880 + 10 + 48), y_r(24), "かれん", StartF, ContiF, 1);
-					}
-					StartF = (LONGLONG)(1000000.f * 38.986f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(640 + 42 - 12), y_r(12), "ShiniNet氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400), y_r(640 + 42), y_r(24), "ゴー〇ドシップ", StartF, ContiF, 1);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500), y_r(640 + 42), y_r(24), "メジ〇マoクイーン", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "つかさ氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 120), y_r(540 + 42 + 48), y_r(24), "つかさ式ていおー", StartF, ContiF, 0);
-						//
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "WARPSTAR氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500), y_r(540 + 42 + 48), y_r(24), "【ウマ娘】スペシャルウィーク", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "トレーナーモデル", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "モノゾフ氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【モブモデル】モブ用親父セット【配布中】", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "Jean氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400), y_r(540 + 42 + 48), y_r(24), "【MMDウマ娘】テイエムオペラオー【モデル配布】", StartF, ContiF, 1);
-						//
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "EndressStorm氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500), y_r(540 + 42 + 48), y_r(24), "メイショウドトウ", StartF, ContiF, 1);
-					}
-					StartF = (LONGLONG)(1000000.f * 47.200f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400 - 60), y_r(540 + 42), y_r(24), "tomoyo氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(400), y_r(540 + 42 + 48), y_r(24), "tmy式ダスカ　ver.0.92", StartF, ContiF, 1);
-						//
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500 - 60), y_r(540 + 42), y_r(24), "Jean氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1500), y_r(540 + 42 + 48), y_r(24), "【MMDウマ娘】ウオッカ【モデル配布】", StartF, ContiF, 1);
-					}
-					StartF = (LONGLONG)(1000000.f * 50.447f);
-					ContiF = (LONGLONG)(1000000.f * 1.800f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "黒子モデル", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "神々の宴氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【ＭＭＤ】ウマ娘モブセット", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "競馬場モデル", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "Led/折鶴P氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "なんちゃって競馬場セット", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "トレセン学園モデル(代演)", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "じん氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【MMDギアス】アッシュフォード学園【ステージ配布】", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "クロフネ(代演)", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "Tansoku102cm-沼地人氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "MMD用モブ前弩級戦艦1890セット", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880), y_r(10), "客席", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960 - 60), y_r(880 + 10), y_r(24), "ppp21氏", StartF, ContiF, 0);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "【MMD】笹かまスタジアム", StartF, ContiF, 1);
-					}
-					StartF += (LONGLONG)(1000000.f * 2.000f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10), y_r(24), "まっちさん氏", StartF, ContiF, 1);
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(960), y_r(880 + 10 + 48), y_r(24), "アグネスタキオン モデル", StartF, ContiF, 1);
-					}
-					StartF = (LONGLONG)(1000000.f * 62.775f);
-					ContiF = (LONGLONG)(1000000.f * 2.000f);
-					{
-						Texts.resize(Texts.size() + 1);
-						Texts.back().Set(y_r(1440 - 60), y_r(720), y_r(32), "", StartF, ContiF, 0);
-					}
+					FileRead_close(mdata);
 				}
 				SetUseASyncLoadFlag(FALSE);
 				//
@@ -1457,6 +1288,10 @@ namespace FPS_n2 {
 					if (!Time_Over()) {
 						if (Cut < 2) {
 							if (NowTime > (LONGLONG)(1000000.f * 0.450f)) {
+								sode[0].isDraw = true;
+								sode[1].isDraw = true;
+								sode[2].isDraw = true;
+								sode[3].isDraw = true;
 								easing_set(&sode[0].xpos, 0.f, 0.9f);
 								easing_set(&sode[0].ypos, 0.f, 0.9f);
 								easing_set(&sode[1].xpos, 0.f, 0.875f);
@@ -1465,32 +1300,32 @@ namespace FPS_n2 {
 								easing_set(&sode[2].ypos, 0.f, 0.85f);
 								easing_set(&sode[3].xpos, 0.f, 0.825f);
 								easing_set(&sode[3].ypos, 0.f, 0.825f);
-								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
-									First[0].Goto_Aim();
-									First2[0].Goto_Aim();
-									First3[0].Goto_Aim();
-									if (First3[0].Alpha_base < 0.f) {
-										First3[0].Alpha_base = 1.f;
-										First3[0].Scale = 1.f;
-									}
+							}
+							if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
+								First[0].Goto_Aim();
+								First2[0].Goto_Aim();
+								First3[0].Goto_Aim();
+								if (First3[0].Alpha_base < 0.f) {
+									First3[0].Alpha_base = 1.f;
+									First3[0].Scale = 1.f;
 								}
-								if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
-									First[1].Goto_Aim();
-									First2[1].Goto_Aim();
-									First3[1].Goto_Aim();
-									if (First3[1].Alpha_base < 0.f) {
-										First3[1].Alpha_base = 1.f;
-										First3[1].Scale = 1.f;
-									}
+							}
+							if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
+								First[1].Goto_Aim();
+								First2[1].Goto_Aim();
+								First3[1].Goto_Aim();
+								if (First3[1].Alpha_base < 0.f) {
+									First3[1].Alpha_base = 1.f;
+									First3[1].Scale = 1.f;
 								}
-								if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
-									First[2].Goto_Aim();
-									First2[2].Goto_Aim();
-									First3[2].Goto_Aim();
-									if (First3[2].Alpha_base < 0.f) {
-										First3[2].Alpha_base = 1.f;
-										First3[2].Scale = 1.f;
-									}
+							}
+							if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
+								First[2].Goto_Aim();
+								First2[2].Goto_Aim();
+								First3[2].Goto_Aim();
+								if (First3[2].Alpha_base < 0.f) {
+									First3[2].Alpha_base = 1.f;
+									First3[2].Scale = 1.f;
 								}
 							}
 							for (auto& sl : First3) {
@@ -1510,14 +1345,18 @@ namespace FPS_n2 {
 						}
 						else if (Cut < 7) {
 							if (Cut == 2) {
-								sode[0].xpos = (float)(DrawPts->disp_x / 5);
-								sode[0].ypos = (float)(DrawPts->disp_y);
-								sode[1].xpos = (float)(-DrawPts->disp_x / 5);
-								sode[1].ypos = (float)(DrawPts->disp_y);
-								sode[2].xpos = (float)(DrawPts->disp_x / 5);
-								sode[2].ypos = (float)(DrawPts->disp_y);
-								sode[3].xpos = (float)(-DrawPts->disp_x / 5);
-								sode[3].ypos = (float)(DrawPts->disp_y);
+								sode[0].isDraw = false;
+								sode[1].isDraw = false;
+								sode[2].isDraw = false;
+								sode[3].isDraw = false;
+								sode[0].xpos = 0.f;
+								sode[0].ypos = 0.f;
+								sode[1].xpos = 0.f;
+								sode[1].ypos = 0.f;
+								sode[2].xpos = 0.f;
+								sode[2].ypos = 0.f;
+								sode[3].xpos = 0.f;
+								sode[3].ypos = 0.f;
 								for (auto& sl : First) {
 									sl.xpos = (float)(DrawPts->disp_x * 2);
 									sl.ypos = (float)(DrawPts->disp_y * 2);
@@ -1532,14 +1371,10 @@ namespace FPS_n2 {
 								Board.isDraw = false;
 							}
 							if (Cut == 6) {
-								sode[0].xpos = 0.f;
-								sode[0].ypos = 0.f;
-								sode[1].xpos = 0.f;
-								sode[1].ypos = 0.f;
-								sode[2].xpos = 0.f;
-								sode[2].ypos = 0.f;
-								sode[3].xpos = 0.f;
-								sode[3].ypos = 0.f;
+								sode[0].isDraw = true;
+								sode[1].isDraw = true;
+								sode[2].isDraw = true;
+								sode[3].isDraw = true;
 								for (auto& sl : First) {
 									sl.Goto_Aim();
 								}
@@ -1571,14 +1406,10 @@ namespace FPS_n2 {
 								}
 							}
 							if (Cut == 8) {
-								sode[0].xpos = (float)(DrawPts->disp_x);
-								sode[0].ypos = (float)(DrawPts->disp_y / 5);
-								sode[1].xpos = (float)(-DrawPts->disp_x);
-								sode[1].ypos = (float)(DrawPts->disp_y / 5);
-								sode[2].xpos = (float)(DrawPts->disp_x);
-								sode[2].ypos = (float)(DrawPts->disp_y / 5);
-								sode[3].xpos = (float)(-DrawPts->disp_x);
-								sode[3].ypos = (float)(DrawPts->disp_y / 5);
+								sode[0].isDraw = false;
+								sode[1].isDraw = false;
+								sode[2].isDraw = false;
+								sode[3].isDraw = false;
 								isNextreset = true;
 							}
 							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
@@ -1623,7 +1454,7 @@ namespace FPS_n2 {
 							Board.isDraw = false;
 							Map.isDraw = true;
 							if (models.Get(Tachyon, 0)->obj.get_anime(1).per > 0) {
-								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
 								Stop_Effect(Effect::ef_reco);
 							}
 							if (Cut <= 12) {
@@ -1688,7 +1519,7 @@ namespace FPS_n2 {
 							if (Cut < 15) {
 								models.Get(Tachyon, 0)->isDraw = false;
 								models.Get(Tachyon2, 0)->isDraw = true;
-								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
 								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.6f);
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(6);
 								Cut_Pic[Cut].cam_per = 0.f;
@@ -1868,7 +1699,7 @@ namespace FPS_n2 {
 
 								models.Get(Tachyon, 5)->isDraw = true;
 								models.Get(Tachyon, 5)->UpdateAnim(7, false, 0.f);
-								models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
+								models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 							}
 							else {
 								models.Get(Tachyon, 2)->isDraw = false;
@@ -1895,7 +1726,7 @@ namespace FPS_n2 {
 
 								models.Get(Macin, 0)->isDraw = true;
 								models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
+								models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 							}
 						}
 						else if (Cut < 25) {
@@ -1945,7 +1776,7 @@ namespace FPS_n2 {
 							models.Get(SCHOOL, 0)->isDraw = false;
 							{
 								models.Get(GATE, 0)->isDraw = true;
-								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
 								models.Get(Tachyon, 0)->isDraw = false;
 								models.Get(Tachyon, 1)->isDraw = false;
 								return_walk = true;
@@ -1973,7 +1804,7 @@ namespace FPS_n2 {
 							camzb_28 = 1.f;
 						}
 						else if (Cut < 28) {
-							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
 							if (Gate_Xpos < 20.f) {
 								Gate_Xpos += 20.f *1.f / GetFPS();
 							}
@@ -2132,13 +1963,13 @@ namespace FPS_n2 {
 						else if (Cut < 42) {
 							Gate_Xpos = 0.f;
 							models.Get(GATE, 0)->isDraw = true;
-							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f))*MATRIX_ref::RotY(deg2rad(0)));
+							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
 							models.Get(GATE, 0)->UpdateAnim(0, false, 0.f);
 
 							Gate_Xpos += -7.f;
 							for (int i = 0; i < 12; i++) {
 								models.Get(Mobu, i)->isDraw = true;
-								models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f))*MATRIX_ref::RotY(deg2rad(0)));
+								models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f)));
 								Gate_Xpos += -14.f;
 							}
 
@@ -2242,10 +2073,10 @@ namespace FPS_n2 {
 								for (int i = 0; i < 12; i++) {
 									//models.Get(Mobu, i)->
 									models.Get(Mobu, i)->isDraw = true;
-									easing_set(&models.Get(Mobu, i)->obj.get_anime(models.Get(Mobu, i)->Anim_Sel).per, 0.f, mobu_b_run[i]);
-									easing_set(&models.Get(Mobu, i)->obj.get_anime(3).per, 1.f, mobu_b_run[i]);
+									easing_set(&models.Get(Mobu, i)->obj.get_anime(models.Get(Mobu, i)->Anim_Sel).per, 0.f, models.Get(Mobu, i)->b_run);
+									easing_set(&models.Get(Mobu, i)->obj.get_anime(3).per, 1.f, models.Get(Mobu, i)->b_run);
 
-									models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - mobu_b_runrange[i] * models.Get(Mobu, i)->obj.get_anime(3).per))*MATRIX_ref::RotY(deg2rad(0)));
+									models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - models.Get(Mobu, i)->b_runrange * models.Get(Mobu, i)->obj.get_anime(3).per)));
 									Gate_Xpos += -14.f;
 								}
 							}
@@ -2297,8 +2128,7 @@ namespace FPS_n2 {
 							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
 
 							Cut_Pic[Cut].cam_per = 0.f;
-
-							if (anim[0].ypos != 0.f) {
+							if (!anim[0].isDraw) {
 								VECTOR_ref vec_x = (Cut_Pic[Cut].Aim_camera.camvec - Cut_Pic[Cut].Aim_camera.campos).Norm().cross(Cut_Pic[Cut].Aim_camera.camup);
 
 								Set_Effect(Effect::ef_greexp, VECTOR_ref::vget(-4.f, 4.6f, -2.f) + vec_x * 13.f, VECTOR_ref::front(), 5.f);
@@ -2306,49 +2136,32 @@ namespace FPS_n2 {
 							}
 							SetSpeed_Effect(Effect::ef_greexp, 0.5f);
 							SetSpeed_Effect(Effect::ef_greexp2, 0.5f);
+							anim[0].isDraw = true;
 							anim[0].ypos = 0.f;
 						}
-						else if (Cut < 47) {
-							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-							Cut_Pic[Cut].cam_per = 0.f;
-
-							camzb_41 = (float)(DrawPts->disp_y)*0.4f;
-							sode[4].xpos += (float)(y_r(300)) / GetFPS();
-							sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
-							sode[5].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[5].ypos -= (float)(y_r(2400)) / GetFPS();
-							sode[6].xpos += (float)(y_r(300)) / GetFPS();
-							sode[6].ypos -= (float)(y_r(2200)) / GetFPS();
-							sode[7].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
-						}
 						else if (Cut < 48) {
-							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
-							Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos +
-								VECTOR_ref::vget(
-									-1.f,
-									0.3f,
-									0.f
-								)*(1.f);
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
+							if (Cut < 47) {
+								camzb_41 = (float)(DrawPts->disp_y)*0.4f;
+							}
+							else if (Cut < 48) {
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
+								anim[0].isDraw = false;
+								anim[1].isDraw = true;
+								easing_set(&anim[1].ypos, camzb_41, 0.7f);
+								if (camzb_41 == (float)(DrawPts->disp_y)*0.4f) {
+									SetSpeed_Effect(Effect::ef_greexp, 0.1f);
+									SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
+								}
+								if (camzb_41 > 0.f) {
+									camzb_41 -= (float)(y_r(500)) / GetFPS();
+								}
+							}
 
-							Cut_Pic[Cut].cam_per = 0.f;
-							anim[0].ypos = (float)(DrawPts->disp_y);
-							easing_set(&anim[1].ypos, camzb_41, 0.7f);
-							if (camzb_41 == (float)(DrawPts->disp_y)*0.4f) {
-								SetSpeed_Effect(Effect::ef_greexp, 0.1f);
-								SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
-							}
-							if (camzb_41 > 0.f) {
-								camzb_41 -= (float)(y_r(500)) / GetFPS();
-							}
+							sode[4].isDraw = true;
+							sode[5].isDraw = true;
+							sode[6].isDraw = true;
+							sode[7].isDraw = true;
 							sode[4].xpos += (float)(y_r(300)) / GetFPS();
 							sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
 							sode[5].xpos -= (float)(y_r(300)) / GetFPS();
@@ -2357,60 +2170,42 @@ namespace FPS_n2 {
 							sode[6].ypos -= (float)(y_r(2200)) / GetFPS();
 							sode[7].xpos -= (float)(y_r(300)) / GetFPS();
 							sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
-						}
-						else if (Cut < 49) {
-							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
-							Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos +
-								VECTOR_ref::vget(
-									-1.f,
-									0.3f,
-									0.f
-								)*(1.f);
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-							Cut_Pic[Cut].cam_per = 0.f;
-							if (anim[0].ypos == (float)(DrawPts->disp_y)) {
-
-								sode[4].xpos = (float)(0);
-								sode[4].ypos = (float)(-DrawPts->disp_y);
-								sode[5].xpos = (float)(0);
-								sode[5].ypos = (float)(-DrawPts->disp_y * 5 / 4);
-								sode[6].xpos = (float)(0);
-								sode[6].ypos = (float)(-DrawPts->disp_y * 6 / 4);
-								sode[7].xpos = (float)(0);
-								sode[7].ypos = (float)(-DrawPts->disp_y * 7 / 4);
-							}
-							anim[0].ypos = (float)(DrawPts->disp_y) + 2;
-							easing_set(&anim[1].ypos, camzb_41, 0.7f);
-							if (camzb_41 > 0.f) {
-								camzb_41 -= (float)(y_r(500)) / GetFPS();
-							}
-							sode[4].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[4].ypos += (float)(y_r(2800)) / GetFPS();
-							sode[5].xpos += (float)(y_r(300)) / GetFPS();
-							sode[5].ypos += (float)(y_r(2600)) / GetFPS();
-							sode[6].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[6].ypos += (float)(y_r(2400)) / GetFPS();
-							sode[7].xpos += (float)(y_r(300)) / GetFPS();
-							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
-							isNextreset = true;
-							models.Get(Tachyon2, 0)->obj.get_anime(2).time = 35.f;
 						}
 						else if (Cut < 50) {
+							if (Cut < 49) {
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
+								if (anim[0].ypos == 0.f) {
+									sode[4].xpos = (float)(0);
+									sode[4].ypos = (float)(-DrawPts->disp_y);
+									sode[5].xpos = (float)(0);
+									sode[5].ypos = (float)(-DrawPts->disp_y * 5 / 4);
+									sode[6].xpos = (float)(0);
+									sode[6].ypos = (float)(-DrawPts->disp_y * 6 / 4);
+									sode[7].xpos = (float)(0);
+									sode[7].ypos = (float)(-DrawPts->disp_y * 7 / 4);
+								}
+								anim[0].ypos = 2.f;
+								easing_set(&anim[1].ypos, camzb_41, 0.7f);
+								if (camzb_41 > 0.f) {
+									camzb_41 -= (float)(y_r(500)) / GetFPS();
+								}
+								isNextreset = true;
+								models.Get(Tachyon2, 0)->obj.get_anime(2).time = 35.f;
+							}
+							else if (Cut < 50) {
+								anim[1].isDraw = false;
 
-							VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
-							aim.y(0.f);
-							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-
-							Cut_Pic[Cut].cam_per = 0.f;
-							anim[1].ypos = (float)(DrawPts->disp_y);
+								VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
+								aim.y(0.f);
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
+								models.Get(Tachyon2, 0)->UpdateAnim(2, false, 0.1f);
+								isNextreset = true;
+								models.Get(Karen, 0)->isDraw = false;
+							}
 							sode[4].xpos -= (float)(y_r(300)) / GetFPS();
 							sode[4].ypos += (float)(y_r(2800)) / GetFPS();
 							sode[5].xpos += (float)(y_r(300)) / GetFPS();
@@ -2419,14 +2214,13 @@ namespace FPS_n2 {
 							sode[6].ypos += (float)(y_r(2400)) / GetFPS();
 							sode[7].xpos += (float)(y_r(300)) / GetFPS();
 							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
-
-							models.Get(Tachyon2, 0)->isDraw = true;
-							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
-							models.Get(Tachyon2, 0)->UpdateAnim(2, false, 0.1f);
-							isNextreset = true;
-							models.Get(Karen, 0)->isDraw = false;
 						}
 						else if (Cut < 51) {
+							sode[4].isDraw = false;
+							sode[5].isDraw = false;
+							sode[6].isDraw = false;
+							sode[7].isDraw = false;
+
 							Board.isDraw = false;
 							Map.isDraw = true;
 							Stop_Effect(Effect::ef_greexp);
@@ -2437,9 +2231,7 @@ namespace FPS_n2 {
 							models.Get(Karen, 0)->UpdateAnim(1, false, 0.95f);
 							if (!models.Get(Karen, 0)->isDraw) {
 								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
-
 								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-0.3f, 0.f, 28.f);
-
 								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
 								Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
 								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;

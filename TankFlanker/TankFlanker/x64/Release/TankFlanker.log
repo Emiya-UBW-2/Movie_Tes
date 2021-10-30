@@ -118,9 +118,9 @@ c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(156): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(171): warning C4505: 'StringToWString': 参照されていないローカル関数は削除されました。
   コード生成しています。
-  23 of 1620 functions ( 1.4%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    4 functions had inline decision re-evaluated but remain unchanged
+  12 of 1646 functions ( 0.7%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    19 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
 EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj) : warning LNK4099: PDB 'EffekseerForDXLib_vs2017.pdb' が 'EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj)' で、または 'C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Release\EffekseerForDXLib_vs2017.pdb' に見つかりません。デバッグ情報がないものとして、オブジェクトにリンクします。
   TankFlanker.vcxproj -> C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Release\FPS_n2.exe
