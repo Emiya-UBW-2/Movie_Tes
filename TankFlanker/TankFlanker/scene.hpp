@@ -215,6 +215,7 @@ namespace FPS_n2 {
 				cam_info Aim_camera;
 				float cam_per = 0.0f;
 				LONGLONG TIME = 0;
+				bool isNextreset = false;
 
 				Cut_Info() {
 					Aim_camera.campos = VECTOR_ref::vget(0, 10, -30);
@@ -222,6 +223,7 @@ namespace FPS_n2 {
 					Aim_camera.camup = VECTOR_ref::up();
 					Aim_camera.set_cam_info(deg2rad(15), 1.0f, 300.f);
 					cam_per = 0.95f;
+					isNextreset = false;
 				}
 
 				void Dispose() {
@@ -613,604 +615,90 @@ namespace FPS_n2 {
 				PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
 				ChangeMovieVolumeToGraph(0, movie.get());
 				*/
-				SetUseASyncLoadFlag(TRUE);
-				{
-					{
-						//羽広がり前
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 0.450f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 10.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//羽広がり中
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 2.614f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 10.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//胸
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.021f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.f, 13.82f, -2.08f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(20.1))*sin(-deg2rad(22.9)), sin(deg2rad(20.1)), -cos(deg2rad(20.1))*cos(-deg2rad(22.9)))*10.3f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.far_ = 20.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//背中
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.258f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-2.57f, 10.04f, 0.31f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.3))*sin(-deg2rad(225.7)), sin(deg2rad(6.3)), -cos(deg2rad(6.3))*cos(-deg2rad(225.7)))*10.3f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.far_ = 20.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//右足→
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.512f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.85f, 16.69f, 0.61f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(15.5))*sin(-deg2rad(202.8)), sin(deg2rad(15.5)), -cos(deg2rad(15.5))*cos(-deg2rad(202.8)))*10.3f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.far_ = 20.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//頭←
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 3.724f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.54f, 16.05f, -1.28f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(8.6))*sin(-deg2rad(73.9)), sin(deg2rad(8.6)), -cos(deg2rad(8.6))*cos(-deg2rad(73.9)))*10.3f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.far_ = 20.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//羽切るはじめ
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 4.310f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, -10, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, -10, -10);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 10.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//羽切る終わり
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 5.086f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.far_ = 40.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//斬新
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 6.448f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(1.11f, 14.36f, -1.74f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180 + 19.5)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180 + 19.5)))*27.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.far_ = 40.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//＜＞
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.096f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-					}
-					{
-						//顔
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.288f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-4.494195f, 12.919953f, -28.361502f);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.366895f, 16.169621f, -21.344687f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//顔2
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.576f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.106448f, 3.030100f, -23.623045f);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(2.044426f, 4.483082f, -26.842037f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//顔3
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 7.864f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(2.589150f, 10.542250f, -24.661646f);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(3.584894f, 12.149980f, -16.973043f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//||
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 10.264f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-14.621624f, 7.440908f, -16.774031f);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(17.178366f, 9.319146f, -36.016518f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//バイク
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 13.410f);
-
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(-7.410444f, 11.652717f, 2.655200f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-6.079808f, 12.230768f, -1.217081f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//君が願うことなら
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 15.80f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-								sin(deg2rad(-5.5)),
-								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-							)*88.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//全てが現
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 17.80f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-								sin(deg2rad(-5.5)),
-								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-							)*88.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//実になるだろ(天道)
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 19.0f);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						//う　選
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 20.334f);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						//ばれしもの(加賀美)
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 21.452f);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-					}
-					{}
-					{
-						//隕石
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 23.422f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 2, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 20, -20);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 200.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//ワーム①
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.252f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 200.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//羽ワイプ
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 24.452f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 200.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//ワーム②(暴そ)
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 25.164f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 15, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 15, -20);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 200.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//東京タワー(うを始めて）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 26.526f);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, 0);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(0, 5, -20);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().cam_per = 0.f;
-
-						//バイク戻る(る　世界を元に戻すにはぁ）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 29.790);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -30.985756f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-								sin(deg2rad(-5.5)),
-								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-							)*108.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(25);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//バンバイク①(もう　時か）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 31.670);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-cos(deg2rad(-5.5f))*sin(-deg2rad(float(90 - 10))),
-								sin(deg2rad(-5.5)),
-								-cos(deg2rad(-5.5))*cos(-deg2rad(float(90 - 10)))
-							)*88.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//バンバイク②(んがな）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 32.52);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-cos(deg2rad(0.f))*sin(-deg2rad(float(0 - 10))),
-								sin(deg2rad(0.f)),
-								-cos(deg2rad(0.f))*cos(-deg2rad(float(0 - 10)))
-							)*88.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//寝る女(い　Moving First ここ）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 34.654);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								2.f,
-								12.f,
-								6.f
-							)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//雨加賀美(ろのぉ）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 35.522);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								2.f,
-								10.f,
-								8.f
-							)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						Cut_Pic.back().cam_per = 0.f;
-					}
-					{}
-					{
-						//雨加賀美②(時計）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.175);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 0, 0);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-2.f, 12.f, -6.f)*2.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-
-						//雨加賀美②(時計）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 36.775);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-10.f, 0.f, 0.f)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//クロス(走らせ）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.173);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(20.f, 0.f, 0.f)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//陽(）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 38.986);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								0.f,
-								6.f,
-								10.f
-							)*1.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 300.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//陰(明日の）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 40.11);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 20, -7);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								0.f,
-								6.f,
-								-10.f
-							)*1.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(45);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 300.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//手①(その）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 41.226);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-10.f,
-								0.f,
-								0.f
-							)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//手②(先へ）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.317);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-10.f,
-								0.f,
-								0.f
-							)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//ガチャ(）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 42.726);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 19.f, 0.f);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-cos(deg2rad(-25.5f))*sin(-deg2rad(float(90 - 50))),
-								sin(deg2rad(-25.5f)),
-								-cos(deg2rad(-25.5f))*cos(-deg2rad(float(90 - 50)))
-							)*10.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(25);
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//握手(）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.641);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								-10.f,
-								0.f,
-								0.f
-							)*1.0f;
-
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.fov = deg2rad(15);
-						Cut_Pic.back().Aim_camera.near_ = 1.f;
-						Cut_Pic.back().Aim_camera.far_ = 100.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//オフ(）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 43.971);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.3f, 17.75f, 0.0);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-							VECTOR_ref::vget(
-								0.f,
-								0.f,
-								10.f
-							)*1.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(4), 1.0f, 20.f);
-						Cut_Pic.back().cam_per = 0.f;
-					}
-					{}
-					{
-						//オフ2(）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 44.311);
-
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0.f, 18, 0.);
-						Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(0.f, 0.f, 20.f)*1.0f;
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-						Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(10), 1.f, 40.f);
-						Cut_Pic.back().cam_per = 0.f;
-						//オフ離れる(君の存在）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 46.084);
-
-						Cut_Pic.back().cam_per = 0.f;
-						//オフ近付く(戦うた）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 47.122);
-						//オフガチャン(び　生ま）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 48.090);
-						//オフガチャン(れ変わる）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 49.761);
-						//爆発（目）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.024);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//ワイプ（に）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.447);
-						Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
-						Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//爆発(見)
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 50.830);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//ワイプ（える）
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 51.601);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-						//走る(スピード超えてくモーショ)
-						Cut_Pic.resize(Cut_Pic.size() + 1);
-						Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 54.848);
-						Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-						Cut_Pic.back().Aim_camera.fov = deg2rad(35);
-						Cut_Pic.back().Aim_camera.far_ = 3000.f;
-						Cut_Pic.back().cam_per = 0.f;
-					}
-					//女(ン いったい自分以が)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 56.271);
-					//だばー(い　)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 57.462);
-					//雨加賀美(誰の)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 58.004);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							-10.f,
-							0.f,
-							0.f
-						)*1.0f;
-
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(15), 1.f, 30.f);
-					Cut_Pic.back().cam_per = 0.f;
-					//雨加賀美(強さ　信じられる)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 60.290);
-					Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-					Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec +
-						VECTOR_ref::vget(
-							0.f,
-							0.f,
-							-10.f
-						)*1.0f;
-					Cut_Pic.back().Aim_camera.camup = VECTOR_ref::up();
-					Cut_Pic.back().Aim_camera.set_cam_info(deg2rad(25), 3.f, 1000.f);
-					Cut_Pic.back().cam_per = 0.9f;
-					//クロックアップ(ぅ　高速の)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 61.440);
-					//クロックアップ(ぅ　高速の)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 62.775);
-					//遠い(ビジョン)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 64.074);
-					//近い(見逃すなぁ)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 66.165);
-					//覆う(付いてこれるなら)
-					Cut_Pic.resize(Cut_Pic.size() + 1);
-					Cut_Pic.back().TIME = (LONGLONG)(1000000.f * 70.592);
-				}
-				{}
 				SetUseASyncLoadFlag(FALSE);
+				//カット
+				{
+					std::vector<std::string> args;
+					int mdata = FileRead_open("data/Cut.txt", FALSE);
+					while (FileRead_eof(mdata) == 0) {
+						args.clear();
+						std::string func = getparams::get_str(mdata);
+						// //を削除
+						{
+							size_t sls = func.find("//");
+							if (sls != std::string::npos) { func = func.substr(0, sls); }
+						}
+						//いらない要素を排除
+						{
+							Sub_Func(func, '{');
+							Sub_Func(func, '}');
+							Sub_Func(func, ' ');
+							Sub_Func(func, '\t');
+							Sub_Func(func, ';');
+							Sub_Func(func, '\"');
+						}
+						if (func == "") { continue; }
+						//()と,で囲われた部分から引数を取得
+						{
+							std::string tmp_func = func;
+							size_t left = tmp_func.find("(");
+							size_t right = tmp_func.rfind(")");
+							if (left != std::string::npos && right != std::string::npos) {
+								tmp_func = tmp_func.substr(left + 1, right - 1 - left);
+							}
+							while (true) {
+								size_t in_str = tmp_func.find(",");
+								if (in_str == std::string::npos) {
+									args.emplace_back(tmp_func);
+									break;
+								}
+								else {
+									std::string arg = tmp_func.substr(0, in_str);
+									tmp_func = tmp_func.substr(in_str + 1);
+									args.emplace_back(arg);
+								}
+							}
+						}
+						//
+						if (func.find("SetCut") != std::string::npos) {
+							Cut_Pic.resize(Cut_Pic.size() + 1);
+							Cut_Pic.back().TIME = (LONGLONG)(1000000.f * std::stof(args[0]));
+						}
+						else if (func.find("SetCampos_NoneRad") != std::string::npos) {
+							Cut_Pic.back().Aim_camera.campos = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						}
+						else if (func.find("SetCampos_ByRad") != std::string::npos) {
+							float Xrad = std::stof(args[0]);
+							float Yrad = std::stof(args[1]);
+							float Range = std::stof(args[2]);
+							Cut_Pic.back().Aim_camera.campos = Cut_Pic.back().Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(Xrad))*sin(-deg2rad(Yrad)), sin(deg2rad(Xrad)), -cos(deg2rad(Xrad))*cos(-deg2rad(Yrad)))*Range;
+						}
+						else if (func.find("SetCamvec") != std::string::npos) {
+							Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						}
+						else if (func.find("SetCamup") != std::string::npos) {
+							Cut_Pic.back().Aim_camera.camup = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						}
+						else if (func.find("SetCamInfo") != std::string::npos) {
+							Cut_Pic.back().Aim_camera.fov = deg2rad(std::stof(args[0]));
+							Cut_Pic.back().Aim_camera.near_ = std::stof(args[1]);
+							Cut_Pic.back().Aim_camera.far_ = std::stof(args[2]);
+							Cut_Pic.back().cam_per = std::stof(args[3]);
+						}
+						else if(func.find("SetNextResetPhysics") != std::string::npos) {
+							Cut_Pic.back().isNextreset = true;
+						}
+					}
+					FileRead_close(mdata);
+				}
+				//テロップ
 				{
 					LONGLONG StartF = 0;
 					LONGLONG ContiF = 0;
 
 					std::vector<std::string> args;
 					int mdata = FileRead_open("data/telop.txt", FALSE);
-					while (FileRead_eof(mdata) == 0){
+					while (FileRead_eof(mdata) == 0) {
 						args.clear();
 						std::string func = getparams::get_str(mdata);
 						// //を削除
@@ -1270,7 +758,6 @@ namespace FPS_n2 {
 					}
 					FileRead_close(mdata);
 				}
-				SetUseASyncLoadFlag(FALSE);
 				//
 				BGM.play(DX_PLAYTYPE_BACK, TRUE);
 				//BGM.vol(64);
@@ -1286,65 +773,18 @@ namespace FPS_n2 {
 				const auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 				{
 					if (!Time_Over()) {
-						if (Cut < 2) {
-							if (NowTime > (LONGLONG)(1000000.f * 0.450f)) {
-								sode[0].isDraw = true;
-								sode[1].isDraw = true;
-								sode[2].isDraw = true;
-								sode[3].isDraw = true;
-								easing_set(&sode[0].xpos, 0.f, 0.9f);
-								easing_set(&sode[0].ypos, 0.f, 0.9f);
-								easing_set(&sode[1].xpos, 0.f, 0.875f);
-								easing_set(&sode[1].ypos, 0.f, 0.875f);
-								easing_set(&sode[2].xpos, 0.f, 0.85f);
-								easing_set(&sode[2].ypos, 0.f, 0.85f);
-								easing_set(&sode[3].xpos, 0.f, 0.825f);
-								easing_set(&sode[3].ypos, 0.f, 0.825f);
+						int SEL = 0;
+						{
+							//0
+							if (Cut == SEL) {
 							}
-							if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
-								First[0].Goto_Aim();
-								First2[0].Goto_Aim();
-								First3[0].Goto_Aim();
-								if (First3[0].Alpha_base < 0.f) {
-									First3[0].Alpha_base = 1.f;
-									First3[0].Scale = 1.f;
-								}
+							SEL++;
+							//1
+							if (Cut == SEL) {
 							}
-							if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
-								First[1].Goto_Aim();
-								First2[1].Goto_Aim();
-								First3[1].Goto_Aim();
-								if (First3[1].Alpha_base < 0.f) {
-									First3[1].Alpha_base = 1.f;
-									First3[1].Scale = 1.f;
-								}
-							}
-							if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
-								First[2].Goto_Aim();
-								First2[2].Goto_Aim();
-								First3[2].Goto_Aim();
-								if (First3[2].Alpha_base < 0.f) {
-									First3[2].Alpha_base = 1.f;
-									First3[2].Scale = 1.f;
-								}
-							}
-							for (auto& sl : First3) {
-								if (sl.Alpha_base > 0.f) {
-									sl.Alpha_base = std::max(sl.Alpha_base - 6.f / GetFPS(), 0.f);
-								}
-								if (sl.Scale < 3.f) {
-									sl.Scale += 6.f / GetFPS();
-								}
-							}
-							for (auto& sl : First3) {
-								if (sl.Alpha_base >= 0.f) {
-									easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
-								}
-							}
-							isNextreset = true;
-						}
-						else if (Cut < 7) {
-							if (Cut == 2) {
+							SEL++;
+							//2
+							if (Cut == SEL) {
 								sode[0].isDraw = false;
 								sode[1].isDraw = false;
 								sode[2].isDraw = false;
@@ -1367,10 +807,22 @@ namespace FPS_n2 {
 								}
 								Board.isDraw = true;
 							}
-							if (Cut == 5) {
+							SEL++;
+							//3
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//4
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//5
+							if (Cut == SEL) {
 								Board.isDraw = false;
 							}
-							if (Cut == 6) {
+							SEL++;
+							//6
+							if (Cut == SEL) {
 								sode[0].isDraw = true;
 								sode[1].isDraw = true;
 								sode[2].isDraw = true;
@@ -1381,13 +833,11 @@ namespace FPS_n2 {
 								for (auto& sl : First2) {
 									sl.Goto_Aim();
 								}
-								isNextreset = true;
 								Board.isDraw = true;
 							}
-							models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
-						}
-						else if (Cut < 9) {
-							if (Cut == 7) {
+							SEL++;
+							//7
+							if (Cut == SEL) {
 								easing_set(&sode[0].xpos, (float)(DrawPts->disp_x), 0.9f);
 								easing_set(&sode[0].ypos, (float)(DrawPts->disp_y / 5), 0.9f);
 								easing_set(&sode[1].xpos, (float)(-DrawPts->disp_x), 0.875f);
@@ -1405,95 +855,1002 @@ namespace FPS_n2 {
 									sl.ypos = (float)(DrawPts->disp_y * 2);
 								}
 							}
-							if (Cut == 8) {
+							SEL++;
+							//8
+							if (Cut == SEL) {
 								sode[0].isDraw = false;
 								sode[1].isDraw = false;
 								sode[2].isDraw = false;
 								sode[3].isDraw = false;
-								isNextreset = true;
 							}
-							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
-							if (models.Get(Tachyon2, 0)->obj.get_anime(0).per > 0) {
-								Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
-								cam_yure = 0.f;
+							SEL++;
+							//9
+							if (Cut == SEL) {
 							}
-							else {
-								SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
-
-								Cut_Pic[Cut].Aim_camera.far_ = 80.f;
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-								Cut_Pic[Cut].cam_per = 0.975f;
-								cam_yure += 5.f / GetFPS();
-
-								easing_set(&Cut_Pic[Cut].Aim_camera.campos,
-									Cut_Pic[Cut].Aim_camera.camvec
-									+
-									VECTOR_ref::vget(
-										-cos(deg2rad(6.9))*sin(-deg2rad(180.f + 19.5f)),
-										sin(deg2rad(6.9)),
-										-cos(deg2rad(6.9))*cos(-deg2rad(180.f + 19.5f))
-									)*(27.0f + cam_yure)
-									+
-									VECTOR_ref::vget(
-										-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
-										-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
-										-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f),
-									0.9f);
-								easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(-0.5f + (float)(GetRand((int)(2.f * 0.5f) * 10)) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
-							}
-							SetSpeed_Effect(Effect::ef_reco, 1.05f);
-							models.Get(Tachyon2, 0)->UpdateAnim(1, true, 1.f);
-
-							models.Get(Tachyon, 0)->UpdateAnim(1, true, 0.f);
-							models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
+							SEL++;
 						}
-						else if (Cut < 14) {
-							models.Get(Tachyon2, 0)->isDraw = false;
-							models.Get(Tachyon, 0)->isDraw = true;
-							Board.isDraw = false;
-							Map.isDraw = true;
-							if (models.Get(Tachyon, 0)->obj.get_anime(1).per > 0) {
-								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
-								Stop_Effect(Effect::ef_reco);
+						{}
+						{
+							//10
+							if (Cut == SEL) {
 							}
-							if (Cut <= 12) {
-								if (models.Get(Tachyon, 0)->obj.get_anime(2).time == 30.f) {
-									models.Get(Tachyon, 0)->OpacityRate = 0.f;
-									spd_takion = 0.6f;
+							SEL++;
+							//11
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//12
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//13
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//14
+							if (Cut == SEL) {
+								models.Get(Tachyon, 0)->isDraw = false;
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
+								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.6f);
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(6);
+								models.Get(Tachyon, 1)->obj.get_anime(2).time = 33.f;
+								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.6f;
+							}
+							SEL++;
+							//15
+							if (Cut == SEL) {
+								if (models.Get(Tachyon, 1)->obj.get_anime(2).time == 33.f) {
+									models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									models.Get(Tachyon2, 0)->isDraw = false;
+									models.Get(Tachyon, 1)->isDraw = true;
 								}
-								easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
-								if (models.Get(Tachyon, 0)->obj.get_anime(2).time <= 32.f) {
-									models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
+
+								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
+								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.45f;
+
+								models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
+								models.Get(Cafe, 0)->obj.get_anime(0).time = 33.f;
+
+								models.Get(Tachyon2, 0)->OpacityRate = 0.f;
+								models.Get(Cafe, 0)->OpacityRate = 0.f;
+								isfirst_14 = false;
+							}
+							SEL++;
+							//16
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//17
+							if (Cut == SEL) {
+								easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
+									models.Get(Tachyon2, 0)->obj.frame(9) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
+									0.975f);
+								if (!isfirst_14) {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(9);
+								}
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-8.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc)),
+										sin(deg2rad(-8.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(-8.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc))
+									)*38.0f;
+								if (!isfirst_14) {
+									Cut_Pic[Cut].cam_per = 0.f;
+									isfirst_14 = true;
 								}
 								else {
-									easing_set(&spd_takion, 0.01f, 0.9f);
-									models.Get(Tachyon, 0)->OpacityRate = 1.f;
-									models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
+									Cut_Pic[Cut].cam_per = 0.975f;
 								}
-								models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
+								radc += 12.5f / GetFPS();
 							}
-							else {
-								if (NowTime > (LONGLONG)(1000000.f * 8.864f)) {
-									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.6f);
-									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(6);
-									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(17.178366f, 4.319146f, -36.016518f);
+							SEL++;
+							//18
+							if (Cut == SEL) {
+								if (isfirst_14) {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8);
+									Cut_Pic[Cut].cam_per = 0.f;
+									isfirst_14 = false;
+								}
+								else {
+									easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
+										models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
+										0.975f);
+									Cut_Pic[Cut].cam_per = 0.975f;
+								}
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 + 180 - 10) + radc)),
+										sin(deg2rad(-5.5f + xradadd_r * 1.5f)),
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*cos(-deg2rad(float(90 + 180 - 10) + radc))
+									)*34.0f;
+								radc += 12.5f / GetFPS();
+							}
+							SEL++;
+							//19
+							if (Cut == SEL) {
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(103);
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(25.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc)),
+										sin(deg2rad(25.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(25.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc))
+									)*38.0f;
+								radc += 12.5f / GetFPS();
+
+								for (int i = 0; i < 12; i++) {
+									models.Get(NEWS, i)->move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(-30 + GetRand(2 * 30)));
+									models.Get(NEWS, i)->move.pos = VECTOR_ref::vget((float)(-20 + GetRand(2 * 20)), (float)(7 + GetRand(10)), (float)(-20 + GetRand(2 * 20)));
+									models.Get(NEWS, i)->move.vec.y(-(float)(GetRand(100)) / 1000.f);
+								}
+							}
+							SEL++;
+						}
+						{}
+						{
+							//20
+							if (Cut == SEL) {
+								Map.isDraw = false;
+								models.Get(Tachyon2, 0)->isDraw = false;
+								models.Get(Tachyon, 1)->isDraw = false;
+								if (models.Get(Cafe, 0)->obj.get_anime(0).time != 0.f) {
+									models.Get(Cafe, 0)->obj.get_anime(0).time = 0.f;
+									models.Get(Cafe, 0)->isDraw = false;
+								}
+								for (int i = 0; i < 12; i++) {
+									models.Get(NEWS, i)->isDraw = true;
+									if (models.Get(NEWS, i)->move.pos.y() >= 3.5f) {
+										models.Get(NEWS, i)->move.vec.yadd(M_GR / powf((FPS / 0.75f), 2.f));
+									}
+									else {
+										float yp = models.Get(NEWS, i)->move.vec.y();
+										easing_set(&yp, 0.f, 0.995f);
+										models.Get(NEWS, i)->move.vec.y(yp);
+									}
+
+									models.Get(NEWS, i)->move.pos += models.Get(NEWS, i)->move.vec;
+									models.Get(NEWS, i)->obj.SetMatrix(models.Get(NEWS, i)->move.mat*MATRIX_ref::Mtrans(models.Get(NEWS, i)->move.pos));
+								}
+								/*
+								for (auto& n : news_p) {
+									n.xpos = DrawPts->disp_x / 2 - DrawPts->disp_x;
+									n.ypos = DrawPts->disp_y / 2 - DrawPts->disp_y;
+									n.rad = deg2rad(-30);
+								}
+								*/
+							}
+							SEL++;
+							//21
+							if (Cut == SEL) {
+								models.Get(Tachyon, 2)->isDraw = true;
+								models.Get(Tachyon, 2)->UpdateAnim(4, false, 0.f);
+								models.Get(Tachyon, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, 1, -10)));
+
+								models.Get(Tachyon, 3)->isDraw = true;
+								models.Get(Tachyon, 3)->UpdateAnim(5, false, 0.f);
+								models.Get(Tachyon, 3)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
+
+								models.Get(Tachyon, 4)->isDraw = true;
+								models.Get(Tachyon, 4)->UpdateAnim(6, false, 0.f);
+								models.Get(Tachyon, 4)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
+
+								models.Get(Tachyon, 5)->isDraw = true;
+								models.Get(Tachyon, 5)->UpdateAnim(7, false, 0.f);
+								models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
+							}
+							SEL++;
+							//22
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//23
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//24
+							if (Cut == SEL) {
+								Map.isDraw = false;
+								models.Get(GoldShip, 0)->isDraw = false;
+								models.Get(Speweek, 0)->isDraw = false;
+								models.Get(Teio, 0)->isDraw = false;
+								models.Get(Macin, 0)->isDraw = false;
+								models.Get(Tachyon, 0)->obj.get_anime(8).time = 33.f;
+								return_walk = false;
+							}
+							SEL++;
+							//25
+							if (Cut == SEL) {
+								models.Get(SCHOOL, 0)->isDraw = true;
+								models.Get(Tachyon, 0)->isDraw = true;
+								if (models.Get(Tachyon, 0)->obj.get_anime(8).time == 33.f) {
+									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									models.Get(Tachyon, 1)->isDraw = false;
+									models.Get(Tachyon, 1)->OpacityRate = 1.f;
+								}
+								if (models.Get(Tachyon, 0)->obj.get_anime(8).time == models.Get(Tachyon, 0)->obj.get_anime(8).alltime) {
+									if (!return_walk) {
+										models.Get(Tachyon, 1)->isDraw = true;
+										models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+										models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.f);
+										models.Get(Tachyon, 1)->obj.work_anime();
+										models.Get(Tachyon, 1)->obj.PhysicsResetState();
+									}
+									return_walk = true;
+								}
+								models.Get(Tachyon, 0)->UpdateAnim(8, false, return_walk ? -4.f : 4.f);
+								if (return_walk) {
+									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.7f);
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 1)->obj.frame(9);
+									Cut_Pic[Cut].cam_per = 0.95f;
+									Cut_Pic[Cut].Aim_camera.near_ = 5.f;
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(7);
+								}
+								else {
+									models.Get(Tachyon, 0)->PhysicsSpeed = 4.f;
+								}
+								radc2 = 0.f;
+							}
+							SEL++;
+							//26
+							if (Cut == SEL) {
+								Map.isDraw = true;
+								models.Get(SCHOOL, 0)->isDraw = false;
+								models.Get(GATE, 0)->isDraw = true;
+								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
+								models.Get(Tachyon, 0)->isDraw = false;
+								models.Get(Tachyon, 1)->isDraw = false;
+								return_walk = true;
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+									)*88.0f;
+								radc2 += 12.5f / GetFPS();
+								Gate_Xpos = -20.f;
+								camzb_28 = 1.f;
+							}
+							SEL++;
+							//27
+							if (Cut == SEL) {
+								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
+								if (Gate_Xpos < 20.f) {
+									Gate_Xpos += 20.f *1.f / GetFPS();
+								}
+								models.Get(Karen, 0)->obj.get_anime(0).time = 6.25f;
+								if (camzb_28 == 1.f) {
+									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
+									Cut_Pic[Cut].cam_per = 0.f;
+								}
+								else {
+									float pp = 7.f;
+									easing_set(&rand_vp, VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f), 0.9f);
+									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f) + rand_vp;
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+								camzb_28 = 0.f;
+								ship_z = -5.f;
+								ship_zadd = 0.f;
+							}
+							SEL++;
+							//28
+							if (Cut == SEL) {
+								models.Get(GATE, 0)->isDraw = false;
+							}
+							SEL++;
+							//29
+							if (Cut == SEL) {
+							}
+							SEL++;
+						}
+						{}
+						{
+							//30
+							if (Cut == SEL) {
+								Board.isDraw = true;
+								Ship.isDraw = false;
+								Map.isDraw = false;
+								models.Get(Tachyon, 0)->isDraw = false;
+								models.Get(Karen, 0)->isDraw = false;
+								models.Get(Cafe, 0)->isDraw = true;
+								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.f);
+							}
+							SEL++;
+							//31
+							if (Cut == SEL) {
+								Board.isDraw = false;
+								models.Get(Tachyon, 0)->isDraw = true;
+								models.Get(Cafe, 0)->UpdateAnim(1, true, 0.f);
+								models.Get(Scarlet, 0)->OpacityRate = 0.5f;
+							}
+							SEL++;
+							//32
+							if (Cut == SEL) {
+								models.Get(Tachyon, 0)->isDraw = false;
+								Map.isDraw = true;
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Cafe, 0)->isDraw = false;
+								models.Get(Scarlet, 0)->isDraw = true;
+								models.Get(Scarlet, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+								models.Get(Scarlet, 0)->UpdateAnim(0, false, 0.6f);
+								if (models.Get(Scarlet, 0)->obj.get_anime(0).time > 10.f) {
+									easing_set(&models.Get(Scarlet, 0)->OpacityRate, 1.f, 0.95f);
+								}
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
+								models.Get(Tachyon2, 0)->UpdateAnim(10, false, 0.6f);
+							}
+							SEL++;
+							//33
+							if (Cut == SEL) {
+								models.Get(Vodka, 0)->isDraw = true;
+								models.Get(Vodka, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -50)));
+								models.Get(Vodka, 0)->UpdateAnim(0, false, 1.f);
+							}
+							SEL++;
+							//34
+							if (Cut == SEL) {
+								models.Get(Vodka, 0)->isDraw = false;
+							}
+							SEL++;
+							//35
+							if (Cut == SEL) {
+								Map.isDraw = false;
+								models.Get(Scarlet, 0)->isDraw = false;
+								models.Get(Tachyon2, 0)->isDraw = false;
+								models.Get(Cafe, 0)->isDraw = true;
+								models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
+								models.Get(Cafe, 0)->OpacityRate = 1.f;
+							}
+							SEL++;
+							//36
+							if (Cut == SEL) {
+								models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
+								models.Get(Cafe, 0)->OpacityRate = std::max(models.Get(Cafe, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
+								models.Get(Tachyon, 0)->isDraw = true;
+								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
+								models.Get(Tachyon, 0)->UpdateAnim(11, false, 0.5f);
+								models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
+							}
+							SEL++;
+							//37
+							if (Cut == SEL) {
+								models.Get(Tachyon, 0)->isDraw = false;
+								models.Get(Cafe, 0)->isDraw = false;
+								models.Get(Trainer, 0)->isDraw = true;
+								models.Get(Trainer, 0)->UpdateAnim(0, false, 1.2f);
+							}
+							SEL++;
+							//38
+							if (Cut == SEL) {
+								models.Get(Trainer, 0)->isDraw = false;
+								models.Get(Tachyon, 0)->isDraw = true;
+								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
+								models.Get(Tachyon, 0)->UpdateAnim(12, false, 0.5f);
+							}
+							SEL++;
+							//39
+							if (Cut == SEL) {
+								Map.isDraw = true;
+								models.Get(Tachyon, 0)->isDraw = false;
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+								models.Get(Tachyon2, 0)->UpdateAnim(13, false, 1.2f);
+							}
+							SEL++;
+						}
+						{}
+						{
+							//40
+							if (Cut == SEL) {
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+								models.Get(Tachyon2, 0)->UpdateAnim(14, false, 2.8f);
+								camzb_28 = 0.f;
+								camzb_41 = 0.1f;
+								for (int i = 0; i < 12; i++) {
+									models.Get(Mobu, i)->UpdateAnim(models.Get(Mobu, i)->Anim_Sel, false, 0.f);
+								}
+							}
+							SEL++;
+							//41
+							if (Cut == SEL) {
+								Gate_Xpos = 0.f;
+								models.Get(GATE, 0)->isDraw = true;
+								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
+								models.Get(GATE, 0)->UpdateAnim(0, false, 0.f);
+
+								Gate_Xpos += -7.f;
+								for (int i = 0; i < 12; i++) {
+									models.Get(Mobu, i)->isDraw = true;
+									models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f)));
+									Gate_Xpos += -14.f;
+								}
+								models.Get(Tachyon2, 0)->isDraw = false;
+								float pp = 10.f;
+								if (camzb_28 < -9.5f) {
+									pp = 2.f;
+								}
+								if (camzb_28 <= -10.f) {
+									pp = 0.f;
+								}
+								rand_vp = VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f);
+
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
+										sin(deg2rad(0.f)),
+										-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
+									)*(20.f - camzb_28 * 20.8f) +
+									rand_vp;
+
+								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
+								easing_set(&camzb_41, 0.3f, 0.995f);
+								Cut_Pic[Cut].cam_per = 0.f;
+								if (camzb_28 != 0.f) {
+									if (camzb_28 > -8.f) {
+										Cut_Pic[Cut].cam_per = 0.9f;
+									}
+									else {
+										Cut_Pic[Cut].cam_per = 0.95f;
+									}
+								}
+								if (camzb_28 > -10.f) {
+									camzb_28 -= 100.f / GetFPS();
+								}
+								else {
+									camzb_28 = -10.f;
+								}
+							}
+							SEL++;
+							//42
+							if (Cut == SEL) {
+								float pp = 10.f;
+								if (camzb_28 > -5.f) {
+									pp = 2.f;
+								}
+								rand_vp = VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f);
+
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
+										sin(deg2rad(0.f)),
+										-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
+									)*(10.f - camzb_28 * 20.8f) +
+									rand_vp;
+								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
+								easing_set(&camzb_41, 0.3f, 0.995f);
+								HostpassPTs->Set_Bright(
+									226 + (int)((float)(255 - 226)*bright_43),
+									226 + (int)((float)(255 - 226)*bright_43),
+									196 + (int)((float)(255 - 196)*bright_43)
+								);
+								easing_set(&bright_43, 1.f, 0.9f);
+								if (camzb_28 < 0.f) {
+									camzb_28 += 70.f / GetFPS();
+								}
+								else {
+									camzb_28 = 0.f;
+								}
+							}
+							SEL++;
+							//43
+							if (Cut == SEL) {
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-20.f))*sin(-deg2rad(-10.f + camzb_28)),
+										sin(deg2rad(-20.f)),
+										-cos(deg2rad(-20.f))*cos(-deg2rad(-10.f + camzb_28))
+									)*(20.f);
+								camzb_28 += 40.f / GetFPS();
+								camyup = 0.f;
+							}
+							SEL++;
+							//44
+							if (Cut == SEL) {
+								if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
+									models.Get(GATE, 0)->UpdateAnim(1, false, 1.f);
+
+									Gate_Xpos = 0.f;
+									Gate_Xpos += -7.f;
+									for (int i = 0; i < 12; i++) {
+										//models.Get(Mobu, i)->
+										models.Get(Mobu, i)->isDraw = true;
+										easing_set(&models.Get(Mobu, i)->obj.get_anime(models.Get(Mobu, i)->Anim_Sel).per, 0.f, models.Get(Mobu, i)->b_run);
+										easing_set(&models.Get(Mobu, i)->obj.get_anime(3).per, 1.f, models.Get(Mobu, i)->b_run);
+
+										models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - models.Get(Mobu, i)->b_runrange * models.Get(Mobu, i)->obj.get_anime(3).per)));
+										Gate_Xpos += -14.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 49.681)) {
+									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(-39.67f, 5.48f, -51.8f);
+									Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(1, -0.3f, 0.6f);
 									Cut_Pic[Cut].cam_per = 0.9f;
-									models.Get(Tachyon, 0)->PhysicsSpeed = 0.02f;
 								}
 								else {
-									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.01f);
+									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-40.67f, 5.53f, -42.f);
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(1, -0.1f - 0.1f*camyup, -0.13f);
+									camyup += 1.f / GetFPS();
+									Cut_Pic[Cut].cam_per = 0.f;
+								}
+							}
+							SEL++;
+							//45
+							if (Cut == SEL) {
+								models.Get(Tachyon2, 0)->isDraw = false;
+								Board.isDraw = true;
+								Map.isDraw = false;
+								models.Get(GATE, 0)->isDraw = false;
+								for (int i = 0; i < 12; i++) {
+									//models.Get(Mobu, i)->
+									models.Get(Mobu, i)->isDraw = false;
+								}
+								if (!anim[0].isDraw) {
+									VECTOR_ref vec_x = (Cut_Pic[Cut].Aim_camera.camvec - Cut_Pic[Cut].Aim_camera.campos).Norm().cross(Cut_Pic[Cut].Aim_camera.camup);
+									Set_Effect(Effect::ef_greexp, VECTOR_ref::vget(-4.f, 4.6f, -2.f) + vec_x * 13.f, VECTOR_ref::front(), 5.f);
+									Set_Effect(Effect::ef_greexp2, VECTOR_ref::vget(8.f, 5.5f, 4.f) - vec_x * 8.f, VECTOR_ref::front(), 4.f);
+								}
+								SetSpeed_Effect(Effect::ef_greexp, 0.5f);
+								SetSpeed_Effect(Effect::ef_greexp2, 0.5f);
+								anim[0].isDraw = true;
+								anim[0].ypos = 0.f;
+							}
+							SEL++;
+							//46
+							if (Cut == SEL) {
+								sode[4].isDraw = true;
+								sode[5].isDraw = true;
+								sode[6].isDraw = true;
+								sode[7].isDraw = true;
+								camzb_41 = (float)(DrawPts->disp_y)*0.4f;
+							}
+							SEL++;
+							//47
+							if (Cut == SEL) {
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
+								anim[0].isDraw = false;
+								anim[1].isDraw = true;
+								easing_set(&anim[1].ypos, camzb_41, 0.7f);
+								if (camzb_41 == (float)(DrawPts->disp_y)*0.4f) {
+									SetSpeed_Effect(Effect::ef_greexp, 0.1f);
+									SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
+								}
+								if (camzb_41 > 0.f) {
+									camzb_41 -= (float)(y_r(500)) / GetFPS();
+								}
+							}
+							SEL++;
+							//48
+							if (Cut == SEL) {
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
+								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
+								if (anim[0].ypos == 0.f) {
+									sode[4].xpos = (float)(0);
+									sode[4].ypos = (float)(-DrawPts->disp_y);
+									sode[5].xpos = (float)(0);
+									sode[5].ypos = (float)(-DrawPts->disp_y * 5 / 4);
+									sode[6].xpos = (float)(0);
+									sode[6].ypos = (float)(-DrawPts->disp_y * 6 / 4);
+									sode[7].xpos = (float)(0);
+									sode[7].ypos = (float)(-DrawPts->disp_y * 7 / 4);
+								}
+								anim[0].ypos = 2.f;
+								easing_set(&anim[1].ypos, camzb_41, 0.7f);
+								if (camzb_41 > 0.f) {
+									camzb_41 -= (float)(y_r(500)) / GetFPS();
+								}
+								models.Get(Tachyon2, 0)->obj.get_anime(2).time = 35.f;
+							}
+							SEL++;
+							//49
+							if (Cut == SEL) {
+								anim[1].isDraw = false;
+
+								VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
+								aim.y(0.f);
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
+								models.Get(Tachyon2, 0)->UpdateAnim(2, false, 0.1f);
+								models.Get(Karen, 0)->isDraw = false;
+							}
+							SEL++;
+						}
+						{}
+						{
+							//50
+							if (Cut == SEL) {
+								sode[4].isDraw = false;
+								sode[5].isDraw = false;
+								sode[6].isDraw = false;
+								sode[7].isDraw = false;
+
+								Board.isDraw = false;
+								Map.isDraw = true;
+								Stop_Effect(Effect::ef_greexp);
+								Stop_Effect(Effect::ef_greexp2);
+								models.Get(Tachyon2, 0)->isDraw = false;
+
+								models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+								models.Get(Karen, 0)->UpdateAnim(1, false, 0.95f);
+								if (models.Get(Karen, 0)->isDraw) {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(8);
+									Cut_Pic[Cut].cam_per = 0.995f;
+								}
+								models.Get(Karen, 0)->isDraw = true;
+							}
+							SEL++;
+							//51
+							if (Cut == SEL) {
+								models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+								models.Get(Karen, 0)->UpdateAnim(2, false, 1.15f);
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(10) + VECTOR_ref::vget(2.3f, 0.f, 0.f);
+							}
+							SEL++;
+							//52
+							if (Cut == SEL) {
+							}
+							SEL++;
+							//53
+							if (Cut == SEL) {
+								if (models.Get(Cafe, 0)->obj.get_anime(3).time > 30.f) {
+									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(-5.f, -3.5f, -20.f)*2.0f;
+									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
+									Cut_Pic[Cut].Aim_camera.near_ = 1.f;
+									Cut_Pic[Cut].Aim_camera.far_ = 5000.f;
+									Cut_Pic[Cut].cam_per = 0.9975f;
+								}
+								else {
+									if (models.Get(Cafe, 0)->obj.get_anime(3).time > 15.f) {
+										Cut_Pic[Cut].cam_per = 0.f;
+									}
+									else {
+										Cut_Pic[Cut].cam_per = 1.f;
+									}
+								}
+								models.Get(Mobu, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
+								models.Get(Mobu, 2)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
+								models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2000.f - 5.f)));
+								models.Get(Doto, 0)->obj.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
+								models.Get(Cafe, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
+								models.Get(Mobu, 1)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
+								models.Get(Opera, 0)->obj.get_anime(0).time = (float)GetRand(100) / 10.f;
+							}
+							SEL++;
+							//54
+							if (Cut == SEL) {
+								Board.isDraw = false;
+								Map.isDraw = true;
+								models.Get(GATE, 0)->isDraw = true;
+								models.Get(Mobu, 0)->isDraw = true;
+								models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
+								models.Get(Mobu, 0)->UpdateAnim(4, false, 0.84f);
+
+								models.Get(Mobu, 2)->isDraw = true;
+								models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(20.f, 0.f, -2000.f - 40.f)));
+								models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
+
+								models.Get(Doto, 0)->UpdateAnim(0, false, 0.82f);
+
+								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 30.f)));
+								models.Get(Cafe, 0)->UpdateAnim(4, false, 0.85f);
+
+								models.Get(Mobu, 1)->isDraw = true;
+								models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 0.f, -2000.f - 5.f)));
+								models.Get(Mobu, 1)->UpdateAnim(4, false, 0.82f);
+
+								models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2000.f + 10.f)));
+								models.Get(Opera, 0)->UpdateAnim(0, false, 0.84f);
+
+								if (models.Get(Opera, 0)->isDraw) {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(7 + GetRand(3)) + VECTOR_ref::vget(0.f, 2.f, -30.f);
+								}
+								else {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 2.f, -30.f);
+								}
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(0.5f))*sin(-deg2rad(float(90 - 10 + 180))),
+										sin(deg2rad(0.5f)),
+										-cos(deg2rad(0.5f))*cos(-deg2rad(float(90 - 10 + 180)))
+									)*608.0f;
+
+								if (models.Get(Opera, 0)->isDraw) {
+									Cut_Pic[Cut].cam_per = 0.975f;
+								}
+								else {
+									Cut_Pic[Cut].cam_per = 0.f;
+								}
+								radc2 = -1.f;
+								models.Get(Cafe, 0)->isDraw = true;
+								models.Get(Doto, 0)->isDraw = true;
+								models.Get(Opera, 0)->isDraw = true;
+								nex_cut = false;
+							}
+							SEL++;
+							//55
+							if (Cut == SEL) {
+								models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 5.f, 0.f, -2200.f - 45.f)));
+								models.Get(Mobu, 0)->UpdateAnim(4, false, 0.8f);
+								models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 7.f, 0.f, -2200.f - 70.f)));
+								models.Get(Mobu, 1)->UpdateAnim(4, false, 0.8f);
+								models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 10.f, 0.f, -2200.f - 65.f)));
+								models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
+								models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 6.f, 0.f, -2200.f - 35.f)));
+								models.Get(Doto, 0)->UpdateAnim(0, false, 1.1f);
+								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 5.f, 0.f, -2200.f - 0.f)));
+								models.Get(Cafe, 0)->UpdateAnim(4, false, 0.98f);
+								models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 12.5f, 0.f, -2200.f - 40.f)));
+								models.Get(Opera, 0)->UpdateAnim(0, false, 0.95f);
+
+								if (nex_cut) {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f);
+								}
+								else {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 10.f, 30.f);
+								}
+								if (radc2 < 0.f) {
+									Cut_Pic[Cut].Aim_camera.campos = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f) +
+										VECTOR_ref::vget(
+											-cos(deg2rad(1.5f))*sin(-deg2rad(float(90 - 80 + 180) + radc2)),
+											sin(deg2rad(1.5f)),
+											-cos(deg2rad(1.5f))*cos(-deg2rad(float(90 - 80 + 180) + radc2))
+										)*468.0f;
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 62.755)) {
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(0.85f);
+								}
+								else {
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(2);
+								}
+
+								if (nex_cut) {
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+								else {
+									Cut_Pic[Cut].cam_per = 0.f;
+								}
+								nex_cut = true;
+								radc2 = 0.f;
+							}
+							SEL++;
+							//56
+							if (Cut == SEL) {
+								models.Get(Mobu, 0)->isDraw = false;
+								models.Get(Mobu, 1)->isDraw = false;
+								models.Get(Mobu, 2)->isDraw = false;
+								models.Get(Doto, 0)->isDraw = false;
+								models.Get(Opera, 0)->isDraw = false;
+								models.Get(Tachyon, 0)->isDraw = true;
+
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+									)*88.0f;
+								radc2 += 12.5f / GetFPS();
+								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+								models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.2f);
+							}
+							SEL++;
+							//57
+							if (Cut == SEL) {
+								models.Get(GATE, 0)->isDraw = false;
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
+
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+									)*88.0f;
+								radc2 += 12.5f / GetFPS();
+								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+								models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
+								Box_ALPHA = 0.f;
+							}
+							SEL++;
+							//58
+							if (Cut == SEL) {
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
+
+								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
+								easing_set(&xradadd_r, xradadd, 0.975f);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
+										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
+										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
+									)*88.0f;
+								radc2 += 12.5f / GetFPS();
+
+								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+								models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
+
+								if (Box_ALPHA < 1.f) {
+									Box_ALPHA += 1.f / GetFPS();
+									per_logo = 1.f;
+								}
+								else {
+									Box_ALPHA = 1.f;
+									if (per_logo > 0.f) {
+										per_logo -= 1.f / GetFPS() / 1.5f;
+										easing_set(&Logo.xpos, (float)(DrawPts->disp_x / 2) + Logo.xpos_rand, 0.975f);
+										easing_set(&Logo.ypos, (float)(DrawPts->disp_y / 2) + Logo.ypos_rand, 0.975f);
+										easing_set(&Logo.Scale, 1.f - ((float)(0.1f) * per_logo) + (float)(GetRand((int)((float)(0.1f) * per_logo) * 2 * 100)) / 100.f, 0.975f);
+										Logo.Set_Rand((float)(y_r(1000)) * per_logo, 0.8f, (float)(y_r(1000)) * per_logo, 0.8f, 0.f, 0.f);
+									}
+									else {
+										per_logo = 0.f;
+										easing_set(&Logo.xpos, (float)(DrawPts->disp_x / 2), 0.95f);
+										easing_set(&Logo.ypos, (float)(DrawPts->disp_y / 2), 0.95f);
+										easing_set(&Logo.Scale, 1.f, 0.95f);
+									}
+								}
+
+								for (auto& sl : sode_last) {
+									easing_set(&sl.xpos, sl.xpos_base + y_r(sl.xpos_rand), 0.945f);
+									easing_set(&sl.ypos, sl.ypos_base + y_r(sl.ypos_rand), 0.925f);
+									easing_set(&sl.rad, sl.rad_base + sl.rad_rand, 0.925f);
+									sl.Set_Rand(50.f, 0.95f, 50.f, 0.95f, 10.f, 0.95f);
+								}
+							}
+						}
+						//
+						{
+							if (Cut >= 0 && Cut < 2) {
+								if (NowTime > (LONGLONG)(1000000.f * 0.450f)) {
+									sode[0].isDraw = true;
+									sode[1].isDraw = true;
+									sode[2].isDraw = true;
+									sode[3].isDraw = true;
+									easing_set(&sode[0].xpos, 0.f, 0.9f);
+									easing_set(&sode[0].ypos, 0.f, 0.9f);
+									easing_set(&sode[1].xpos, 0.f, 0.875f);
+									easing_set(&sode[1].ypos, 0.f, 0.875f);
+									easing_set(&sode[2].xpos, 0.f, 0.85f);
+									easing_set(&sode[2].ypos, 0.f, 0.85f);
+									easing_set(&sode[3].xpos, 0.f, 0.825f);
+									easing_set(&sode[3].ypos, 0.f, 0.825f);
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
+									First[0].Goto_Aim();
+									First2[0].Goto_Aim();
+									First3[0].Goto_Aim();
+									if (First3[0].Alpha_base < 0.f) {
+										First3[0].Alpha_base = 1.f;
+										First3[0].Scale = 1.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
+									First[1].Goto_Aim();
+									First2[1].Goto_Aim();
+									First3[1].Goto_Aim();
+									if (First3[1].Alpha_base < 0.f) {
+										First3[1].Alpha_base = 1.f;
+										First3[1].Scale = 1.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
+									First[2].Goto_Aim();
+									First2[2].Goto_Aim();
+									First3[2].Goto_Aim();
+									if (First3[2].Alpha_base < 0.f) {
+										First3[2].Alpha_base = 1.f;
+										First3[2].Scale = 1.f;
+									}
+								}
+								for (auto& sl : First3) {
+									if (sl.Alpha_base > 0.f) {
+										sl.Alpha_base = std::max(sl.Alpha_base - 6.f / GetFPS(), 0.f);
+									}
+									if (sl.Scale < 3.f) {
+										sl.Scale += 6.f / GetFPS();
+									}
+								}
+								for (auto& sl : First3) {
+									if (sl.Alpha_base >= 0.f) {
+										easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
+									}
+								}
+							}
+							if (Cut >= 2 && Cut < 7) {
+								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
+							}
+							if (Cut >= 7 && Cut < 9) {
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
+								if (models.Get(Tachyon2, 0)->obj.get_anime(0).per > 0) {
+									Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
+									cam_yure = 0.f;
+								}
+								else {
+									SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
+
+									Cut_Pic[Cut].Aim_camera.far_ = 80.f;
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+									Cut_Pic[Cut].cam_per = 0.975f;
+									cam_yure += 5.f / GetFPS();
+
+									easing_set(&Cut_Pic[Cut].Aim_camera.campos,
+										Cut_Pic[Cut].Aim_camera.camvec
+										+
+										VECTOR_ref::vget(
+											-cos(deg2rad(6.9))*sin(-deg2rad(180.f + 19.5f)),
+											sin(deg2rad(6.9)),
+											-cos(deg2rad(6.9))*cos(-deg2rad(180.f + 19.5f))
+										)*(27.0f + cam_yure)
+										+
+										VECTOR_ref::vget(
+											-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
+											-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
+											-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f),
+										0.9f);
+									easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(-0.5f + (float)(GetRand((int)(2.f * 0.5f) * 10)) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
+								}
+								SetSpeed_Effect(Effect::ef_reco, 1.05f);
+								models.Get(Tachyon2, 0)->UpdateAnim(1, true, 1.f);
+								models.Get(Tachyon, 0)->UpdateAnim(1, true, 0.f);
+								models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
+							}
+							if (Cut >= 9 && Cut < 14) {
+								models.Get(Tachyon2, 0)->isDraw = false;
+								models.Get(Tachyon, 0)->isDraw = true;
+								Board.isDraw = false;
+								Map.isDraw = true;
+								if (models.Get(Tachyon, 0)->obj.get_anime(1).per > 0) {
+									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
+									Stop_Effect(Effect::ef_reco);
+								}
+								if (Cut <= 12) {
+									if (models.Get(Tachyon, 0)->obj.get_anime(2).time == 30.f) {
+										models.Get(Tachyon, 0)->OpacityRate = 0.f;
+										spd_takion = 0.6f;
+									}
+									easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
+									if (models.Get(Tachyon, 0)->obj.get_anime(2).time <= 32.f) {
+										models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
+									}
+									else {
+										easing_set(&spd_takion, 0.01f, 0.9f);
+										models.Get(Tachyon, 0)->OpacityRate = 1.f;
+										models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
+									}
 									models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
 								}
-							}
+								else {
+									if (NowTime > (LONGLONG)(1000000.f * 8.864f)) {
+										models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.6f);
+										Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(6);
+										Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(17.178366f, 4.319146f, -36.016518f);
+										Cut_Pic[Cut].cam_per = 0.9f;
+										models.Get(Tachyon, 0)->PhysicsSpeed = 0.02f;
+									}
+									else {
+										models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.01f);
+										models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
+									}
+								}
 
-							models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
-							if (Cut == 13) {
-								isNextreset = true;
+								models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
 							}
-						}
-						else if (Cut < 20) {
-
 							if (Cut >= 15 && Cut <= 16) {
 								//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(116.485695f, 18.346067f, -56.928761f);
 
@@ -1514,43 +1871,7 @@ namespace FPS_n2 {
 								Cut_Pic[Cut].cam_per = 0.f;
 								radc2 += 12.5f / GetFPS();
 							}
-
-
-							if (Cut < 15) {
-								models.Get(Tachyon, 0)->isDraw = false;
-								models.Get(Tachyon2, 0)->isDraw = true;
-								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
-								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.6f);
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(6);
-								Cut_Pic[Cut].cam_per = 0.f;
-
-								models.Get(Tachyon, 1)->obj.get_anime(2).time = 33.f;
-								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.6f;
-								if (Cut == 14) {
-									isNextreset = true;
-								}
-							}
-							else if (Cut < 16) {
-								if (models.Get(Tachyon, 1)->obj.get_anime(2).time == 33.f) {
-									models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-									models.Get(Tachyon2, 0)->isDraw = false;
-									models.Get(Tachyon, 1)->isDraw = true;
-								}
-
-								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
-								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.45f;
-
-								models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
-								models.Get(Cafe, 0)->obj.get_anime(0).time = 33.f;
-								if (Cut == 15) {
-									isNextreset = true;
-								}
-
-								models.Get(Tachyon2, 0)->OpacityRate = 0.f;
-								models.Get(Cafe, 0)->OpacityRate = 0.f;
-								isfirst_14 = false;
-							}
-							else if (Cut < 20) {
+							if (Cut >= 16 && Cut < 20) {
 								models.Get(Tachyon2, 0)->isDraw = true;
 								models.Get(Cafe, 0)->isDraw = true;
 								if (models.Get(Tachyon2, 0)->obj.get_anime(3).time == 33.f) {
@@ -1567,944 +1888,121 @@ namespace FPS_n2 {
 
 								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 								models.Get(Cafe, 0)->PhysicsSpeed = 0.45f;
-
-								if (Cut == 17) {
-									easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
-										models.Get(Tachyon2, 0)->obj.frame(9) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
-										0.975f);
-									if (!isfirst_14) {
-										Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(9);
-									}
-									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-									easing_set(&xradadd_r, xradadd, 0.975f);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-										VECTOR_ref::vget(
-											-cos(deg2rad(-8.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc)),
-											sin(deg2rad(-8.5 + xradadd_r * 1.5f)),
-											-cos(deg2rad(-8.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc))
-										)*38.0f;
-									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-									if (!isfirst_14) {
-										Cut_Pic[Cut].cam_per = 0.f;
-										isfirst_14 = true;
-									}
-									else {
-										Cut_Pic[Cut].cam_per = 0.975f;
-									}
-									Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
-									radc += 12.5f / GetFPS();
-								}
-								else if (Cut == 18) {
-									if (isfirst_14) {
-										Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8);
-										Cut_Pic[Cut].cam_per = 0.f;
-										isfirst_14 = false;
-									}
-									else {
-										easing_set(&Cut_Pic[Cut].Aim_camera.camvec,
-											models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, -5.5f + (float)(GetRand((int)(2.f * 5.5f) * 10)) / 10.f, -13.5f + (float)(GetRand((int)(2.f * 13.5f) * 10)) / 10.f),
-											0.975f);
-										Cut_Pic[Cut].cam_per = 0.975f;
-									}
-									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-									easing_set(&xradadd_r, xradadd, 0.975f);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-										VECTOR_ref::vget(
-											-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 + 180 - 10) + radc)),
-											sin(deg2rad(-5.5f + xradadd_r * 1.5f)),
-											-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*cos(-deg2rad(float(90 + 180 - 10) + radc))
-										)*34.0f;
-									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-									Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
-									radc += 12.5f / GetFPS();
-								}
-								else if (Cut == 19) {
-									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(103);
-									float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-									easing_set(&xradadd_r, xradadd, 0.975f);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-										VECTOR_ref::vget(
-											-cos(deg2rad(25.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc)),
-											sin(deg2rad(25.5 + xradadd_r * 1.5f)),
-											-cos(deg2rad(25.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc))
-										)*38.0f;
-									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-									Cut_Pic[Cut].cam_per = 0.f;
-									Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
-									radc += 12.5f / GetFPS();
-								}
 							}
-							for (int i = 0; i < 12; i++) {
-								models.Get(NEWS, i)->move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(-30 + GetRand(2 * 30)));
-								models.Get(NEWS, i)->move.pos = VECTOR_ref::vget((float)(-20 + GetRand(2 * 20)), (float)(7 + GetRand(10)), (float)(-20 + GetRand(2 * 20)));
-								models.Get(NEWS, i)->move.vec.y(-(float)(GetRand(100)) / 1000.f);
-							}
-							isNextreset = true;
-						}
-						else if (Cut < 21) {
-							Map.isDraw = false;
-							models.Get(Tachyon2, 0)->isDraw = false;
-							models.Get(Tachyon, 1)->isDraw = false;
-							if (models.Get(Cafe, 0)->obj.get_anime(0).time != 0.f) {
-								models.Get(Cafe, 0)->obj.get_anime(0).time = 0.f;
-								models.Get(Cafe, 0)->isDraw = false;
-							}
-							for (int i = 0; i < 12; i++) {
-								models.Get(NEWS, i)->isDraw = true;
-								if (models.Get(NEWS, i)->move.pos.y() >= 3.5f) {
-									models.Get(NEWS, i)->move.vec.yadd(M_GR / powf((FPS / 0.75f), 2.f));
-								}
-								else {
-									float yp = models.Get(NEWS, i)->move.vec.y();
-									easing_set(&yp, 0.f, 0.995f);
-									models.Get(NEWS, i)->move.vec.y(yp);
-								}
-
-								models.Get(NEWS, i)->move.pos += models.Get(NEWS, i)->move.vec;
-								models.Get(NEWS, i)->obj.SetMatrix(models.Get(NEWS, i)->move.mat*MATRIX_ref::Mtrans(models.Get(NEWS, i)->move.pos));
-							}
-							/*
-							for (auto& n : news_p) {
-								n.xpos = DrawPts->disp_x / 2 - DrawPts->disp_x;
-								n.ypos = DrawPts->disp_y / 2 - DrawPts->disp_y;
-								n.rad = deg2rad(-30);
-							}
-							*/
-						}
-						else if (Cut < 24) {
-							for (int i = 0; i < 12; i++) {
-								models.Get(NEWS, i)->isDraw = false;
-							}
-							Map.isDraw = true;
-							for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
-								n->xpos = (n + 1)->xpos;
-								n->ypos = (n + 1)->ypos;
-								n->rad = (n + 1)->rad;
-							}
-							news_p.back().xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
-							news_p.back().ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
-							news_p.back().rad += deg2rad(6) / GetFPS();
-							if (Cut < 22) {
-								models.Get(Tachyon, 2)->isDraw = true;
-								models.Get(Tachyon, 2)->UpdateAnim(4, false, 0.f);
-								models.Get(Tachyon, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, 1, -10)));
-
-								models.Get(Tachyon, 3)->isDraw = true;
-								models.Get(Tachyon, 3)->UpdateAnim(5, false, 0.f);
-								models.Get(Tachyon, 3)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
-
-								models.Get(Tachyon, 4)->isDraw = true;
-								models.Get(Tachyon, 4)->UpdateAnim(6, false, 0.f);
-								models.Get(Tachyon, 4)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
-
-								models.Get(Tachyon, 5)->isDraw = true;
-								models.Get(Tachyon, 5)->UpdateAnim(7, false, 0.f);
-								models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
-							}
-							else {
-								models.Get(Tachyon, 2)->isDraw = false;
-								models.Get(Tachyon, 3)->isDraw = false;
-								models.Get(Tachyon, 4)->isDraw = false;
-								models.Get(Tachyon, 5)->isDraw = false;
-
-								models.Get(GoldShip, 0)->isDraw = true;
-								if (news_p.back().ypos < DrawPts->disp_y / 2) {
-									models.Get(GoldShip, 0)->UpdateAnim(0, false, 0.f);
-								}
-								else {
-									models.Get(GoldShip, 0)->UpdateAnim(1, true, 0.45f);
-								}
-								models.Get(GoldShip, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
-
-								models.Get(Speweek, 0)->isDraw = true;
-								models.Get(Speweek, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Speweek, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
-
-								models.Get(Teio, 0)->isDraw = true;
-								models.Get(Teio, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Teio, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
-
-								models.Get(Macin, 0)->isDraw = true;
-								models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
-							}
-						}
-						else if (Cut < 25) {
-							Map.isDraw = false;
-							models.Get(GoldShip, 0)->isDraw = false;
-							models.Get(Speweek, 0)->isDraw = false;
-							models.Get(Teio, 0)->isDraw = false;
-							models.Get(Macin, 0)->isDraw = false;
-							models.Get(Tachyon, 0)->obj.get_anime(8).time = 33.f;
-							isNextreset = true;
-							return_walk = false;
-						}
-						else if (Cut < 26) {
-							models.Get(SCHOOL, 0)->isDraw = true;
-							models.Get(Tachyon, 0)->isDraw = true;
-							if (models.Get(Tachyon, 0)->obj.get_anime(8).time == 33.f) {
-								models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-								models.Get(Tachyon, 1)->isDraw = false;
-								models.Get(Tachyon, 1)->OpacityRate = 1.f;
-							}
-							if (models.Get(Tachyon, 0)->obj.get_anime(8).time == models.Get(Tachyon, 0)->obj.get_anime(8).alltime) {
-								if (!return_walk) {
-									models.Get(Tachyon, 1)->isDraw = true;
-									models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.f);
-									models.Get(Tachyon, 1)->obj.work_anime();
-									models.Get(Tachyon, 1)->obj.PhysicsResetState();
-								}
-								return_walk = true;
-							}
-							models.Get(Tachyon, 0)->UpdateAnim(8, false, return_walk ? -4.f : 4.f);
-							if (return_walk) {
-								models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.7f);
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 1)->obj.frame(9);
-								Cut_Pic[Cut].cam_per = 0.95f;
-								Cut_Pic[Cut].Aim_camera.near_ = 5.f;
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(7);
-							}
-							else {
-								models.Get(Tachyon, 0)->PhysicsSpeed = 4.f;
-							}
-							radc2 = 0.f;
-							isNextreset = true;
-						}
-						else if (Cut < 27) {
-							Map.isDraw = true;
-							models.Get(SCHOOL, 0)->isDraw = false;
-							{
-								models.Get(GATE, 0)->isDraw = true;
-								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
-								models.Get(Tachyon, 0)->isDraw = false;
-								models.Get(Tachyon, 1)->isDraw = false;
-								return_walk = true;
-
-								//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(116.485695f, 18.346067f, -56.928761f);
-
-								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-
-								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-								easing_set(&xradadd_r, xradadd, 0.975f);
-								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-									VECTOR_ref::vget(
-										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
-										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
-										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
-									)*88.0f;
-
-								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-								Cut_Pic[Cut].cam_per = 0.f;
-								radc2 += 12.5f / GetFPS();
-							}
-							Gate_Xpos = -20.f;
-							camzb_28 = 1.f;
-						}
-						else if (Cut < 28) {
-							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
-							if (Gate_Xpos < 20.f) {
-								Gate_Xpos += 20.f *1.f / GetFPS();
-							}
-							isNextreset = true;
-							models.Get(Karen, 0)->obj.get_anime(0).time = 6.25f;
-							if (camzb_28 == 1.f) {
-								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f);
-								Cut_Pic[Cut].cam_per = 0.f;
-							}
-							else {
-								float pp = 7.f;
-								easing_set(&rand_vp, VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f), 0.9f);
-								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f) + rand_vp;
-								Cut_Pic[Cut].cam_per = 0.95f;
-							}
-							camzb_28 = 0.f;
-							ship_z = -5.f;
-							ship_zadd = 0.f;
-						}
-						else if (Cut < 30) {
-							if (Cut == 28) {
-								models.Get(GATE, 0)->isDraw = false;
-							}
-							models.Get(Karen, 0)->isDraw = true;
-							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							models.Get(Karen, 0)->UpdateAnim(0, false, 1.0f);
-
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									2.f,
-									12.f,
-									6.f
-								)*1.0f;
-
-							if (camzb_28 != 0.f) {
-								if (camzb_28 > -8.f) {
-									Cut_Pic[Cut].cam_per = 0.9f;
-								}
-								else {
-									Cut_Pic[Cut].cam_per = 0.95f;
-								}
-							}
-							if (camzb_28 > -10.f) {
-								camzb_28 -= 100.f / GetFPS();
-							}
-							else {
-								camzb_28 = -10.f;
-							}
-
-							Ship.isDraw = true;
-							Ship.OpacityRate = 0.3f;
-							Ship.obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
-							Ship.obj.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
-							ship_z += ship_zadd / GetFPS();
-							if (ship_zadd <= 0.95f) {
-								easing_set(&ship_zadd, 1.f, 0.95f);
-							}
-							else {
-								ship_zadd = 1.f;
-							}
-							if (Cut == 29) {
-								isNextreset = true;
-							}
-						}
-						else if (Cut < 31) {
-							Board.isDraw = true;
-							Ship.isDraw = false;
-							Map.isDraw = false;
-							models.Get(Tachyon, 0)->isDraw = false;
-							models.Get(Karen, 0)->isDraw = false;
-							models.Get(Cafe, 0)->isDraw = true;
-							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Cafe, 0)->UpdateAnim(0, true, 0.f);
-						}
-						else if (Cut < 32) {
-							Board.isDraw = false;
-							models.Get(Tachyon, 0)->isDraw = true;
-							models.Get(Cafe, 0)->UpdateAnim(1, true, 0.f);
-							isNextreset = true;
-							models.Get(Scarlet, 0)->OpacityRate = 0.5f;
-						}
-						else if (Cut < 33) {
-							models.Get(Tachyon, 0)->isDraw = false;
-							Map.isDraw = true;
-							models.Get(Tachyon2, 0)->isDraw = true;
-							models.Get(Cafe, 0)->isDraw = false;
-							models.Get(Scarlet, 0)->isDraw = true;
-							models.Get(Scarlet, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Scarlet, 0)->UpdateAnim(0, false, 0.6f);
-							if (models.Get(Scarlet, 0)->obj.get_anime(0).time > 10.f) {
-								easing_set(&models.Get(Scarlet, 0)->OpacityRate, 1.f, 0.95f);
-							}
-							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
-							models.Get(Tachyon2, 0)->UpdateAnim(10, false, 0.6f);
-							isNextreset = true;
-						}
-						else if (Cut < 34) {
-							models.Get(Vodka, 0)->isDraw = true;
-							models.Get(Vodka, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -50)));
-							models.Get(Vodka, 0)->UpdateAnim(0, false, 1.f);
-						}
-						else if (Cut < 35) {
-							models.Get(Vodka, 0)->isDraw = false;
-							isNextreset = true;
-						}
-						else if (Cut < 36) {
-							Map.isDraw = false;
-							models.Get(Scarlet, 0)->isDraw = false;
-							models.Get(Tachyon2, 0)->isDraw = false;
-							models.Get(Cafe, 0)->isDraw = true;
-							models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
-							models.Get(Cafe, 0)->OpacityRate = 1.f;
-							isNextreset = true;
-						}
-						else if (Cut < 37) {//手
-							models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
-							models.Get(Cafe, 0)->OpacityRate = std::max(models.Get(Cafe, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
-							models.Get(Tachyon, 0)->isDraw = true;
-
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
-							models.Get(Tachyon, 0)->UpdateAnim(11, false, 0.5f);
-							models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-						}
-						else if (Cut < 38) {//光るトレーナー
-							models.Get(Tachyon, 0)->isDraw = false;
-							models.Get(Cafe, 0)->isDraw = false;
-							models.Get(Trainer, 0)->isDraw = true;
-							models.Get(Trainer, 0)->UpdateAnim(0, false, 1.2f);
-						}
-						else if (Cut < 39) {
-							models.Get(Trainer, 0)->isDraw = false;
-							models.Get(Tachyon, 0)->isDraw = true;
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
-							models.Get(Tachyon, 0)->UpdateAnim(12, false, 0.5f);
-							isNextreset = true;
-						}
-						else if (Cut < 40) {
-							Map.isDraw = true;
-							models.Get(Tachyon, 0)->isDraw = false;
-							models.Get(Tachyon2, 0)->isDraw = true;
-							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Tachyon2, 0)->UpdateAnim(13, false, 1.2f);
-							isNextreset = true;
-						}
-						else if (Cut < 41) {
-							models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Tachyon2, 0)->UpdateAnim(14, false, 2.8f);
-							isNextreset = true;
-							camzb_28 = 0.f;
-							camzb_41 = 0.1f;
-							for (int i = 0; i < 12; i++) {
-								models.Get(Mobu, i)->UpdateAnim(models.Get(Mobu, i)->Anim_Sel, false, 0.f);
-							}
-						}
-						else if (Cut < 42) {
-							Gate_Xpos = 0.f;
-							models.Get(GATE, 0)->isDraw = true;
-							models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
-							models.Get(GATE, 0)->UpdateAnim(0, false, 0.f);
-
-							Gate_Xpos += -7.f;
-							for (int i = 0; i < 12; i++) {
-								models.Get(Mobu, i)->isDraw = true;
-								models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f)));
-								Gate_Xpos += -14.f;
-							}
-
-							models.Get(Tachyon2, 0)->isDraw = false;
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
-
-							float pp = 10.f;
-							if (camzb_28 < -9.5f) {
-								pp = 2.f;
-							}
-							if (camzb_28 <= -10.f) {
-								pp = 0.f;
-							}
-							rand_vp = VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f);
-
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
-									sin(deg2rad(0.f)),
-									-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
-								)*(20.f - camzb_28 * 20.8f) +
-								rand_vp;
-
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
-							easing_set(&camzb_41, 0.3f, 0.995f);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-							Cut_Pic[Cut].cam_per = 0.f;
-							if (camzb_28 != 0.f) {
-								if (camzb_28 > -8.f) {
-									Cut_Pic[Cut].cam_per = 0.9f;
-								}
-								else {
-									Cut_Pic[Cut].cam_per = 0.95f;
-								}
-							}
-							if (camzb_28 > -10.f) {
-								camzb_28 -= 100.f / GetFPS();
-							}
-							else {
-								camzb_28 = -10.f;
-							}
-						}
-						else if (Cut < 43) {
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-60.122698f, 16.028077f, -50.985756f);
-
-							float pp = 10.f;
-							if (camzb_28 > -5.f) {
-								pp = 2.f;
-							}
-							rand_vp = VECTOR_ref::vget(-pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f, -pp + float(GetRand((int)pp * 2 * 100)) / 100.f);
-
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(0.f))*sin(-deg2rad(float(0 + 30))),
-									sin(deg2rad(0.f)),
-									-cos(deg2rad(0.f))*cos(-deg2rad(float(0 + 30)))
-								)*(10.f - camzb_28 * 20.8f) +
-								rand_vp;
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(camzb_41, 0.9f, 0);
-							easing_set(&camzb_41, 0.3f, 0.995f);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-							Cut_Pic[Cut].cam_per = 0.95f;
-							HostpassPTs->Set_Bright(
-								226 + (int)((float)(255 - 226)*bright_43),
-								226 + (int)((float)(255 - 226)*bright_43),
-								196 + (int)((float)(255 - 196)*bright_43)
-							);
-							easing_set(&bright_43, 1.f, 0.9f);
-							if (camzb_28 < 0.f) {
-								camzb_28 += 70.f / GetFPS();
-							}
-							else {
-								camzb_28 = 0.f;
-							}
-						}
-						else if (Cut < 44) {
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-120.f, 37.f, -20.f);
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(-20.f))*sin(-deg2rad(float(0 - 10) + camzb_28)),
-									sin(deg2rad(-20.f)),
-									-cos(deg2rad(-20.f))*cos(-deg2rad(float(0 - 10) + camzb_28))
-								)*(20.f);
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
-							Cut_Pic[Cut].Aim_camera.far_ = 300.f;
-
-							Cut_Pic[Cut].cam_per = 0.f;
-
-							camzb_28 += 40.f / GetFPS();
-							camyup = 0.f;
-						}
-						else if (Cut < 45) {
-							if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
-								models.Get(GATE, 0)->UpdateAnim(1, false, 1.f);
-
-								Gate_Xpos = 0.f;
-								Gate_Xpos += -7.f;
+							if (Cut >= 21 && Cut < 24) {
 								for (int i = 0; i < 12; i++) {
-									//models.Get(Mobu, i)->
-									models.Get(Mobu, i)->isDraw = true;
-									easing_set(&models.Get(Mobu, i)->obj.get_anime(models.Get(Mobu, i)->Anim_Sel).per, 0.f, models.Get(Mobu, i)->b_run);
-									easing_set(&models.Get(Mobu, i)->obj.get_anime(3).per, 1.f, models.Get(Mobu, i)->b_run);
-
-									models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - models.Get(Mobu, i)->b_runrange * models.Get(Mobu, i)->obj.get_anime(3).per)));
-									Gate_Xpos += -14.f;
+									models.Get(NEWS, i)->isDraw = false;
 								}
-							}
-							if (NowTime > (LONGLONG)(1000000.f * 49.681)) {
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(-40.67f + 1.f, 5.53f + -0.05f, -52.f + 0.2f);
-								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos +
-									VECTOR_ref::vget(
-										1,
-										-0.3f,
-										0.6f
-									)*(-1.f);
-
-								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-								Cut_Pic[Cut].cam_per = 0.9f;
-							}
-							else {
-								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-40.67f, 5.53f, -42.f);
-								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-									VECTOR_ref::vget(
-										1,
-										-0.1f - 0.1f*camyup,
-										-0.13f
-									)*(1.f);
-								camyup += 1.f / GetFPS();
-								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-								Cut_Pic[Cut].cam_per = 0.f;
-							}
-
-						}
-						else if (Cut < 46) {
-							models.Get(Tachyon2, 0)->isDraw = false;
-							Board.isDraw = true;
-							Map.isDraw = false;
-							models.Get(GATE, 0)->isDraw = false;
-							for (int i = 0; i < 12; i++) {
-								//models.Get(Mobu, i)->
-								models.Get(Mobu, i)->isDraw = false;
-							}
-							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 14.997231f, -18.595667f);
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 4.546323f, -0.092557f);
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(35);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-							Cut_Pic[Cut].cam_per = 0.f;
-							if (!anim[0].isDraw) {
-								VECTOR_ref vec_x = (Cut_Pic[Cut].Aim_camera.camvec - Cut_Pic[Cut].Aim_camera.campos).Norm().cross(Cut_Pic[Cut].Aim_camera.camup);
-
-								Set_Effect(Effect::ef_greexp, VECTOR_ref::vget(-4.f, 4.6f, -2.f) + vec_x * 13.f, VECTOR_ref::front(), 5.f);
-								Set_Effect(Effect::ef_greexp2, VECTOR_ref::vget(8.f, 5.5f, 4.f) - vec_x * 8.f, VECTOR_ref::front(), 4.f);
-							}
-							SetSpeed_Effect(Effect::ef_greexp, 0.5f);
-							SetSpeed_Effect(Effect::ef_greexp2, 0.5f);
-							anim[0].isDraw = true;
-							anim[0].ypos = 0.f;
-						}
-						else if (Cut < 48) {
-							if (Cut < 47) {
-								camzb_41 = (float)(DrawPts->disp_y)*0.4f;
-							}
-							else if (Cut < 48) {
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
-								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
-								anim[0].isDraw = false;
-								anim[1].isDraw = true;
-								easing_set(&anim[1].ypos, camzb_41, 0.7f);
-								if (camzb_41 == (float)(DrawPts->disp_y)*0.4f) {
-									SetSpeed_Effect(Effect::ef_greexp, 0.1f);
-									SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
+								Map.isDraw = true;
+								for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
+									n->xpos = (n + 1)->xpos;
+									n->ypos = (n + 1)->ypos;
+									n->rad = (n + 1)->rad;
 								}
-								if (camzb_41 > 0.f) {
-									camzb_41 -= (float)(y_r(500)) / GetFPS();
-								}
-							}
+								news_p.back().xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
+								news_p.back().ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
+								news_p.back().rad += deg2rad(6) / GetFPS();
+								if (Cut != 21) {
+									models.Get(Tachyon, 2)->isDraw = false;
+									models.Get(Tachyon, 3)->isDraw = false;
+									models.Get(Tachyon, 4)->isDraw = false;
+									models.Get(Tachyon, 5)->isDraw = false;
 
-							sode[4].isDraw = true;
-							sode[5].isDraw = true;
-							sode[6].isDraw = true;
-							sode[7].isDraw = true;
-							sode[4].xpos += (float)(y_r(300)) / GetFPS();
-							sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
-							sode[5].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[5].ypos -= (float)(y_r(2400)) / GetFPS();
-							sode[6].xpos += (float)(y_r(300)) / GetFPS();
-							sode[6].ypos -= (float)(y_r(2200)) / GetFPS();
-							sode[7].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
-						}
-						else if (Cut < 50) {
-							if (Cut < 49) {
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*anim[1].ypos / (float)(DrawPts->disp_y), 0.595667f);
-								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
-								if (anim[0].ypos == 0.f) {
-									sode[4].xpos = (float)(0);
-									sode[4].ypos = (float)(-DrawPts->disp_y);
-									sode[5].xpos = (float)(0);
-									sode[5].ypos = (float)(-DrawPts->disp_y * 5 / 4);
-									sode[6].xpos = (float)(0);
-									sode[6].ypos = (float)(-DrawPts->disp_y * 6 / 4);
-									sode[7].xpos = (float)(0);
-									sode[7].ypos = (float)(-DrawPts->disp_y * 7 / 4);
-								}
-								anim[0].ypos = 2.f;
-								easing_set(&anim[1].ypos, camzb_41, 0.7f);
-								if (camzb_41 > 0.f) {
-									camzb_41 -= (float)(y_r(500)) / GetFPS();
-								}
-								isNextreset = true;
-								models.Get(Tachyon2, 0)->obj.get_anime(2).time = 35.f;
-							}
-							else if (Cut < 50) {
-								anim[1].isDraw = false;
-
-								VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
-								aim.y(0.f);
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
-								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
-								models.Get(Tachyon2, 0)->isDraw = true;
-								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
-								models.Get(Tachyon2, 0)->UpdateAnim(2, false, 0.1f);
-								isNextreset = true;
-								models.Get(Karen, 0)->isDraw = false;
-							}
-							sode[4].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[4].ypos += (float)(y_r(2800)) / GetFPS();
-							sode[5].xpos += (float)(y_r(300)) / GetFPS();
-							sode[5].ypos += (float)(y_r(2600)) / GetFPS();
-							sode[6].xpos -= (float)(y_r(300)) / GetFPS();
-							sode[6].ypos += (float)(y_r(2400)) / GetFPS();
-							sode[7].xpos += (float)(y_r(300)) / GetFPS();
-							sode[7].ypos += (float)(y_r(2000)) / GetFPS();
-						}
-						else if (Cut < 51) {
-							sode[4].isDraw = false;
-							sode[5].isDraw = false;
-							sode[6].isDraw = false;
-							sode[7].isDraw = false;
-
-							Board.isDraw = false;
-							Map.isDraw = true;
-							Stop_Effect(Effect::ef_greexp);
-							Stop_Effect(Effect::ef_greexp2);
-							models.Get(Tachyon2, 0)->isDraw = false;
-
-							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							models.Get(Karen, 0)->UpdateAnim(1, false, 0.95f);
-							if (!models.Get(Karen, 0)->isDraw) {
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
-								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-0.3f, 0.f, 28.f);
-								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
-								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-								Cut_Pic[Cut].cam_per = 0.f;
-							}
-							else {
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(8);
-								Cut_Pic[Cut].cam_per = 0.995f;
-							}
-							models.Get(Karen, 0)->isDraw = true;
-							isNextreset = true;
-						}
-						else if (Cut < 52) {
-
-							models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
-							models.Get(Karen, 0)->UpdateAnim(2, false, 1.15f);
-
-							Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.3f, 18.f, -28.595667f);
-							Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(10) + VECTOR_ref::vget(2.3f, 0.f, 0.f);
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(0, 1.f, 0);
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(15);
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-							Cut_Pic[Cut].cam_per = 0.f;
-							isNextreset = true;
-						}
-						else if (Cut < 54) {
-							Board.isDraw = true;
-							Map.isDraw = false;
-							models.Get(Karen, 0)->isDraw = false;
-							models.Get(Cafe, 0)->isDraw = true;
-							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-							models.Get(Cafe, 0)->UpdateAnim(3, false, 0.8f);
-							models.Get(Cafe, 0)->OpacityRate = 1.f;
-							if (Cut == 53) {
-								if (models.Get(Cafe, 0)->obj.get_anime(3).time > 30.f) {
-									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 17, -4.5);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(-5.f, -3.5f, -20.f)*2.0f;
-									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
-									Cut_Pic[Cut].Aim_camera.near_ = 1.f;
-									Cut_Pic[Cut].Aim_camera.far_ = 5000.f;
-									Cut_Pic[Cut].cam_per = 0.9975f;
-								}
-								else {
-									if (models.Get(Cafe, 0)->obj.get_anime(3).time > 15.f) {
-										Cut_Pic[Cut].cam_per = 0.f;
+									models.Get(GoldShip, 0)->isDraw = true;
+									if (news_p.back().ypos < DrawPts->disp_y / 2) {
+										models.Get(GoldShip, 0)->UpdateAnim(0, false, 0.f);
 									}
 									else {
-										Cut_Pic[Cut].cam_per = 1.f;
+										models.Get(GoldShip, 0)->UpdateAnim(1, true, 0.45f);
+									}
+									models.Get(GoldShip, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
+
+									models.Get(Speweek, 0)->isDraw = true;
+									models.Get(Speweek, 0)->UpdateAnim(0, false, 0.f);
+									models.Get(Speweek, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
+
+									models.Get(Teio, 0)->isDraw = true;
+									models.Get(Teio, 0)->UpdateAnim(0, false, 0.f);
+									models.Get(Teio, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
+
+									models.Get(Macin, 0)->isDraw = true;
+									models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
+									models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
+								}
+							}
+							if (Cut >= 28 && Cut < 30) {
+								models.Get(Karen, 0)->isDraw = true;
+								models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+								models.Get(Karen, 0)->UpdateAnim(0, false, 1.0f);
+
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
+									VECTOR_ref::vget(
+										2.f,
+										12.f,
+										6.f
+									)*1.0f;
+
+								if (camzb_28 != 0.f) {
+									if (camzb_28 > -8.f) {
+										Cut_Pic[Cut].cam_per = 0.9f;
+									}
+									else {
+										Cut_Pic[Cut].cam_per = 0.95f;
 									}
 								}
-								isNextreset = true;
-								models.Get(Mobu, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-								models.Get(Mobu, 2)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-								models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2000.f - 5.f)));
-								models.Get(Doto, 0)->obj.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
-								models.Get(Cafe, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-								models.Get(Mobu, 1)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-								models.Get(Opera, 0)->obj.get_anime(0).time = (float)GetRand(100) / 10.f;
-							}
-						}
-						else if (Cut < 55) {
-							Board.isDraw = false;
-							Map.isDraw = true;
-							models.Get(GATE, 0)->isDraw = true;
-							models.Get(Mobu, 0)->isDraw = true;
-							models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
-							models.Get(Mobu, 0)->UpdateAnim(4, false, 0.84f);
-
-							models.Get(Mobu, 2)->isDraw = true;
-							models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(20.f, 0.f, -2000.f - 40.f)));
-							models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
-
-							models.Get(Doto, 0)->UpdateAnim(0, false, 0.82f);
-
-							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 30.f)));
-							models.Get(Cafe, 0)->UpdateAnim(4, false, 0.85f);
-
-							models.Get(Mobu, 1)->isDraw = true;
-							models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 0.f, -2000.f - 5.f)));
-							models.Get(Mobu, 1)->UpdateAnim(4, false, 0.82f);
-
-							models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2000.f + 10.f)));
-							models.Get(Opera, 0)->UpdateAnim(0, false, 0.84f);
-
-							if (models.Get(Opera, 0)->isDraw) {
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(7 + GetRand(3)) + VECTOR_ref::vget(0.f, 2.f, -30.f);
-							}
-							else {
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 2.f, -30.f);
-							}
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(0.5f))*sin(-deg2rad(float(90 - 10 + 180))),
-									sin(deg2rad(0.5f)),
-									-cos(deg2rad(0.5f))*cos(-deg2rad(float(90 - 10 + 180)))
-								)*608.0f;
-
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(1.5);
-							Cut_Pic[Cut].Aim_camera.near_ = 300.f;
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-							if (models.Get(Opera, 0)->isDraw) {
-								Cut_Pic[Cut].cam_per = 0.975f;
-							}
-							else {
-								Cut_Pic[Cut].cam_per = 0.f;
-							}
-
-							isNextreset = true;
-							radc2 = -1.f;
-							models.Get(Cafe, 0)->isDraw = true;
-							models.Get(Doto, 0)->isDraw = true;
-							models.Get(Opera, 0)->isDraw = true;
-							nex_cut = false;
-						}
-						else if (Cut < 56) {
-							models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 5.f, 0.f, -2200.f - 45.f)));
-							models.Get(Mobu, 0)->UpdateAnim(4, false, 0.8f);
-							models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 7.f, 0.f, -2200.f - 70.f)));
-							models.Get(Mobu, 1)->UpdateAnim(4, false, 0.8f);
-							models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f + 10.f, 0.f, -2200.f - 65.f)));
-							models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
-							models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 6.f, 0.f, -2200.f - 35.f)));
-							models.Get(Doto, 0)->UpdateAnim(0, false, 1.1f);
-							models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 5.f, 0.f, -2200.f - 0.f)));
-							models.Get(Cafe, 0)->UpdateAnim(4, false, 0.98f);
-							models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 12.5f, 0.f, -2200.f - 40.f)));
-							models.Get(Opera, 0)->UpdateAnim(0, false, 0.95f);
-
-							if (nex_cut) {
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f);
-							}
-							else {
-								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 10.f, 30.f);
-							}
-							if (radc2 < 0.f) {
-								Cut_Pic[Cut].Aim_camera.campos = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f) +
-									VECTOR_ref::vget(
-										-cos(deg2rad(1.5f))*sin(-deg2rad(float(90 - 80 + 180) + radc2)),
-										sin(deg2rad(1.5f)),
-										-cos(deg2rad(1.5f))*cos(-deg2rad(float(90 - 80 + 180) + radc2))
-									)*468.0f;
-							}
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.near_ = 100.f;
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-
-							if (NowTime > (LONGLONG)(1000000.f * 62.755)) {
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(0.85f);
-							}
-							else {
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(2);
-							}
-
-							if (nex_cut) {
-								Cut_Pic[Cut].cam_per = 0.95f;
-							}
-							else {
-								Cut_Pic[Cut].cam_per = 0.f;
-							}
-							nex_cut = true;
-							radc2 = 0.f;
-							isNextreset = true;
-						}
-						else if (Cut < 57) {
-							models.Get(Mobu, 0)->isDraw = false;
-							models.Get(Mobu, 1)->isDraw = false;
-							models.Get(Mobu, 2)->isDraw = false;
-							models.Get(Doto, 0)->isDraw = false;
-							models.Get(Opera, 0)->isDraw = false;
-							models.Get(Tachyon, 0)->isDraw = true;
-							//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(116.485695f, 18.346067f, -56.928761f);
-
-							Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-
-							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-							easing_set(&xradadd_r, xradadd, 0.975f);
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
-									sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
-									-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
-								)*88.0f;
-
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-							Cut_Pic[Cut].cam_per = 0.f;
-							radc2 += 12.5f / GetFPS();
-
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.2f);
-							isNextreset = true;
-						}
-						else if (Cut < 58) {
-							models.Get(GATE, 0)->isDraw = false;
-							Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
-
-							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-							easing_set(&xradadd_r, xradadd, 0.975f);
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
-									sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
-									-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
-								)*88.0f;
-
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(8);
-							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-							Cut_Pic[Cut].cam_per = 0.f;
-							radc2 += 12.5f / GetFPS();
-
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
-							Box_ALPHA = 0.f;
-						}
-						else if (Cut < 59) {
-							Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
-
-							float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
-							easing_set(&xradadd_r, xradadd, 0.975f);
-							Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-								VECTOR_ref::vget(
-									-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
-									sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
-									-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
-								)*88.0f;
-
-							Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-							Cut_Pic[Cut].Aim_camera.fov = deg2rad(8);
-							Cut_Pic[Cut].Aim_camera.near_ = 10.f;
-							Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-							Cut_Pic[Cut].cam_per = 0.f;
-							radc2 += 12.5f / GetFPS();
-
-							models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-							models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
-
-							if (Box_ALPHA < 1.f) {
-								Box_ALPHA += 1.f / GetFPS();
-								per_logo = 1.f;
-							}
-							else {
-								Box_ALPHA = 1.f;
-								if (per_logo > 0.f) {
-									per_logo -= 1.f / GetFPS() / 1.5f;
-									easing_set(&Logo.xpos, (float)(DrawPts->disp_x / 2) + Logo.xpos_rand, 0.975f);
-									easing_set(&Logo.ypos, (float)(DrawPts->disp_y / 2) + Logo.ypos_rand, 0.975f);
-									easing_set(&Logo.Scale, 1.f - ((float)(0.1f) * per_logo) + (float)(GetRand((int)((float)(0.1f) * per_logo) * 2 * 100)) / 100.f, 0.975f);
-									Logo.Set_Rand((float)(y_r(1000)) * per_logo, 0.8f, (float)(y_r(1000)) * per_logo, 0.8f, 0.f, 0.f);
+								if (camzb_28 > -10.f) {
+									camzb_28 -= 100.f / GetFPS();
 								}
 								else {
-									per_logo = 0.f;
-									easing_set(&Logo.xpos, (float)(DrawPts->disp_x / 2), 0.95f);
-									easing_set(&Logo.ypos, (float)(DrawPts->disp_y / 2), 0.95f);
-									easing_set(&Logo.Scale, 1.f, 0.95f);
+									camzb_28 = -10.f;
+								}
+
+								Ship.isDraw = true;
+								Ship.OpacityRate = 0.3f;
+								Ship.obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
+								Ship.obj.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
+								ship_z += ship_zadd / GetFPS();
+								if (ship_zadd <= 0.95f) {
+									easing_set(&ship_zadd, 1.f, 0.95f);
+								}
+								else {
+									ship_zadd = 1.f;
 								}
 							}
-
-							for (auto& sl : sode_last) {
-								easing_set(&sl.xpos, sl.xpos_base + y_r(sl.xpos_rand), 0.945f);
-								easing_set(&sl.ypos, sl.ypos_base + y_r(sl.ypos_rand), 0.925f);
-								easing_set(&sl.rad, sl.rad_base + sl.rad_rand, 0.925f);
-								sl.Set_Rand(50.f, 0.95f, 50.f, 0.95f, 10.f, 0.95f);
+							if (Cut >= 46 && Cut < 48) {
+								sode[4].xpos += (float)(y_r(300)) / GetFPS();
+								sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
+								sode[5].xpos -= (float)(y_r(300)) / GetFPS();
+								sode[5].ypos -= (float)(y_r(2400)) / GetFPS();
+								sode[6].xpos += (float)(y_r(300)) / GetFPS();
+								sode[6].ypos -= (float)(y_r(2200)) / GetFPS();
+								sode[7].xpos -= (float)(y_r(300)) / GetFPS();
+								sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
 							}
-
+							if (Cut >= 48 && Cut < 50) {
+								sode[4].xpos -= (float)(y_r(300)) / GetFPS();
+								sode[4].ypos += (float)(y_r(2800)) / GetFPS();
+								sode[5].xpos += (float)(y_r(300)) / GetFPS();
+								sode[5].ypos += (float)(y_r(2600)) / GetFPS();
+								sode[6].xpos -= (float)(y_r(300)) / GetFPS();
+								sode[6].ypos += (float)(y_r(2400)) / GetFPS();
+								sode[7].xpos += (float)(y_r(300)) / GetFPS();
+								sode[7].ypos += (float)(y_r(2000)) / GetFPS();
+							}
+							if (Cut >= 52 && Cut < 54) {
+								Board.isDraw = true;
+								Map.isDraw = false;
+								models.Get(Karen, 0)->isDraw = false;
+								models.Get(Cafe, 0)->isDraw = true;
+								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+								models.Get(Cafe, 0)->UpdateAnim(3, false, 0.8f);
+								models.Get(Cafe, 0)->OpacityRate = 1.f;
+							}
 						}
-
+						if (Cut_Pic[Cut].isNextreset) {
+							isNextreset = true;
+						}
 						easing_set(&camera_main.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camup, Cut_Pic[Cut].Aim_camera.camup, Cut_Pic[Cut].cam_per);
@@ -2664,3 +2162,4 @@ namespace FPS_n2 {
 		};
 	};
 };
+

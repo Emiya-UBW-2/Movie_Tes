@@ -1,0 +1,362 @@
+//0
+	//羽広がり前 0
+		SetCut(0.45);
+		SetCamvec(0, -10, -10);
+		SetCampos_NoneRad(0, -10, 0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 10.0, 0.0);
+		SetNextResetPhysics();
+	//羽広がり中 1
+		SetCut(2.614);
+		SetCamvec(0, -10, -10);
+		SetCampos_NoneRad(0, -10, 0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 10.0, 0.0);
+	//胸 2
+		SetCut(3.0210);
+		SetCamvec(1.0, 13.82, -2.080);
+		SetCampos_ByRad(20.1, 22.9, 10.3);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 20.0, 0.0);
+		SetNextResetPhysics();
+	//背中 3
+		SetCut(3.2580);
+		SetCamvec(-2.57, 10.04, 0.310);
+		SetCampos_ByRad(6.3, 225.7, 10.3);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 20.0, 0.0);
+	//右足→ 4
+		SetCut(3.5120);
+		SetCamvec(-0.85, 16.69, 0.610);
+		SetCampos_ByRad(15.5, 202.8, 10.3);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 20.0, 0.0);
+	//頭← 5
+		SetCut(3.7240);
+		SetCamvec(-0.54, 16.05, -1.280);
+		SetCampos_ByRad(8.6, 73.9, 10.3);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 20.0, 0.0);
+	//羽切るはじめ 6
+		SetCut(4.3100);
+		SetCamvec(0, -10, 0);
+		SetCampos_NoneRad(0, -10, -10);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 10.0, 0.0);
+		SetNextResetPhysics();
+	//羽切る終わり 7
+		SetCut(5.0860);
+		SetCamvec(1.11, 14.36, -1.740);
+		SetCampos_ByRad(6.9, 199.5, 27.0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 40.0, 0.0);
+	//斬新 8
+		SetCut(6.4480);
+		SetCamvec(1.11, 14.36, -1.740);
+		SetCampos_ByRad(6.9, 199.5, 27.0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 40.0, 0.0);
+		SetNextResetPhysics();
+	//＜＞ 9
+		SetCut(7.0960);
+		SetCamvec(-14.621624, 7.440908, -16.7740310);
+		SetCampos_NoneRad(17.178366, 9.319146, -36.0165180);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 3000.0, 0.0);
+//10
+	//顔 10
+		SetCut(7.288f);
+		SetCamvec(-4.494195f, 12.919953f, -28.361502f);
+		SetCampos_NoneRad(2.366895f, 16.169621f, -21.344687f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+	//顔2 11
+		SetCut(7.576f);
+		SetCamvec(-0.106448f, 3.030100f, -23.623045f);
+		SetCampos_NoneRad(2.044426f, 4.483082f, -26.842037f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+	//顔3 12
+		SetCut(7.864f);
+		SetCamvec(2.589150f, 10.542250f, -24.661646f);
+		SetCampos_NoneRad(3.584894f, 12.149980f, -16.973043f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+	//|| 13
+		SetCut(10.264f);
+		SetCamvec(-14.621624f, 7.440908f, -16.774031f);
+		SetCampos_NoneRad(17.178366f, 9.319146f, -36.016518f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+		SetNextResetPhysics();
+	//バイク 14
+		SetCut(13.410f);
+		SetCampos_NoneRad(-7.410444f, 11.652717f, 2.655200f);
+		SetCamvec(-6.079808f, 12.230768f, -1.217081f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+		SetNextResetPhysics();
+	//君が願うことなら 15
+		SetCut(15.80f);
+		SetCamvec(10.122698f, 18.028077f, -100.985756f);
+		SetCampos_ByRad(-5.5, 80, 88.0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+		SetNextResetPhysics();
+	//全てが現 16
+		SetCut(17.80f);
+		SetCamvec(10.122698f, 18.028077f, -100.985756f);
+		SetCampos_ByRad(-5.5, 80, 88.0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0 , 3000.0, 0.0);
+		SetNextResetPhysics();
+	//実になるだろ(天道) 17
+		SetCut(19.0f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0 , 3000.0, 0.95);
+		SetNextResetPhysics();
+	//う　選 18
+		SetCut(20.334f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0 , 3000.0, 0.95);
+		SetNextResetPhysics();
+	//ばれしもの(加賀美) 19
+		SetCut(21.452f);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0 , 3000.0, 0.0);
+		SetNextResetPhysics();
+//20
+	//隕石 20
+		SetCut(23.422);
+		SetCamvec(0, 2, 0);
+		SetCampos_NoneRad(0, 20, -20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 200.0, 0.0);
+	//ワーム① 21
+		SetCut(24.252);
+		SetCamvec(0, 15, 0);
+		SetCampos_NoneRad(0, 15, -20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 200.0, 0.0);
+	//羽ワイプ 22
+		SetCut(24.452);
+		SetCamvec(0, 15, 0);
+		SetCampos_NoneRad(0, 15, -20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 200.0, 0.0);
+	//ワーム②(暴そ) 23
+		SetCut(25.164);
+		SetCamvec(0, 15, 0);
+		SetCampos_NoneRad(0, 15, -20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 200.0, 0.0);
+	//東京タワー(うを始めて） 24
+		SetCut(26.526);
+		SetCamvec(0, 20, 0);
+		SetCampos_NoneRad(0, 5, -20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+		SetNextResetPhysics();
+	//バイク戻る(る　世界を元に戻すにはぁ）25
+		SetCut(29.790);
+		SetCamvec(10.1226980, 18.0280770, -30.985756);
+		SetCampos_ByRad(-5.5, 80, 108);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 1.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//バンバイク①(もう　時か）26
+		SetCut(31.670);
+		SetCamvec(10.122698, 18.028077, -100.985756);
+		SetCampos_ByRad(-5.5, 80, 88);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 3000.0, 0.0);
+	//バンバイク②(んがな）27
+		SetCut(32.52);
+		SetCamvec(10.1226980, 10.0280770, -50.985756);
+		SetCampos_ByRad(0, -10, 88);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//寝る女(い　Moving First ここ）28
+		SetCut(34.654);
+		SetCamvec(0, 0, 0);
+		SetCampos_NoneRad(2, 12, 6);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+	//雨加賀美(ろのぉ）29
+		SetCut(35.522);
+		SetCamvec(0, 0, 0);
+		SetCampos_NoneRad(2, 10, 8);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+		SetNextResetPhysics();
+//30
+	//雨加賀美②(時計）30
+		SetCut(36.175);
+		SetCamvec(0, 0, 0);
+		SetCampos_NoneRad(-4, 24, -12);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+	//雨加賀美②(時計）31
+		SetCut(36.775);
+		SetCamvec(0, 17, -4.5);
+		SetCampos_NoneRad(-10, 17, -4.5);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 100.0, 0.0);
+		SetNextResetPhysics();
+	//クロス(走らせ）32
+		SetCut(38.173);
+		SetCamvec(0, 20, -7);
+		SetCampos_NoneRad(20, 20, -7);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+		SetNextResetPhysics();
+	//陽(）33
+		SetCut(38.986);
+		SetCamvec(0, 20, -7);
+		SetCampos_NoneRad(0, 26, 3);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 300.0, 0.0);
+	//陰(明日の）34
+		SetCut(40.11);
+		SetCamvec(0, 20, -7);
+		SetCampos_NoneRad(0, 26, -17);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 1.0, 300.0, 0.0);
+		SetNextResetPhysics();
+	//手①(その）35
+		SetCut(41.226);
+		SetCamvec(0, 17, -4.5);
+		SetCampos_NoneRad(-10, 17, -4.5);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 100.0, 0.0);
+		SetNextResetPhysics();
+	//手②(先へ）36
+		SetCut(42.317);
+		SetCamvec(0, 17, -4.5);
+		SetCampos_NoneRad(-10, 17, -4.5);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 100.0, 0.0);
+	//ガチャ(）37
+		SetCut(42.726);
+		SetCamvec(0, 19, 0);
+		SetCampos_ByRad(-25.5, 40, 10);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
+	//握手(）38
+		SetCut(43.641);
+		SetCamvec(0, 17, -4.5);
+		SetCampos_NoneRad(-10, 17, -4.5);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 100.0, 0.0);
+		SetNextResetPhysics();
+	//オフ(）39
+		SetCut(43.971);
+		SetCamvec(0.30, 17.750, 0);
+		SetCampos_NoneRad(0.30, 17.750, 10);
+		SetCamup(0, 1, 0);
+		SetCamInfo(4, 1.0, 20.0, 0.0);
+		SetNextResetPhysics();
+//40
+	//オフ2(）40
+		SetCut(44.311);
+		SetCamvec(0, 18, 0);
+		SetCampos_NoneRad(0, 18, 20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(10, 1.0, 40.0, 0.0);
+		SetNextResetPhysics();
+	//オフ離れる(君の存在）41
+		SetCut(46.084);
+		SetCamvec(-60.122698, 16.028077, -50.985756);
+		SetCamInfo(45, 1.0, 3000.0, 0.0);
+	//オフ近付く(戦うた）42
+		SetCut(47.122);
+		SetCamvec(-60.122698, 16.028077, -50.985756);
+		SetCamInfo(45, 1.0, 3000.0, 0.95);
+	//オフガチャン(び　生ま）43
+		SetCut(48.090);
+		SetCamvec(-120.0, 37.0, -20.0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 1.0, 300.0, 0.0);
+	//オフガチャン(れ変わる）44
+		SetCut(49.761);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 3000.0, 0.0);
+	//爆発（目）45
+		SetCut(50.024);
+		SetCampos_NoneRad(32.2115100, 14.9972310, -18.595667);
+		SetCamvec(-0.8281840, 4.5463230, -0.092557);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 3000.0, 0.0);
+	//ワイプ（に）46
+		SetCut(50.447);
+		SetCampos_NoneRad(32.2115100, 14.9972310, -18.595667);
+		SetCamvec(-0.8281840, 4.5463230, -0.092557);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 3000.0, 0.0);
+	//爆発(見)47
+		SetCut(50.830);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 3000.0, 0.0);
+	//ワイプ（える）48
+		SetCut(51.601);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//走る(スピード超えてくモーショ)49
+		SetCut(54.848);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+//50
+	//女(ン いったい自分以が) 50
+		SetCut(56.271);
+		SetCamvec(0.0, 18.0, -0.595667);
+		SetCampos_NoneRad(0.3, 18.0, -28.595667);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 1.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//だばー(い　) 51
+		SetCut(57.462);
+		SetCampos_NoneRad(0.3, 18.0, -28.595667);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//雨加賀美(誰の) 52
+		SetCut(58.004);
+		SetCamvec(0, 17, -4.5);
+		SetCampos_NoneRad(-10, 17, -4.5);
+		SetCamup(0, 1, 0);
+		SetCamInfo(15, 1.0, 30.0,0.0);
+	//雨加賀美(強さ　信じられる) 53
+		SetCut(60.290);
+		SetCamvec(0, 17, -4.5);
+		SetCampos_NoneRad(0, 17, -14.5);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 3.0, 1000.0, 0.9);
+		SetNextResetPhysics();
+	//クロックアップ(ぅ　高速の) 54
+		SetCut(61.440);
+		SetCamup(0, 1, 0);
+		SetCamInfo(1.5, 300.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//クロックアップ(ぅ　高速の) 55
+		SetCut(62.775);
+		SetCamup(0, 1, 0);
+		SetCamInfo(2, 100.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//遠い(ビジョン) 56
+		SetCut(64.074);
+		SetCamvec(10.122698, 18.028077, -100.985756);
+		SetCamup(0, 1, 0);
+		SetCamInfo(45, 10.0, 3000.0, 0.0);
+		SetNextResetPhysics();
+	//近い(見逃すなぁ) 57
+		SetCut(66.165);
+		SetCamup(0, 1, 0);
+		SetCamInfo(8, 10.0, 3000.0, 0.0);
+	//覆う(付いてこれるなら) 58
+		SetCut(70.592);
+		SetCamup(0, 1, 0);
+		SetCamInfo(8, 10.0, 3000.0, 0.0);
+//LAST
