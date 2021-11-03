@@ -278,7 +278,7 @@ namespace FPS_n2 {
 			};
 			class GraphControl {
 			public:
-				bool isDraw = true;
+				bool isDraw = false;
 
 				int xsize = -1;
 				int ysize = -1;
@@ -296,15 +296,17 @@ namespace FPS_n2 {
 				float ypos = 0;
 				float rad = 0;
 				float Alpha = 1.f;
-
 				float Scale = 1.f;
+
 				GraphHandle handle;
 
-				void Set(float xp, float yp, float rd, float al, std::string_view Path) {
+				void Set(float xp, float yp, float rd, float al, float sc, std::string_view Path) {
 					xpos = xp;
 					ypos = yp;
 					rad = rd;
 					Alpha = al;
+					Scale = sc;
+					isDraw = false;
 					handle = GraphHandle::Load(Path);
 					handle.GetSize(&xsize, &ysize);
 				}
@@ -317,11 +319,6 @@ namespace FPS_n2 {
 					easing_set(&xpos_rand, deg2rad(-xp + (float)(GetRand((int)xp * 2 * 100)) / 100.f), xper);
 					easing_set(&ypos_rand, deg2rad(-yp + (float)(GetRand((int)yp * 2 * 100)) / 100.f), yper);
 					easing_set(&rad_rand, deg2rad(-rd + (float)(GetRand((int)rd * 2 * 100)) / 100.f), rdper);
-				}
-				void Goto_Aim(float easing = 0.f) {
-					easing_set(&xpos, xpos_base, easing);
-					easing_set(&ypos, ypos_base, easing);
-					easing_set(&rad, rad_base, easing);
 				}
 				void Draw(float scale_, int b_r, int b_g, int b_b) {
 					if (this->isDraw && this->Alpha > 0.f) {
@@ -370,13 +367,13 @@ namespace FPS_n2 {
 			Model Map;
 			Model sky;						//‹ó
 			Model Ship;
+
 			GraphHandle sun_pic;			//‘¾—z
 			VECTOR_ref sun_pos;				//‘¾—z
 
-			GraphControl face;
-
 			ModelControl models;
 
+			GraphControl face;
 			std::vector<GraphControl> news_p;
 			std::vector<GraphControl> sode;
 			std::vector<GraphControl> anim;
@@ -430,7 +427,6 @@ namespace FPS_n2 {
 					//3D
 					{
 						models.Load_onAnime(SCHOOL);//origin
-
 						models.Load_onAnime(Tachyon);//origin
 						models.Load_onAnime(Tachyon);//1
 						models.Load_onAnime(Tachyon);//2
@@ -449,10 +445,8 @@ namespace FPS_n2 {
 						models.Load_onAnime(Trainer);//origin
 						models.Load_onAnime(Opera);//origin
 						models.Load_onAnime(Doto);//origin
-
 						for (int i = 0; i < 12; i++) {
 							models.Load_onAnime(Mobu);
-
 							models.Get(Mobu, i)->b_run = 0.8f + (float)(GetRand(195)) / 1000.f;
 							models.Get(Mobu, i)->b_runrange = (float)(GetRand(100)) / 10.f;
 							while (true) {
@@ -462,7 +456,6 @@ namespace FPS_n2 {
 								}
 							}
 						}
-
 						models.Load_onAnime(GATE);//origin
 						for (int i = 0; i < 12; i++) {
 							models.Load_onAnime(NEWS);					//origin
@@ -476,90 +469,70 @@ namespace FPS_n2 {
 					//2D
 					{
 						this->sun_pic = GraphHandle::Load("data/sun.png");					//sun
-						face.Set(0, 0, 0, 1.f, "data/Cut.png");
+						face.Set(0, 0, 0, 1.f, 1.f, "data/Cut.png");
 						for (int i = 0; i < 10; i++) {
 							news_p.resize(news_p.size() + 1);
-							news_p.back().Set((float)(DrawPts->disp_x / 2 - DrawPts->disp_x), (float)(DrawPts->disp_y / 2 - DrawPts->disp_y), deg2rad(-30), (float)(i + 1) / 10.f, "data/Cut2.png");
+							news_p.back().Set((float)(DrawPts->disp_x / 2 - DrawPts->disp_x), (float)(DrawPts->disp_y / 2 - DrawPts->disp_y), deg2rad(-30), (float)(i + 1) / 10.f, 1.f, "data/Cut2.png");
 							news_p.back().Scale = (float)DrawPts->disp_x / (float)news_p.back().xsize*1.5f;
 						}
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/1.png");
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/1.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/2.png");
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/2.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/3.png");
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/3.png");
 						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/first_sode/4.png");
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/4.png");
+						sode.resize(sode.size() + 1);
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/1.png");
+						sode.resize(sode.size() + 1);
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/2.png");
+						sode.resize(sode.size() + 1);
+						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/1.png");
+						sode.resize(sode.size() + 1);
+						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/2.png");
+						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0, 1.f, 1.f, "data/logo.png");
+						sode_last.resize(10);
+						sode_last[0].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-150)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(100)) * 10.f,deg2rad(-260), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[1].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-300)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(-500)) * 10.f,deg2rad(-230), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[2].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(0)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(-600)) * 10.f,deg2rad(-180), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[3].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-500)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(300)) * 10.f,deg2rad(-270), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[4].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(400)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(-550)) * 10.f,deg2rad(-140), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[5].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(500)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(500)) * 10.f,deg2rad(-10), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[6].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(600)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(-300)) * 10.f, deg2rad(-110), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[7].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(700)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(100)) * 10.f,deg2rad(-90), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[8].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(50)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(700)) * 10.f,deg2rad(30), 1.f, 1.f, "data/second_sode/1.png");
+						sode_last[9].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-450)) * 10.f,(float)(DrawPts->disp_y / 2) + (float)(y_r(550)) * 10.f, deg2rad(50), 1.f, 1.f, "data/second_sode/1.png");
 
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/1.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/2.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/1.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y), 0, 1.f, "data/second_sode/2.png");
-
-						sode[0].isDraw = false;
-						sode[1].isDraw = false;
-						sode[2].isDraw = false;
-						sode[3].isDraw = false;
-						sode[4].isDraw = false;
-						sode[5].isDraw = false;
-						sode[6].isDraw = false;
-						sode[7].isDraw = false;
-
-						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/logo.png");
-						for (int i = 0; i < 10; i++) {
-							sode_last.resize(sode_last.size() + 1);
-							sode_last.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/second_sode/1.png");
-						}
-						sode_last[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(150)), (float)(DrawPts->disp_y / 2 + y_r(100)), deg2rad(-350));
-						sode_last[1].Set_Base((float)(DrawPts->disp_x / 2 - y_r(300)), (float)(DrawPts->disp_y / 2 - y_r(500)), deg2rad(-320));
-						sode_last[2].Set_Base((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2 - y_r(600)), deg2rad(-270));
-						sode_last[3].Set_Base((float)(DrawPts->disp_x / 2 - y_r(500)), (float)(DrawPts->disp_y / 2 + y_r(300)), deg2rad(-360));
-						sode_last[4].Set_Base((float)(DrawPts->disp_x / 2 + y_r(400)), (float)(DrawPts->disp_y / 2 - y_r(550)), deg2rad(-230));
-						sode_last[5].Set_Base((float)(DrawPts->disp_x / 2 + y_r(500)), (float)(DrawPts->disp_y / 2 + y_r(500)), deg2rad(-100));
-						sode_last[6].Set_Base((float)(DrawPts->disp_x / 2 + y_r(600)), (float)(DrawPts->disp_y / 2 - y_r(300)), deg2rad(-200));
-						sode_last[7].Set_Base((float)(DrawPts->disp_x / 2 + y_r(700)), (float)(DrawPts->disp_y / 2 + y_r(100)), deg2rad(-180));
-						sode_last[8].Set_Base((float)(DrawPts->disp_x / 2 + y_r(50)), (float)(DrawPts->disp_y / 2 + y_r(700)), deg2rad(-60));
-						sode_last[9].Set_Base((float)(DrawPts->disp_x / 2 - y_r(450)), (float)(DrawPts->disp_y / 2 + y_r(550)), deg2rad(-40));
 						for (auto& sl : sode_last) {
-							sl.xpos = (float)(DrawPts->disp_x / 2) + (sl.xpos_base - (float)(DrawPts->disp_x / 2)) * 10.f;
-							sl.ypos = (float)(DrawPts->disp_y / 2) + (sl.ypos_base - (float)(DrawPts->disp_y / 2)) * 10.f;
-							sl.rad = sl.rad_base + deg2rad(90);
+							sl.xpos_base = (float)(DrawPts->disp_x / 2) + (sl.xpos - (float)(DrawPts->disp_x / 2)) / 10.f;
+							sl.ypos_base = (float)(DrawPts->disp_y / 2) + (sl.ypos - (float)(DrawPts->disp_y / 2)) / 10.f;
+							sl.rad_base = sl.rad - deg2rad(90);
 						}
-						for (int i = 0; i < 3; i++) {
-							First.resize(First.size() + 1);
-							First.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 1.f, "data/FIRST.png");
-						}
-						First[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
-						First[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
-						First[2].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f);
-
-						for (int i = 0; i < 3; i++) {
-							First2.resize(First2.size() + 1);
-							First2.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 196.f / 255.f, "data/sun.png");
-						}
-						First2[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
-						First2[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
-						First2[2].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f);
-
+						First.resize(First.size() + 1);
+						First[0].Set((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f, 1.f, 1.f, "data/FIRST.png");
+						First.resize(First.size() + 1);
+						First[1].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f, 1.f, 1.f, "data/FIRST.png");
+						First.resize(First.size() + 1);
+						First[2].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f, 1.f, 1.f, "data/FIRST.png");
+						First2.resize(First2.size() + 1);
+						First2[0].Set((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f, 196.f / 255.f, 1.f, "data/sun.png");
+						First2.resize(First2.size() + 1);
+						First2[1].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f, 196.f / 255.f, 1.f, "data/sun.png");
+						First2.resize(First2.size() + 1);
+						First2[2].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f, 196.f / 255.f, 1.f, "data/sun.png");
 						for (int i = 0; i < 3; i++) {
 							First3.resize(First3.size() + 1);
-							First3.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 0.f, "data/sun.png");
+							First3.back().Set((float)(DrawPts->disp_x / 2 + DrawPts->disp_x), (float)(DrawPts->disp_y / 2), 0, 0.f, 1.f, "data/sun.png");
 							First3.back().Alpha_base = -1.f;
-							First3.back().Scale = 1.f;
 						}
-						First3[0].Set_Base((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f);
-						First3[1].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f);
-						First3[2].Set_Base((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f);
+						First3[0].Set((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f, 0.f, 1.f, "data/sun.png");
+						First3[1].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f, 0.f, 1.f, "data/sun.png");
+						First3[2].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f, 0.f, 1.f, "data/sun.png");
 						anim.resize(anim.size() + 1);
-						anim.back().Set(0.f, 0.f, 0, 1.f, "data/anime/0.png");
+						anim.back().Set(0.f, 0.f, 0, 1.f, 1.f, "data/anime/0.png");
 						anim.resize(anim.size() + 1);
-						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, 1.f, "data/anime/1.png");
-						anim[0].isDraw = false;
-						anim[1].isDraw = false;
+						anim.back().Set(0.f, (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/anime/1.png");
 					}
 				}
 				//*/
@@ -581,9 +554,6 @@ namespace FPS_n2 {
 				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
 				camera_main.camup = VECTOR_ref::up();
 				camera_main.set_cam_info(deg2rad(15), 1.0f, 200.f);
-			}
-			void Common_Draw(void) {
-				models.Draw();
 			}
 		public:
 			void Sub_Func(std::string& func, const char& in_str) {
@@ -607,8 +577,8 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
 				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
-				Cut = 36;
-				Cut = 0;
+				Cut = 46;
+				//Cut = 0;
 				BGM = SoundHandle::Load("data/sound2.wav");
 				/*
 				movie = GraphHandle::Load("data/base_movie.mp4");
@@ -685,7 +655,7 @@ namespace FPS_n2 {
 							Cut_Pic.back().Aim_camera.far_ = std::stof(args[2]);
 							Cut_Pic.back().cam_per = std::stof(args[3]);
 						}
-						else if(func.find("SetNextResetPhysics") != std::string::npos) {
+						else if (func.find("SetNextResetPhysics") != std::string::npos) {
 							Cut_Pic.back().isNextreset = true;
 						}
 					}
@@ -781,6 +751,59 @@ namespace FPS_n2 {
 							SEL++;
 							//1
 							if (Cut == SEL) {
+								sode[0].isDraw = true;
+								sode[1].isDraw = true;
+								sode[2].isDraw = true;
+								sode[3].isDraw = true;
+								easing_set(&sode[0].xpos, 0.f, 0.9f);
+								easing_set(&sode[0].ypos, 0.f, 0.9f);
+								easing_set(&sode[1].xpos, 0.f, 0.875f);
+								easing_set(&sode[1].ypos, 0.f, 0.875f);
+								easing_set(&sode[2].xpos, 0.f, 0.85f);
+								easing_set(&sode[2].ypos, 0.f, 0.85f);
+								easing_set(&sode[3].xpos, 0.f, 0.825f);
+								easing_set(&sode[3].ypos, 0.f, 0.825f);
+
+								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
+									First[0].isDraw = true;
+									First2[0].isDraw = true;
+									First3[0].isDraw = true;
+									if (First3[0].Alpha_base < 0.f) {
+										First3[0].Alpha_base = 1.f;
+										First3[0].Scale = 1.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
+									First[1].isDraw = true;
+									First2[1].isDraw = true;
+									First3[1].isDraw = true;
+									if (First3[1].Alpha_base < 0.f) {
+										First3[1].Alpha_base = 1.f;
+										First3[1].Scale = 1.f;
+									}
+								}
+								if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
+									First[2].isDraw = true;
+									First2[2].isDraw = true;
+									First3[2].isDraw = true;
+									if (First3[2].Alpha_base < 0.f) {
+										First3[2].Alpha_base = 1.f;
+										First3[2].Scale = 1.f;
+									}
+								}
+								for (auto& sl : First3) {
+									if (sl.Alpha_base > 0.f) {
+										sl.Alpha_base = std::max(sl.Alpha_base - 6.f / GetFPS(), 0.f);
+									}
+									if (sl.Scale < 3.f) {
+										sl.Scale += 6.f / GetFPS();
+									}
+								}
+								for (auto& sl : First3) {
+									if (sl.Alpha_base >= 0.f) {
+										easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
+									}
+								}
 							}
 							SEL++;
 							//2
@@ -789,21 +812,11 @@ namespace FPS_n2 {
 								sode[1].isDraw = false;
 								sode[2].isDraw = false;
 								sode[3].isDraw = false;
-								sode[0].xpos = 0.f;
-								sode[0].ypos = 0.f;
-								sode[1].xpos = 0.f;
-								sode[1].ypos = 0.f;
-								sode[2].xpos = 0.f;
-								sode[2].ypos = 0.f;
-								sode[3].xpos = 0.f;
-								sode[3].ypos = 0.f;
 								for (auto& sl : First) {
-									sl.xpos = (float)(DrawPts->disp_x * 2);
-									sl.ypos = (float)(DrawPts->disp_y * 2);
+									sl.isDraw = false;
 								}
 								for (auto& sl : First2) {
-									sl.xpos = (float)(DrawPts->disp_x * 2);
-									sl.ypos = (float)(DrawPts->disp_y * 2);
+									sl.isDraw = false;
 								}
 								Board.isDraw = true;
 							}
@@ -818,7 +831,6 @@ namespace FPS_n2 {
 							SEL++;
 							//5
 							if (Cut == SEL) {
-								Board.isDraw = false;
 							}
 							SEL++;
 							//6
@@ -827,13 +839,20 @@ namespace FPS_n2 {
 								sode[1].isDraw = true;
 								sode[2].isDraw = true;
 								sode[3].isDraw = true;
+								sode[0].xpos = 0.f;
+								sode[0].ypos = 0.f;
+								sode[1].xpos = 0.f;
+								sode[1].ypos = 0.f;
+								sode[2].xpos = 0.f;
+								sode[2].ypos = 0.f;
+								sode[3].xpos = 0.f;
+								sode[3].ypos = 0.f;
 								for (auto& sl : First) {
-									sl.Goto_Aim();
+									sl.isDraw = true;
 								}
 								for (auto& sl : First2) {
-									sl.Goto_Aim();
+									sl.isDraw = true;
 								}
-								Board.isDraw = true;
 							}
 							SEL++;
 							//7
@@ -847,13 +866,12 @@ namespace FPS_n2 {
 								easing_set(&sode[3].xpos, (float)(-DrawPts->disp_x), 0.825f);
 								easing_set(&sode[3].ypos, (float)(DrawPts->disp_y / 5), 0.825f);
 								for (auto& sl : First) {
-									sl.xpos = (float)(DrawPts->disp_x * 2);
-									sl.ypos = (float)(DrawPts->disp_y * 2);
+									sl.isDraw = false;
 								}
 								for (auto& sl : First2) {
-									sl.xpos = (float)(DrawPts->disp_x * 2);
-									sl.ypos = (float)(DrawPts->disp_y * 2);
+									sl.isDraw = false;
 								}
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
 							}
 							SEL++;
 							//8
@@ -866,6 +884,10 @@ namespace FPS_n2 {
 							SEL++;
 							//9
 							if (Cut == SEL) {
+								Board.isDraw = false;
+								models.Get(Tachyon2, 0)->isDraw = false;
+								models.Get(Tachyon, 0)->isDraw = true;
+								Map.isDraw = true;
 							}
 							SEL++;
 						}
@@ -919,6 +941,10 @@ namespace FPS_n2 {
 							SEL++;
 							//16
 							if (Cut == SEL) {
+								models.Get(Tachyon2, 0)->isDraw = true;
+								models.Get(Cafe, 0)->isDraw = true;
+								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 							}
 							SEL++;
 							//17
@@ -1043,10 +1069,28 @@ namespace FPS_n2 {
 								models.Get(Tachyon, 5)->isDraw = true;
 								models.Get(Tachyon, 5)->UpdateAnim(7, false, 0.f);
 								models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
+								face.isDraw = true;
+								for (auto&n : news_p) { n.isDraw = true; }
+								for (int i = 0; i < 12; i++) {
+									models.Get(NEWS, i)->isDraw = false;
+								}
+								Map.isDraw = true;
 							}
 							SEL++;
 							//22
 							if (Cut == SEL) {
+								models.Get(Tachyon, 2)->isDraw = false;
+								models.Get(Tachyon, 3)->isDraw = false;
+								models.Get(Tachyon, 4)->isDraw = false;
+								models.Get(Tachyon, 5)->isDraw = false;
+								models.Get(GoldShip, 0)->isDraw = true;
+								models.Get(GoldShip, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
+								models.Get(Speweek, 0)->isDraw = true;
+								models.Get(Speweek, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
+								models.Get(Teio, 0)->isDraw = true;
+								models.Get(Teio, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
+								models.Get(Macin, 0)->isDraw = true;
+								models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 							}
 							SEL++;
 							//23
@@ -1055,6 +1099,8 @@ namespace FPS_n2 {
 							SEL++;
 							//24
 							if (Cut == SEL) {
+								face.isDraw = false;
+								for (auto&n : news_p) { n.isDraw = false; }
 								Map.isDraw = false;
 								models.Get(GoldShip, 0)->isDraw = false;
 								models.Get(Speweek, 0)->isDraw = false;
@@ -1144,6 +1190,11 @@ namespace FPS_n2 {
 							//28
 							if (Cut == SEL) {
 								models.Get(GATE, 0)->isDraw = false;
+								models.Get(Karen, 0)->isDraw = true;
+								models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+								Ship.isDraw = true;
+								Ship.OpacityRate = 0.3f;
+								Ship.obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
 							}
 							SEL++;
 							//29
@@ -1499,6 +1550,12 @@ namespace FPS_n2 {
 							SEL++;
 							//52
 							if (Cut == SEL) {
+								Board.isDraw = true;
+								Map.isDraw = false;
+								models.Get(Karen, 0)->isDraw = false;
+								models.Get(Cafe, 0)->isDraw = true;
+								models.Get(Cafe, 0)->OpacityRate = 1.f;
+								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
 							}
 							SEL++;
 							//53
@@ -1704,78 +1761,23 @@ namespace FPS_n2 {
 										easing_set(&Logo.Scale, 1.f, 0.95f);
 									}
 								}
+								Logo.isDraw = (int)(per_logo*100.f) <= GetRand(99);
 
 								for (auto& sl : sode_last) {
 									easing_set(&sl.xpos, sl.xpos_base + y_r(sl.xpos_rand), 0.945f);
 									easing_set(&sl.ypos, sl.ypos_base + y_r(sl.ypos_rand), 0.925f);
 									easing_set(&sl.rad, sl.rad_base + sl.rad_rand, 0.925f);
 									sl.Set_Rand(50.f, 0.95f, 50.f, 0.95f, 10.f, 0.95f);
+									sl.isDraw = true;
 								}
 							}
 						}
 						//
 						{
-							if (Cut >= 0 && Cut < 2) {
-								if (NowTime > (LONGLONG)(1000000.f * 0.450f)) {
-									sode[0].isDraw = true;
-									sode[1].isDraw = true;
-									sode[2].isDraw = true;
-									sode[3].isDraw = true;
-									easing_set(&sode[0].xpos, 0.f, 0.9f);
-									easing_set(&sode[0].ypos, 0.f, 0.9f);
-									easing_set(&sode[1].xpos, 0.f, 0.875f);
-									easing_set(&sode[1].ypos, 0.f, 0.875f);
-									easing_set(&sode[2].xpos, 0.f, 0.85f);
-									easing_set(&sode[2].ypos, 0.f, 0.85f);
-									easing_set(&sode[3].xpos, 0.f, 0.825f);
-									easing_set(&sode[3].ypos, 0.f, 0.825f);
-								}
-								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
-									First[0].Goto_Aim();
-									First2[0].Goto_Aim();
-									First3[0].Goto_Aim();
-									if (First3[0].Alpha_base < 0.f) {
-										First3[0].Alpha_base = 1.f;
-										First3[0].Scale = 1.f;
-									}
-								}
-								if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
-									First[1].Goto_Aim();
-									First2[1].Goto_Aim();
-									First3[1].Goto_Aim();
-									if (First3[1].Alpha_base < 0.f) {
-										First3[1].Alpha_base = 1.f;
-										First3[1].Scale = 1.f;
-									}
-								}
-								if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
-									First[2].Goto_Aim();
-									First2[2].Goto_Aim();
-									First3[2].Goto_Aim();
-									if (First3[2].Alpha_base < 0.f) {
-										First3[2].Alpha_base = 1.f;
-										First3[2].Scale = 1.f;
-									}
-								}
-								for (auto& sl : First3) {
-									if (sl.Alpha_base > 0.f) {
-										sl.Alpha_base = std::max(sl.Alpha_base - 6.f / GetFPS(), 0.f);
-									}
-									if (sl.Scale < 3.f) {
-										sl.Scale += 6.f / GetFPS();
-									}
-								}
-								for (auto& sl : First3) {
-									if (sl.Alpha_base >= 0.f) {
-										easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
-									}
-								}
-							}
-							if (Cut >= 2 && Cut < 7) {
+							if (Cut >= 2 && Cut <= 6) {
 								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
 							}
-							if (Cut >= 7 && Cut < 9) {
-								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
+							if (Cut >= 7 && Cut <= 8) {
 								if (models.Get(Tachyon2, 0)->obj.get_anime(0).per > 0) {
 									Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(25);
@@ -1783,25 +1785,14 @@ namespace FPS_n2 {
 								}
 								else {
 									SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
-
 									Cut_Pic[Cut].Aim_camera.far_ = 80.f;
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
 									Cut_Pic[Cut].cam_per = 0.975f;
 									cam_yure += 5.f / GetFPS();
-
 									easing_set(&Cut_Pic[Cut].Aim_camera.campos,
 										Cut_Pic[Cut].Aim_camera.camvec
-										+
-										VECTOR_ref::vget(
-											-cos(deg2rad(6.9))*sin(-deg2rad(180.f + 19.5f)),
-											sin(deg2rad(6.9)),
-											-cos(deg2rad(6.9))*cos(-deg2rad(180.f + 19.5f))
-										)*(27.0f + cam_yure)
-										+
-										VECTOR_ref::vget(
-											-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
-											-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f,
-											-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f),
+										+ VECTOR_ref::vget(-cos(deg2rad(6.9))*sin(-deg2rad(180.f + 19.5f)), sin(deg2rad(6.9)), -cos(deg2rad(6.9))*cos(-deg2rad(180.f + 19.5f)))*(27.0f + cam_yure)
+										+ VECTOR_ref::vget(-cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f, -cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f, -cam_yure + (float)(GetRand(2 * (int)cam_yure * 10)) / 10.f),
 										0.9f);
 									easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(-0.5f + (float)(GetRand((int)(2.f * 0.5f) * 10)) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
 								}
@@ -1810,11 +1801,7 @@ namespace FPS_n2 {
 								models.Get(Tachyon, 0)->UpdateAnim(1, true, 0.f);
 								models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
 							}
-							if (Cut >= 9 && Cut < 14) {
-								models.Get(Tachyon2, 0)->isDraw = false;
-								models.Get(Tachyon, 0)->isDraw = true;
-								Board.isDraw = false;
-								Map.isDraw = true;
+							if (Cut >= 9 && Cut <= 13) {
 								if (models.Get(Tachyon, 0)->obj.get_anime(1).per > 0) {
 									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
 									Stop_Effect(Effect::ef_reco);
@@ -1852,48 +1839,28 @@ namespace FPS_n2 {
 								models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
 							}
 							if (Cut >= 15 && Cut <= 16) {
-								//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(116.485695f, 18.346067f, -56.928761f);
-
-								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 18.028077f, -100.985756f);
-
 								float xradadd = -2.f + float(GetRand(2 * 2 * 100)) / 100.f;
 								easing_set(&xradadd_r, xradadd, 0.975f);
-								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-									VECTOR_ref::vget(
-										-cos(deg2rad(-5.5f + xradadd_r * 1.5f))*sin(-deg2rad(float(90 - 10) + radc2)),
-										sin(deg2rad(-5.5 + xradadd_r * 1.5f)),
-										-cos(deg2rad(-5.5 + xradadd_r * 1.5f))*cos(-deg2rad(float(90 - 10) + radc2))
-									)*88.0f;
-
-								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::up();
-								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-								Cut_Pic[Cut].Aim_camera.far_ = 3000.f;
-								Cut_Pic[Cut].cam_per = 0.f;
+								float Xrad = -5.5f + xradadd_r * 1.5f;
+								float Yrad = float(90 - 10) + radc2;
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(-cos(deg2rad(Xrad))*sin(-deg2rad(Yrad)), sin(deg2rad(Xrad)), -cos(deg2rad(Xrad))*cos(-deg2rad(Yrad)))*88.0f;
 								radc2 += 12.5f / GetFPS();
 							}
-							if (Cut >= 16 && Cut < 20) {
-								models.Get(Tachyon2, 0)->isDraw = true;
-								models.Get(Cafe, 0)->isDraw = true;
-								if (models.Get(Tachyon2, 0)->obj.get_anime(3).time == 33.f) {
-									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-								}
-								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
+							if (Cut >= 16 && Cut <= 19) {
 								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
+
+								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
 								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
 
+								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.45f);
 								models.Get(Tachyon2, 0)->PhysicsSpeed = 0.45f;
 
 								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 								models.Get(Cafe, 0)->PhysicsSpeed = 0.45f;
 							}
-							if (Cut >= 21 && Cut < 24) {
-								for (int i = 0; i < 12; i++) {
-									models.Get(NEWS, i)->isDraw = false;
-								}
-								Map.isDraw = true;
+
+							if (Cut >= 21 && Cut <= 23) {
 								for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
 									n->xpos = (n + 1)->xpos;
 									n->ypos = (n + 1)->ypos;
@@ -1903,53 +1870,23 @@ namespace FPS_n2 {
 								news_p.back().ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
 								news_p.back().rad += deg2rad(6) / GetFPS();
 								if (Cut != 21) {
-									models.Get(Tachyon, 2)->isDraw = false;
-									models.Get(Tachyon, 3)->isDraw = false;
-									models.Get(Tachyon, 4)->isDraw = false;
-									models.Get(Tachyon, 5)->isDraw = false;
-
-									models.Get(GoldShip, 0)->isDraw = true;
 									if (news_p.back().ypos < DrawPts->disp_y / 2) {
 										models.Get(GoldShip, 0)->UpdateAnim(0, false, 0.f);
 									}
 									else {
 										models.Get(GoldShip, 0)->UpdateAnim(1, true, 0.45f);
 									}
-									models.Get(GoldShip, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
-
-									models.Get(Speweek, 0)->isDraw = true;
 									models.Get(Speweek, 0)->UpdateAnim(0, false, 0.f);
-									models.Get(Speweek, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
-
-									models.Get(Teio, 0)->isDraw = true;
 									models.Get(Teio, 0)->UpdateAnim(0, false, 0.f);
-									models.Get(Teio, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
-
-									models.Get(Macin, 0)->isDraw = true;
 									models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
-									models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 								}
 							}
-							if (Cut >= 28 && Cut < 30) {
-								models.Get(Karen, 0)->isDraw = true;
-								models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
+							if (Cut >= 28 && Cut <= 29) {
 								models.Get(Karen, 0)->UpdateAnim(0, false, 1.0f);
-
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
-								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec +
-									VECTOR_ref::vget(
-										2.f,
-										12.f,
-										6.f
-									)*1.0f;
-
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f)*1.0f;
 								if (camzb_28 != 0.f) {
-									if (camzb_28 > -8.f) {
-										Cut_Pic[Cut].cam_per = 0.9f;
-									}
-									else {
-										Cut_Pic[Cut].cam_per = 0.95f;
-									}
+									Cut_Pic[Cut].cam_per = (camzb_28 > -8.f) ? 0.9f : 0.95f;
 								}
 								if (camzb_28 > -10.f) {
 									camzb_28 -= 100.f / GetFPS();
@@ -1957,10 +1894,6 @@ namespace FPS_n2 {
 								else {
 									camzb_28 = -10.f;
 								}
-
-								Ship.isDraw = true;
-								Ship.OpacityRate = 0.3f;
-								Ship.obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
 								Ship.obj.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
 								ship_z += ship_zadd / GetFPS();
 								if (ship_zadd <= 0.95f) {
@@ -1970,7 +1903,7 @@ namespace FPS_n2 {
 									ship_zadd = 1.f;
 								}
 							}
-							if (Cut >= 46 && Cut < 48) {
+							if (Cut >= 46 && Cut <= 47) {
 								sode[4].xpos += (float)(y_r(300)) / GetFPS();
 								sode[4].ypos -= (float)(y_r(2800)) / GetFPS();
 								sode[5].xpos -= (float)(y_r(300)) / GetFPS();
@@ -1980,7 +1913,7 @@ namespace FPS_n2 {
 								sode[7].xpos -= (float)(y_r(300)) / GetFPS();
 								sode[7].ypos -= (float)(y_r(2000)) / GetFPS();
 							}
-							if (Cut >= 48 && Cut < 50) {
+							if (Cut >= 48 && Cut <= 49) {
 								sode[4].xpos -= (float)(y_r(300)) / GetFPS();
 								sode[4].ypos += (float)(y_r(2800)) / GetFPS();
 								sode[5].xpos += (float)(y_r(300)) / GetFPS();
@@ -1990,14 +1923,8 @@ namespace FPS_n2 {
 								sode[7].xpos += (float)(y_r(300)) / GetFPS();
 								sode[7].ypos += (float)(y_r(2000)) / GetFPS();
 							}
-							if (Cut >= 52 && Cut < 54) {
-								Board.isDraw = true;
-								Map.isDraw = false;
-								models.Get(Karen, 0)->isDraw = false;
-								models.Get(Cafe, 0)->isDraw = true;
-								models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+							if (Cut >= 52 && Cut <= 53) {
 								models.Get(Cafe, 0)->UpdateAnim(3, false, 0.8f);
-								models.Get(Cafe, 0)->OpacityRate = 1.f;
 							}
 						}
 						if (Cut_Pic[Cut].isNextreset) {
@@ -2085,7 +2012,7 @@ namespace FPS_n2 {
 				models.Get(GATE, 0)->Draw();
 			}
 			void Shadow_Draw(void) noexcept override {
-				Common_Draw();
+				models.Draw();
 			}
 			void Main_Draw(void) noexcept override {
 				if (Cut == 2 || Cut == 3 || Cut == 4 || Cut == 6 || Cut == 7 || Cut == 8 || Cut == 34 || Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
@@ -2106,7 +2033,7 @@ namespace FPS_n2 {
 				}
 				Board.Draw();
 				Map.Draw();
-				Common_Draw();
+				models.Draw();
 				Ship.Draw();
 
 				SetFogEnable(FALSE);
@@ -2139,13 +2066,10 @@ namespace FPS_n2 {
 							sl.Draw((float)(DrawPts->disp_y) / 540.f, per_b, per_b, per_b);
 						}
 					}
-					if ((int)(per_logo*100.f) <= GetRand(99)) {
-						Logo.Draw((float)(DrawPts->disp_y) / 540.f / 2.f, 255, 255, 255);
-					}
-					if (Cut == 21 || Cut == 22 || Cut == 23) {
-						face.Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
-						for (auto&n : news_p) { n.Draw(1.f, 255, 255, 255); }
-					}
+					Logo.Draw((float)(DrawPts->disp_y) / 540.f / 2.f, 255, 255, 255);
+
+					face.Draw_Ex(DrawPts->disp_x, DrawPts->disp_y, 255, 255, 255);
+					for (auto&n : news_p) { n.Draw(1.f, 255, 255, 255); }
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
@@ -2162,4 +2086,3 @@ namespace FPS_n2 {
 		};
 	};
 };
-
