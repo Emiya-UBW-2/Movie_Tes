@@ -1,3 +1,24 @@
+//モデル読み込み
+		LoadModel("data/school/model.mv1", 1);
+		LoadModel("data/umamusume/Tachyon/model.mv1", 6);
+		LoadModel("data/umamusume/Tachyon2/model.mv1", 1);
+		LoadModel("data/umamusume/Cafe/model.mv1", 1);
+		LoadModel("data/umamusume/scarlet/model.mv1", 1);
+		LoadModel("data/umamusume/vodka/model.mv1", 1);
+		LoadModel("data/umamusume/spe/model.mv1", 1);
+		LoadModel("data/umamusume/gold/model.mv1", 1);
+		LoadModel("data/umamusume/teio/model.mv1", 1);
+		LoadModel("data/umamusume/mac/model.mv1", 1);
+		LoadModel("data/umamusume/karen/model.mv1", 1);
+		LoadModel("data/umamusume/trainer/model.mv1", 1);
+		LoadModel("data/umamusume/opera/model.mv1", 1);
+		LoadModel("data/umamusume/doto/model.mv1", 1);
+		LoadModel("data/umamusume/mobu_black/model.mv1", 12);//モブ
+		LoadModel("data/map/model_gate.mv1", 1);//ゲート
+		LoadModel("data/paper/news.mv1", 12);//新聞紙
+//モデル読み込み終わり
+
+//カット設定
 //0
 	//羽広がり前 0
 		SetCut(0.45);
@@ -49,13 +70,13 @@
 		SetCamvec(1.11, 14.36, -1.740);
 		SetCampos_ByRad(6.9, 199.5, 27.0);
 		SetCamup(0, 1, 0);
-		SetCamInfo(15, 1.0, 40.0, 0.0);
+		SetCamInfo(25, 1.0, 80.0, 0.0);
 	//斬新 8
 		SetCut(6.4480);
 		SetCamvec(1.11, 14.36, -1.740);
 		SetCampos_ByRad(6.9, 199.5, 27.0);
 		SetCamup(0, 1, 0);
-		SetCamInfo(15, 1.0, 40.0, 0.0);
+		SetCamInfo(25, 1.0, 80.0, 0.0);
 		SetNextResetPhysics();
 	//＜＞ 9
 		SetCut(7.0960);
@@ -360,3 +381,150 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(8, 10.0, 3000.0, 0.0);
 //LAST
+
+
+
+//テロップはじめ
+	//テロップ1
+		SetTelopTime(2.614,1.5);
+		SetTelop(660,880,12,"原作",LEFT);
+		SetTelop(660,892, 32,"ウマ娘プリティーダービー",LEFT);
+	//テロップ2
+		AddTelopTime(1.696,3.29);//4.310
+		SetTelop(760,880,12,"皐月賞馬",LEFT);
+		SetTelop(760,892,32,"アグネスタキオン",LEFT);
+	//テロップ3
+		AddTelopTime(3.297,2.97);//7.288
+		SetTelop(760,880,12,"菊花賞馬",LEFT);
+		SetTelop(760,892,32,"マンハッタンカフェ",LEFT);
+	//テロップ4
+		AddTelopTime(2.976,2.0);//9.264
+		SetTelop(780,880,12,"クロフネの子",LEFT);
+		SetTelop(780,892,32,"カレンチャン",LEFT);
+	//テロップ5
+		AddTelopTime(2.146, 1.925);//11.410f
+		SetTelop(860, 880, 12, "全身発行体", LEFT);
+		SetTelop(860, 892, 32, "トレーナー", LEFT);
+	//テロップ6
+		AddTelopTime(1.925, 1.925);//13.410f
+		SetTelop(1460, 540, 12, "トレセン学園理事長", LEFT);
+		SetTelop(1460, 552, 32, "秋川やよい", LEFT);
+		SetTelop(1460, 880, 12, "理事長秘書", LEFT);
+		SetTelop(1460, 892, 32, "駿川たづな", LEFT);
+	//テロップ7
+		AddTelopTime(1.925, 1.925f);
+		SetTelop(1460, 540, 12, "チームスピカ担当", LEFT);
+		SetTelop(1460, 552, 32, "沖野T", LEFT);
+		SetTelop(1370, 880, 12, "あげません", LEFT);
+		SetTelop(1370, 892, 32, "スペシャルウィーク", LEFT);
+	//テロップ7
+		AddTelopTime(1.925, 1.925f);
+		SetTelop(1370, 552, 32, "トウカイ テイオー", LEFT);
+		SetTelop(1370, 594, 32, "メジロマックイーン", LEFT);
+		SetTelop(1370, 678, 32, "ウオッカ", LEFT);
+		SetTelop(1370, 720, 32, "ダイワスカーレット", LEFT);
+		SetTelop(1370, 880, 12, "ナレーション", LEFT);
+		SetTelop(1370, 892, 32, "ゴールドシップ", LEFT);
+	//テロップ8
+		AddTelopTime(1.925, 1.925f);
+		SetTelop(860, 880, 12, "理事長代理", LEFT);
+		SetTelop(860, 892, 32, "樫本理子", LEFT);
+	//テロップ9
+	//	AddTelopTime(1.925f, 1.925);//23.422f)
+	//	SetTelop(380, 810, 32, "", LEFT);
+	//	SetTelop(1340, 810, 32, "", LEFT);
+	//テロップ10
+		SetTelopTime(25.164, 2.000f);
+		SetTelop(760, 880, 12, "脚本", LEFT);
+		SetTelop(760, 892, 32, "アグネスデジタル", LEFT);
+	//テロップ11
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(760, 880, 12, "音楽", LEFT);
+		SetTelop(760, 892, 32, "アグネスデジタル", LEFT);
+	//テロップ12
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(1380, 720, 10, "オープニングテーマ", LEFT);
+		SetTelop(1320, 730, 36, "『NEXT LEVEL』", LEFT);
+		SetTelop(1350, 766, 36, "YU-KI", LEFT);
+		SetTelop(1490, 778, 24, "(TRF)", LEFT);
+		SetTelop(1350, 813, 10, "作　　詞", LEFT);
+		SetTelop(1350, 845, 10, "作・編曲", LEFT);
+		SetTelop(1410, 802, 32, "藤田聖子", LEFT);
+		SetTelop(1410, 834, 32, "渡部チェル", LEFT);
+	//テロップ13
+		SetTelopTime(32.52, 2.0);
+		SetTelop(340, 650, 10, "使用モデル", LEFT);
+		SetTelop(340, 660, 24, "S.Aikawa氏", LEFT);
+		SetTelop(400, 718, 24, "[MMD] アグネスタキオン (ウマ娘)", MIDDLE);
+	//テロップ14
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(1440, 880, 10, "使用モデル", LEFT);
+		SetTelop(1440, 870, 24, "ShiniNet氏", LEFT);
+		SetTelop(1500, 918, 24, "マン〇ッタンカフェ", MIDDLE);
+	//テロップ15
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(1440, 880, 10, "使用モデル", LEFT);
+		SetTelop(1440, 870, 24, "kachin氏", LEFT);
+		SetTelop(1500, 918, 24, "かれん", MIDDLE);
+	//テロップ16
+		SetTelopTime(38.986, 2.000f);
+		SetTelop(340, 670, 12, "ShiniNet氏", LEFT);
+		SetTelop(400, 682, 24, "ゴー〇ドシップ", MIDDLE);
+		SetTelop(1500, 682, 24, "メジ〇マoクイーン", MIDDLE);
+	//テロップ17
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(340, 582, 24, "つかさ氏", LEFT);
+		SetTelop(280, 630, 24, "つかさ式ていおー", LEFT);
+		SetTelop(1440, 582, 24, "WARPSTAR氏", LEFT);
+		SetTelop(1500, 630, 24, "【ウマ娘】スペシャルウィーク", MIDDLE);
+	//テロップ18
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(900, 880, 10, "トレーナーモデル", LEFT);
+		SetTelop(900, 870, 24, "モノゾフ氏", LEFT);
+		SetTelop(960, 918, 24, "【モブモデル】モブ用親父セット【配布中】", MIDDLE);
+	//テロップ19
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(340, 582, 24, "Jean氏", LEFT);
+		SetTelop(400, 630, 24, "【MMDウマ娘】テイエムオペラオー【モデル配布】", MIDDLE);
+		SetTelop(1440, 582, 24, "EndressStorm氏", LEFT);
+		SetTelop(1500, 630, 24, "メイショウドトウ", MIDDLE);
+	//テロップ20
+		SetTelopTime(47.200, 2.000f);
+		SetTelop(340, 582, 24, "tomoyo氏", LEFT);
+		SetTelop(400, 630, 24, "tmy式ダスカ　ver.0.92", MIDDLE);
+		SetTelop(1440, 582, 24, "Jean氏", LEFT);
+		SetTelop(1500, 630, 24, "【MMDウマ娘】ウオッカ【モデル配布】", MIDDLE);
+	//テロップ21
+		SetTelopTime(50.447, 1.800f);
+		SetTelop(900, 870, 10, "黒子モデル", LEFT);
+		SetTelop(900, 880, 24, "神々の宴氏", LEFT);
+		SetTelop(960, 918, 24, "【ＭＭＤ】ウマ娘モブセット", MIDDLE);
+	//テロップ22
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(900, 870, 10, "競馬場モデル", LEFT);
+		SetTelop(900, 880, 24, "Led/折鶴P氏", LEFT);
+		SetTelop(960, 918, 24, "なんちゃって競馬場セット", MIDDLE);
+	//テロップ23
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(900, 870, 10, "トレセン学園モデル(代演)", LEFT);
+		SetTelop(900, 880, 24, "じん氏", LEFT);
+		SetTelop(960, 918, 24, "【MMDギアス】アッシュフォード学園【ステージ配布】", MIDDLE);
+	//テロップ24
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(900, 870, 10, "クロフネ(代演)", LEFT);
+		SetTelop(900, 880, 24, "Tansoku102cm-沼地人氏", LEFT);
+		SetTelop(960, 918, 24, "MMD用モブ前弩級戦艦1890セット", MIDDLE);
+	//テロップ25
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(900, 870, 10, "客席", LEFT);
+		SetTelop(900, 880, 24, "ppp21氏", LEFT);
+		SetTelop(960, 918, 24, "【MMD】笹かまスタジアム", MIDDLE);
+	//テロップ26
+		AddTelopTime(2.000, 2.000f);
+		SetTelop(960, 870, 24, "まっちさん氏", MIDDLE);
+		SetTelop(960, 918, 24, "アグネスタキオン モデル", MIDDLE);
+	//テロップ27
+	//	SetTelopTime(62.775, 2.000f);
+	//	SetTelop(1380, 720, 32, "", LEFT);
+
+//テロップ終わり
