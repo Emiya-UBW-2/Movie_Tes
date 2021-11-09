@@ -113,6 +113,16 @@ namespace FPS_n2 {
 		//
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
+			class Cutinfo_g {
+			public:
+				int On = 0;
+				int Off = 0;
+
+				int animsel = -1;
+				bool isloop = false;
+				float animspeed = 0.f;
+			};
+
 			class Model {
 			private:
 				void Sel_AnimNum(MV1&model, int sel) {
@@ -122,16 +132,20 @@ namespace FPS_n2 {
 				}
 			public:
 				bool isBase = true;
+				std::string Path;
+
 				size_t numBase = 0;
 				float PhysicsSpeed = 1.f;
 
 				float b_run = 0;
 				float b_runrange = 0;
 
-				std::string Path;
 				MV1 obj;
 				moves move;
 				bool isDraw = true;
+
+				int nowcut = 0;
+				std::vector<Cutinfo_g> Cutinfo_;//オンにするカット
 				float OpacityRate = 1.f;
 				int Anim_Sel = 0;
 				void UpdateAnim(int ID, bool isloop, float speed) {
@@ -195,7 +209,37 @@ namespace FPS_n2 {
 					}
 					return nullptr;
 				}
-
+				void FirstUpdate(int Cut) {
+					for (auto& m : model) {
+						while (true) {
+							if (m.Cutinfo_.size() > m.nowcut) {
+								if (Cut == m.Cutinfo_[m.nowcut].On) {
+									m.isDraw = true;
+								}
+								if (m.isDraw) {
+									//対応動作
+									{
+										//アニメーション動作
+										if (m.Cutinfo_[m.nowcut].animsel >= 0) {
+											m.UpdateAnim(m.Cutinfo_[m.nowcut].animsel, m.Cutinfo_[m.nowcut].isloop, m.Cutinfo_[m.nowcut].animspeed);
+										}
+									}
+									if (Cut > m.Cutinfo_[m.nowcut].Off) {
+										m.isDraw = false;
+										m.nowcut++;
+										continue;
+									}
+								}
+							}
+							break;
+						}
+					}
+				}
+				void SetPhysics(bool reset_p) {
+					for (auto& m : model) {
+						m.SetPhysics(reset_p);
+					}
+				}
 				void Set() {
 					for (auto& m : model) {
 						m.isDraw = false;
@@ -277,9 +321,10 @@ namespace FPS_n2 {
 					}
 				}
 			};
-			class GraphControl {
+			class Graph {
+			public:
 				float rad_base = 0;
-				float Scale_base = 1.f;
+				float Scale_base = 0.f;
 
 				float xpos_rand = 0;
 				float ypos_rand = 0;
@@ -298,17 +343,22 @@ namespace FPS_n2 {
 
 				float x_per = 1.f;
 				float y_per = 1.f;
+				float rad_per = 1.f;
+				float scale_per = 1.f;
 				float xpos_base = 0;
 				float ypos_base = 0;
 				float Alpha_base = 1.f;
 
 				bool isDraw = false;
+				std::vector<Cutinfo_g> Cutinfo_;//オンにするカット
 
 				float xpos = 0;
 				float ypos = 0;
 				float rad = 0;
 				float Alpha = 1.f;
 				float Scale = 1.f;
+			public:
+				std::string Path;
 
 				void SetBright(int b_r, int b_g, int b_b) {
 					Bright_R = b_r;
@@ -325,13 +375,15 @@ namespace FPS_n2 {
 					this->handle = GraphHandle::Load(Path);
 					this->handle.GetSize(&xsize, &ysize);
 				}
-				void Set_Base(float xp, float xper, float yp, float yper, float rd,float scl) {
+				void Set_Base(float xp, float xper, float yp, float yper, float rd, float scl, float rdper, float sclper) {
 					this->xpos_base = xp;
 					this->ypos_base = yp;
 					this->x_per = xper;
 					this->y_per = yper;
 					this->rad_base = rd;
 					this->Scale_base = scl;
+					this->rad_per = rdper;
+					this->scale_per = sclper;
 				}
 				void Set_Rand(float xp, float xper, float yp, float yper, float rd, float rdper, float scl, float sclper) {
 					easing_set(&this->xpos_rand, GetRandf(xp), xper);
@@ -339,11 +391,11 @@ namespace FPS_n2 {
 					easing_set(&this->rad_rand, deg2rad(GetRandf(rd)), rdper);
 					easing_set(&this->Scale_rand, GetRandf(scl), sclper);
 				}
-				void Update_Rand(float xper, float yper, float rdper, float sclper) {
-					easing_set(&this->xpos, this->xpos_base + this->xpos_rand, xper);
-					easing_set(&this->ypos, this->ypos_base + this->ypos_rand, yper);
-					easing_set(&this->rad, this->rad_base + this->rad_rand, rdper);
-					easing_set(&this->Scale, this->Scale_base + this->Scale_rand, sclper);
+				void Update() {
+					easing_set(&this->xpos, this->xpos_base + this->xpos_rand, this->x_per);
+					easing_set(&this->ypos, this->ypos_base + this->ypos_rand, this->y_per);
+					easing_set(&this->rad, this->rad_base + this->rad_rand, this->rad_per);
+					easing_set(&this->Scale, this->Scale_base + this->Scale_rand, this->scale_per);
 				}
 				void Draw(float scale_) {
 					if (this->isDraw && this->Alpha > 0.f) {
@@ -364,9 +416,57 @@ namespace FPS_n2 {
 					}
 				}
 			};
+			class GraphControl {
+				std::vector<Graph> model;
+				size_t Max = 0;
+			public:
+				GraphControl() {
+					model.resize(64);
+					Max = 0;
+				}
+				void Load(float xp, float yp, float rd, float al, float sc, std::string_view Path) {
+					model[Max].Path = Path;
+					model[Max].Set(xp, yp, rd, al, sc, Path);
+					Max++;
+				}
+				Graph* Get(std::string_view Path, size_t Sel = 0) {
+					int Cnt = 0;
+					for (size_t i = 0; i < Max; i++) {
+						if (model[i].Path == Path) {
+							if (Cnt >= Sel) {
+								return &(model[i]);
+							}
+							Cnt++;
+						}
+					}
+					return nullptr;
+				}
+
+				void Set() {
+					for (auto& m : model) {
+						m.isDraw = false;
+					}
+				}
+				void Update() {
+					for (auto& m : model) {
+						m.Update();
+					}
+				}
+				void Draw(int Disp_y) {
+					for (auto& m : model) {
+						m.Draw((float)Disp_y / m.ysize);
+					}
+				}
+			};
 			//スクリプト読み込み処理
 			std::string func;
 			std::vector<std::string> args;
+			class ARG {
+			public:
+				std::string Base;
+				std::string After;
+			};
+			std::vector<ARG> args2;
 			static void Sub_Func(std::string& func_t, const char& in_str) {
 				size_t str_switch = 0;
 				size_t str_in = std::string::npos;
@@ -422,28 +522,35 @@ namespace FPS_n2 {
 				}
 			}
 		private:
-			std::string Tachyon = "data/umamusume/Tachyon/model.mv1";
+			std::string Tachyon  = "data/umamusume/Tachyon/model.mv1";
 			std::string Tachyon2 = "data/umamusume/Tachyon2/model.mv1";
-			std::string Cafe = "data/umamusume/Cafe/model.mv1";
-			std::string Scarlet = "data/umamusume/scarlet/model.mv1";
-			std::string Vodka = "data/umamusume/vodka/model.mv1";
+			std::string Cafe     = "data/umamusume/Cafe/model.mv1";
 			std::string GoldShip = "data/umamusume/gold/model.mv1";
-			std::string Speweek = "data/umamusume/spe/model.mv1";
-			std::string Teio = "data/umamusume/teio/model.mv1";
-			std::string Macin = "data/umamusume/mac/model.mv1";
-			std::string Karen = "data/umamusume/karen/model.mv1";
-			std::string Trainer = "data/umamusume/trainer/model.mv1";
-			std::string Opera = "data/umamusume/opera/model.mv1";
-			std::string Doto = "data/umamusume/doto/model.mv1";
-			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
+			std::string Karen    = "data/umamusume/karen/model.mv1";
+			std::string Opera    = "data/umamusume/opera/model.mv1";
+			std::string Doto     = "data/umamusume/doto/model.mv1";
+			std::string Mobu     = "data/umamusume/mobu_black/model.mv1";
 
-			std::string GATE = "data/map/model_gate.mv1";
-			std::string MAP = "data/map/model.mv1";
-			std::string BOARD = "data/board/model.mv1";
-			std::string SHIP = "data/ship/model.mv1";
-			std::string SCHOOL = "data/school/model.mv1";
-			std::string NEWS = "data/paper/news.mv1";
-			std::string SKY = "data/sky/model.mv1";
+			std::string GATE   = "data/model/map/model_gate.mv1";
+			std::string SCHOOL = "data/model/school/model.mv1";
+			std::string MAP    = "data/model/map/model.mv1";
+			std::string BOARD  = "data/model/board/model.mv1";
+			std::string SHIP   = "data/model/ship/model.mv1";
+			std::string SKY    = "data/model/sky/model.mv1";
+
+			std::string FACE   = "data/picture/Cut.png";
+			std::string NEWSP  = "data/picture/Cut2.png";
+			std::string SODE1  = "data/picture/sode1.png";
+			std::string SODE2  = "data/picture/sode2.png";
+			std::string SODE3  = "data/picture/sode3.png";
+			std::string SODE4  = "data/picture/sode4.png";
+			std::string SODE5  = "data/picture/sode5.png";
+			std::string SODE6  = "data/picture/sode6.png";
+			std::string ANIME1 = "data/picture/anime0.png";
+			std::string ANIME2 = "data/picture/anime1.png";
+			std::string FIRST1 = "data/picture/FIRST.png";
+			std::string FLASH1 = "data/picture/sun.png";
+			std::string LOGO1  = "data/picture/logo.png";
 
 			Model Board;
 			Model Map;
@@ -454,16 +561,8 @@ namespace FPS_n2 {
 			VECTOR_ref sun_pos;				//太陽
 
 			ModelControl models;
+			GraphControl graphs;
 
-			GraphControl face;
-			std::vector<GraphControl> news_p;
-			std::vector<GraphControl> sode;
-			std::vector<GraphControl> anim;
-			std::vector<GraphControl> sode_last;
-			std::vector<GraphControl> First;
-			std::vector<GraphControl> First2;
-			std::vector<GraphControl> First3;
-			GraphControl Logo;
 			float per_logo = 1.f;
 			//データ
 			SoundHandle BGM;
@@ -501,86 +600,12 @@ namespace FPS_n2 {
 				//*
 				{
 					//3D
-					{
-						MV1::LoadonAnime(MAP, &Map.obj, 0);
-						MV1::LoadonAnime(BOARD, &Board.obj, 0);
-						MV1::LoadonAnime(SHIP, &Ship.obj, 0);			//空
-						MV1::LoadonAnime(SKY, &sky.obj, 0);				//空
-					}
+					MV1::LoadonAnime(MAP, &Map.obj, 0);
+					MV1::LoadonAnime(BOARD, &Board.obj, 0);
+					MV1::LoadonAnime(SHIP, &Ship.obj, 0);			//空
+					MV1::LoadonAnime(SKY, &sky.obj, 0);				//空
 					//2D
-					{
-						this->sun_pic = GraphHandle::Load("data/sun.png");					//sun
-						face.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0, 1.f, 1.f, "data/Cut.png");
-						for (int i = 0; i < 10; i++) {
-							news_p.resize(news_p.size() + 1);
-							news_p.back().Set((float)(DrawPts->disp_x / 2 - DrawPts->disp_x), (float)(DrawPts->disp_y / 2 - DrawPts->disp_y), deg2rad(-30), (float)(i + 1) / 10.f, 1.5f, "data/Cut2.png");
-						}
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/2.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/1.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/2.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/second_sode/1.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/4.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/3.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/2.png");
-						sode.resize(sode.size() + 1);
-						sode.back().Set((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/first_sode/1.png");
-
-						sode[0].SetBright(108, 108, 108);
-						sode[1].SetBright(144, 144, 144);
-						sode[2].SetBright(192, 192, 192);
-
-						Logo.Set((float)(DrawPts->disp_x / 2), (float)(DrawPts->disp_y / 2), 0, 1.f, 0.5f, "data/logo.png");
-						Logo.Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0.f, 0.5f);
-
-						sode_last.resize(10);
-						sode_last[0].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-150)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(100)) * 10.f, deg2rad(-260), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[1].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-300)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(-500)) * 10.f, deg2rad(-230), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[2].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(0)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(-600)) * 10.f, deg2rad(-180), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[3].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-500)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(300)) * 10.f, deg2rad(-270), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[4].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(400)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(-550)) * 10.f, deg2rad(-140), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[5].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(500)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(500)) * 10.f, deg2rad(-10), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[6].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(600)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(-300)) * 10.f, deg2rad(-110), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[7].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(700)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(100)) * 10.f, deg2rad(-90), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[8].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(50)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(700)) * 10.f, deg2rad(30), 1.f, 1.f, "data/second_sode/1.png");
-						sode_last[9].Set((float)(DrawPts->disp_x / 2) + (float)(y_r(-450)) * 10.f, (float)(DrawPts->disp_y / 2) + (float)(y_r(550)) * 10.f, deg2rad(50), 1.f, 1.f, "data/second_sode/1.png");
-
-						for (auto& sl : sode_last) {
-							sl.Set_Base(
-								(float)(DrawPts->disp_x / 2) + (sl.xpos - (float)(DrawPts->disp_x / 2)) / 10.f, 0.f,
-								(float)(DrawPts->disp_y / 2) + (sl.ypos - (float)(DrawPts->disp_y / 2)) / 10.f, 0.f,
-								sl.rad - deg2rad(90), 1.f);
-						}
-						First.resize(First.size() + 1);
-						First[0].Set((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f, 1.f, 172.f / 540.f * 0.5f, "data/FIRST.png");
-						First.resize(First.size() + 1);
-						First[1].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f, 1.f, 172.f / 540.f * 0.5f, "data/FIRST.png");
-						First.resize(First.size() + 1);
-						First[2].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f, 1.f, 172.f / 540.f * 0.5f, "data/FIRST.png");
-						First2.resize(First2.size() + 1);
-						First2[0].Set((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f, 196.f / 255.f, 128.f / 540.f * 0.5f, "data/sun.png");
-						First2.resize(First2.size() + 1);
-						First2[1].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f, 196.f / 255.f, 128.f / 540.f * 0.5f, "data/sun.png");
-						First2.resize(First2.size() + 1);
-						First2[2].Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f, 196.f / 255.f, 128.f / 540.f * 0.5f, "data/sun.png");
-
-						First3.resize(First3.size() + 1);
-						First3.back().Set((float)(DrawPts->disp_x / 2 - y_r(1920 * 3 / 10)), (float)(DrawPts->disp_y / 2 + y_r(100)), 0.f, 0.f, 128.f / 540.f * 0.9f, "data/sun.png");
-						First3.resize(First3.size() + 1);
-						First3.back().Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 4)), (float)(DrawPts->disp_y / 2 - y_r(1080 * 3 / 10)), 0.f, 0.f, 128.f / 540.f * 0.9f, "data/sun.png");
-						First3.resize(First3.size() + 1);
-						First3.back().Set((float)(DrawPts->disp_x / 2 + y_r(1920 / 6)), (float)(DrawPts->disp_y / 2 + y_r(1080 * 3 / 10)), 0.f, 0.f, 128.f / 540.f * 0.9f, "data/sun.png");
-						anim.resize(anim.size() + 1);
-						anim.back().Set((float)(DrawPts->disp_x) / 2.f, (float)(DrawPts->disp_y) / 2.f, 0, 1.f, 1.f, "data/anime/0.png");
-						anim.resize(anim.size() + 1);
-						anim.back().Set((float)(DrawPts->disp_x) / 2.f, (float)(DrawPts->disp_y) / 2.f + (float)(DrawPts->disp_y), 0, 1.f, 1.f, "data/anime/1.png");
-					}
+					this->sun_pic = GraphHandle::Load("data/picture/sun.png");					//sun
 				}
 				//*/
 				SetUseASyncLoadFlag(FALSE);
@@ -592,16 +617,77 @@ namespace FPS_n2 {
 				//
 				SetUseASyncLoadFlag(FALSE);
 				{
+					{
+						//newsp
+						graphs.Load((float)(y_r(1920 / 2)), (float)(y_r(1080 / 2)), 0, 1.f, 1.f, FACE);
+						for (int i = 0; i < 15; i++) { graphs.Load((float)(1920 * -1 / 2), (float)(y_r(1080 * -1 / 2)), deg2rad(-30), (float)(i + 1) / 10.f, 1.5f, NEWSP); }
+						//anim
+						graphs.Load((float)(y_r(1920 / 2)), (float)(y_r(1080 / 2)), 0, 1.f, 1.f, ANIME1);
+						graphs.Load((float)(y_r(1920 / 2)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, ANIME2);
+						//sode
+						graphs.Load((float)(y_r(1920 * 7 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE6);
+						graphs.Load((float)(y_r(1920 * 3 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 * 7 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE6);
+						graphs.Load((float)(y_r(1920 * 3 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 * 3 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE4);
+						graphs.Load((float)(y_r(1920 * 7 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE3);
+						graphs.Load((float)(y_r(1920 * 3 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE2);
+						graphs.Load((float)(y_r(1920 * 7 / 10)), (float)(y_r(1080 * 3 / 2)), 0, 1.f, 1.f, SODE1);
+						//
+						graphs.Load((float)(y_r(1920 / 5)), (float)(y_r(1080 / 2) + y_r(100)), 0.f, 196.f / 255.f, 128.f / 540.f * 0.5f, FLASH1);
+						graphs.Load((float)(y_r(1920 * 3 / 4)), (float)(y_r(1080 / 5)), 0.f, 196.f / 255.f, 128.f / 540.f * 0.5f, FLASH1);
+						graphs.Load((float)(y_r(1920 * 2 / 3)), (float)(y_r(1080 * 4 / 5)), 0.f, 196.f / 255.f, 128.f / 540.f * 0.5f, FLASH1);
+
+						graphs.Load((float)(y_r(1920 / 5)), (float)(y_r(1080 / 2) + y_r(100)), 0.f, 1.f, 172.f / 540.f * 0.5f, FIRST1);
+						graphs.Load((float)(y_r(1920 * 3 / 4)), (float)(y_r(1080 / 5)), 0.f, 1.f, 172.f / 540.f * 0.5f, FIRST1);
+						graphs.Load((float)(y_r(1920 * 2 / 3)), (float)(y_r(1080 * 4 / 5)), 0.f, 1.f, 172.f / 540.f * 0.5f, FIRST1);
+
+						graphs.Load((float)(y_r(1920 / 5)), (float)(y_r(1080 / 2) + y_r(100)), 0.f, 0.f, 128.f / 540.f * 0.9f, FLASH1);//3
+						graphs.Load((float)(y_r(1920 * 3 / 4)), (float)(y_r(1080 / 5)), 0.f, 0.f, 128.f / 540.f * 0.9f, FLASH1);//4
+						graphs.Load((float)(y_r(1920 * 2 / 3)), (float)(y_r(1080 * 4 / 5)), 0.f, 0.f, 128.f / 540.f * 0.9f, FLASH1);
+						//sode_last
+						graphs.Load((float)(y_r(1920 / 2) + y_r(-150) * 10.f), (float)(y_r(1080 / 2) + y_r(100) * 10.f), deg2rad(-260), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(-300) * 10.f), (float)(y_r(1080 / 2) + y_r(-500) * 10.f), deg2rad(-230), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2)), (float)(y_r(1080 / 2) + y_r(-600) * 10.f), deg2rad(-180), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(-500) * 10.f), (float)(y_r(1080 / 2) + y_r(300) * 10.f), deg2rad(-270), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(400) * 10.f), (float)(y_r(1080 / 2) + y_r(-550) * 10.f), deg2rad(-140), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(500) * 10.f), (float)(y_r(1080 / 2) + y_r(500) * 10.f), deg2rad(-10), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(600) * 10.f), (float)(y_r(1080 / 2) + y_r(-300) * 10.f), deg2rad(-110), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(700) * 10.f), (float)(y_r(1080 / 2) + y_r(100) * 10.f), deg2rad(-90), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(50) * 10.f), (float)(y_r(1080 / 2) + y_r(700) * 10.f), deg2rad(30), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2) + y_r(-450) * 10.f), (float)(y_r(1080 / 2) + y_r(550) * 10.f), deg2rad(50), 1.f, 1.f, SODE5);
+						graphs.Load((float)(y_r(1920 / 2)), (float)(y_r(1080 / 2)), 0, 1.f, 0.5f, LOGO1);
+					}
 					LONGLONG StartF = 0;
 					LONGLONG ContiF = 0;
 					int mdata = FileRead_open("data/Cut.txt", FALSE);
 					int cnt = 0;
 
 					clsDx();
-					const auto NowTime = GetNowHiPerformanceCount();
+					auto NowTime = GetNowHiPerformanceCount();
+					auto TotalTime = GetNowHiPerformanceCount();
 					while (FileRead_eof(mdata) == 0) {
 						LoadScript(getparams::get_str(mdata));
 						if (func == "") { continue; }
+						//変数登録
+						{
+							if (func.find("SetArg") != std::string::npos) {
+								args2.resize(args2.size() + 1);
+								args2.back().Base = args[0];
+								args2.back().After = args[1];
+							}
+							//変数変換処理
+							else {
+								for (auto& a1 : args) {
+									for (auto& a2 : args2) {
+										if (a1 == a2.Base) {
+											a1 = a2.After;
+											break;
+										}
+									}
+								}
+							}
+						}
 						//モデル読み込み
 						{
 							if (func.find("LoadModel") != std::string::npos) {
@@ -639,6 +725,31 @@ namespace FPS_n2 {
 							else if (func.find("SetNextResetPhysics") != std::string::npos) {
 								Cut_Pic.back().isNextreset = true;
 							}
+							else if (func.find("SetDrawModel") != std::string::npos) {
+								size_t in_str = args[1].find("~");
+								if (in_str != std::string::npos) {
+									int start_t = std::stoi(args[1].substr(0, in_str));
+									int end_t = std::stoi(args[1].substr(in_str + 1));
+									for (int i = start_t; i <= end_t; i++) {
+										auto* t = models.Get(args[0], i);
+										t->Cutinfo_.resize(t->Cutinfo_.size() + 1);
+										t->Cutinfo_.back().On = (int)(Cut_Pic.size()) - 1;
+										t->Cutinfo_.back().Off = std::stoi(args[2]);
+									}
+								}
+								else {
+									auto* t = models.Get(args[0], std::stoi(args[1]));
+									t->Cutinfo_.resize(t->Cutinfo_.size() + 1);
+									t->Cutinfo_.back().On = (int)(Cut_Pic.size()) - 1;
+									t->Cutinfo_.back().Off = std::stoi(args[2]);
+								}
+							}
+							else if (func.find("SetModelAnime") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->Cutinfo_.back().animsel = std::stoi(args[2]);
+								t->Cutinfo_.back().isloop = (args[3].find("TRUE") != std::string::npos);
+								t->Cutinfo_.back().animspeed = std::stof(args[4]);
+							}
 						}
 						//テロップ
 						{
@@ -662,15 +773,19 @@ namespace FPS_n2 {
 						//END
 						if (ProcessMessage() == 0) {
 							GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-							printfDx("ロード%3d完了 [%6.2f s] : %s\n", cnt, float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f, func.c_str());
-							DrawPts->Screen_Flip();
+							float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
+							printfDx("ロード%3d完了 [%7.3f s] : %s\n", cnt, tim, func.c_str());
+							if (tim >= 0.001f) {
+								DrawPts->Screen_Flip();
+							}
+							NowTime = GetNowHiPerformanceCount();
 						}
 						cnt++;
 					}
 					FileRead_close(mdata);
 					if (ProcessMessage() == 0) {
 						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-						printfDx("ロード全部完了　キーを押してください[%6.2f s]\n", float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f);
+						printfDx("ロード全部完了　キーを押してください : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
 						DrawPts->Screen_Flip();
 					}
 				}
@@ -680,22 +795,26 @@ namespace FPS_n2 {
 				{
 					models.Set();
 					Map.isDraw = false;
+					Map.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
 					Board.isDraw = false;
+					Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
 					Ship.isDraw = false;
 					sky.isDraw = false;
-					for (int i = 0; i < 12; i++) {
-						models.Get(Mobu, i)->b_run = 0.8f + (float)(GetRand(195)) / 1000.f;
-						models.Get(Mobu, i)->b_runrange = (float)(GetRand(100)) / 10.f;
-						while (true) {
-							models.Get(Mobu, i)->Anim_Sel = GetRand(2);
-							if (i == 0 || models.Get(Mobu, i)->Anim_Sel != models.Get(Mobu, i - 1)->Anim_Sel) {
-								break;
-							}
-						}
-					}
-					Map.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
-					Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
+					//モデル座標事前準備
+					std::string Vodka = "data/umamusume/vodka/model.mv1";
+					models.Get(Vodka, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -50)));
 					models.Get(SCHOOL, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-819.f, -28.2f, -590.f))*MATRIX_ref::RotY(deg2rad(-90)));
+					//
+					graphs.Get(SODE6, 0)->SetBright(108, 108, 108);
+					graphs.Get(SODE5, 0)->SetBright(144, 144, 144);
+					graphs.Get(SODE6, 1)->SetBright(192, 192, 192);
+					graphs.Get(FLASH1, 3)->Alpha_base = -1.f;
+					graphs.Get(FLASH1, 4)->Alpha_base = -1.f;
+					graphs.Get(FLASH1, 5)->Alpha_base = -1.f;
+					graphs.Get(FLASH1, 3)->Set_Base(0, 1, 0, 1, 0, graphs.Get(FLASH1, 3)->Scale, 1, 0);
+					graphs.Get(FLASH1, 4)->Set_Base(0, 1, 0, 1, 0, graphs.Get(FLASH1, 4)->Scale, 1, 0);
+					graphs.Get(FLASH1, 5)->Set_Base(0, 1, 0, 1, 0, graphs.Get(FLASH1, 5)->Scale, 1, 0);
+					graphs.Get(LOGO1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0.f, 0.5f, 0, 0);
 				}
 			}
 		public:
@@ -726,56 +845,52 @@ namespace FPS_n2 {
 					if (!Time_Over()) {
 						int SEL = 0;
 						{
+							models.FirstUpdate(Cut);
 							//0
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-								}
-							}
 							SEL++;
 							//1
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sode[7].isDraw = true;
-									sode[6].isDraw = true;
-									sode[5].isDraw = true;
-									sode[4].isDraw = true;
-									models.Get(Tachyon2, 0)->isDraw = true;
+									graphs.Get(SODE1, 0)->isDraw = true;
+									graphs.Get(SODE2, 0)->isDraw = true;
+									graphs.Get(SODE3, 0)->isDraw = true;
+									graphs.Get(SODE4, 0)->isDraw = true;
 								}
-								sode[7].Set_Base((float)(DrawPts->disp_x / 2), 0.9f, (float)(DrawPts->disp_y / 2), 0.9f, 0, 1.f);
-								sode[6].Set_Base((float)(DrawPts->disp_x / 2), 0.875f, (float)(DrawPts->disp_y / 2), 0.875f, 0, 1.f);
-								sode[5].Set_Base((float)(DrawPts->disp_x / 2), 0.85f, (float)(DrawPts->disp_y / 2), 0.85f, 0, 1.f);
-								sode[4].Set_Base((float)(DrawPts->disp_x / 2), 0.825f, (float)(DrawPts->disp_y / 2), 0.825f, 0, 1.f);
+								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.9f, (float)(DrawPts->disp_y / 2), 0.9f, 0, 1.f, 0, 0);
+								graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.875f, (float)(DrawPts->disp_y / 2), 0.875f, 0, 1.f, 0, 0);
+								graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.85f, (float)(DrawPts->disp_y / 2), 0.85f, 0, 1.f, 0, 0);
+								graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.825f, (float)(DrawPts->disp_y / 2), 0.825f, 0, 1.f, 0, 0);
 								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
-									First[0].isDraw = true;
-									First2[0].isDraw = true;
-									First3[0].isDraw = true;
-									if (First3[0].Alpha_base < 0.f) {
-										First3[0].Alpha_base = 1.f;
+									graphs.Get(FIRST1, 0)->isDraw = true;
+									graphs.Get(FLASH1, 0)->isDraw = true;
+									graphs.Get(FLASH1, 3)->isDraw = true;
+									if (graphs.Get(FLASH1, 3)->Alpha_base < 0.f) {
+										graphs.Get(FLASH1, 3)->Alpha_base = 1.f;
 									}
 								}
 								if (NowTime > (LONGLONG)(1000000.f * 1.637f)) {
-									First[1].isDraw = true;
-									First2[1].isDraw = true;
-									First3[1].isDraw = true;
-									if (First3[1].Alpha_base < 0.f) {
-										First3[1].Alpha_base = 1.f;
+									graphs.Get(FIRST1, 1)->isDraw = true;
+									graphs.Get(FLASH1, 1)->isDraw = true;
+									graphs.Get(FLASH1, 4)->isDraw = true;
+									if (graphs.Get(FLASH1, 4)->Alpha_base < 0.f) {
+										graphs.Get(FLASH1, 4)->Alpha_base = 1.f;
 									}
 								}
 								if (NowTime > (LONGLONG)(1000000.f * 1.820f)) {
-									First[2].isDraw = true;
-									First2[2].isDraw = true;
-									First3[2].isDraw = true;
-									if (First3[2].Alpha_base < 0.f) {
-										First3[2].Alpha_base = 1.f;
+									graphs.Get(FIRST1, 2)->isDraw = true;
+									graphs.Get(FLASH1, 2)->isDraw = true;
+									graphs.Get(FLASH1, 5)->isDraw = true;
+									if (graphs.Get(FLASH1, 5)->Alpha_base < 0.f) {
+										graphs.Get(FLASH1, 5)->Alpha_base = 1.f;
 									}
 								}
-								for (auto& sl : First3) {
-									if (sl.Alpha_base > 0.f) {
-										sl.Alpha_base = std::max(sl.Alpha_base - 6.f / GetFPS(), 0.f);
-										sl.Scale += 6.f*(128.f / 540.f * 0.9f) / GetFPS();
+								for (int i = 0; i < 3; i++) {
+									if (graphs.Get(FLASH1, 3 + i)->Alpha_base > 0.f) {
+										graphs.Get(FLASH1, 3 + i)->Alpha_base = std::max(graphs.Get(FLASH1, 3 + i)->Alpha_base - 6.f / GetFPS(), 0.f);
+										graphs.Get(FLASH1, 3 + i)->Scale_base += 6.f*(128.f / 540.f * 0.9f) / GetFPS();
 									}
-									if (sl.Alpha_base >= 0.f) {
-										easing_set(&sl.Alpha, sl.Alpha_base, 0.9f);
+									if (graphs.Get(FLASH1, 3 + i)->Alpha_base >= 0.f) {
+										easing_set(&graphs.Get(FLASH1, 3 + i)->Alpha, graphs.Get(FLASH1, 3 + i)->Alpha_base, 0.9f);
 									}
 								}
 							}
@@ -783,61 +898,44 @@ namespace FPS_n2 {
 							//2
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sode[7].isDraw = false;
-									sode[6].isDraw = false;
-									sode[5].isDraw = false;
-									sode[4].isDraw = false;
-									for (auto& sl : First) {
-										sl.isDraw = false;
-									}
-									for (auto& sl : First2) {
-										sl.isDraw = false;
-									}
+									graphs.Get(SODE1, 0)->isDraw = false;
+									graphs.Get(SODE2, 0)->isDraw = false;
+									graphs.Get(SODE3, 0)->isDraw = false;
+									graphs.Get(SODE4, 0)->isDraw = false;
+									graphs.Get(FIRST1, 0)->isDraw = false;
+									graphs.Get(FIRST1, 1)->isDraw = false;
+									graphs.Get(FIRST1, 2)->isDraw = false;
+									graphs.Get(FLASH1, 0)->isDraw = false;
+									graphs.Get(FLASH1, 1)->isDraw = false;
+									graphs.Get(FLASH1, 2)->isDraw = false;
 									Board.isDraw = true;
 								}
-								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
 							}
 							SEL++;
 							//3
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-								}
-								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
-							}
 							SEL++;
 							//4
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-								}
-								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
-							}
 							SEL++;
 							//5
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-								}
-								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
-							}
 							SEL++;
 							//6
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sode[7].isDraw = true;
-									sode[6].isDraw = true;
-									sode[5].isDraw = true;
-									sode[4].isDraw = true;
-									for (auto& sl : First) {
-										sl.isDraw = true;
-									}
-									for (auto& sl : First2) {
-										sl.isDraw = true;
-									}
+									graphs.Get(SODE1, 0)->isDraw = true;
+									graphs.Get(SODE2, 0)->isDraw = true;
+									graphs.Get(SODE3, 0)->isDraw = true;
+									graphs.Get(SODE4, 0)->isDraw = true;
+									graphs.Get(FIRST1, 0)->isDraw = true;
+									graphs.Get(FIRST1, 1)->isDraw = true;
+									graphs.Get(FIRST1, 2)->isDraw = true;
+									graphs.Get(FLASH1, 0)->isDraw = true;
+									graphs.Get(FLASH1, 1)->isDraw = true;
+									graphs.Get(FLASH1, 2)->isDraw = true;
 								}
-								sode[7].Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f);
-								sode[6].Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f);
-								sode[5].Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f);
-								sode[4].Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f);
-								models.Get(Tachyon2, 0)->UpdateAnim(0, false, 0.8f);
+								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0);
+								graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0);
+								graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0);
+								graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0);
 							}
 							SEL++;
 							//7
@@ -845,19 +943,15 @@ namespace FPS_n2 {
 								if (isFirstLoop) {
 									Set_Effect(Effect::ef_reco, VECTOR_ref::vget(0.f, 0.f, 0.f), VECTOR_ref::front(), 3.f);
 									cam_yure = 0.f;
-									for (auto& sl : First) {
-										sl.isDraw = false;
-									}
-									for (auto& sl : First2) {
-										sl.isDraw = false;
-									}
+									graphs.Get(FIRST1, 0)->isDraw = false;
+									graphs.Get(FIRST1, 1)->isDraw = false;
+									graphs.Get(FIRST1, 2)->isDraw = false;
+									graphs.Get(FLASH1, 0)->isDraw = false;
+									graphs.Get(FLASH1, 1)->isDraw = false;
+									graphs.Get(FLASH1, 2)->isDraw = false;
+									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
 								}
-								sode[7].Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.9f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.9f, 0, 1.f);
-								sode[6].Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.875f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.875f, 0, 1.f);
-								sode[5].Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.85f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.85f, 0, 1.f);
-								sode[4].Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.825f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.825f, 0, 1.f);
-								models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f))*MATRIX_ref::RotY(deg2rad(180)));
-								if (models.Get(Tachyon2, 0)->obj.get_anime(0).per == 0) {
+								else {
 									SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
 									SetSpeed_Effect(Effect::ef_reco, 1.05f);
 									cam_yure += 5.f / GetFPS();
@@ -866,27 +960,27 @@ namespace FPS_n2 {
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
 									Cut_Pic[Cut].cam_per = 0.975f;
 								}
-								models.Get(Tachyon2, 0)->UpdateAnim(1, true, 1.f);
+								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.9f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.9f, 0, 1.f, 0, 0);
+								graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.875f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.875f, 0, 1.f, 0, 0);
+								graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.85f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.85f, 0, 1.f, 0, 0);
+								graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.825f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.825f, 0, 1.f, 0, 0);
 							}
 							SEL++;
 							//8
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sode[7].isDraw = false;
-									sode[6].isDraw = false;
-									sode[5].isDraw = false;
-									sode[4].isDraw = false;
+									graphs.Get(SODE1, 0)->isDraw = false;
+									graphs.Get(SODE2, 0)->isDraw = false;
+									graphs.Get(SODE3, 0)->isDraw = false;
+									graphs.Get(SODE4, 0)->isDraw = false;
 								}
-								if (models.Get(Tachyon2, 0)->obj.get_anime(0).per == 0) {
-									SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
-									SetSpeed_Effect(Effect::ef_reco, 1.05f);
-									cam_yure += 5.f / GetFPS();
-									easing_set(&Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].Aim_camera.camvec + GetVector(6.9f, 180.f + 19.5f)*(27.0f + cam_yure) + VECTOR_ref::vget(GetRandf(cam_yure), GetRandf(cam_yure), GetRandf(cam_yure)), 0.9f);
-									easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(GetRandf(5.f) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
-									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-									Cut_Pic[Cut].cam_per = 0.975f;
-								}
-								models.Get(Tachyon2, 0)->UpdateAnim(1, true, 1.f);
+								SetScale_Effect(Effect::ef_reco, 3.f + cam_yure * 1.f / 3.f);
+								SetSpeed_Effect(Effect::ef_reco, 1.05f);
+								cam_yure += 5.f / GetFPS();
+								easing_set(&Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].Aim_camera.camvec + GetVector(6.9f, 180.f + 19.5f)*(27.0f + cam_yure) + VECTOR_ref::vget(GetRandf(cam_yure), GetRandf(cam_yure), GetRandf(cam_yure)), 0.9f);
+								easing_set(&Cut_Pic[Cut].Aim_camera.camup, VECTOR_ref::vget(GetRandf(5.f) / 10.f + cam_yure / 50.f, 1.f, 0.f).Norm(), 0.95f);
+								Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+								Cut_Pic[Cut].cam_per = 0.975f;
 							}
 							SEL++;
 							//9
@@ -896,19 +990,16 @@ namespace FPS_n2 {
 									Board.isDraw = false;
 									Map.isDraw = true;
 									sky.isDraw = true;
-									models.Get(Tachyon2, 0)->isDraw = false;
-									models.Get(Tachyon, 0)->isDraw = true;
 									models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
 									models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
 									models.Get(Tachyon, 0)->OpacityRate = 0.f;
+									spd_takion = 0.6f;
 								}
 								if (models.Get(Tachyon, 0)->obj.get_anime(2).time > 32.f) {
 									easing_set(&spd_takion, 0.01f, 0.9f);
 									models.Get(Tachyon, 0)->OpacityRate = 1.f;
 								}
 								else {
-									spd_takion = 0.6f;
 									easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
 								}
 								models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
@@ -920,51 +1011,18 @@ namespace FPS_n2 {
 							//10
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-								}
-								if (models.Get(Tachyon, 0)->obj.get_anime(2).time > 32.f) {
-									easing_set(&spd_takion, 0.01f, 0.9f);
 									models.Get(Tachyon, 0)->OpacityRate = 1.f;
 								}
-								else {
-									spd_takion = 0.6f;
-									easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
-								}
-								models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
 							}
 							SEL++;
 							//11
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-								}
-								if (models.Get(Tachyon, 0)->obj.get_anime(2).time > 32.f) {
-									easing_set(&spd_takion, 0.01f, 0.9f);
-									models.Get(Tachyon, 0)->OpacityRate = 1.f;
-								}
-								else {
-									spd_takion = 0.6f;
-									easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
-								}
-								models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
-							}
 							SEL++;
 							//12
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-								}
-								if (models.Get(Tachyon, 0)->obj.get_anime(2).time > 32.f) {
-									easing_set(&spd_takion, 0.01f, 0.9f);
-									models.Get(Tachyon, 0)->OpacityRate = 1.f;
-								}
-								else {
-									spd_takion = 0.6f;
-									easing_set(&models.Get(Tachyon, 0)->OpacityRate, 1.f, 0.95f);
-								}
-								models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
-							}
 							SEL++;
 							//13
 							if (Cut == SEL) {
 								if (isFirstLoop) {
+									models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
 								}
 								if (NowTime > (LONGLONG)(1000000.f * 8.864f)) {
 									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.6f);
@@ -975,35 +1033,25 @@ namespace FPS_n2 {
 								}
 								else {
 									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.01f);
-									models.Get(Tachyon, 0)->PhysicsSpeed = 0.01f;
 								}
 							}
 							SEL++;
 							//14
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon, 0)->isDraw = false;
 									models.Get(Tachyon, 0)->PhysicsSpeed = 1.f;
-									models.Get(Tachyon2, 0)->isDraw = true;
 									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, 0.f)));
 									models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
-									models.Get(Tachyon2, 0)->PhysicsSpeed = 0.6f;
 								}
-								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.6f);
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(6);
 							}
 							SEL++;
 							//15
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon, 1)->isDraw = true;
-									models.Get(Tachyon, 1)->obj.get_anime(2).time = 33.f;
-									models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-									models.Get(Tachyon2, 0)->isDraw = false;
-									models.Get(Tachyon2, 0)->PhysicsSpeed = 0.45f;
+									models.Get(Tachyon, 0)->obj.get_anime(2).time = 33.f;
 									radc = 0.f;
 								}
-								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*88.0f;
 								radc += 12.5f / GetFPS();
@@ -1012,28 +1060,20 @@ namespace FPS_n2 {
 							//16
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon2, 0)->isDraw = true;
-									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 									models.Get(Tachyon2, 0)->obj.get_anime(3).time = 33.f;
 									models.Get(Tachyon2, 0)->OpacityRate = 0.f;
-									models.Get(Cafe, 0)->isDraw = true;
-									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-90 + 180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(90))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 									models.Get(Cafe, 0)->obj.get_anime(0).time = 33.f;
 									models.Get(Cafe, 0)->OpacityRate = 0.f;
-									models.Get(Cafe, 0)->PhysicsSpeed = 0.45f;
 								}
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*88.0f;
 								radc += 12.5f / GetFPS();
 
-								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-
-								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
+								models.Get(Tachyon, 0)->OpacityRate = std::max(models.Get(Tachyon, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
 								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.45f);
-
-								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
+								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 							}
 							SEL++;
 							//17
@@ -1041,7 +1081,7 @@ namespace FPS_n2 {
 								if (isFirstLoop) {
 									radc = 0.f;
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(9);
-									Cut_Pic[Cut].cam_per = 0.f;
+									models.Get(Cafe, 0)->OpacityRate = 1.f;
 								}
 								else {
 									easing_set(&Cut_Pic[Cut].Aim_camera.camvec, models.Get(Tachyon2, 0)->obj.frame(9) + VECTOR_ref::vget(0.f, GetRandf(5.5f), GetRandf(13.5f)), 0.975f);
@@ -1051,14 +1091,8 @@ namespace FPS_n2 {
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-8.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*38.0f;
 								radc += 12.5f / GetFPS();
 
-								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-
-								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
+								models.Get(Tachyon, 0)->OpacityRate = std::max(models.Get(Tachyon, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
 								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.45f);
-
-								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 							}
 							SEL++;
 							//18
@@ -1066,7 +1100,6 @@ namespace FPS_n2 {
 								if (isFirstLoop) {
 									radc = 0.f;
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8);
-									Cut_Pic[Cut].cam_per = 0.f;
 								}
 								else {
 									Cut_Pic[Cut].cam_per = 0.975f;
@@ -1075,14 +1108,9 @@ namespace FPS_n2 {
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 + 180 - 10) + radc)*34.0f;
 								radc += 12.5f / GetFPS();
-								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 
-								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
+								models.Get(Tachyon, 0)->OpacityRate = std::max(models.Get(Tachyon, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
 								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.45f);
-
-								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 							}
 							SEL++;
 							//19
@@ -1090,18 +1118,16 @@ namespace FPS_n2 {
 								if (isFirstLoop) {
 									radc = 0.f;
 								}
+								else {
+									Cut_Pic[Cut].cam_per = 0.975f;
+								}
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(103);
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(25.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*38.0f;
 								radc += 12.5f / GetFPS();
-								models.Get(Cafe, 0)->OpacityRate = std::min(models.Get(Cafe, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 
-								models.Get(Tachyon, 1)->OpacityRate = std::max(models.Get(Tachyon, 1)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon, 1)->UpdateAnim(2, true, 0.45f);
+								models.Get(Tachyon, 0)->OpacityRate = std::max(models.Get(Tachyon, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
 								models.Get(Tachyon2, 0)->OpacityRate = std::min(models.Get(Tachyon2, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
-								models.Get(Tachyon2, 0)->UpdateAnim(3, true, 0.45f);
-
-								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.45f);
 							}
 							SEL++;
 						}
@@ -1109,21 +1135,16 @@ namespace FPS_n2 {
 						{
 							//20
 							if (Cut == SEL) {
+								std::string NEWS = "data/paper/news.mv1";
 								if (isFirstLoop) {
 									Map.isDraw = false;
 									sky.isDraw = false;
-									models.Get(Tachyon, 1)->isDraw = false;
-									models.Get(Tachyon2, 0)->isDraw = false;
-									models.Get(Cafe, 0)->isDraw = false;
-									models.Get(Cafe, 0)->obj.get_anime(0).time = 0.f;
 									for (int i = 0; i < 12; i++) {
 										models.Get(NEWS, i)->move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(GetRandf(30.f)));
 										models.Get(NEWS, i)->move.pos = VECTOR_ref::vget(GetRandf(20.f), (float)(7 + GetRand(10)), GetRandf(20.f));
 										models.Get(NEWS, i)->move.vec.y(-(float)(GetRand(100)) / 1000.f);
-										models.Get(NEWS, i)->isDraw = true;
 									}
-									models.Get(Tachyon2, 0)->PhysicsSpeed = 1.f;
-									models.Get(Cafe, 0)->PhysicsSpeed = 1.f;
+									models.Get(Tachyon, 0)->OpacityRate = 1.f;
 								}
 								for (int i = 0; i < 12; i++) {
 									if (models.Get(NEWS, i)->move.pos.y() >= 3.5f) {
@@ -1142,102 +1163,76 @@ namespace FPS_n2 {
 							//21
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon, 2)->isDraw = true;
-									models.Get(Tachyon, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, 1, -10)));
-									models.Get(Tachyon, 3)->isDraw = true;
-									models.Get(Tachyon, 3)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
-									models.Get(Tachyon, 4)->isDraw = true;
-									models.Get(Tachyon, 4)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
-									models.Get(Tachyon, 5)->isDraw = true;
-									models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
-									face.isDraw = true;
-									for (auto&n : news_p) { n.isDraw = true; }
-									for (int i = 0; i < 12; i++) { models.Get(NEWS, i)->isDraw = false; }
 									Map.isDraw = true;
 									sky.isDraw = true;
+									models.Get(Tachyon, 2)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, 1, -10)));
+									models.Get(Tachyon, 3)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
+									models.Get(Tachyon, 4)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
+									models.Get(Tachyon, 5)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
+									graphs.Get(FACE)->isDraw = true;
+									for (int i = 0; i < 15; i++) {
+										graphs.Get(NEWSP, i)->isDraw = true;
+									}
 								}
-								models.Get(Tachyon, 2)->UpdateAnim(4, false, 0.f);
-								models.Get(Tachyon, 3)->UpdateAnim(5, false, 0.f);
-								models.Get(Tachyon, 4)->UpdateAnim(6, false, 0.f);
-								models.Get(Tachyon, 5)->UpdateAnim(7, false, 0.f);
-								for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
-									n->xpos = (n + 1)->xpos;
-									n->ypos = (n + 1)->ypos;
-									n->rad = (n + 1)->rad;
+								for (int i = 0; i < 15 - 1; i++) {
+									graphs.Get(NEWSP, i)->xpos = graphs.Get(NEWSP, i + 1)->xpos;
+									graphs.Get(NEWSP, i)->ypos = graphs.Get(NEWSP, i + 1)->ypos;
+									graphs.Get(NEWSP, i)->rad = graphs.Get(NEWSP, i + 1)->rad;
 								}
-								news_p.back().xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
-								news_p.back().ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
-								news_p.back().rad += deg2rad(6) / GetFPS();
+								graphs.Get(NEWSP, 14)->xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
+								graphs.Get(NEWSP, 14)->ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
+								graphs.Get(NEWSP, 14)->rad += deg2rad(6) / GetFPS();
 							}
 							SEL++;
 							//22
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon, 2)->isDraw = false;
-									models.Get(Tachyon, 3)->isDraw = false;
-									models.Get(Tachyon, 4)->isDraw = false;
-									models.Get(Tachyon, 5)->isDraw = false;
-									models.Get(GoldShip, 0)->isDraw = true;
 									models.Get(GoldShip, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-6))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5, -2, -10)));
-									models.Get(Speweek, 0)->isDraw = true;
+									std::string Speweek = "data/umamusume/spe/model.mv1";
+									std::string Teio = "data/umamusume/teio/model.mv1";
+									std::string Macin = "data/umamusume/mac/model.mv1";
 									models.Get(Speweek, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(5))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-3, 0, 10)));
-									models.Get(Teio, 0)->isDraw = true;
 									models.Get(Teio, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(-25))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-18, 0, 30)));
-									models.Get(Macin, 0)->isDraw = true;
 									models.Get(Macin, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-30, 0.5, 40)));
 								}
-								for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
-									n->xpos = (n + 1)->xpos;
-									n->ypos = (n + 1)->ypos;
-									n->rad = (n + 1)->rad;
+								for (int i = 0; i < 15 - 1; i++) {
+									graphs.Get(NEWSP, i)->xpos = graphs.Get(NEWSP, i + 1)->xpos;
+									graphs.Get(NEWSP, i)->ypos = graphs.Get(NEWSP, i + 1)->ypos;
+									graphs.Get(NEWSP, i)->rad = graphs.Get(NEWSP, i + 1)->rad;
 								}
-								news_p.back().xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
-								news_p.back().ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
-								news_p.back().rad += deg2rad(6) / GetFPS();
-								if (news_p.back().ypos < DrawPts->disp_y / 2) {
-									models.Get(GoldShip, 0)->UpdateAnim(0, false, 0.f);
-								}
-								else {
-									models.Get(GoldShip, 0)->UpdateAnim(1, true, 0.45f);
-								}
-								models.Get(Speweek, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Teio, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
+								graphs.Get(NEWSP, 14)->xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
+								graphs.Get(NEWSP, 14)->ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
+								graphs.Get(NEWSP, 14)->rad += deg2rad(6) / GetFPS();
 							}
 							SEL++;
 							//23
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 								}
-								for (auto n = news_p.begin(); n != news_p.end() - 1; n++) {
-									n->xpos = (n + 1)->xpos;
-									n->ypos = (n + 1)->ypos;
-									n->rad = (n + 1)->rad;
+								for (int i = 0; i < 15 - 1; i++) {
+									graphs.Get(NEWSP, i)->xpos = graphs.Get(NEWSP, i + 1)->xpos;
+									graphs.Get(NEWSP, i)->ypos = graphs.Get(NEWSP, i + 1)->ypos;
+									graphs.Get(NEWSP, i)->rad = graphs.Get(NEWSP, i + 1)->rad;
 								}
-								news_p.back().xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
-								news_p.back().ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
-								news_p.back().rad += deg2rad(6) / GetFPS();
-								if (news_p.back().ypos < DrawPts->disp_y / 2) {
+								graphs.Get(NEWSP, 14)->xpos += (int)((float)(DrawPts->disp_x / 2)*4.f / GetFPS());
+								graphs.Get(NEWSP, 14)->ypos += (int)((float)(DrawPts->disp_y / 2)*4.f / GetFPS());
+								graphs.Get(NEWSP, 14)->rad += deg2rad(6) / GetFPS();
+								if (graphs.Get(NEWSP, 14)->ypos < DrawPts->disp_y / 2) {
 									models.Get(GoldShip, 0)->UpdateAnim(0, false, 0.f);
 								}
 								else {
 									models.Get(GoldShip, 0)->UpdateAnim(1, true, 0.45f);
 								}
-								models.Get(Speweek, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Teio, 0)->UpdateAnim(0, false, 0.f);
-								models.Get(Macin, 0)->UpdateAnim(0, false, 0.f);
 							}
 							SEL++;
 							//24
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									face.isDraw = false;
-									for (auto&n : news_p) { n.isDraw = false; }
 									Map.isDraw = false;
-									models.Get(GoldShip, 0)->isDraw = false;
-									models.Get(Speweek, 0)->isDraw = false;
-									models.Get(Teio, 0)->isDraw = false;
-									models.Get(Macin, 0)->isDraw = false;
+									graphs.Get(FACE)->isDraw = false;
+									for (int i = 0; i < 15; i++) {
+										graphs.Get(NEWSP, i)->isDraw = false;
+									}
 								}
 							}
 							SEL++;
@@ -1245,34 +1240,22 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									models.Get(Tachyon, 0)->obj.get_anime(8).time = 33.f;
-									models.Get(SCHOOL, 0)->isDraw = true;
-									models.Get(Tachyon, 0)->isDraw = true;
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-									models.Get(Tachyon, 1)->isDraw = false;
-									models.Get(Tachyon, 1)->OpacityRate = 1.f;
+									models.Get(Tachyon, 1)->OpacityRate = 0.f;
+									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.f);
 								}
-								if (models.Get(Tachyon, 0)->obj.get_anime(8).time == models.Get(Tachyon, 0)->obj.get_anime(8).alltime) {
-									if (!return_walk) {
-										models.Get(Tachyon, 1)->isDraw = true;
-										models.Get(Tachyon, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-										models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.f);
-										models.Get(Tachyon, 1)->obj.work_anime();
-										models.Get(Tachyon, 1)->obj.PhysicsResetState();
+								if (!return_walk) {
+									if (models.Get(Tachyon, 0)->obj.get_anime(8).TimeEnd()) {
+										return_walk = true;
+										models.Get(Tachyon, 1)->OpacityRate = 1.f;
 									}
-									return_walk = true;
 								}
-								models.Get(Tachyon, 0)->UpdateAnim(8, false, return_walk ? -4.f : 4.f);
 								if (return_walk) {
 									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.7f);
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 1)->obj.frame(9);
 									Cut_Pic[Cut].cam_per = 0.95f;
-									Cut_Pic[Cut].Aim_camera.near_ = 5.f;
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(7);
-									models.Get(Tachyon, 0)->PhysicsSpeed = 1.f;
 								}
-								else {
-									models.Get(Tachyon, 0)->PhysicsSpeed = 4.f;
-								}
+								models.Get(Tachyon, 0)->UpdateAnim(8, false, return_walk ? -4.f : 4.f);
 								radc = 0.f;
 							}
 							SEL++;
@@ -1280,13 +1263,7 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									Map.isDraw = true;
-									models.Get(SCHOOL, 0)->isDraw = false;
-									models.Get(GATE, 0)->isDraw = true;
 									models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
-									models.Get(Tachyon, 0)->isDraw = false;
-									models.Get(Tachyon, 0)->PhysicsSpeed = 1.f;
-									models.Get(Tachyon, 1)->isDraw = false;
-									return_walk = true;
 								}
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*88.0f;
@@ -1314,8 +1291,6 @@ namespace FPS_n2 {
 							//28
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(GATE, 0)->isDraw = false;
-									models.Get(Karen, 0)->isDraw = true;
 									models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
 									models.Get(Karen, 0)->obj.get_anime(0).time = 6.25f;
 									Ship.isDraw = true;
@@ -1328,7 +1303,6 @@ namespace FPS_n2 {
 								else {
 									Cut_Pic[Cut].cam_per = (camzb_28 > -8.f) ? 0.9f : 0.95f;
 								}
-								models.Get(Karen, 0)->UpdateAnim(0, false, 1.0f);
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f)*1.0f;
 								camzb_28 = std::max(camzb_28 - 100.f / GetFPS(), -10.f);
@@ -1346,7 +1320,6 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 								}
-								models.Get(Karen, 0)->UpdateAnim(0, false, 1.0f);
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f)*1.0f;
 								if (camzb_28 != 0.f) {
@@ -1373,148 +1346,91 @@ namespace FPS_n2 {
 									Ship.isDraw = false;
 									Map.isDraw = false;
 									sky.isDraw = false;
-									models.Get(Tachyon, 0)->isDraw = false;
-									models.Get(Karen, 0)->isDraw = false;
-									models.Get(Cafe, 0)->isDraw = true;
 									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									models.Get(Cafe, 0)->obj.get_anime(0).time = 0.f;
 								}
-								models.Get(Cafe, 0)->UpdateAnim(0, true, 0.f);
 							}
 							SEL++;
 							//31
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									Board.isDraw = false;
-									models.Get(Tachyon, 0)->isDraw = true;
-									models.Get(Scarlet, 0)->OpacityRate = 0.5f;
 								}
-								models.Get(Cafe, 0)->UpdateAnim(1, true, 0.f);
 							}
 							SEL++;
 							//32
 							if (Cut == SEL) {
+								std::string Scarlet = "data/umamusume/scarlet/model.mv1";
 								if (isFirstLoop) {
 									Map.isDraw = true;
 									sky.isDraw = true;
-									models.Get(Tachyon, 0)->isDraw = false;
-									models.Get(Tachyon2, 0)->isDraw = true;
 									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -14)));
-									models.Get(Cafe, 0)->isDraw = false;
-									models.Get(Scarlet, 0)->isDraw = true;
-									models.Get(Scarlet, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									models.Get(Scarlet, 0)->OpacityRate = 0.5f;
 								}
-								models.Get(Scarlet, 0)->UpdateAnim(0, false, 0.6f);
 								if (models.Get(Scarlet, 0)->obj.get_anime(0).time > 10.f) {
 									easing_set(&models.Get(Scarlet, 0)->OpacityRate, 1.f, 0.95f);
 								}
-								models.Get(Tachyon2, 0)->UpdateAnim(10, false, 0.6f);
 							}
 							SEL++;
 							//33
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									models.Get(Vodka, 0)->isDraw = true;
-									models.Get(Vodka, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -50)));
-									models.Get(Vodka, 0)->UpdateAnim(0, false, 1.f);
-								}
-							}
 							SEL++;
 							//34
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									models.Get(Vodka, 0)->isDraw = false;
-								}
-							}
 							SEL++;
 							//35
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									Map.isDraw = false;
 									sky.isDraw = false;
-									models.Get(Scarlet, 0)->isDraw = false;
-									models.Get(Tachyon2, 0)->isDraw = false;
-									models.Get(Cafe, 0)->isDraw = true;
-									models.Get(Cafe, 0)->OpacityRate = 1.f;
 								}
-								models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
 							}
 							SEL++;
 							//36
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon, 0)->isDraw = true;
 									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
 								}
-								models.Get(Cafe, 0)->UpdateAnim(2, false, 0.6f);
-								models.Get(Cafe, 0)->OpacityRate = std::max(models.Get(Cafe, 0)->OpacityRate - 2.f / GetFPS(), 0.f);
-								models.Get(Tachyon, 0)->UpdateAnim(11, false, 0.5f);
 								models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / GetFPS(), 1.f);
 							}
 							SEL++;
 							//37
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									models.Get(Tachyon, 0)->isDraw = false;
-									models.Get(Cafe, 0)->isDraw = false;
-									models.Get(Trainer, 0)->isDraw = true;
-								}
-								models.Get(Trainer, 0)->UpdateAnim(0, false, 1.2f);
-							}
 							SEL++;
 							//38
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									models.Get(Trainer, 0)->isDraw = false;
-									models.Get(Tachyon, 0)->isDraw = true;
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(270))*MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 1.6f, -10.f)));
-								}
-								models.Get(Tachyon, 0)->UpdateAnim(12, false, 0.5f);
-							}
 							SEL++;
 							//39
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									Map.isDraw = true;
 									sky.isDraw = true;
-									models.Get(Tachyon, 0)->isDraw = false;
-									models.Get(Tachyon2, 0)->isDraw = true;
-									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
+									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0))*MATRIX_ref::RotY(deg2rad(180)));
 								}
-								models.Get(Tachyon2, 0)->UpdateAnim(13, false, 1.2f);
 							}
 							SEL++;
 						}
 						{}
 						{
 							//40
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									camzb_28 = 0.f;
-									camzb_41 = 0.1f;
-									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
-								}
-								models.Get(Tachyon2, 0)->UpdateAnim(14, false, 2.8f);
-								for (int i = 0; i < 12; i++) {
-									models.Get(Mobu, i)->UpdateAnim(models.Get(Mobu, i)->Anim_Sel, false, 0.f);
-								}
-							}
 							SEL++;
 							//41
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(GATE, 0)->isDraw = true;
+									camzb_28 = 0.f;
+									camzb_41 = 0.1f;
+									Gate_Xpos = -7.f;
 									for (int i = 0; i < 12; i++) {
-										models.Get(Mobu, i)->isDraw = true;
+										auto* t = models.Get(Mobu, i);
+										t->b_run = 0.8f + (float)(GetRand(195)) / 1000.f;
+										t->b_runrange = (float)(GetRand(100)) / 10.f;
+										while (true) {
+											t->Anim_Sel = GetRand(2);
+											if (i == 0 || t->Anim_Sel != models.Get(Mobu, i - 1)->Anim_Sel) {
+												break;
+											}
+										}
+										t->UpdateAnim(t->Anim_Sel, false, 0.f);
+										t->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f)));
+										Gate_Xpos += -14.f;
 									}
-									models.Get(Tachyon2, 0)->isDraw = false;
-								}
-								Gate_Xpos = 0.f;
-								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
-								models.Get(GATE, 0)->UpdateAnim(0, false, 0.f);
-								Gate_Xpos += -7.f;
-								for (int i = 0; i < 12; i++) {
-									models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f)));
-									Gate_Xpos += -14.f;
+									models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0.25f, 0.f)));
 								}
 								float pp = 10.f;
 								if (camzb_28 < -9.5f) {
@@ -1582,18 +1498,16 @@ namespace FPS_n2 {
 									Gate_Xpos = 0.f;
 									Gate_Xpos += -7.f;
 									for (int i = 0; i < 12; i++) {
-										//models.Get(Mobu, i)->
-										models.Get(Mobu, i)->isDraw = true;
-										easing_set(&models.Get(Mobu, i)->obj.get_anime(models.Get(Mobu, i)->Anim_Sel).per, 0.f, models.Get(Mobu, i)->b_run);
-										easing_set(&models.Get(Mobu, i)->obj.get_anime(3).per, 1.f, models.Get(Mobu, i)->b_run);
-
-										models.Get(Mobu, i)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - models.Get(Mobu, i)->b_runrange * models.Get(Mobu, i)->obj.get_anime(3).per)));
+										auto* t = models.Get(Mobu, i);
+										easing_set(&t->obj.get_anime(t->Anim_Sel).per, 0.f, t->b_run);
+										easing_set(&t->obj.get_anime(3).per, 1.f, t->b_run);
+										t->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - t->b_runrange * t->obj.get_anime(3).per)));
 										Gate_Xpos += -14.f;
 									}
 								}
 								if (NowTime > (LONGLONG)(1000000.f * 49.681)) {
 									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(-39.67f, 5.48f, -51.8f);
-									Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(1, -0.3f, 0.6f);
+									Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(1, -0.3f, -0.6f);
 									Cut_Pic[Cut].cam_per = 0.9f;
 								}
 								else {
@@ -1607,15 +1521,10 @@ namespace FPS_n2 {
 							//45
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon2, 0)->isDraw = false;
 									Board.isDraw = true;
 									Map.isDraw = false;
 									sky.isDraw = false;
-									models.Get(GATE, 0)->isDraw = false;
-									for (int i = 0; i < 12; i++) {
-										models.Get(Mobu, i)->isDraw = false;
-									}
-									anim[0].isDraw = true;
+									graphs.Get(ANIME1, 0)->isDraw = true;
 									VECTOR_ref vec_x = (Cut_Pic[Cut].Aim_camera.camvec - Cut_Pic[Cut].Aim_camera.campos).Norm().cross(Cut_Pic[Cut].Aim_camera.camup);
 									Set_Effect(Effect::ef_greexp, VECTOR_ref::vget(-4.f, 4.6f, -2.f) + vec_x * 13.f, VECTOR_ref::front(), 5.f);
 									Set_Effect(Effect::ef_greexp2, VECTOR_ref::vget(8.f, 5.5f, 4.f) - vec_x * 8.f, VECTOR_ref::front(), 4.f);
@@ -1627,19 +1536,19 @@ namespace FPS_n2 {
 							//46
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sode[3].isDraw = true;
-									sode[2].isDraw = true;
-									sode[1].isDraw = true;
-									sode[0].isDraw = true;
-									sode[3].Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f);
-									sode[2].Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f);
-									sode[1].Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f);
-									sode[0].Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f);
+									graphs.Get(SODE5, 1)->isDraw = true;
+									graphs.Get(SODE6, 1)->isDraw = true;
+									graphs.Get(SODE5, 0)->isDraw = true;
+									graphs.Get(SODE6, 0)->isDraw = true;
+									graphs.Get(SODE5, 1)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f, 0, 0);
+									graphs.Get(SODE6, 1)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f, 0, 0);
+									graphs.Get(SODE5, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f, 0, 0);
+									graphs.Get(SODE6, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x / 5), 0, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y), 0, 0, 1.f, 0, 0);
 								}
-								sode[3].Set_Base(sode[3].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[3].ypos_base - (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f);
-								sode[2].Set_Base(sode[2].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[2].ypos_base - (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f);
-								sode[1].Set_Base(sode[1].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[1].ypos_base - (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f);
-								sode[0].Set_Base(sode[0].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[0].ypos_base - (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f);
+								graphs.Get(SODE5, 1)->Set_Base(graphs.Get(SODE5, 1)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 1)->ypos_base - (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 1)->Set_Base(graphs.Get(SODE6, 1)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 1)->ypos_base - (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE5, 0)->Set_Base(graphs.Get(SODE5, 0)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 0)->ypos_base - (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 0)->Set_Base(graphs.Get(SODE6, 0)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 0)->ypos_base - (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f, 0, 0);
 							}
 							SEL++;
 							//47
@@ -1648,60 +1557,57 @@ namespace FPS_n2 {
 									camzb_41 = (float)(DrawPts->disp_y)*0.4f;
 									SetSpeed_Effect(Effect::ef_greexp, 0.1f);
 									SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
-									anim[0].isDraw = false;
-									anim[1].isDraw = true;
+									graphs.Get(ANIME1, 0)->isDraw = false;
+									graphs.Get(ANIME2, 0)->isDraw = true;
 								}
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*(anim[1].ypos - (float)(DrawPts->disp_y) / 2.f) / (float)(DrawPts->disp_y), 0.595667f);
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*(graphs.Get(ANIME2, 0)->ypos - (float)(DrawPts->disp_y) / 2.f) / (float)(DrawPts->disp_y), 0.595667f);
 								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
-								easing_set(&anim[1].ypos, (float)(DrawPts->disp_y) / 2.f + camzb_41, 0.7f);
+								easing_set(&graphs.Get(ANIME2, 0)->ypos, (float)(DrawPts->disp_y) / 2.f + camzb_41, 0.7f);
 								if (camzb_41 > 0.f) {
 									camzb_41 -= (float)(y_r(500)) / GetFPS();
 								}
-								sode[3].Set_Base(sode[3].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[3].ypos_base - (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f);
-								sode[2].Set_Base(sode[2].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[2].ypos_base - (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f);
-								sode[1].Set_Base(sode[1].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[1].ypos_base - (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f);
-								sode[0].Set_Base(sode[0].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[0].ypos_base - (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f);
+								graphs.Get(SODE5, 1)->Set_Base(graphs.Get(SODE5, 1)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 1)->ypos_base - (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 1)->Set_Base(graphs.Get(SODE6, 1)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 1)->ypos_base - (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE5, 0)->Set_Base(graphs.Get(SODE5, 0)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 0)->ypos_base - (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 0)->Set_Base(graphs.Get(SODE6, 0)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 0)->ypos_base - (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f, 0, 0);
 							}
 							SEL++;
 							//48
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									anim[0].ypos = (float)(DrawPts->disp_y) / 2.f;
-									sode[3].Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y), 0, 0, 1.f);
-									sode[2].Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y * 5 / 4), 0, 0, 1.f);
-									sode[1].Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y * 6 / 4), 0, 0, 1.f);
-									sode[0].Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y * 7 / 4), 0, 0, 1.f);
+									graphs.Get(ANIME1, 0)->ypos = (float)(DrawPts->disp_y) / 2.f;
+									graphs.Get(SODE5, 1)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y), 0, 0, 1.f, 0, 0);
+									graphs.Get(SODE6, 1)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y * 5 / 4), 0, 0, 1.f, 0, 0);
+									graphs.Get(SODE5, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y * 6 / 4), 0, 0, 1.f, 0, 0);
+									graphs.Get(SODE6, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(0), 0, (float)(DrawPts->disp_y / 2) + (float)(-DrawPts->disp_y * 7 / 4), 0, 0, 1.f, 0, 0);
 								}
-								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*(anim[1].ypos - (float)(DrawPts->disp_y) / 2.f) / (float)(DrawPts->disp_y), 0.595667f);
+								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(48.211510f, 15.f - 1.5f*(graphs.Get(ANIME2, 0)->ypos - (float)(DrawPts->disp_y) / 2.f) / (float)(DrawPts->disp_y), 0.595667f);
 								Cut_Pic[Cut].Aim_camera.camvec = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(-1.f, 0.3f, 0.f)*(1.f);
-								easing_set(&anim[1].ypos, (float)(DrawPts->disp_y) / 2.f + camzb_41, 0.7f);
+								easing_set(&graphs.Get(ANIME2, 0)->ypos, (float)(DrawPts->disp_y) / 2.f + camzb_41, 0.7f);
 								if (camzb_41 > 0.f) {
 									camzb_41 -= (float)(y_r(500)) / GetFPS();
 								}
-								sode[3].Set_Base(sode[3].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[3].ypos_base + (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f);
-								sode[2].Set_Base(sode[2].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[2].ypos_base + (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f);
-								sode[1].Set_Base(sode[1].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[1].ypos_base + (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f);
-								sode[0].Set_Base(sode[0].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[0].ypos_base + (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f);
+								graphs.Get(SODE5, 1)->Set_Base(graphs.Get(SODE5, 1)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 1)->ypos_base + (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 1)->Set_Base(graphs.Get(SODE6, 1)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 1)->ypos_base + (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE5, 0)->Set_Base(graphs.Get(SODE5, 0)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 0)->ypos_base + (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 0)->Set_Base(graphs.Get(SODE6, 0)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 0)->ypos_base + (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f, 0, 0);
 							}
 							SEL++;
 							//49
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Tachyon2, 0)->isDraw = true;
 									models.Get(Tachyon2, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-10, 0, 30.f)));
 									models.Get(Tachyon2, 0)->obj.get_anime(2).time = 35.f;
-									models.Get(Karen, 0)->isDraw = false;
-									anim[1].isDraw = false;
+									graphs.Get(ANIME2, 0)->isDraw = false;
 								}
 								VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
 								aim.y(0.f);
 								Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
-								models.Get(Tachyon2, 0)->UpdateAnim(2, false, 0.1f);
-								sode[3].Set_Base(sode[3].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[3].ypos_base + (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f);
-								sode[2].Set_Base(sode[2].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[2].ypos_base + (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f);
-								sode[1].Set_Base(sode[1].xpos_base - (float)(y_r(300)) / GetFPS(), 0, sode[1].ypos_base + (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f);
-								sode[0].Set_Base(sode[0].xpos_base + (float)(y_r(300)) / GetFPS(), 0, sode[0].ypos_base + (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f);
+								graphs.Get(SODE5, 1)->Set_Base(graphs.Get(SODE5, 1)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 1)->ypos_base + (float)(y_r(2800)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 1)->Set_Base(graphs.Get(SODE6, 1)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 1)->ypos_base + (float)(y_r(2400)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE5, 0)->Set_Base(graphs.Get(SODE5, 0)->xpos_base - (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE5, 0)->ypos_base + (float)(y_r(2200)) / GetFPS(), 0, 0, 1.f, 0, 0);
+								graphs.Get(SODE6, 0)->Set_Base(graphs.Get(SODE6, 0)->xpos_base + (float)(y_r(300)) / GetFPS(), 0, graphs.Get(SODE6, 0)->ypos_base + (float)(y_r(2000)) / GetFPS(), 0, 0, 1.f, 0, 0);
 							}
 							SEL++;
 						}
@@ -1710,34 +1616,26 @@ namespace FPS_n2 {
 							//50
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sode[3].isDraw = false;
-									sode[2].isDraw = false;
-									sode[1].isDraw = false;
-									sode[0].isDraw = false;
+									graphs.Get(SODE5, 1)->isDraw = false;
+									graphs.Get(SODE6, 1)->isDraw = false;
+									graphs.Get(SODE5, 0)->isDraw = false;
+									graphs.Get(SODE6, 0)->isDraw = false;
 									sky.isDraw = true;
 									Board.isDraw = false;
 									Map.isDraw = true;
 									Stop_Effect(Effect::ef_greexp);
 									Stop_Effect(Effect::ef_greexp2);
-									models.Get(Tachyon2, 0)->isDraw = false;
-									models.Get(Karen, 0)->isDraw = true;
-									models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
 								}
 								else {
-									Cut_Pic[Cut].cam_per = 0.995f;
-								}
-								models.Get(Karen, 0)->UpdateAnim(1, false, 0.95f);
-								if (!isFirstLoop) {
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(8);
+									Cut_Pic[Cut].cam_per = 0.995f;
 								}
 							}
 							SEL++;
 							//51
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Karen, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(2, 0, 0.f)));
 								}
-								models.Get(Karen, 0)->UpdateAnim(2, false, 1.15f);
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(10) + VECTOR_ref::vget(2.3f, 0.f, 0.f);
 							}
 							SEL++;
@@ -1747,12 +1645,8 @@ namespace FPS_n2 {
 									Board.isDraw = true;
 									Map.isDraw = false;
 									sky.isDraw = false;
-									models.Get(Karen, 0)->isDraw = false;
-									models.Get(Cafe, 0)->isDraw = true;
-									models.Get(Cafe, 0)->OpacityRate = 1.f;
 									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, 0)));
 								}
-								models.Get(Cafe, 0)->UpdateAnim(3, false, 0.8f);
 							}
 							SEL++;
 							//53
@@ -1768,15 +1662,9 @@ namespace FPS_n2 {
 									Cut_Pic[Cut].Aim_camera.far_ = 5000.f;
 									Cut_Pic[Cut].cam_per = 0.9975f;
 								}
-								else {
-									if (models.Get(Cafe, 0)->obj.get_anime(3).time > 15.f) {
-										Cut_Pic[Cut].cam_per = 0.f;
-									}
-									else {
-										Cut_Pic[Cut].cam_per = 1.f;
-									}
+								else if (models.Get(Cafe, 0)->obj.get_anime(3).time > 15.f) {
+									Cut_Pic[Cut].cam_per = 0.f;
 								}
-								models.Get(Cafe, 0)->UpdateAnim(3, false, 0.8f);
 							}
 							SEL++;
 							//54
@@ -1785,45 +1673,24 @@ namespace FPS_n2 {
 									sky.isDraw = true;
 									Board.isDraw = false;
 									Map.isDraw = true;
-									models.Get(GATE, 0)->isDraw = true;
-
-									models.Get(Mobu, 0)->isDraw = true;
-									models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
 									models.Get(Mobu, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
-									models.Get(Doto, 0)->isDraw = true;
-									models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2000.f - 5.f)));
-									models.Get(Doto, 0)->obj.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
-
-									models.Get(Cafe, 0)->isDraw = true;
-									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 30.f)));
-									models.Get(Cafe, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
-									models.Get(Opera, 0)->isDraw = true;
-									models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2000.f + 10.f)));
-									models.Get(Opera, 0)->obj.get_anime(0).time = (float)GetRand(100) / 10.f;
-
-									models.Get(Mobu, 1)->isDraw = true;
-									models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 0.f, -2000.f - 5.f)));
 									models.Get(Mobu, 1)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
-									models.Get(Mobu, 2)->isDraw = true;
-									models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(20.f, 0.f, -2000.f - 40.f)));
 									models.Get(Mobu, 2)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
-
+									models.Get(Doto, 0)->obj.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
+									models.Get(Cafe, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
+									models.Get(Opera, 0)->obj.get_anime(0).time = (float)GetRand(100) / 10.f;
+									models.Get(Mobu, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 25.f)));
+									models.Get(Mobu, 1)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(5.f, 0.f, -2000.f - 5.f)));
+									models.Get(Mobu, 2)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(20.f, 0.f, -2000.f - 40.f)));
+									models.Get(Doto, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(10.f, 0.f, -2000.f - 5.f)));
+									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.f, -2000.f - 30.f)));
+									models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-20.f, 0.f, -2000.f + 10.f)));
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(7 + GetRand(3)) + VECTOR_ref::vget(0.f, 2.f, -30.f);
-									Cut_Pic[Cut].cam_per = 0.f;
 								}
 								else {
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 2.f, -30.f);
 									Cut_Pic[Cut].cam_per = 0.975f;
 								}
-								models.Get(Mobu, 0)->UpdateAnim(4, false, 0.84f);
-								models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
-								models.Get(Doto, 0)->UpdateAnim(0, false, 0.82f);
-								models.Get(Cafe, 0)->UpdateAnim(4, false, 0.85f);
-								models.Get(Mobu, 1)->UpdateAnim(4, false, 0.82f);
-								models.Get(Opera, 0)->UpdateAnim(0, false, 0.84f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(0.5f, float(90 - 10 + 180))*608.0f;
 							}
 							SEL++;
@@ -1837,20 +1704,13 @@ namespace FPS_n2 {
 									models.Get(Cafe, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 5.f, 0.f, -2200.f - 0.f)));
 									models.Get(Opera, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(-2394.f*1.95f - 12.5f, 0.f, -2200.f - 40.f)));
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 10.f, 30.f);
-									Cut_Pic[Cut].cam_per = 0.f;
 								}
 								else {
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f);
 									Cut_Pic[Cut].cam_per = 0.95f;
 								}
-								models.Get(Mobu, 0)->UpdateAnim(4, false, 0.8f);
-								models.Get(Mobu, 1)->UpdateAnim(4, false, 0.8f);
-								models.Get(Mobu, 2)->UpdateAnim(4, false, 0.8f);
-								models.Get(Doto, 0)->UpdateAnim(0, false, 1.1f);
-								models.Get(Cafe, 0)->UpdateAnim(4, false, 0.98f);
-								models.Get(Opera, 0)->UpdateAnim(0, false, 0.95f);
 								Cut_Pic[Cut].Aim_camera.campos = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f) + GetVector(1.5f, float(90 - 80 + 180))*468.0f;
-								if (NowTime > (LONGLONG)(1000000.f * 62.755)) {
+								if (NowTime > (LONGLONG)(1000000.f * 62.455)) {
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(0.85f);
 								}
 								else {
@@ -1861,48 +1721,41 @@ namespace FPS_n2 {
 							//56
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(Mobu, 0)->isDraw = false;
-									models.Get(Mobu, 1)->isDraw = false;
-									models.Get(Mobu, 2)->isDraw = false;
-									models.Get(Doto, 0)->isDraw = false;
-									models.Get(Opera, 0)->isDraw = false;
-									models.Get(Tachyon, 0)->isDraw = true;
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 									radc = 0.f;
 								}
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*88.0f;
 								radc += 12.5f / GetFPS();
-								models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.2f);
 							}
 							SEL++;
 							//57
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									models.Get(GATE, 0)->isDraw = false;
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
+									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
 								}
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*88.0f;
 								radc += 12.5f / GetFPS();
-								models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
 							}
 							SEL++;
 							//58
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									Box_ALPHA = 0.f;
-									models.Get(Tachyon, 0)->obj.SetMatrix(MATRIX_ref::RotY(deg2rad(180 + 0))*MATRIX_ref::Mtrans(VECTOR_ref::vget(0, 0, -140)));
-									for (auto& sl : sode_last) {
-										sl.isDraw = true;
+									for (int i = 0; i < 10; i++) {
+										auto& sl = *graphs.Get(SODE5, 2 + i);
+										graphs.Get(SODE5, 2 + i)->isDraw = true;
+										sl.Set_Base((float)(DrawPts->disp_x / 2) + (sl.xpos - (float)(DrawPts->disp_x / 2)) / 10.f, 0.945f, (float)(DrawPts->disp_y / 2) + (sl.ypos - (float)(DrawPts->disp_y / 2)) / 10.f, 0.925f, sl.rad - deg2rad(90), 1.f, 0.925f, 1.f);
+										int per_b = 127 + (int)(128.f* i / 10);
+										sl.SetBright(per_b, per_b, per_b);
 									}
 								}
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(9);
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, float(90 - 10) + radc)*88.0f;
 								radc += 12.5f / GetFPS();
-								models.Get(Tachyon, 0)->UpdateAnim(15, false, 0.75f);
 								if (Box_ALPHA < 1.f) {
 									Box_ALPHA += 1.f / GetFPS();
 									per_logo = 1.f;
@@ -1911,31 +1764,31 @@ namespace FPS_n2 {
 									Box_ALPHA = 1.f;
 									if (per_logo > 0.f) {
 										per_logo -= 1.f / GetFPS() / 1.5f;
-										Logo.Update_Rand(0.975f, 0.975f, 1.f, 0.975f);
-										Logo.Set_Rand((float)(y_r(1000)) * per_logo, 0.8f, (float)(y_r(1000)) * per_logo, 0.8f, 0.f, 0.f, 0.1f * per_logo, 0.f);
+										graphs.Get(LOGO1, 0)->x_per = 0.975f;
+										graphs.Get(LOGO1, 0)->y_per = 0.975f;
+										graphs.Get(LOGO1, 0)->rad_per = 1.f;
+										graphs.Get(LOGO1, 0)->scale_per = 0.975f;
+										graphs.Get(LOGO1, 0)->Set_Rand((float)(y_r(1000)) * per_logo, 0.8f, (float)(y_r(1000)) * per_logo, 0.8f, 0.f, 0.f, 0.1f * per_logo, 0.f);
 									}
 									else {
 										per_logo = 0.f;
-										Logo.Update_Rand(0.95f, 0.95f, 1.f, 0.95f);
-										Logo.Set_Rand(0.f, 0.f, 0.f, 0.f, 10.f, 0.95f, 0.f, 0.f);
+										graphs.Get(LOGO1, 0)->x_per = 0.95f;
+										graphs.Get(LOGO1, 0)->y_per = 0.95f;
+										graphs.Get(LOGO1, 0)->rad_per = 1.f;
+										graphs.Get(LOGO1, 0)->scale_per = 0.95f;
+										graphs.Get(LOGO1, 0)->Set_Rand(0.f, 0.f, 0.f, 0.f, 10.f, 0.95f, 0.f, 0.f);
 									}
-									Logo.isDraw = (int)(per_logo*100.f) <= GetRand(99);
+									graphs.Get(LOGO1, 0)->isDraw = (int)(per_logo*100.f) <= GetRand(99);
 								}
-								for (auto& sl : sode_last) {
-									sl.Update_Rand(0.945f, 0.925f, 0.925f, 1.f);
-									sl.Set_Rand((float)(y_r(50)), 0.95f, (float)(y_r(50)), 0.95f, 10.f, 0.95f, 0.f, 0.f);
-									int per_b = 127 + (int)(128.f* (&sl - &sode_last.front()) / sode_last.size());
-									sl.SetBright(per_b, per_b, per_b);
+								for (int i = 0; i < 10; i++) {
+									graphs.Get(SODE5, 2 + i)->Set_Rand((float)(y_r(50)), 0.95f, (float)(y_r(50)), 0.95f, 10.f, 0.95f, 0.f, 0.f);
 								}
 							}
 						}
 						//
-						for (auto& m_sode : sode) {
-							m_sode.Update_Rand(m_sode.x_per, m_sode.y_per, 0.f, 0.f);
-						}
-						if (Cut_Pic[Cut].isNextreset) {
-							isNextreset = true;
-						}
+						graphs.Update();
+						//
+						if (Cut_Pic[Cut].isNextreset) { isNextreset = true; }
 						easing_set(&camera_main.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_main.camup, Cut_Pic[Cut].Aim_camera.camup, Cut_Pic[Cut].cam_per);
@@ -1957,15 +1810,7 @@ namespace FPS_n2 {
 							}
 						}
 						else {
-							models.Get(Tachyon, 0)->SetPhysics(reset_p);
-							models.Get(Tachyon, 1)->SetPhysics(reset_p);
-							models.Get(Tachyon2, 0)->SetPhysics(reset_p);
-							models.Get(Cafe, 0)->SetPhysics(reset_p);
-							models.Get(Scarlet, 0)->SetPhysics(reset_p);
-							models.Get(Vodka, 0)->SetPhysics(reset_p);
-							models.Get(Karen, 0)->SetPhysics(reset_p);
-							models.Get(Opera, 0)->SetPhysics(reset_p);
-							models.Get(Doto, 0)->SetPhysics(reset_p);
+							models.SetPhysics(reset_p);
 							reset_p = false;
 						}
 					}
@@ -2049,15 +1894,7 @@ namespace FPS_n2 {
 						DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(0, 0, 0), TRUE);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-					for (auto& sl : anim) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					for (auto& sl : sode) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					for (auto& sl : First2) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					for (auto& sl : First) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					for (auto& sl : First3) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					for (auto& sl : news_p) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					for (auto& sl : sode_last) { sl.Draw((float)(DrawPts->disp_y) / sl.ysize); }
-					Logo.Draw((float)(DrawPts->disp_y) / Logo.ysize);
-					face.Draw((float)(DrawPts->disp_y) / face.ysize);
+					graphs.Draw(DrawPts->disp_y);
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}

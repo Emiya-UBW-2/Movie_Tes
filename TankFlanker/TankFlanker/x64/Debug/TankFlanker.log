@@ -109,6 +109,9 @@ c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1623
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(368): warning C4458: 'Path' を宣言すると、クラス メンバーが隠蔽されます
+  c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(361): note: 'FPS_n2::Sceneclass::MAINLOOP::Graph::Path' の宣言を確認してください
+c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\scene.hpp(882): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
