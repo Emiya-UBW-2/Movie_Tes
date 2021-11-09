@@ -388,6 +388,7 @@
 		SetCamInfo(25, 1.0, 300.0, 0.0);
 	//オフガチャン(れ変わる）44
 		SetCut(49.761);
+		SetCamvec(-40.67, 5.53, -42.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 44);
