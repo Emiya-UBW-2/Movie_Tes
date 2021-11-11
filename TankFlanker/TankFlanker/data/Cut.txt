@@ -1,3 +1,6 @@
+
+
+//
 		SetArg(SCHOOL, "data/model/school/model.mv1");
 		SetArg(Tachyon, "data/umamusume/Tachyon/model.mv1");
 		SetArg(Tachyon2, "data/umamusume/Tachyon2/model.mv1");
@@ -51,7 +54,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 		SetDrawModel(Tachyon2, 0, 6);
-		SetModelAnime(Tachyon2, 0, 0, FALSE, 0.8);
+		SetModelAnime(Tachyon2, 0, 0, FALSE, 0.8, -1);
 	//胸 2
 		SetCut(3.0210);
 		SetCamvec(1.0, 13.82, -2.080);
@@ -91,13 +94,14 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(25, 1.0, 80.0, 0.0);
 		SetDrawModel(Tachyon2, 0, 8);
-		SetModelAnime(Tachyon2, 0, 1, TRUE, 1.0);
+		SetModelAnime(Tachyon2, 0, 1, TRUE, 1.0, -1);
+		SetModelMat(Tachyon2, 0, 0, 0, 0, 0, 180);
 	//斬新 8
 		SetCut(6.4480);
 		SetCamvec(1.11, 14.36, -1.740);
 		SetCampos_ByRad(6.9, 199.5, 27.0);
 		SetCamup(0, 1, 0);
-		SetCamInfo(25, 1.0, 80.0, 0.0);
+		SetCamInfo(25, 1.0, 80.0, 0.975);
 		SetNextResetPhysics();
 	//＜＞ 9
 		SetCut(7.0960);
@@ -114,7 +118,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0 , 3000.0, 0.0);
 		SetDrawModel(Tachyon, 0, 12);
-		SetModelAnime(Tachyon, 0, 2, TRUE, 0.01);
+		SetModelAnime(Tachyon, 0, 2, TRUE, 0.01, -1);
 	//顔2 11
 		SetCut(7.576f);
 		SetCamvec(-0.106448f, 3.030100f, -23.623045f);
@@ -143,7 +147,8 @@
 		SetCamInfo(45, 1.0 , 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 14);
-		SetModelAnime(Tachyon2, 0, 3, TRUE, 0.6);
+		SetModelAnime(Tachyon2, 0, 3, TRUE, 0.6, 33.0);
+		SetModelMat(Tachyon2, 0, 0, 0, 0, 0, 0);
 	//君が願うことなら 15
 		SetCut(15.80f);
 		SetCamvec(10.122698f, 18.028077f, -100.985756f);
@@ -152,7 +157,7 @@
 		SetCamInfo(45, 1.0 , 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 19);
-		SetModelAnime(Tachyon, 0, 2, TRUE, 0.45);
+		SetModelAnime(Tachyon, 0, 2, TRUE, 0.45, 33.0);
 	//全てが現 16
 		SetCut(17.80f);
 		SetCamvec(10.122698f, 18.028077f, -100.985756f);
@@ -161,9 +166,11 @@
 		SetCamInfo(45, 1.0 , 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 19);
-		SetModelAnime(Tachyon2, 0, 3, TRUE, 0.45);
+		SetModelAnime(Tachyon2, 0, 3, TRUE, 0.45, 33.0);
+		SetModelMat(Tachyon2, 0, -90, 0, 0, -140, 0);
 		SetDrawModel(Cafe, 0, 19);
-		SetModelAnime(Cafe, 0, 0, TRUE, 0.45);
+		SetModelAnime(Cafe, 0, 0, TRUE, 0.45, 33.0);
+		SetModelMat(Cafe, 0, 90, 0, 0, -140, 0, 33.0);
 	//実になるだろ(天道) 17
 		SetCut(19.0f);
 		SetCamup(0, 1, 0);
@@ -196,13 +203,17 @@
 		SetCamInfo(45, 1.0, 200.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 2, 21);
-		SetModelAnime(Tachyon, 2, 4, FLASE, 0.0);
+		SetModelAnime(Tachyon, 2, 4, FLASE, 0.0, -1);
+		SetModelMat(Tachyon, 2, -6, 5, 1, -10, 0);
 		SetDrawModel(Tachyon, 3, 21);
-		SetModelAnime(Tachyon, 3, 5, FLASE, 0.0);
+		SetModelAnime(Tachyon, 3, 5, FLASE, 0.0, -1);
+		SetModelMat(Tachyon, 3, 5, -3, 0, 10, 0);
 		SetDrawModel(Tachyon, 4, 21);
-		SetModelAnime(Tachyon, 4, 6, FLASE, 0.0);
+		SetModelAnime(Tachyon, 4, 6, FLASE, 0.0, -1);
+		SetModelMat(Tachyon, 4, -25, -18, 0, 30, 0);
 		SetDrawModel(Tachyon, 5, 21);
-		SetModelAnime(Tachyon, 5, 7, FLASE, 0.0);
+		SetModelAnime(Tachyon, 5, 7, FLASE, 0.0, -1);
+		SetModelMat(Tachyon, 5, 0, -30, 0.5, 40, 0);
 	//羽ワイプ 22
 		SetCut(24.452);
 		SetCamvec(0, 15, 0);
@@ -210,13 +221,17 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 200.0, 0.0);
 		SetDrawModel(GoldShip, 0, 22);
-		SetModelAnime(GoldShip, 0, 0, FALSE, 0.0);
+		SetModelAnime(GoldShip, 0, 0, FALSE, 0.0, -1);
+		SetModelMat(GoldShip, 0, -6, 5, -2, -10, 0);
 		SetDrawModel(Speweek, 0, 23);
-		SetModelAnime(Speweek, 0, 0, FALSE, 0.0);
+		SetModelAnime(Speweek, 0, 0, FALSE, 0.0, -1);
+		SetModelMat(Speweek, 0, 5, -3, 0, 10, 0);
 		SetDrawModel(Macin, 0, 23);
-		SetModelAnime(Macin, 0, 0, FALSE, 0.0);
+		SetModelAnime(Macin, 0, 0, FALSE, 0.0, -1);
+		SetModelMat(Macin, 0, 0, -30, 0.5, 40, 0);
 		SetDrawModel(Teio, 0, 23);
-		SetModelAnime(Teio, 0, 0, FALSE, 0.0);
+		SetModelAnime(Teio, 0, 0, FALSE, 0.0, -1);
+		SetModelMat(Teio, 0, -25, -18, 0, 30, 0);
 	//ワーム②(暴そ) 23
 		SetCut(25.164);
 		SetCamvec(0, 15, 0);
@@ -241,6 +256,7 @@
 		SetDrawModel(Tachyon, 0, 25);
 		SetDrawModel(Tachyon, 1, 25);
 		SetDrawModel(SCHOOL, 0, 25);
+		SetModelMat(SCHOOL, 0, 0, -819, -28.2, -590, -90);
 	//バンバイク①(もう　時か）26
 		SetCut(31.670);
 		SetCamvec(10.122698, 18.028077, -100.985756);
@@ -248,6 +264,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 27);
+		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
 	//バンバイク②(んがな）27
 		SetCut(32.52);
 		SetCamvec(10.1226980, 10.0280770, -50.985756);
@@ -262,7 +279,8 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetDrawModel(Karen, 0, 29);
-		SetModelAnime(Karen, 0, 0, FALSE, 1.0);
+		SetModelAnime(Karen, 0, 0, FALSE, 1.0, 6.25);
+		SetModelMat(Karen, 0, 0, 2, 0, 0, 0);
 	//雨加賀美(ろのぉ）29
 		SetCut(35.522);
 		SetCamvec(0, 0, 0);
@@ -278,7 +296,8 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetDrawModel(Cafe, 0, 30);
-		SetModelAnime(Cafe, 0, 0, TRUE, 0.0);
+		SetModelAnime(Cafe, 0, 0, TRUE, 0.0, 0);
+		SetModelMat(Cafe, 0, 0, 0, 0, 0, 0);
 	//雨加賀美②(時計）31
 		SetCut(36.775);
 		SetCamvec(0, 17, -4.5);
@@ -288,7 +307,7 @@
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 31);
 		SetDrawModel(Cafe, 0, 31);
-		SetModelAnime(Cafe, 0, 1, TRUE, 0.0);
+		SetModelAnime(Cafe, 0, 1, TRUE, 0.0, -1);
 	//クロス(走らせ）32
 		SetCut(38.173);
 		SetCamvec(0, 20, -7);
@@ -297,9 +316,10 @@
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 32);
-		SetModelAnime(Tachyon2, 0, 10, FALSE, 0.6);
+		SetModelAnime(Tachyon2, 0, 10, FALSE, 0.6, -1);
+		SetModelMat(Tachyon2, 0, 180, 0, 0, -14, 0);
 		SetDrawModel(Scarlet, 0, 34);
-		SetModelAnime(Scarlet, 0, 0, FALSE, 0.6);
+		SetModelAnime(Scarlet, 0, 0, FALSE, 0.6, -1);
 	//陽(）33
 		SetCut(38.986);
 		SetCamvec(0, 20, -7);
@@ -307,9 +327,10 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 300.0, 0.0);
 		SetDrawModel(Tachyon2, 0, 34);
-		SetModelAnime(Tachyon2, 0, 10, FALSE, 0.0);
+		SetModelAnime(Tachyon2, 0, 10, FALSE, 0.0, -1);
 		SetDrawModel(Vodka, 0, 33);
-		SetModelAnime(Vodka, 0, 0, FALSE, 0.0);
+		SetModelMat(Vodka, 0, 0, 0, 0, -50, 0);
+		SetModelAnime(Vodka, 0, 0, FALSE, 0.0, -1);
 	//陰(明日の）34
 		SetCut(40.11);
 		SetCamvec(0, 20, -7);
@@ -325,7 +346,7 @@
 		SetCamInfo(15, 1.0, 100.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 36);
-		SetModelAnime(Cafe, 0, 2, FALSE, 0.6);
+		SetModelAnime(Cafe, 0, 2, FALSE, 0.6, -1);
 	//手②(先へ）36
 		SetCut(42.317);
 		SetCamvec(0, 17, -4.5);
@@ -333,7 +354,8 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 1.0, 100.0, 0.0);
 		SetDrawModel(Tachyon, 0, 36);
-		SetModelAnime(Tachyon, 0, 11, FALSE, 0.5);
+		SetModelAnime(Tachyon, 0, 11, FALSE, 0.5, -1);
+		SetModelMat(Tachyon, 0, 270, 5, 16, -10, 0);
 	//ガチャ(）37
 		SetCut(42.726);
 		SetCamvec(0, 19, 0);
@@ -341,7 +363,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(25, 1.0, 100.0, 0.0);
 		SetDrawModel(Trainer, 0, 37);
-		SetModelAnime(Trainer, 0, 0, FALSE, 1.2);
+		SetModelAnime(Trainer, 0, 0, FALSE, 1.2, -1);
 	//握手(）38
 		SetCut(43.641);
 		SetCamvec(0, 17, -4.5);
@@ -350,7 +372,7 @@
 		SetCamInfo(15, 1.0, 100.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 38);
-		SetModelAnime(Tachyon, 0, 12, FALSE, 0.5);
+		SetModelAnime(Tachyon, 0, 12, FALSE, 0.5, -1);
 	//オフ(）39
 		SetCut(43.971);
 		SetCamvec(0.30, 17.750, 0);
@@ -359,7 +381,8 @@
 		SetCamInfo(4, 1.0, 20.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 39);
-		SetModelAnime(Tachyon2, 0, 13, FALSE, 1.2);
+		SetModelAnime(Tachyon2, 0, 13, FALSE, 1.2, -1);
+		SetModelMat(Tachyon2, 0, 0, 0, 0, 0, 180);
 //40
 	//オフ2(）40
 		SetCut(44.311);
@@ -369,13 +392,14 @@
 		SetCamInfo(10, 1.0, 40.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 40);
-		SetModelAnime(Tachyon2, 0, 14, FALSE, 2.8);
+		SetModelAnime(Tachyon2, 0, 14, FALSE, 2.8, -1);
 	//オフ離れる(君の存在）41
 		SetCut(46.084);
 		SetCamvec(-60.122698, 16.028077, -50.985756);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 43);
-		SetModelAnime(GATE, 0, 0, FALSE, 0.0);
+		SetModelAnime(GATE, 0, 0, FALSE, 0.0, -1);
+		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
 		SetDrawModel(Mobu, 0~11, 44);
 	//オフ近付く(戦うた）42
 		SetCut(47.122);
@@ -419,7 +443,8 @@
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 49);
-		SetModelAnime(Tachyon2, 0, 2, FALSE, 0.1);
+		SetModelAnime(Tachyon2, 0, 2, FALSE, 0.1, 35.0);
+		SetModelMat(Tachyon2, 0, 0, -10, 0, 30, 0);
 //50
 	//女(ン いったい自分以が) 50
 		SetCut(56.271);
@@ -429,7 +454,7 @@
 		SetCamInfo(25, 1.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Karen, 0, 50);
-		SetModelAnime(Karen, 0, 1, FALSE, 0.95);
+		SetModelAnime(Karen, 0, 1, FALSE, 0.95, -1);
 	//だばー(い　) 51
 		SetCut(57.462);
 		SetCampos_NoneRad(0.3, 18.0, -28.595667);
@@ -437,7 +462,7 @@
 		SetCamInfo(15, 1.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Karen, 0, 51);
-		SetModelAnime(Karen, 0, 2, FALSE, 1.15);
+		SetModelAnime(Karen, 0, 2, FALSE, 1.15, -1);
 	//雨加賀美(誰の) 52
 		SetCut(58.004);
 		SetCamvec(0, 17, -4.5);
@@ -445,7 +470,8 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 1.0, 30.0,0.0);
 		SetDrawModel(Cafe, 0, 53);
-		SetModelAnime(Cafe, 0, 3, FALSE, 0.8);
+		SetModelAnime(Cafe, 0, 3, FALSE, 0.8, -1);
+		SetModelMat(Cafe, 0, 0, 0, 0, 0, 0);
 	//雨加賀美(強さ　信じられる) 53
 		SetCut(60.290);
 		SetCamvec(0, 17, -4.5);
@@ -459,18 +485,23 @@
 		SetCamInfo(1.5, 300.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 54);
-		SetModelAnime(Cafe, 0, 4, FALSE, 0.85);
+		SetModelAnime(Cafe, 0, 4, FALSE, 0.85, -1);
+		SetModelMat(Cafe, 0, 0, 0.0, 0.0, -2030.0, 0);
 		SetDrawModel(Doto, 0, 54);
-		SetModelAnime(Doto, 0, 0, FALSE, 0.82);
+		SetModelAnime(Doto, 0, 0, FALSE, 0.82, -1);
+		SetModelMat(Doto, 0, 0, 10.0, 0.0, -2005.0, 0);
 		SetDrawModel(Opera, 0, 54);
-		SetModelAnime(Opera, 0, 0, FALSE, 0.84);
+		SetModelAnime(Opera, 0, 0, FALSE, 0.84, -1);
+		SetModelMat(Opera, 0, 0, -20.0, 0.0, -1990.0, 0);
 		SetDrawModel(Mobu, 0, 54);
-		SetModelAnime(Mobu, 0, 4, FALSE, 0.84);
+		SetModelAnime(Mobu, 0, 4, FALSE, 0.84, -1);
+		SetModelMat(Mobu, 0, 0, 0.0, 0.0, -2025.0, 0);
 		SetDrawModel(Mobu, 1, 54);
-		SetModelAnime(Mobu, 1, 4, FALSE, 0.8);
+		SetModelAnime(Mobu, 1, 4, FALSE, 0.8, -1);
+		SetModelMat(Mobu, 1, 0, 5.0, 0.0, -2005.0, 0);
 		SetDrawModel(Mobu, 2, 54);
-		SetModelAnime(Mobu, 2, 4, FALSE, 0.82);
-
+		SetModelAnime(Mobu, 2, 4, FALSE, 0.82, -1);
+		SetModelMat(Mobu, 2, 0, 20.0, 0.0, -2040.0, 0);
 		SetDrawModel(GATE, 0, 56);
 	//クロックアップ(ぅ　高速の) 55
 		SetCut(62.775);
@@ -478,17 +509,17 @@
 		SetCamInfo(2, 100.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 55);
-		SetModelAnime(Cafe, 0, 4, FALSE, 0.98);
+		SetModelAnime(Cafe, 0, 4, FALSE, 0.98, -1);
 		SetDrawModel(Doto, 0, 55);
-		SetModelAnime(Doto, 0, 0, FALSE, 1.1);
+		SetModelAnime(Doto, 0, 0, FALSE, 1.1, -1);
 		SetDrawModel(Opera, 0, 55);
-		SetModelAnime(Opera, 0, 0, FALSE, 0.95);
+		SetModelAnime(Opera, 0, 0, FALSE, 0.95, -1);
 		SetDrawModel(Mobu, 0, 55);
-		SetModelAnime(Mobu, 0, 4, FALSE, 0.84);
+		SetModelAnime(Mobu, 0, 4, FALSE, 0.84, -1);
 		SetDrawModel(Mobu, 1, 55);
-		SetModelAnime(Mobu, 1, 4, FALSE, 0.8);
+		SetModelAnime(Mobu, 1, 4, FALSE, 0.8, -1);
 		SetDrawModel(Mobu, 2, 55);
-		SetModelAnime(Mobu, 2, 4, FALSE, 0.82);
+		SetModelAnime(Mobu, 2, 4, FALSE, 0.82, -1);
 	//遠い(ビジョン) 56
 		SetCut(64.074);
 		SetCamvec(10.122698, 18.028077, -100.985756);
@@ -496,13 +527,15 @@
 		SetCamInfo(45, 10.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 56);
-		SetModelAnime(Tachyon, 0, 15, FALSE, 0.2);
+		SetModelAnime(Tachyon, 0, 15, FALSE, 0.2, -1);
+		SetModelMat(Tachyon, 0, 0, 0, 0, -140, 0);
 	//近い(見逃すなぁ) 57
 		SetCut(66.165);
 		SetCamup(0, 1, 0);
 		SetCamInfo(8, 10.0, 3000.0, 0.0);
 		SetDrawModel(Tachyon, 0, 58);
-		SetModelAnime(Tachyon, 0, 15, FALSE, 0.75);
+		SetModelAnime(Tachyon, 0, 15, FALSE, 0.75, -1);
+		SetModelMat(Tachyon, 0, 0, 0, 0, 140, 180);
 	//覆う(付いてこれるなら) 58
 		SetCut(70.592);
 		SetCamup(0, 1, 0);
