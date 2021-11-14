@@ -18,6 +18,20 @@
 		SetArg(Mobu, "data/umamusume/mobu_black/model.mv1");//モブ
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
 		SetArg(NEWS, "data/model/paper/news.mv1");//新聞紙
+
+		SetArg(FACE, "data/picture/Cut.png");
+		SetArg(NEWSP, "data/picture/Cut2.png");
+		SetArg(SODE1, "data/picture/sode1.png");
+		SetArg(SODE2, "data/picture/sode2.png");
+		SetArg(SODE3, "data/picture/sode3.png");
+		SetArg(SODE4, "data/picture/sode4.png");
+		SetArg(SODE5, "data/picture/sode5.png");
+		SetArg(SODE6, "data/picture/sode6.png");
+		SetArg(ANIME1, "data/picture/anime0.png");
+		SetArg(ANIME2, "data/picture/anime1.png");
+		SetArg(FIRST1, "data/picture/FIRST.png");
+		SetArg(FLASH1, "data/picture/sun.png");
+		SetArg(LOGO1, "data/picture/logo.png");
 //モデル読み込み
 		LoadModel(SCHOOL, 1);
 		LoadModel(Tachyon, 6);
@@ -55,6 +69,10 @@
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 		SetDrawModel(Tachyon2, 0, 6);
 		SetModelAnime(Tachyon2, 0, 0, FALSE, 0.8, -1);
+		SetDrawGraph(SODE1, 0, 1);
+		SetDrawGraph(SODE2, 0, 1);
+		SetDrawGraph(SODE3, 0, 1);
+		SetDrawGraph(SODE4, 0, 1);
 	//胸 2
 		SetCut(3.0210);
 		SetCamvec(1.0, 13.82, -2.080);
@@ -87,6 +105,12 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 		SetNextResetPhysics();
+		SetDrawGraph(SODE1, 0, 7);
+		SetDrawGraph(SODE2, 0, 7);
+		SetDrawGraph(SODE3, 0, 7);
+		SetDrawGraph(SODE4, 0, 7);
+		SetDrawGraph(FIRST1, 0~2, 6);
+		SetDrawGraph(FLASH1, 0~2, 6);
 	//羽切る終わり 7
 		SetCut(5.0860);
 		SetCamvec(1.11, 14.36, -1.740);
@@ -110,6 +134,8 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(Tachyon, 0, 9);
+		SetModelPhysicsSpeed(Tachyon, 0, 0.01);
+		SetModelOpacityRate(Tachyon, 0, 0.0);
 //10
 	//顔 10
 		SetCut(7.288f);
@@ -168,14 +194,19 @@
 		SetDrawModel(Tachyon2, 0, 19);
 		SetModelAnime(Tachyon2, 0, 3, TRUE, 0.45, 33.0);
 		SetModelMat(Tachyon2, 0, -90, 0, 0, -140, 0);
+		SetModelOpacityRate(Tachyon2, 0, 0.0);
 		SetDrawModel(Cafe, 0, 19);
 		SetModelAnime(Cafe, 0, 0, TRUE, 0.45, 33.0);
 		SetModelMat(Cafe, 0, 90, 0, 0, -140, 0, 33.0);
+		SetModelOpacityRate(Cafe, 0, 0.0);
 	//実になるだろ(天道) 17
 		SetCut(19.0f);
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 1.0 , 3000.0, 0.0);
 		SetNextResetPhysics();
+		SetModelOpacityRate(Tachyon, 0, 0.0);
+		SetModelOpacityRate(Cafe, 0, 1.0);
+		SetModelOpacityRate(Tachyon2, 0, 1.0);
 	//う　選 18
 		SetCut(20.334f);
 		SetCamup(0, 1, 0);
@@ -195,6 +226,7 @@
 		SetCamInfo(45, 1.0, 200.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(NEWS, 0~11, 20);
+		SetModelOpacityRate(Tachyon, 0, 1.0);
 	//ワーム① 21
 		SetCut(24.252);
 		SetCamvec(0, 15, 0);
@@ -214,6 +246,9 @@
 		SetDrawModel(Tachyon, 5, 21);
 		SetModelAnime(Tachyon, 5, 7, FLASE, 0.0, -1);
 		SetModelMat(Tachyon, 5, 0, -30, 0.5, 40, 0);
+		SetDrawGraph(FACE, 0, 23);
+		SetDrawGraph(NEWSP, 0, 23);
+		SetGraphBlur(NEWSP, 0, 23);
 	//羽ワイプ 22
 		SetCut(24.452);
 		SetCamvec(0, 15, 0);
@@ -255,6 +290,7 @@
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 25);
 		SetDrawModel(Tachyon, 1, 25);
+		SetModelOpacityRate(Tachyon, 1, 0.0);
 		SetDrawModel(SCHOOL, 0, 25);
 		SetModelMat(SCHOOL, 0, 0, -819, -28.2, -590, -90);
 	//バンバイク①(もう　時か）26
@@ -320,6 +356,7 @@
 		SetModelMat(Tachyon2, 0, 180, 0, 0, -14, 0);
 		SetDrawModel(Scarlet, 0, 34);
 		SetModelAnime(Scarlet, 0, 0, FALSE, 0.6, -1);
+		SetModelOpacityRate(Scarlet, 0, 0.5);
 	//陽(）33
 		SetCut(38.986);
 		SetCamvec(0, 20, -7);
@@ -355,7 +392,7 @@
 		SetCamInfo(15, 1.0, 100.0, 0.0);
 		SetDrawModel(Tachyon, 0, 36);
 		SetModelAnime(Tachyon, 0, 11, FALSE, 0.5, -1);
-		SetModelMat(Tachyon, 0, 270, 5, 16, -10, 0);
+		SetModelMat(Tachyon, 0, 270, 5, 1.6, -10, 0);
 	//ガチャ(）37
 		SetCut(42.726);
 		SetCamvec(0, 19, 0);
@@ -422,16 +459,20 @@
 		SetCamvec(-0.8281840, 4.5463230, -0.092557);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetDrawGraph(ANIME1, 0, 46);
 	//ワイプ（に）46
 		SetCut(50.447);
 		SetCampos_NoneRad(32.2115100, 14.9972310, -18.595667);
 		SetCamvec(-0.8281840, 4.5463230, -0.092557);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetDrawGraph(SODE5, 0~1, 49);
+		SetDrawGraph(SODE6, 0~1, 49);
 	//爆発(見)47
 		SetCut(50.830);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetDrawGraph(ANIME2, 0, 48);
 	//ワイプ（える）48
 		SetCut(51.601);
 		SetCamup(0, 1, 0);
@@ -472,6 +513,7 @@
 		SetDrawModel(Cafe, 0, 53);
 		SetModelAnime(Cafe, 0, 3, FALSE, 0.8, -1);
 		SetModelMat(Cafe, 0, 0, 0, 0, 0, 0);
+		SetModelOpacityRate(Cafe, 0, 1.0);
 	//雨加賀美(強さ　信じられる) 53
 		SetCut(60.290);
 		SetCamvec(0, 17, -4.5);
@@ -510,16 +552,22 @@
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 55);
 		SetModelAnime(Cafe, 0, 4, FALSE, 0.98, -1);
+		SetModelMat(Cafe, 0, 180, -4718.3, 0.0, -2200.0, 0);
 		SetDrawModel(Doto, 0, 55);
 		SetModelAnime(Doto, 0, 0, FALSE, 1.1, -1);
+		SetModelMat(Doto, 0, 180, -4728.3, 0.0, -2235.0, 0);
 		SetDrawModel(Opera, 0, 55);
 		SetModelAnime(Opera, 0, 0, FALSE, 0.95, -1);
+		SetModelMat(Opera, 0, 180, -4740.8, 0.0, -2240.0, 0);
 		SetDrawModel(Mobu, 0, 55);
 		SetModelAnime(Mobu, 0, 4, FALSE, 0.84, -1);
+		SetModelMat(Mobu, 0, 180, -4703.3, 0.0, -2245.0, 0);
 		SetDrawModel(Mobu, 1, 55);
 		SetModelAnime(Mobu, 1, 4, FALSE, 0.8, -1);
+		SetModelMat(Mobu, 1, 180, -4695.3, 0.0, -2270.0, 0);
 		SetDrawModel(Mobu, 2, 55);
 		SetModelAnime(Mobu, 2, 4, FALSE, 0.82, -1);
+		SetModelMat(Mobu, 2, 180, -4718.3, 0.0, -2265.0, 0);
 	//遠い(ビジョン) 56
 		SetCut(64.074);
 		SetCamvec(10.122698, 18.028077, -100.985756);
@@ -540,6 +588,7 @@
 		SetCut(70.592);
 		SetCamup(0, 1, 0);
 		SetCamInfo(8, 10.0, 3000.0, 0.0);
+		SetDrawGraph(SODE5, 2~11, 58);
 //LAST
 
 
