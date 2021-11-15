@@ -166,6 +166,9 @@ namespace FPS_n2 {
 						}
 					}
 				public:
+					bool isFar = false;
+					bool IsNearShadow = true;
+					bool IsFarShadow = false;
 					bool isBase = true;
 					std::string Path;
 
@@ -286,6 +289,9 @@ namespace FPS_n2 {
 				void Set() {
 					for (auto& m : model) {
 						m.isDraw = false;
+						m.isFar = false;
+						m.IsNearShadow = true;
+						m.IsFarShadow = false;
 					}
 				}
 				void Update() {
@@ -293,9 +299,41 @@ namespace FPS_n2 {
 						m.Update();
 					}
 				}
-				void Draw() {
-					for (auto& m : model) {
-						m.Draw();
+				void Draw_Far() {
+					auto fog_e = GetFogEnable();
+					SetFogEnable(FALSE);
+					SetUseLighting(FALSE);
+					{
+						for (auto& m : model) {
+							if (m.isFar) {
+								m.Draw();
+							}
+						}
+					}
+					SetUseLighting(TRUE);
+					SetFogEnable(fog_e);
+				}
+				void Draw(bool innearshadow, bool infarshadow) {
+					if (infarshadow) {
+						for (auto& m : model) {
+							if (!m.isFar && m.IsFarShadow) {
+								m.Draw();
+							}
+						}
+					}
+					else if (innearshadow) {
+						for (auto& m : model) {
+							if (!m.isFar && m.IsNearShadow) {
+								m.Draw();
+							}
+						}
+					}
+					else {
+						for (auto& m : model) {
+							if (!m.isFar) {
+								m.Draw();
+							}
+						}
 					}
 				}
 			};
@@ -662,9 +700,6 @@ namespace FPS_n2 {
 			std::string Karen = "data/umamusume/karen/model.mv1";
 			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
 			std::string GATE = "data/model/map/model_gate.mv1";
-
-			std::string MAP = "data/model/map/model.mv1";
-			std::string BOARD = "data/model/board/model.mv1";
 			std::string SHIP = "data/model/ship/model.mv1";
 			std::string SKY = "data/model/sky/model.mv1";
 
@@ -681,11 +716,6 @@ namespace FPS_n2 {
 			std::string FIRST1 = "data/picture/FIRST.png";
 			std::string FLASH1 = "data/picture/sun.png";
 			std::string LOGO1 = "data/picture/logo.png";
-
-			ModelControl::Model Board;
-			ModelControl::Model Map;
-			ModelControl::Model sky;						//空
-			ModelControl::Model Ship;
 
 			GraphHandle sun_pic;			//太陽
 			VECTOR_ref sun_pos;				//太陽
@@ -727,17 +757,9 @@ namespace FPS_n2 {
 				TEMPSCENE::Awake();
 				//
 				SetUseASyncLoadFlag(TRUE);
-				//*
 				{
-					//3D
-					MV1::LoadonAnime(MAP, &Map.obj, 0);
-					MV1::LoadonAnime(BOARD, &Board.obj, 0);
-					MV1::LoadonAnime(SHIP, &Ship.obj, 0);			//空
-					MV1::LoadonAnime(SKY, &sky.obj, 0);				//空
-					//2D
 					this->sun_pic = GraphHandle::Load("data/picture/sun.png");					//sun
 				}
-				//*/
 				SetUseASyncLoadFlag(FALSE);
 				//
 				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
@@ -977,10 +999,22 @@ namespace FPS_n2 {
 				SetUseASyncLoadFlag(FALSE);
 				//モデルの事前処理
 				{
+					std::string SCHOOL = "data/model/school/model.mv1";
+					std::string MAP = "data/model/map/model.mv1";
+					std::string BOARD = "data/model/board/model.mv1";
+
 					models.Set();
-					Map.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
-					Board.obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
-					Board.isDraw = true;
+					models.Get(SHIP)->IsNearShadow = false;
+					models.Get(SHIP)->obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
+					models.Get(SCHOOL, 0)->IsFarShadow = true;
+					models.Get(GATE, 0)->IsFarShadow = true;
+					models.Get(MAP, 0)->IsFarShadow = true;
+					models.Get(MAP, 0)->IsNearShadow = false;
+					models.Get(MAP, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
+					models.Get(BOARD, 0)->IsFarShadow = false;
+					models.Get(BOARD, 0)->IsNearShadow = false;
+					models.Get(BOARD, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
+					models.Get(SKY, 0)->isFar = true;
 					//モデル座標事前準備
 					graphs.Get(FACE)->X.Set((float)(y_r(1920 * 1 / 2)), 0.f);
 					graphs.Get(FACE)->Y.Set((float)(y_r(1080 * 1 / 2)), 0.f);
@@ -1003,13 +1037,13 @@ namespace FPS_n2 {
 				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
 				Cut = 41;
 				Cut = 0;
+				SetUseASyncLoadFlag(FALSE);
 				BGM = SoundHandle::Load("data/sound2.wav");
 				/*
 				movie = GraphHandle::Load("data/base_movie.mp4");
 				PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
 				ChangeMovieVolumeToGraph(0, movie.get());
 				*/
-				SetUseASyncLoadFlag(FALSE);
 				//プレイ用意
 				BGM.play(DX_PLAYTYPE_BACK, TRUE);
 				//BGM.vol(64);
@@ -1022,10 +1056,10 @@ namespace FPS_n2 {
 				auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 				{
 					if (!Time_Over()) {
+						models.FirstUpdate((int)Cut, isFirstLoop);
+						graphs.FirstUpdate((int)Cut, isFirstLoop);
 						int SEL = 1;
 						{
-							models.FirstUpdate((int)Cut, isFirstLoop);
-							graphs.FirstUpdate((int)Cut, isFirstLoop);
 							//1
 							if (Cut == SEL) {
 								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.9f, (float)(DrawPts->disp_y / 2), 0.9f, 0, 1.f, 0, 0, 1.f, 0.f);
@@ -1098,9 +1132,6 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									Stop_Effect(Effect::ef_reco);
-									Board.isDraw = false;
-									Map.isDraw = true;
-									sky.isDraw = true;
 									models.Get(Tachyon, 0)->obj.get_anime(2).time = 30.f;
 									spd_takion = 0.6f;
 								}
@@ -1129,9 +1160,6 @@ namespace FPS_n2 {
 							SEL++;
 							//14
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									models.Get(Tachyon, 0)->PhysicsSpeed = 1.f;
-								}
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(6);
 							}
 							SEL++;
@@ -1206,36 +1234,22 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								std::string NEWS = "data/model/paper/news.mv1";
 								if (isFirstLoop) {
-									Map.isDraw = false;
-									sky.isDraw = false;
 									for (int i = 0; i < 12; i++) {
 										auto* t = models.Get(NEWS, i);
 										t->move.mat = MATRIX_ref::RotY(deg2rad(GetRand(360)))*MATRIX_ref::RotX(deg2rad(GetRandf(30.f)));
-										t->move.pos = VECTOR_ref::vget(GetRandf(20.f), (float)(7 + GetRand(10)), GetRandf(20.f));
+										t->move.pos = VECTOR_ref::vget(GetRandf(20.f), (float)(37 + GetRand(10)), GetRandf(20.f));
 										t->move.vec.y(-(float)(GetRand(100)) / 1000.f);
 									}
 								}
 								for (int i = 0; i < 12; i++) {
 									auto* t = models.Get(NEWS, i);
-									if (t->move.pos.y() >= 3.5f) {
-										t->move.vec.yadd(M_GR / powf((FPS / 0.75f), 2.f));
-									}
-									else {
-										float yp = t->move.vec.y();
-										easing_set(&yp, 0.f, 0.995f);
-										t->move.vec.y(yp);
-									}
-									t->move.pos += t->move.vec;
+									t->move.Update_Physics(0.f, 0.75f);
 									t->obj.SetMatrix(t->move.MatIn());
 								}
 							}
 							SEL++;
 							//21
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Map.isDraw = true;
-									sky.isDraw = true;
-								}
 								graphs.Get(NEWSP)->X.Base += (int)((float)(DrawPts->disp_x / 2)*4.f / FPS);
 								graphs.Get(NEWSP)->Y.Base += (int)((float)(DrawPts->disp_y / 2)*4.f / FPS);
 								graphs.Get(NEWSP)->Rad.Base += deg2rad(6) / FPS;
@@ -1256,14 +1270,7 @@ namespace FPS_n2 {
 								std::string GoldShip = "data/umamusume/gold/model.mv1";
 								models.Get(GoldShip, 0)->UpdateAnim(1, true, (graphs.Get(NEWSP)->Y.Ans < DrawPts->disp_y / 2) ? 0.f : 0.45f);
 							}
-							SEL++;
-							//24
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Map.isDraw = false;
-								}
-							}
-							SEL++;
+							SEL+=2;
 							//25
 							if (Cut == SEL) {
 								if (isFirstLoop) {
@@ -1289,7 +1296,6 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									radc = 0.f;
-									Map.isDraw = true;
 								}
 								easing_set(&xradadd_r, GetRandf(2.f), 0.975f);
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(-5.5f + xradadd_r * 1.5f, 80.f + radc)*88.0f;
@@ -1315,9 +1321,6 @@ namespace FPS_n2 {
 							//28
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									Ship.isDraw = true;
-									Ship.OpacityRate = 0.3f;
-									Ship.obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
 									ship_z = -5.f;
 									ship_zadd = 0.f;
 									camzb_28 = 0.f;
@@ -1329,7 +1332,7 @@ namespace FPS_n2 {
 									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
 									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f);
 									camzb_28 = std::max(camzb_28 - 100.f / FPS, -10.f);
-									Ship.obj.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
+									models.Get(SHIP)->obj.SetPosition(camera_main.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z));
 									ship_z += ship_zadd / FPS;
 									if (ship_zadd <= 0.95f) {
 										easing_set(&ship_zadd, 1.f, 0.95f);
@@ -1347,7 +1350,7 @@ namespace FPS_n2 {
 									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
 									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f);
 									camzb_28 = std::max(camzb_28 - 100.f / FPS, -10.f);
-									Ship.obj.SetPosition(camera_main.camvec + VECTOR_ref::up()*3.f + VECTOR_ref::right()*-2.f + VECTOR_ref::front()*-1.f*ship_z);
+									models.Get(SHIP)->obj.SetPosition(camera_main.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z));
 									ship_z += ship_zadd / FPS;
 									if (ship_zadd <= 0.95f) {
 										easing_set(&ship_zadd, 1.f, 0.95f);
@@ -1357,55 +1360,21 @@ namespace FPS_n2 {
 									}
 								}
 							}
-							SEL++;
-						}
-						{}
-						{
-							//30
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Board.isDraw = true;
-									Ship.isDraw = false;
-									Map.isDraw = false;
-									sky.isDraw = false;
-								}
-							}
-							SEL+=2;
+							SEL+=3;
 							//32
 							if (Cut == SEL) {
 								std::string Scarlet = "data/umamusume/scarlet/model.mv1";
-								if (isFirstLoop) {
-									Board.isDraw = false;
-									Map.isDraw = true;
-									sky.isDraw = true;
-								}
 								if (models.Get(Scarlet, 0)->obj.get_anime(0).time > 10.f) {
 									easing_set(&models.Get(Scarlet, 0)->OpacityRate, 1.f, 0.95f);
 								}
 							}
-							SEL+=3;
-							//35
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Map.isDraw = false;
-									sky.isDraw = false;
-								}
-							}
-							SEL++;
+							SEL+=4;
 							//36
 							if (Cut == SEL) {
 								models.Get(Tachyon, 0)->OpacityRate = std::min(models.Get(Tachyon, 0)->OpacityRate + 2.f / FPS, 1.f);
 								models.Get(Cafe, 0)->OpacityRate = std::max(models.Get(Cafe, 0)->OpacityRate - 2.f / FPS, 0.f);
 							}
-							SEL+=3;
-							//39
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Map.isDraw = true;
-									sky.isDraw = true;
-								}
-							}
-							SEL+=2;
+							SEL+=5;
 							//41
 							if (Cut == SEL) {
 								if (isFirstLoop) {
@@ -1513,9 +1482,6 @@ namespace FPS_n2 {
 							//45
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									Board.isDraw = true;
-									Map.isDraw = false;
-									sky.isDraw = false;
 									VECTOR_ref vec_x = (Cut_Pic[Cut].Aim_camera.camvec - Cut_Pic[Cut].Aim_camera.campos).Norm().cross(Cut_Pic[Cut].Aim_camera.camup);
 									Set_Effect(Effect::ef_greexp, VECTOR_ref::vget(-4.f, 4.6f, -2.f) + vec_x * 13.f, VECTOR_ref::front(), 5.f);
 									Set_Effect(Effect::ef_greexp2, VECTOR_ref::vget(8.f, 5.5f, 4.f) - vec_x * 8.f, VECTOR_ref::front(), 4.f);
@@ -1606,9 +1572,6 @@ namespace FPS_n2 {
 							//50
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									sky.isDraw = true;
-									Board.isDraw = false;
-									Map.isDraw = true;
 									Stop_Effect(Effect::ef_greexp);
 									Stop_Effect(Effect::ef_greexp2);
 								}
@@ -1622,16 +1585,7 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Karen, 0)->obj.frame(10) + VECTOR_ref::vget(2.3f, 0.f, 0.f);
 							}
-							SEL++;
-							//52
-							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Board.isDraw = true;
-									Map.isDraw = false;
-									sky.isDraw = false;
-								}
-							}
-							SEL++;
+							SEL+=2;
 							//53
 							if (Cut == SEL) {
 								if (models.Get(Cafe, 0)->obj.get_anime(3).time > 30.f) {
@@ -1653,9 +1607,6 @@ namespace FPS_n2 {
 								if (isFirstLoop) {
 									std::string Opera = "data/umamusume/opera/model.mv1";
 									std::string Doto = "data/umamusume/doto/model.mv1";
-									sky.isDraw = true;
-									Board.isDraw = false;
-									Map.isDraw = true;
 									models.Get(Mobu, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
 									models.Get(Mobu, 1)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
 									models.Get(Mobu, 2)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
@@ -1673,15 +1624,13 @@ namespace FPS_n2 {
 							SEL++;
 							//55
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 10.f, 30.f);
-								}
-								else {
-									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8) + VECTOR_ref::vget(0.f, 0.3f, 20.f);
+								if (!isFirstLoop) {
 									Cut_Pic[Cut].cam_per = 0.95f;
 								}
+								easing_set(&rand_vp, VECTOR_ref::vget(GetRandf(7.f), GetRandf(7.f), GetRandf(7.f)), 0.95f);
+								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(7 + GetRand(3)) + VECTOR_ref::vget(0.f, 0.3f, 20.f) + rand_vp;
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + GetVector(1.5f, 190.f)*468.0f;
-								if (NowTime > (LONGLONG)(1000000.f * 62.455)) {
+								if (NowTime > (LONGLONG)(1000000.f * 62.655)) {
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(0.85f);
 								}
 							}
@@ -1761,7 +1710,6 @@ namespace FPS_n2 {
 						camera_main.set_cam_info(camera_main.fov, camera_main.near_, camera_main.far_);
 					}
 					models.Update();
-					Ship.Update();
 					if (!Time_Over()) {
 						isFirstLoop = false;
 						if (NowTime > Cut_Pic[Cut%Cut_Pic.size()].TIME) {
@@ -1778,7 +1726,6 @@ namespace FPS_n2 {
 						}
 					}
 				}
-
 				Effect_UseControl::Update_Effect();
 				if (Time_Over()) {
 					return false;
@@ -1804,30 +1751,16 @@ namespace FPS_n2 {
 				//
 			}
 			void BG_Draw(void) noexcept override {
-				if (!Time_Over()) {
-					if (sky.isDraw) {
-						auto fog_e = GetFogEnable();
-						SetFogEnable(FALSE);
-						SetUseLighting(FALSE);
-						{
-							sky.Draw();
-							DrawBillboard3D(this->sun_pos.get(), 0.5f, 0.5f, 200.f, 0.f, this->sun_pic.get(), TRUE);
-						}
-						SetUseLighting(TRUE);
-						SetFogEnable(fog_e);
-					}
+				models.Draw_Far();
+				if (models.Get(SKY, 0)->isDraw) {
+					DrawBillboard3D(this->sun_pos.get(), 0.5f, 0.5f, 200.f, 0.f, this->sun_pic.get(), TRUE);
 				}
 			}
-			void Shadow_Draw_Far(void) noexcept override {
-				Map.obj.DrawModel();
-			}
 			void Shadow_Draw_NearFar(void) noexcept override {
-				std::string SCHOOL = "data/model/school/model.mv1";
-				models.Get(SCHOOL, 0)->Draw();
-				models.Get(GATE, 0)->Draw();
+				models.Draw(false, true);
 			}
 			void Shadow_Draw(void) noexcept override {
-				models.Draw();
+				models.Draw(true, false);
 			}
 			void Main_Draw(void) noexcept override {
 				if (Cut == 2 || Cut == 3 || Cut == 4 || Cut == 6 || Cut == 7 || Cut == 8 || Cut == 34 || Cut == 30 || (Cut >= 45 && Cut <= 49) || Cut == 52 || Cut == 53) {
@@ -1844,10 +1777,7 @@ namespace FPS_n2 {
 						SetFogStartEnd(10, 300);
 					}
 				}
-				Board.Draw();
-				Map.Draw();
-				models.Draw();
-				Ship.Draw();
+				models.Draw(false, false);
 
 				SetFogEnable(FALSE);
 				{
@@ -1859,9 +1789,6 @@ namespace FPS_n2 {
 					graphs.Draw(DrawPts->disp_y);
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-			}
-			void Item_Draw(void) noexcept override {
-				TEMPSCENE::Item_Draw();
 			}
 			void LAST_Draw(void) noexcept override {
 				/*

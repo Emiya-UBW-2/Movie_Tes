@@ -18,6 +18,10 @@
 		SetArg(Mobu, "data/umamusume/mobu_black/model.mv1");//モブ
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
 		SetArg(NEWS, "data/model/paper/news.mv1");//新聞紙
+		SetArg(SHIP, "data/model/ship/model.mv1");
+		SetArg(MAP, "data/model/map/model.mv1");
+		SetArg(BOARD, "data/model/board/model.mv1");
+		SetArg(SKY, "data/model/sky/model.mv1");
 
 		SetArg(FACE, "data/picture/Cut.png");
 		SetArg(NEWSP, "data/picture/Cut2.png");
@@ -33,6 +37,9 @@
 		SetArg(FLASH1, "data/picture/sun.png");
 		SetArg(LOGO1, "data/picture/logo.png");
 //モデル読み込み
+		LoadModel(SKY, 1);
+		LoadModel(BOARD, 1);
+		LoadModel(MAP, 1);
 		LoadModel(SCHOOL, 1);
 		LoadModel(Tachyon, 6);
 		LoadModel(Tachyon2, 1);
@@ -50,6 +57,7 @@
 		LoadModel(Mobu, 12);//モブ
 		LoadModel(GATE, 1);//ゲート
 		LoadModel(NEWS, 12);//新聞紙
+		LoadModel(SHIP, 1);//船
 //モデル読み込み終わり
 
 //カット設定
@@ -61,6 +69,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 		SetNextResetPhysics();
+		SetDrawModel(BOARD, 0, 8);
 	//羽広がり中 1
 		SetCut(2.614);
 		SetCamvec(0, -10, -10);
@@ -136,6 +145,8 @@
 		SetDrawModel(Tachyon, 0, 9);
 		SetModelPhysicsSpeed(Tachyon, 0, 0.01);
 		SetModelOpacityRate(Tachyon, 0, 0.0);
+		SetDrawModel(MAP, 0, 19);
+		SetDrawModel(SKY, 0, 19);
 //10
 	//顔 10
 		SetCut(7.288f);
@@ -175,6 +186,9 @@
 		SetDrawModel(Tachyon2, 0, 14);
 		SetModelAnime(Tachyon2, 0, 3, TRUE, 0.6, 33.0);
 		SetModelMat(Tachyon2, 0, 0, 0, 0, 0, 0);
+		SetDrawModel(Tachyon, 0, 14);
+		SetModelPhysicsSpeed(Tachyon, 0, 1.0);
+		SetModelOpacityRate(Tachyon, 0, 0.0);
 	//君が願うことなら 15
 		SetCut(15.80f);
 		SetCamvec(10.122698f, 18.028077f, -100.985756f);
@@ -184,6 +198,7 @@
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 19);
 		SetModelAnime(Tachyon, 0, 2, TRUE, 0.45, 33.0);
+		SetModelOpacityRate(Tachyon, 0, 1.0);
 	//全てが現 16
 		SetCut(17.80f);
 		SetCamvec(10.122698f, 18.028077f, -100.985756f);
@@ -220,8 +235,8 @@
 //20
 	//隕石 20
 		SetCut(23.422);
-		SetCamvec(0, 2, 0);
-		SetCampos_NoneRad(0, 20, -20);
+		SetCamvec(0, 32, 0);
+		SetCampos_NoneRad(0, 50, -20);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 200.0, 0.0);
 		SetNextResetPhysics();
@@ -249,6 +264,8 @@
 		SetDrawGraph(FACE, 0, 23);
 		SetDrawGraph(NEWSP, 0, 23);
 		SetGraphBlur(NEWSP, 0, 23);
+		SetDrawModel(MAP, 0, 23);
+		SetDrawModel(SKY, 0, 23);
 	//羽ワイプ 22
 		SetCut(24.452);
 		SetCamvec(0, 15, 0);
@@ -281,6 +298,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetNextResetPhysics();
+		SetDrawModel(SKY, 0, 25);
 	//バイク戻る(る　世界を元に戻すにはぁ）25
 		SetCut(29.790);
 		SetCamvec(10.1226980, 18.0280770, -30.985756);
@@ -290,6 +308,7 @@
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 25);
 		SetDrawModel(Tachyon, 1, 25);
+		SetModelOpacityRate(Tachyon, 0, 1.0);
 		SetModelOpacityRate(Tachyon, 1, 0.0);
 		SetDrawModel(SCHOOL, 0, 25);
 		SetModelMat(SCHOOL, 0, 0, -819, -28.2, -590, -90);
@@ -301,6 +320,8 @@
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 27);
 		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
+		SetDrawModel(MAP, 0, 29);
+		SetDrawModel(SKY, 0, 29);
 	//バンバイク②(んがな）27
 		SetCut(32.52);
 		SetCamvec(10.1226980, 10.0280770, -50.985756);
@@ -317,6 +338,8 @@
 		SetDrawModel(Karen, 0, 29);
 		SetModelAnime(Karen, 0, 0, FALSE, 1.0, 6.25);
 		SetModelMat(Karen, 0, 0, 2, 0, 0, 0);
+		SetDrawModel(SHIP, 0, 29);
+		SetModelOpacityRate(SHIP, 0, 0.3);
 	//雨加賀美(ろのぉ）29
 		SetCut(35.522);
 		SetCamvec(0, 0, 0);
@@ -334,6 +357,7 @@
 		SetDrawModel(Cafe, 0, 30);
 		SetModelAnime(Cafe, 0, 0, TRUE, 0.0, 0);
 		SetModelMat(Cafe, 0, 0, 0, 0, 0, 0);
+		SetDrawModel(BOARD, 0, 31);
 	//雨加賀美②(時計）31
 		SetCut(36.775);
 		SetCamvec(0, 17, -4.5);
@@ -357,6 +381,8 @@
 		SetDrawModel(Scarlet, 0, 34);
 		SetModelAnime(Scarlet, 0, 0, FALSE, 0.6, -1);
 		SetModelOpacityRate(Scarlet, 0, 0.5);
+		SetDrawModel(MAP, 0, 34);
+		SetDrawModel(SKY, 0, 34);
 	//陽(）33
 		SetCut(38.986);
 		SetCamvec(0, 20, -7);
@@ -420,6 +446,8 @@
 		SetDrawModel(Tachyon2, 0, 39);
 		SetModelAnime(Tachyon2, 0, 13, FALSE, 1.2, -1);
 		SetModelMat(Tachyon2, 0, 0, 0, 0, 0, 180);
+		SetDrawModel(MAP, 0, 44);
+		SetDrawModel(SKY, 0, 44);
 //40
 	//オフ2(）40
 		SetCut(44.311);
@@ -460,6 +488,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
 		SetDrawGraph(ANIME1, 0, 46);
+		SetDrawModel(BOARD, 0, 49);
 	//ワイプ（に）46
 		SetCut(50.447);
 		SetCampos_NoneRad(32.2115100, 14.9972310, -18.595667);
@@ -496,6 +525,8 @@
 		SetNextResetPhysics();
 		SetDrawModel(Karen, 0, 50);
 		SetModelAnime(Karen, 0, 1, FALSE, 0.95, -1);
+		SetDrawModel(MAP, 0, 51);
+		SetDrawModel(SKY, 0, 51);
 	//だばー(い　) 51
 		SetCut(57.462);
 		SetCampos_NoneRad(0.3, 18.0, -28.595667);
@@ -514,6 +545,7 @@
 		SetModelAnime(Cafe, 0, 3, FALSE, 0.8, -1);
 		SetModelMat(Cafe, 0, 0, 0, 0, 0, 0);
 		SetModelOpacityRate(Cafe, 0, 1.0);
+		SetDrawModel(BOARD, 0, 53);
 	//雨加賀美(強さ　信じられる) 53
 		SetCut(60.290);
 		SetCamvec(0, 17, -4.5);
@@ -545,6 +577,8 @@
 		SetModelAnime(Mobu, 2, 4, FALSE, 0.82, -1);
 		SetModelMat(Mobu, 2, 0, 20.0, 0.0, -2040.0, 0);
 		SetDrawModel(GATE, 0, 56);
+		SetDrawModel(MAP, 0, 58);
+		SetDrawModel(SKY, 0, 58);
 	//クロックアップ(ぅ　高速の) 55
 		SetCut(62.775);
 		SetCamup(0, 1, 0);
