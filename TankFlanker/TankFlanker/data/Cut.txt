@@ -22,6 +22,7 @@
 		SetArg(MAP, "data/model/map/model.mv1");
 		SetArg(BOARD, "data/model/board/model.mv1");
 		SetArg(SKY, "data/model/sky/model.mv1");
+		SetArg(SUN, "data/model/sun/model.mv1");
 
 		SetArg(FACE, "data/picture/Cut.png");
 		SetArg(NEWSP, "data/picture/Cut2.png");
@@ -38,6 +39,7 @@
 		SetArg(LOGO1, "data/picture/logo.png");
 //モデル読み込み
 		LoadModel(SKY, 1);
+		LoadModel(SUN, 1);
 		LoadModel(BOARD, 1);
 		LoadModel(MAP, 1);
 		LoadModel(SCHOOL, 1);
@@ -60,6 +62,16 @@
 		LoadModel(SHIP, 1);//船
 //モデル読み込み終わり
 
+	//ｾｯﾀｯﾌﾟ
+		SetModelMode(SCHOOL, 0, FAR_TRUE);
+		SetModelMode(GATE, 0, FAR_TRUE);
+		SetModelMode(MAP, 0, FAR_TRUE);
+		SetModelMode(MAP, 0, NEAR_FALSE);
+		SetModelMode(BOARD, 0, NEAR_FALSE);
+		SetModelMode(SHIP, NEAR_FALSE);
+		SetModelMode(SKY, 0, SKY_TRUE);
+		SetModelMode(SUN, 0, SKY_TRUE);
+		
 //カット設定
 //0
 	//羽広がり前 0
@@ -147,6 +159,7 @@
 		SetModelOpacityRate(Tachyon, 0, 0.0);
 		SetDrawModel(MAP, 0, 19);
 		SetDrawModel(SKY, 0, 19);
+		SetDrawModel(SUN, 0, 19);
 //10
 	//顔 10
 		SetCut(7.288f);
@@ -266,6 +279,7 @@
 		SetGraphBlur(NEWSP, 0, 23);
 		SetDrawModel(MAP, 0, 23);
 		SetDrawModel(SKY, 0, 23);
+		SetDrawModel(SUN, 0, 23);
 	//羽ワイプ 22
 		SetCut(24.452);
 		SetCamvec(0, 15, 0);
@@ -299,6 +313,7 @@
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(SKY, 0, 25);
+		SetDrawModel(SUN, 0, 25);
 	//バイク戻る(る　世界を元に戻すにはぁ）25
 		SetCut(29.790);
 		SetCamvec(10.1226980, 18.0280770, -30.985756);
@@ -322,6 +337,7 @@
 		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
 		SetDrawModel(MAP, 0, 29);
 		SetDrawModel(SKY, 0, 29);
+		SetDrawModel(SUN, 0, 29);
 	//バンバイク②(んがな）27
 		SetCut(32.52);
 		SetCamvec(10.1226980, 10.0280770, -50.985756);
@@ -383,6 +399,7 @@
 		SetModelOpacityRate(Scarlet, 0, 0.5);
 		SetDrawModel(MAP, 0, 34);
 		SetDrawModel(SKY, 0, 34);
+		SetDrawModel(SUN, 0, 34);
 	//陽(）33
 		SetCut(38.986);
 		SetCamvec(0, 20, -7);
@@ -448,6 +465,7 @@
 		SetModelMat(Tachyon2, 0, 0, 0, 0, 0, 180);
 		SetDrawModel(MAP, 0, 44);
 		SetDrawModel(SKY, 0, 44);
+		SetDrawModel(SUN, 0, 44);
 //40
 	//オフ2(）40
 		SetCut(44.311);
@@ -527,6 +545,7 @@
 		SetModelAnime(Karen, 0, 1, FALSE, 0.95, -1);
 		SetDrawModel(MAP, 0, 51);
 		SetDrawModel(SKY, 0, 51);
+		SetDrawModel(SUN, 0, 51);
 	//だばー(い　) 51
 		SetCut(57.462);
 		SetCampos_NoneRad(0.3, 18.0, -28.595667);
@@ -579,6 +598,7 @@
 		SetDrawModel(GATE, 0, 56);
 		SetDrawModel(MAP, 0, 58);
 		SetDrawModel(SKY, 0, 58);
+		SetDrawModel(SUN, 0, 58);
 	//クロックアップ(ぅ　高速の) 55
 		SetCut(62.775);
 		SetCamup(0, 1, 0);

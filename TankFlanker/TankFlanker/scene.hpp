@@ -289,9 +289,6 @@ namespace FPS_n2 {
 				void Set() {
 					for (auto& m : model) {
 						m.isDraw = false;
-						m.isFar = false;
-						m.IsNearShadow = true;
-						m.IsFarShadow = false;
 					}
 				}
 				void Update() {
@@ -701,7 +698,7 @@ namespace FPS_n2 {
 			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
 			std::string GATE = "data/model/map/model_gate.mv1";
 			std::string SHIP = "data/model/ship/model.mv1";
-			std::string SKY = "data/model/sky/model.mv1";
+			std::string SUN = "data/model/sun/model.mv1";
 
 			std::string FACE = "data/picture/Cut.png";
 			std::string NEWSP = "data/picture/Cut2.png";
@@ -717,14 +714,10 @@ namespace FPS_n2 {
 			std::string FLASH1 = "data/picture/sun.png";
 			std::string LOGO1 = "data/picture/logo.png";
 
-			GraphHandle sun_pic;			//太陽
-			VECTOR_ref sun_pos;				//太陽
-
-			ModelControl models;
-			GraphControl graphs;
-
 			float per_logo = 1.f;
 			//データ
+			ModelControl models;
+			GraphControl graphs;
 			SoundHandle BGM;
 			size_t Cut = 0;
 			std::vector<Cut_Info> Cut_Pic;
@@ -755,12 +748,6 @@ namespace FPS_n2 {
 			using TEMPSCENE::TEMPSCENE;
 			void Awake(void) noexcept override {
 				TEMPSCENE::Awake();
-				//
-				SetUseASyncLoadFlag(TRUE);
-				{
-					this->sun_pic = GraphHandle::Load("data/picture/sun.png");					//sun
-				}
-				SetUseASyncLoadFlag(FALSE);
 				//
 				camera_main.campos = VECTOR_ref::vget(0, 20, -20);
 				camera_main.camvec = VECTOR_ref::vget(0, 20, 0);
@@ -956,6 +943,18 @@ namespace FPS_n2 {
 								auto* t = models.Get(args[0], std::stoi(args[1]));
 								t->Cutinfo_.back().OpacityRate = std::stof(args[2]);
 							}
+							else if (func.find("SetModelMode") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								if (args[2] == "SKY_TRUE") {
+									t->isFar = true;
+								}
+								if (args[2] == "NEAR_FALSE") {
+									t->IsNearShadow = false;
+								}
+								if (args[2] == "FAR_TRUE") {
+									t->IsFarShadow = true;
+								}
+							}
 						}
 						//テロップ
 						{
@@ -997,24 +996,14 @@ namespace FPS_n2 {
 				}
 				WaitKey();
 				SetUseASyncLoadFlag(FALSE);
-				//モデルの事前処理
+				models.Set();
 				{
-					std::string SCHOOL = "data/model/school/model.mv1";
+					//モデルの事前処理
 					std::string MAP = "data/model/map/model.mv1";
 					std::string BOARD = "data/model/board/model.mv1";
-
-					models.Set();
-					models.Get(SHIP)->IsNearShadow = false;
-					models.Get(SHIP)->obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
-					models.Get(SCHOOL, 0)->IsFarShadow = true;
-					models.Get(GATE, 0)->IsFarShadow = true;
-					models.Get(MAP, 0)->IsFarShadow = true;
-					models.Get(MAP, 0)->IsNearShadow = false;
 					models.Get(MAP, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
-					models.Get(BOARD, 0)->IsFarShadow = false;
-					models.Get(BOARD, 0)->IsNearShadow = false;
 					models.Get(BOARD, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
-					models.Get(SKY, 0)->isFar = true;
+					models.Get(SHIP)->obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
 					//モデル座標事前準備
 					graphs.Get(FACE)->X.Set((float)(y_r(1920 * 1 / 2)), 0.f);
 					graphs.Get(FACE)->Y.Set((float)(y_r(1080 * 1 / 2)), 0.f);
@@ -1034,7 +1023,7 @@ namespace FPS_n2 {
 			void Set(void) noexcept override {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
-				this->sun_pos = Get_Light_vec().Norm() * -1500.f;
+				models.Get(SUN, 0)->obj.SetMatrix( MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				Cut = 41;
 				Cut = 0;
 				SetUseASyncLoadFlag(FALSE);
@@ -1752,9 +1741,6 @@ namespace FPS_n2 {
 			}
 			void BG_Draw(void) noexcept override {
 				models.Draw_Far();
-				if (models.Get(SKY, 0)->isDraw) {
-					DrawBillboard3D(this->sun_pos.get(), 0.5f, 0.5f, 200.f, 0.f, this->sun_pic.get(), TRUE);
-				}
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
 				models.Draw(false, true);
@@ -1778,7 +1764,6 @@ namespace FPS_n2 {
 					}
 				}
 				models.Draw(false, false);
-
 				SetFogEnable(FALSE);
 				{
 					if (Box_ALPHA != 0.f) {
@@ -1791,11 +1776,7 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 			void LAST_Draw(void) noexcept override {
-				/*
-				int xxx_m = DrawPts->disp_x * 3 / 4 - y_r(200);
-				int yyy_m = DrawPts->disp_y * 3 / 4;
-				movie.DrawExtendGraph(xxx_m, yyy_m, DrawPts->disp_x / 4 + xxx_m, DrawPts->disp_y / 4 + yyy_m, FALSE);
-				*/
+				//movie.DrawGraph(DrawPts->disp_x * 3 / 4 - y_r(200), DrawPts->disp_y * 3 / 4, FALSE);
 			}
 		};
 	};
