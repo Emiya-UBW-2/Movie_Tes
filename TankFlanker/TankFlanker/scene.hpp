@@ -697,8 +697,6 @@ namespace FPS_n2 {
 			std::string Karen = "data/umamusume/karen/model.mv1";
 			std::string Mobu = "data/umamusume/mobu_black/model.mv1";
 			std::string GATE = "data/model/map/model_gate.mv1";
-			std::string SHIP = "data/model/ship/model.mv1";
-			std::string SUN = "data/model/sun/model.mv1";
 
 			std::string FACE = "data/picture/Cut.png";
 			std::string NEWSP = "data/picture/Cut2.png";
@@ -1003,7 +1001,6 @@ namespace FPS_n2 {
 					std::string BOARD = "data/model/board/model.mv1";
 					models.Get(MAP, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, -2394.f))*MATRIX_ref::RotY(deg2rad(90)));
 					models.Get(BOARD, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.25f, 0.f)));
-					models.Get(SHIP)->obj.SetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f);
 					//ƒ‚ƒfƒ‹À•WŽ–‘O€”õ
 					graphs.Get(FACE)->X.Set((float)(y_r(1920 * 1 / 2)), 0.f);
 					graphs.Get(FACE)->Y.Set((float)(y_r(1080 * 1 / 2)), 0.f);
@@ -1013,16 +1010,23 @@ namespace FPS_n2 {
 					graphs.Get(SODE6, 0)->SetBright(108, 108, 108);
 					graphs.Get(SODE5, 0)->SetBright(144, 144, 144);
 					graphs.Get(SODE6, 1)->SetBright(192, 192, 192);
-					graphs.Get(FLASH1, 3)->Set_Base(0, 1, 0, 1, 0, graphs.Get(FLASH1, 3)->Scale.Ans, 1, 0, 1.f, 0.9f);
-					graphs.Get(FLASH1, 4)->Set_Base(0, 1, 0, 1, 0, graphs.Get(FLASH1, 4)->Scale.Ans, 1, 0, 1.f, 0.9f);
-					graphs.Get(FLASH1, 5)->Set_Base(0, 1, 0, 1, 0, graphs.Get(FLASH1, 5)->Scale.Ans, 1, 0, 1.f, 0.9f);
-					graphs.Get(LOGO1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0.f, 0.5f, 0, 0, 1.f, 0.f);
+					graphs.Get(FLASH1, 3)->Scale.Set(graphs.Get(FLASH1, 3)->Scale.Ans, 0);
+					graphs.Get(FLASH1, 3)->Alpha.Set(1.f, 0.9f);
+					graphs.Get(FLASH1, 4)->Scale.Set(graphs.Get(FLASH1, 4)->Scale.Ans, 0);
+					graphs.Get(FLASH1, 4)->Alpha.Set(1.f, 0.9f);
+					graphs.Get(FLASH1, 5)->Scale.Set(graphs.Get(FLASH1, 5)->Scale.Ans, 0);
+					graphs.Get(FLASH1, 5)->Alpha.Set(1.f, 0.9f);
+					graphs.Get(LOGO1)->X.Set((float)(y_r(1920 * 1 / 2)), 0.f);
+					graphs.Get(LOGO1)->Y.Set((float)(y_r(1080 * 1 / 2)), 0.f);
+					graphs.Get(LOGO1)->Scale.Set(0.5f, 0.f);
+					graphs.Get(LOGO1)->Alpha.Set(1.f, 0.f);
 				}
 			}
 		public:
 			void Set(void) noexcept override {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.5f, -0.5f, 0.5f), GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				TEMPSCENE::Set();
+				std::string SUN = "data/model/sun/model.mv1";
 				models.Get(SUN, 0)->obj.SetMatrix( MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				Cut = 41;
 				Cut = 0;
@@ -1317,39 +1321,20 @@ namespace FPS_n2 {
 								else {
 									Cut_Pic[Cut].cam_per = (camzb_28 > -8.f) ? 0.9f : 0.95f;
 								}
-								{
-									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f);
-									camzb_28 = std::max(camzb_28 - 100.f / FPS, -10.f);
-									models.Get(SHIP)->obj.SetPosition(camera_main.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z));
-									ship_z += ship_zadd / FPS;
-									if (ship_zadd <= 0.95f) {
-										easing_set(&ship_zadd, 1.f, 0.95f);
-									}
-									else {
-										ship_zadd = 1.f;
-									}
+								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
+								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f);
+								camzb_28 = std::max(camzb_28 - 100.f / FPS, -10.f);
+								std::string SHIP = "data/model/ship/model.mv1";
+								models.Get(SHIP)->obj.SetMatrix(MATRIX_ref::GetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f)*MATRIX_ref::Mtrans(camera_main.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z)));
+								ship_z += ship_zadd / FPS;
+								if (ship_zadd <= 0.95f) {
+									easing_set(&ship_zadd, 1.f, 0.95f);
+								}
+								else {
+									ship_zadd = 1.f;
 								}
 							}
-							SEL++;
-							//29
-							if (Cut == SEL) {
-								Cut_Pic[Cut].cam_per = (camzb_28 > -8.f) ? 0.9f : 0.95f;
-								{
-									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, camzb_28);
-									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(2.f, 12.f, 6.f);
-									camzb_28 = std::max(camzb_28 - 100.f / FPS, -10.f);
-									models.Get(SHIP)->obj.SetPosition(camera_main.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z));
-									ship_z += ship_zadd / FPS;
-									if (ship_zadd <= 0.95f) {
-										easing_set(&ship_zadd, 1.f, 0.95f);
-									}
-									else {
-										ship_zadd = 1.f;
-									}
-								}
-							}
-							SEL+=3;
+							SEL+=4;
 							//32
 							if (Cut == SEL) {
 								std::string Scarlet = "data/umamusume/scarlet/model.mv1";

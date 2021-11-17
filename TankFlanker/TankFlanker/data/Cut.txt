@@ -68,7 +68,7 @@
 		SetModelMode(MAP, 0, FAR_TRUE);
 		SetModelMode(MAP, 0, NEAR_FALSE);
 		SetModelMode(BOARD, 0, NEAR_FALSE);
-		SetModelMode(SHIP, NEAR_FALSE);
+		SetModelMode(SHIP, 0, NEAR_FALSE);
 		SetModelMode(SKY, 0, SKY_TRUE);
 		SetModelMode(SUN, 0, SKY_TRUE);
 		
@@ -335,9 +335,9 @@
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 27);
 		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
-		SetDrawModel(MAP, 0, 29);
-		SetDrawModel(SKY, 0, 29);
-		SetDrawModel(SUN, 0, 29);
+		SetDrawModel(MAP, 0, 28);
+		SetDrawModel(SKY, 0, 28);
+		SetDrawModel(SUN, 0, 28);
 	//バンバイク②(んがな）27
 		SetCut(32.52);
 		SetCamvec(10.1226980, 10.0280770, -50.985756);
@@ -346,23 +346,19 @@
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetNextResetPhysics();
 	//寝る女(い　Moving First ここ）28
-		SetCut(34.654);
+		SetCut(35.522);
 		SetCamvec(0, 0, 0);
 		SetCampos_NoneRad(2, 12, 6);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
-		SetDrawModel(Karen, 0, 29);
+		SetDrawModel(Karen, 0, 28);
 		SetModelAnime(Karen, 0, 0, FALSE, 1.0, 6.25);
 		SetModelMat(Karen, 0, 0, 2, 0, 0, 0);
-		SetDrawModel(SHIP, 0, 29);
+		SetDrawModel(SHIP, 0, 28);
 		SetModelOpacityRate(SHIP, 0, 0.3);
-	//雨加賀美(ろのぉ）29
-		SetCut(35.522);
-		SetCamvec(0, 0, 0);
-		SetCampos_NoneRad(2, 10, 8);
-		SetCamup(0, 1, 0);
-		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetNextResetPhysics();
+	//雨加賀美(ろのぉ）29(不要カット)
+		SetCut(35.522);
 //30
 	//雨加賀美②(時計）30
 		SetCut(36.175);
