@@ -82,6 +82,7 @@
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 		SetNextResetPhysics();
 		SetDrawModel(BOARD, 0, 8);
+		SetModelMat(BOARD, 0, 0, 0, 0.25, 0, 0);
 	//âHçLÇ™ÇËíÜ 1
 		SetCut(2.614);
 		SetCamvec(0, -10, -10);
@@ -158,6 +159,7 @@
 		SetModelPhysicsSpeed(Tachyon, 0, 0.01);
 		SetModelOpacityRate(Tachyon, 0, 0.0);
 		SetDrawModel(MAP, 0, 19);
+		SetModelMat(MAP, 0, 0, 0.0, 0.25, -2394.0, 90);
 		SetDrawModel(SKY, 0, 19);
 		SetDrawModel(SUN, 0, 19);
 //10
