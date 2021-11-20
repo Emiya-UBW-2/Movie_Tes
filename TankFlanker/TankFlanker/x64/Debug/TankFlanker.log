@@ -113,8 +113,8 @@ c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
 c:\users\yabushita_maki\documents\github\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hInstance': 引数は関数の本体部で 1 度も参照されません。
-c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(77): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
-c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(80): warning C4505: 'Segment_Point_MinLen': 参照されていないローカル関数は削除されました。
+c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(78): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
+c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(81): warning C4505: 'Segment_Point_MinLen': 参照されていないローカル関数は削除されました。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(156): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。
 c:\users\yabushita_maki\documents\github\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(171): warning C4505: 'StringToWString': 参照されていないローカル関数は削除されました。
   TankFlanker.vcxproj -> C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\TankFlanker\x64\Debug\FPS_n2.exe

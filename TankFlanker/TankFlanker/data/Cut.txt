@@ -208,6 +208,7 @@
 		SetCut(15.80f);
 		SetCamvec(10.122698f, 18.028077f, -100.985756f);
 		SetCampos_ByRad(-5.5, 80, 88.0);
+		SetCampos_Attach(19,TRUE);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0 , 3000.0, 0.0);
 		SetNextResetPhysics();
@@ -333,6 +334,7 @@
 		SetCut(31.670);
 		SetCamvec(10.122698, 18.028077, -100.985756);
 		SetCampos_ByRad(-5.5, 80, 88);
+		SetCampos_Attach(26,TRUE);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 27);
@@ -351,6 +353,7 @@
 		SetCut(35.522);
 		SetCamvec(0, 0, 0);
 		SetCampos_NoneRad(2, 12, 6);
+		SetCampos_Attach(28,FALSE);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetDrawModel(Karen, 0, 28);
@@ -478,6 +481,7 @@
 		SetCut(46.084);
 		SetCamvec(-60.122698, 16.028077, -50.985756);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
+		SetCampos_Attach(43,TRUE);
 		SetDrawModel(GATE, 0, 43);
 		SetModelAnime(GATE, 0, 0, FALSE, 0.0, -1);
 		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
@@ -496,6 +500,7 @@
 		SetCamvec(-40.67, 5.53, -42.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetCampos_Attach(44,FALSE);
 		SetDrawModel(GATE, 0, 44);
 	//爆発（目）45
 		SetCut(50.024);
@@ -517,6 +522,7 @@
 		SetCut(50.830);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetCampos_Attach(49,FALSE);
 		SetDrawGraph(ANIME2, 0, 48);
 	//ワイプ（える）48
 		SetCut(51.601);
@@ -574,6 +580,7 @@
 		SetCut(61.440);
 		SetCamup(0, 1, 0);
 		SetCamInfo(1.5, 300.0, 3000.0, 0.0);
+		SetCampos_Attach(58,TRUE);
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 54);
 		SetModelAnime(Cafe, 0, 4, FALSE, 0.85, -1);
