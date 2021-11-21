@@ -208,7 +208,7 @@
 		SetCut(15.80f);
 		SetCamvec(10.122698f, 18.028077f, -100.985756f);
 		SetCampos_ByRad(-5.5, 80, 88.0);
-		SetCampos_Attach(19,TRUE);
+		SetCampos_Attach(16,TRUE,-5.5,80.0,88.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0 , 3000.0, 0.0);
 		SetNextResetPhysics();
@@ -234,6 +234,7 @@
 		SetCut(19.0f);
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 1.0 , 3000.0, 0.0);
+		SetCampos_Attach(17,TRUE,-8.5,80.0,38.0);
 		SetNextResetPhysics();
 		SetModelOpacityRate(Tachyon, 0, 0.0);
 		SetModelOpacityRate(Cafe, 0, 1.0);
@@ -242,11 +243,13 @@
 		SetCut(20.334f);
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 1.0 , 3000.0, 0.0);
+		SetCampos_Attach(18,TRUE,-5.5,260.0,34.0);
 		SetNextResetPhysics();
 	//ばれしもの(加賀美) 19
 		SetCut(21.452f);
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 1.0 , 3000.0, 0.0);
+		SetCampos_Attach(19,TRUE,25.5,80.0,38.0);
 		SetNextResetPhysics();
 //20
 	//隕石 20
@@ -334,7 +337,7 @@
 		SetCut(31.670);
 		SetCamvec(10.122698, 18.028077, -100.985756);
 		SetCampos_ByRad(-5.5, 80, 88);
-		SetCampos_Attach(26,TRUE);
+		SetCampos_Attach(26,TRUE,-5.5,80.0,88.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
 		SetDrawModel(GATE, 0, 27);
@@ -353,7 +356,7 @@
 		SetCut(35.522);
 		SetCamvec(0, 0, 0);
 		SetCampos_NoneRad(2, 12, 6);
-		SetCampos_Attach(28,FALSE);
+		SetCampos_Attach(28,FALSE,2.0,12.0,6.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 		SetDrawModel(Karen, 0, 28);
@@ -481,11 +484,23 @@
 		SetCut(46.084);
 		SetCamvec(-60.122698, 16.028077, -50.985756);
 		SetCamInfo(45, 1.0, 3000.0, 0.0);
-		SetCampos_Attach(43,TRUE);
+		SetCampos_Attach(42,TRUE, 0.0,30.0,20.0);
 		SetDrawModel(GATE, 0, 43);
 		SetModelAnime(GATE, 0, 0, FALSE, 0.0, -1);
 		SetModelMat(GATE, 0, 0, 0, 0.25, 0, 0);
 		SetDrawModel(Mobu, 0~11, 44);
+		SetModelMat(Mobu, 0, 0, -7.0, 0.25, -10.0, 0);//1
+		SetModelMat(Mobu, 1, 0, -21.0, 0.25, -10.0, 0);//3
+		SetModelMat(Mobu, 2, 0, -35.0, 0.25, -10.0, 0);//5
+		SetModelMat(Mobu, 3, 0, -49.0, 0.25, -10.0, 0);//7
+		SetModelMat(Mobu, 4, 0, -63.0, 0.25, -10.0, 0);//9
+		SetModelMat(Mobu, 5, 0, -77.0, 0.25, -10.0, 0);//11
+		SetModelMat(Mobu, 6, 0, -91.0, 0.25, -10.0, 0);//13
+		SetModelMat(Mobu, 7, 0, -105.0, 0.25, -10.0, 0);//15
+		SetModelMat(Mobu, 8, 0, -119.0, 0.25, -10.0, 0);//17
+		SetModelMat(Mobu, 9, 0, -133.0, 0.25, -10.0, 0);//19
+		SetModelMat(Mobu, 10, 0, -147.0, 0.25, -10.0, 0);//21
+		SetModelMat(Mobu, 11, 0, -161.0, 0.25, -10.0, 0);//23
 	//オフ近付く(戦うた）42
 		SetCut(47.122);
 		SetCamvec(-60.122698, 16.028077, -50.985756);
@@ -495,12 +510,13 @@
 		SetCamvec(-120.0, 37.0, -20.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(25, 1.0, 300.0, 0.0);
+		SetCampos_Attach(43,TRUE, -20.0,-10.0,20.0);
 	//オフガチャン(れ変わる）44
 		SetCut(49.761);
 		SetCamvec(-40.67, 5.53, -42.0);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
-		SetCampos_Attach(44,FALSE);
+		SetCampos_Attach(44,FALSE,1.0,-0.06,-0.13);
 		SetDrawModel(GATE, 0, 44);
 	//爆発（目）45
 		SetCut(50.024);
@@ -522,7 +538,7 @@
 		SetCut(50.830);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
-		SetCampos_Attach(49,FALSE);
+		SetCampos_Attach(48,FALSE,1.0, -0.3, 0.0);
 		SetDrawGraph(ANIME2, 0, 48);
 	//ワイプ（える）48
 		SetCut(51.601);
@@ -533,6 +549,7 @@
 		SetCut(54.848);
 		SetCamup(0, 1, 0);
 		SetCamInfo(35, 1.0, 3000.0, 0.0);
+		SetCampos_Attach(49,FALSE,31.383326, -7.549092, -18.688224);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon2, 0, 49);
 		SetModelAnime(Tachyon2, 0, 2, FALSE, 0.1, 35.0);
@@ -580,7 +597,7 @@
 		SetCut(61.440);
 		SetCamup(0, 1, 0);
 		SetCamInfo(1.5, 300.0, 3000.0, 0.0);
-		SetCampos_Attach(58,TRUE);
+		SetCampos_Attach(54,TRUE,0.5,260.0,608.0);
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 54);
 		SetModelAnime(Cafe, 0, 4, FALSE, 0.85, -1);
@@ -608,6 +625,7 @@
 		SetCut(62.775);
 		SetCamup(0, 1, 0);
 		SetCamInfo(2, 100.0, 3000.0, 0.0);
+		SetCampos_Attach(55,TRUE,1.5,190.0,468.0);
 		SetNextResetPhysics();
 		SetDrawModel(Cafe, 0, 55);
 		SetModelAnime(Cafe, 0, 4, FALSE, 0.98, -1);
@@ -632,6 +650,7 @@
 		SetCamvec(10.122698, 18.028077, -100.985756);
 		SetCamup(0, 1, 0);
 		SetCamInfo(45, 10.0, 3000.0, 0.0);
+		SetCampos_Attach(58,TRUE,-5.5,80.0,88.0);
 		SetNextResetPhysics();
 		SetDrawModel(Tachyon, 0, 56);
 		SetModelAnime(Tachyon, 0, 15, FALSE, 0.2, -1);

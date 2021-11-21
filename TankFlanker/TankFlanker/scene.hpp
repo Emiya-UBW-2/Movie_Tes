@@ -4,6 +4,8 @@
 namespace FPS_n2 {
 	class Sceneclass {
 	public:
+		template <class T>
+		static T Leap(const T& A, const T& B, float Per) { return A + (T)((float)(B - A)*Per); }
 		static float GetRandf(float m_arg) { return -m_arg + (float)(GetRand((int)(m_arg * 2.f * 10000.f))) / 10000.f; }
 		static VECTOR_ref GetVector(float Xrad, float Yrad) { return VECTOR_ref::vget(-cos(deg2rad(Xrad))*sin(-deg2rad(Yrad)), sin(deg2rad(Xrad)), -cos(deg2rad(Xrad))*cos(-deg2rad(Yrad))); }
 		class MAINLOOP;
@@ -889,8 +891,16 @@ namespace FPS_n2 {
 							else if (func.find("SetCampos_Attach") != std::string::npos) {
 								attached.Switch.resize(attached.Switch.size() + 1);
 								attached.Switch.back().SetSwitch((int)(Cut_Pic.size()) - 1, std::stoi(args[0]));
-								camattachInfo.reserve(camattachInfo.size() + 1);
+								camattachInfo.resize(camattachInfo.size() + 1);
 								camattachInfo.back().isradcam = (args[1].find("TRUE") != std::string::npos);
+								if (camattachInfo.back().isradcam) {
+									camattachInfo.back().xradcam = std::stof(args[2]);
+									camattachInfo.back().yradcam = std::stof(args[3]);
+									camattachInfo.back().rangecam = std::stof(args[4]);
+								}
+								else {
+									camattachInfo.back().poscam.Set(std::stof(args[2]), std::stof(args[3]), std::stof(args[4]));
+								}
 							}
 							else if (func.find("SetCamvec") != std::string::npos) {
 								Cut_Pic.back().Aim_camera.camvec = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
@@ -1091,21 +1101,34 @@ namespace FPS_n2 {
 				auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 				{
 					if (!Time_Over()) {
-						attached.Update_(Cut);
+						if (attached.Update_((int)Cut)) {
+							attached.Update_((int)Cut);
+						}
 						models.FirstUpdate((int)Cut, isFirstLoop);
 						graphs.FirstUpdate((int)Cut, isFirstLoop);
 
 						issetcampos = attached.GetSwitch();
 						isradcam = camattachInfo[attached.nowcut].isradcam;
-
+						if (isFirstLoop && attached.isFirstCut) {
+							if (isradcam) {
+								xradcam = camattachInfo[attached.nowcut].xradcam;
+								yradcam = camattachInfo[attached.nowcut].yradcam;
+								rangecam = camattachInfo[attached.nowcut].rangecam;
+							}
+							else {
+								poscam = camattachInfo[attached.nowcut].poscam;
+							}
+						}
 						int SEL = 1;
 						{
 							//1
 							if (Cut == SEL) {
-								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.9f, (float)(DrawPts->disp_y / 2), 0.9f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.875f, (float)(DrawPts->disp_y / 2), 0.875f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.85f, (float)(DrawPts->disp_y / 2), 0.85f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.825f, (float)(DrawPts->disp_y / 2), 0.825f, 0, 1.f, 0, 0, 1.f, 0.f);
+								if (isFirstLoop) {
+									graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.9f, (float)(DrawPts->disp_y / 2), 0.9f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.875f, (float)(DrawPts->disp_y / 2), 0.875f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.85f, (float)(DrawPts->disp_y / 2), 0.85f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.825f, (float)(DrawPts->disp_y / 2), 0.825f, 0, 1.f, 0, 0, 1.f, 0.f);
+								}
 								if (NowTime > (LONGLONG)(1000000.f * 1.421f)) {
 									graphs.Get(FIRST1, 0)->isDraw = true;
 									graphs.Get(FLASH1, 0)->isDraw = true;
@@ -1132,10 +1155,12 @@ namespace FPS_n2 {
 							SEL+=5;
 							//6
 							if (Cut == SEL) {
-								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
+								if (isFirstLoop) {
+									graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2), 0.f, (float)(DrawPts->disp_y / 2), 0.f, 0, 1.f, 0, 0, 1.f, 0.f);
+								}
 							}
 							SEL++;
 							//7
@@ -1147,6 +1172,10 @@ namespace FPS_n2 {
 									yradcam = 199.5f;
 									rangecam = 27.f;
 									xcamup = 0.f;
+									graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.9f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.9f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.875f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.875f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.85f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.85f, 0, 1.f, 0, 0, 1.f, 0.f);
+									graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.825f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.825f, 0, 1.f, 0, 0, 1.f, 0.f);
 								}
 								else {
 									issetcampos = true;
@@ -1162,10 +1191,6 @@ namespace FPS_n2 {
 									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
 									Cut_Pic[Cut].cam_per = 0.975f;
 								}
-								graphs.Get(SODE1, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.9f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.9f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE2, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.875f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.875f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE3, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(DrawPts->disp_x), 0.85f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.85f, 0, 1.f, 0, 0, 1.f, 0.f);
-								graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.825f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.825f, 0, 1.f, 0, 0, 1.f, 0.f);
 							}
 							SEL++;
 							//8
@@ -1201,14 +1226,17 @@ namespace FPS_n2 {
 							SEL+=4;
 							//13
 							if (Cut == SEL) {
+								if (isFirstLoop) {
+									spd_takion = 0.01f;
+								}
 								if (NowTime > (LONGLONG)(1000000.f * 8.864f)) {
-									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.6f);
+									spd_takion = 0.6f;
+								}
+								models.Get(Tachyon, 0)->UpdateAnim(2, true, spd_takion);
+								if (NowTime > (LONGLONG)(1000000.f * 8.864f)) {
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 0)->obj.frame(6);
 									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(17.178366f, 4.319146f, -36.016518f);
 									Cut_Pic[Cut].cam_per = 0.9f;
-								}
-								else {
-									models.Get(Tachyon, 0)->UpdateAnim(2, true, 0.01f);
 								}
 							}
 							SEL++;
@@ -1219,11 +1247,6 @@ namespace FPS_n2 {
 							SEL++;
 							//15
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									xradcam = -5.5f;
-									yradcam = 80.f;
-									rangecam = 88.f;
-								}
 								easing_set(&xradcam, -5.5f + GetRandf(3.f), 0.975f);
 								yradcam += 12.5f / FPS;
 							}
@@ -1240,9 +1263,6 @@ namespace FPS_n2 {
 							//17
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									xradcam = -8.5f;
-									yradcam = 80.f;
-									rangecam = 38.f;
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(9);
 								}
 								else {
@@ -1256,9 +1276,6 @@ namespace FPS_n2 {
 							//18
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									xradcam = -5.5f;
-									yradcam = 260.f;
-									rangecam = 34.f;
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(8);
 								}
 								else {
@@ -1271,12 +1288,7 @@ namespace FPS_n2 {
 							SEL++;
 							//19
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									xradcam = 25.5f;
-									yradcam = 80.f;
-									rangecam = 38.f;
-								}
-								else {
+								if (!isFirstLoop) {
 									Cut_Pic[Cut].cam_per = 0.975f;
 								}
 								Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon2, 0)->obj.frame(103);
@@ -1332,30 +1344,30 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									models.Get(Tachyon, 0)->obj.get_anime(8).time = 33.f;
-									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.f);
+									spd_takion = 0.f;
+								}
+								else {
+									Cut_Pic[Cut].cam_per = 0.95f;
 								}
 								if (!return_walk) {
 									if (models.Get(Tachyon, 0)->obj.get_anime(8).TimeEnd()) {
 										return_walk = true;
-										models.Get(Tachyon, 1)->OpacityRate = 1.f;
-										Cut_Pic[Cut].cam_per = 0.95f;
-										Cut_Pic[Cut].Aim_camera.fov = deg2rad(7);
 									}
 								}
 								else {
-									models.Get(Tachyon, 1)->UpdateAnim(9, false, 0.7f);
-									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 1)->obj.frame(9);
+									spd_takion = 0.7f;
+									models.Get(Tachyon, 1)->OpacityRate = 1.f;
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(7);
 								}
 								models.Get(Tachyon, 0)->UpdateAnim(8, false, return_walk ? -4.f : 4.f);
+								models.Get(Tachyon, 1)->UpdateAnim(9, false, spd_takion);
+								if (return_walk) {
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Tachyon, 1)->obj.frame(9);
+								}
 							}
 							SEL++;
 							//26
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									yradcam = 80.f;
-									rangecam = 88.f;
-									xradcam = -5.5f;
-								}
 								easing_set(&xradcam, -5.5f + GetRandf(3.f), 0.975f);
 								yradcam += 12.5f / FPS;
 							}
@@ -1371,15 +1383,12 @@ namespace FPS_n2 {
 								easing_set(&rand_vp, VECTOR_ref::vget(GetRandf(7.f), GetRandf(7.f), GetRandf(7.f)), 0.9f);
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(10.122698f, 10.028077f, -50.985756f) + rand_vp;
 								models.Get(GATE, 0)->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, 0.f)));
-								if (Gate_Xpos < 20.f) {
-									Gate_Xpos += 20.f *1.f / FPS;
-								}
+								Gate_Xpos = std::min(Gate_Xpos + 20.f / FPS, 20.f);
 							}
 							SEL++;
 							//28
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									poscam.Set(2.f, 12.f, 6.f);
 									ship_z = -5.f;
 									ship_zadd = 0.f;
 									zposcamv = 0.f;
@@ -1390,7 +1399,7 @@ namespace FPS_n2 {
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0, 0, zposcamv);
 								zposcamv = std::max(zposcamv - 100.f / FPS, -10.f);
 								std::string SHIP = "data/model/ship/model.mv1";
-								models.Get(SHIP)->obj.SetMatrix(MATRIX_ref::GetScale(VECTOR_ref::vget(1.f, 1.f, 1.f)*0.01f)*MATRIX_ref::Mtrans(camera_buf.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z)));
+								models.Get(SHIP)->obj.SetMatrix(MATRIX_ref::GetScale(0.01f)*MATRIX_ref::Mtrans(camera_buf.camvec + VECTOR_ref::vget(-2.f, 3.f, -ship_z)));
 								ship_z += ship_zadd / FPS;
 								if (ship_zadd <= 0.95f) {
 									easing_set(&ship_zadd, 1.f, 0.95f);
@@ -1418,10 +1427,6 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									xcamup = 0.1f;
-									xradcam = 0.f;
-									yradcam = 30.f;
-									rangecam = 20.f;
-									Gate_Xpos = -7.f;
 									for (int i = 0; i < 12; i++) {
 										auto* t = models.Get(Mobu, i);
 										t->b_run = 0.8f + (float)(GetRand(195)) / 1000.f;
@@ -1433,8 +1438,6 @@ namespace FPS_n2 {
 											}
 										}
 										t->UpdateAnim(t->Anim_Sel, false, 0.f);
-										t->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f)));
-										Gate_Xpos += -14.f;
 									}
 								}
 								else {
@@ -1470,7 +1473,7 @@ namespace FPS_n2 {
 								randcam = VECTOR_ref::vget(GetRandf(pp), GetRandf(pp), GetRandf(pp));
 								Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(xcamup, 0.9f, 0);
 								easing_set(&xcamup, 0.3f, 0.995f);
-								HostpassPTs->Set_Bright(226 + (int)((float)(255 - 226)*bright_43), 226 + (int)((float)(255 - 226)*bright_43), 196 + (int)((float)(255 - 196)*bright_43));
+								HostpassPTs->Set_Bright(Leap(226, 255, bright_43), Leap(226, 255, bright_43), Leap(216, 255, bright_43));
 								easing_set(&bright_43, 1.f, 0.9f);
 								rangecam = std::max(rangecam - 1456.f / FPS, 20.f);
 							}
@@ -1479,28 +1482,21 @@ namespace FPS_n2 {
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									randcam = VECTOR_ref::zero();
-									xradcam = -20.f;
-									yradcam = -10.f;
-									rangecam = 20.f;
 								}
 								yradcam += 40.f / FPS;
 							}
 							SEL++;
 							//44
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									poscam.Set(1.f,-0.1f,-0.13f);
-								}
 								if (NowTime > (LONGLONG)(1000000.f * 49.561)) {
 									models.Get(GATE, 0)->UpdateAnim(1, false, 1.f);
-									Gate_Xpos = 0.f;
-									Gate_Xpos += -7.f;
+									float MobuXpos = -7.f;
 									for (int i = 0; i < 12; i++) {
 										auto* t = models.Get(Mobu, i);
 										easing_set(&t->obj.get_anime(t->Anim_Sel).per, 0.f, t->b_run);
 										easing_set(&t->obj.get_anime(3).per, 1.f, t->b_run);
-										t->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(Gate_Xpos, 0.25f, -10.f - t->b_runrange * t->obj.get_anime(3).per)));
-										Gate_Xpos += -14.f;
+										t->obj.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(MobuXpos, 0.25f, -10.f - t->b_runrange * t->obj.get_anime(3).per)));
+										MobuXpos += -14.f;
 									}
 								}
 								if (NowTime > (LONGLONG)(1000000.f * 49.681)) {
@@ -1542,7 +1538,6 @@ namespace FPS_n2 {
 									camzb_41 = (float)(DrawPts->disp_y)*0.4f;
 									SetSpeed_Effect(Effect::ef_greexp, 0.1f);
 									SetSpeed_Effect(Effect::ef_greexp2, 0.1f);
-									poscam = VECTOR_ref::vget(1.f, -0.3f, 0.f);
 								}
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(47.211510f, 15.3f - 1.5f*(graphs.Get(ANIME2, 0)->Y.Ans - (float)(DrawPts->disp_y) / 2.f) / (float)(DrawPts->disp_y), 0.595667f);
 								easing_set(&graphs.Get(ANIME2, 0)->Y.Ans, (float)(DrawPts->disp_y) / 2.f + camzb_41, 0.7f);
@@ -1585,9 +1580,9 @@ namespace FPS_n2 {
 							SEL++;
 							//49
 							if (Cut == SEL) {
-								poscam = VECTOR_ref::vget(31.383326f, 25.543554f, -18.688224f);
 								VECTOR_ref aim = models.Get(Tachyon2, 0)->obj.frame(2);
 								aim.y(0.f);
+								//Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(32.211510f, 8.997231f, -18.595667f) + aim;
 								Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(-0.828184f, 16.546323f, -0.092557f) + aim;
 								graphs.Get(SODE5, 1)->X.Base -= (float)(y_r(300)) / FPS;
 								graphs.Get(SODE5, 1)->Y.Base += (float)(y_r(2800)) / FPS;
@@ -1646,9 +1641,6 @@ namespace FPS_n2 {
 									models.Get(Doto, 0)->obj.get_anime(0).time = 30.f + (float)GetRand(100) / 10.f;
 									models.Get(Cafe, 0)->obj.get_anime(4).time = (float)GetRand(100) / 10.f;
 									models.Get(Opera, 0)->obj.get_anime(0).time = (float)GetRand(100) / 10.f;
-									xradcam = 0.5f;
-									yradcam = 260.f;
-									rangecam = 608.f;
 									Cut_Pic[Cut].Aim_camera.camvec = models.Get(Cafe, 0)->obj.frame(7 + GetRand(3)) + VECTOR_ref::vget(0.f, 2.f, -30.f);
 								}
 								else {
@@ -1659,12 +1651,7 @@ namespace FPS_n2 {
 							SEL++;
 							//55
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									xradcam = 1.5f;
-									yradcam = 190.f;
-									rangecam = 468.f;
-								}
-								else {
+								if (!isFirstLoop) {
 									Cut_Pic[Cut].cam_per = 0.95f;
 								}
 								easing_set(&rand_vp, VECTOR_ref::vget(GetRandf(7.f), GetRandf(7.f), GetRandf(7.f)), 0.95f);
@@ -1676,11 +1663,6 @@ namespace FPS_n2 {
 							SEL++;
 							//56
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									xradcam = -5.5f;
-									yradcam = 80.f;
-									rangecam = 88.f;
-								}
 								easing_set(&xradcam, -5.5f + GetRandf(3.f), 0.975f);
 								yradcam += 12.5f / FPS;
 							}
@@ -1743,9 +1725,7 @@ namespace FPS_n2 {
 								Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + poscam + randcam;
 							}
 						}
-						//
 						graphs.Update();
-						//
 						if (Cut_Pic[Cut].isNextreset) { isNextreset = true; }
 						easing_set(&camera_buf.campos, Cut_Pic[Cut].Aim_camera.campos, Cut_Pic[Cut].cam_per);
 						easing_set(&camera_buf.camvec, Cut_Pic[Cut].Aim_camera.camvec, Cut_Pic[Cut].cam_per);
