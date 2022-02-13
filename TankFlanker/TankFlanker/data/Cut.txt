@@ -771,8 +771,8 @@
 		SetTelop(960, 918, 24, "【モブモデル】モブ用親父セット【配布中】", MIDDLE);
 	//テロップ19
 		AddTelopTime(2.000, 2.000f);
-		SetTelop(340, 582, 24, "Jean氏", LEFT);
-		SetTelop(400, 630, 24, "【MMDウマ娘】テイエムオペラオー【モデル配布】", MIDDLE);
+		SetTelop(340, 582, 24, "ゐそべぇ。氏", LEFT);
+		SetTelop(400, 630, 24, "ゐそべぇ。式テイエムオペラオー", MIDDLE);
 		SetTelop(1440, 582, 24, "EndressStorm氏", LEFT);
 		SetTelop(1500, 630, 24, "メイショウドトウ", MIDDLE);
 	//テロップ20

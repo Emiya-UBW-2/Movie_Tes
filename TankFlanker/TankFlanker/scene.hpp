@@ -1178,6 +1178,9 @@ namespace FPS_n2 {
 									graphs.Get(SODE4, 0)->Set_Base((float)(DrawPts->disp_x / 2) + (float)(-DrawPts->disp_x), 0.825f, (float)(DrawPts->disp_y / 2) + (float)(DrawPts->disp_y / 5), 0.825f, 0, 1.f, 0, 0, 1.f, 0.f);
 								}
 								else {
+									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
+									Cut_Pic[Cut].cam_per = 0.975f;
+
 									issetcampos = true;
 									isradcam = true;
 									SetScale_Effect(Effect::ef_reco, 3.f + range_b / 3.f);
@@ -1187,9 +1190,6 @@ namespace FPS_n2 {
 									rangecam = 27.0f + range_b;
 									easing_set(&xcamup, GetRandf(5.f) / 10.f + range_b / 50.f, 0.95f);
 									Cut_Pic[Cut].Aim_camera.camup = VECTOR_ref::vget(xcamup, 0.9f, 0);
-
-									Cut_Pic[Cut].Aim_camera.fov = deg2rad(45);
-									Cut_Pic[Cut].cam_per = 0.975f;
 								}
 							}
 							SEL++;
