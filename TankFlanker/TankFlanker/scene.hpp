@@ -1789,7 +1789,7 @@ namespace FPS_n2 {
 				//movie.Dispose();
 			}
 			void UI_Draw(void) noexcept  override {
-				printfDx("Cut : %d\n", Cut);
+				//printfDx("Cut : %d\n", Cut);
 				if (!isFreepos) {
 					auto NowTime = GetNowHiPerformanceCount() - BaseTime;
 					for (auto& t : Texts) {
