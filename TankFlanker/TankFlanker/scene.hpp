@@ -737,7 +737,7 @@ namespace FPS_n2 {
 
 			std::vector<Cut_tex> Texts;
 			LONGLONG BaseTime = 0;
-			//GraphHandle movie;
+			GraphHandle movie;
 			bool reset_p = true;
 			bool isNextreset = true;//カット終了時に物理をリセットするかどうか
 			bool isFirstLoop = true;//カット最初のループ化取得
@@ -1095,16 +1095,16 @@ namespace FPS_n2 {
 				Cut = 0;
 				SetUseASyncLoadFlag(FALSE);
 				BGM = SoundHandle::Load("data/sound2.wav");
-				/*
+				///*
 				movie = GraphHandle::Load("data/base_movie.mp4");
 				PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
 				ChangeMovieVolumeToGraph(0, movie.get());
-				*/
+				//*/
 				//プレイ用意
 				BGM.play(DX_PLAYTYPE_BACK, TRUE);
 				//BGM.vol(64);
 				BaseTime = GetNowHiPerformanceCount() - (Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0);
-				//SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000);
+				SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000);
 				PostPassParts->Set_Bright(226, 226, 216);
 			}
 			bool Update(void) noexcept override {
@@ -1799,7 +1799,7 @@ namespace FPS_n2 {
 				for (auto& p : Cut_Pic) { p.Dispose(); }
 				Cut_Pic.clear();
 				//BGM.Dispose();
-				//movie.Dispose();
+				movie.Dispose();
 			}
 			void UI_Draw(void) noexcept  override {
 				//printfDx("Cut : %d\n", Cut);
@@ -1860,8 +1860,8 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 			void LAST_Draw(void) noexcept override {
-				//auto* DrawParts = DXDraw::Instance();
-				//movie.DrawGraph(DrawParts->disp_x * 3 / 4 - y_r(200), DrawParts->disp_y * 3 / 4, FALSE);
+				auto* DrawParts = DXDraw::Instance();
+				movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 3 / 4, DrawParts->disp_x, DrawParts->disp_y, FALSE);
 			}
 		};
 	};
