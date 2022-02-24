@@ -40,9 +40,7 @@ namespace FPS_n2 {
 			const auto& Get_handle(void)const noexcept { return handle; }
 			void Set(int siz_t) {
 				this->size = siz_t;
-				SetUseASyncLoadFlag(TRUE);
 				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE,-1,2);
-				SetUseASyncLoadFlag(FALSE);
 			}
 		};
 	private:

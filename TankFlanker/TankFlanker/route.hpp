@@ -11,18 +11,23 @@ namespace FPS_n2 {
 		bool selpause{ true };
 	public:
 		main_c(void) noexcept {
-			auto OPTPTs = std::make_shared<OPTION>();								//設定読み込み
-			auto DrawPts = std::make_shared<DXDraw>("FPS_n2", OPTPTs, Frame_Rate);		//汎用
+			OPTION::Create();
+			auto* OptionParts = OPTION::Instance();
+			OptionParts->Load();								//設定読み込み
+			DXDraw::Create("FPS_n2", Frame_Rate);			//汎用
 #ifdef DEBUG
-			auto DebugPTs = std::make_shared<DeBuG>(Frame_Rate);					//デバッグ
+			DeBuG::Create(Frame_Rate);
+			auto DebugParts = DeBuG::Instance();					//デバッグ
 #endif // DEBUG
-			OPTPTs->Set_useVR(DrawPts->use_vr);
+			auto* DrawParts = DXDraw::Instance();
+			OptionParts->Set_useVR(DrawParts->use_vr);
 			//シェーダー
-			auto HostpassPTs = std::make_shared<HostPassEffect>(OPTPTs, DrawPts->disp_x, DrawPts->disp_y);				//ホストパスエフェクト(VR、フルスクリーン共用)
+			PostPassEffect::Create();
+			auto* PostPassParts = PostPassEffect::Instance();				//ホストパスエフェクト(VR、フルスクリーン共用)
 
 			effectControl.Init();																						//エフェクト
 			//シーン
-			auto MAINLOOPscene = std::make_shared<Sceneclass::MAINLOOP>(DrawPts, OPTPTs, HostpassPTs);
+			auto MAINLOOPscene = std::make_shared<Sceneclass::MAINLOOP>();
 			//開始処理
 			MAINLOOPscene->Awake();
 			//遷移先指定
@@ -42,7 +47,7 @@ namespace FPS_n2 {
 					const auto waits = GetNowHiPerformanceCount();
 					FPS = GetFPS();
 #ifdef DEBUG
-					DebugPTs->put_way();
+					DebugParts->put_way();
 #endif // DEBUG
 					{
 						//更新
@@ -51,7 +56,7 @@ namespace FPS_n2 {
 							selend = scenes_ptr->Update();
 						}
 						//VR空間に適用
-						DrawPts->Move_Player();
+						DrawParts->Move_Player();
 						//描画
 						{
 							//エフェクシアのアプデを60FPS相当に変更
@@ -61,23 +66,23 @@ namespace FPS_n2 {
 							//共通の描画前用意
 							scenes_ptr->ReadyDraw();
 							//UI書き込み
-							HostpassPTs->Set_UI_Draw([&] { scenes_ptr->UI_Draw(); });
+							PostPassParts->Set_UI_Draw([&] { scenes_ptr->UI_Draw(); });
 							//VRに移す
-							DrawPts->Draw_VR([&] {
+							DrawParts->Draw_VR([&] {
 								auto tmp = GetDrawScreen();
 								cam_info tmp_cam = scenes_ptr->Get_Camera();
 								tmp_cam.campos = GetCameraPosition();
 								tmp_cam.camvec = GetCameraTarget();
 								{
 									//被写体深度描画
-									HostpassPTs->BUF_Draw([&] { scenes_ptr->BG_Draw(); }, [&] { DrawPts->Draw_by_Shadow([&] { scenes_ptr->Main_Draw(); }); }, tmp_cam, effectControl.Update_effect_f);
+									PostPassParts->BUF_Draw([&] { scenes_ptr->BG_Draw(); }, [&] { DrawParts->Draw_by_Shadow([&] { scenes_ptr->Main_Draw(); }); }, tmp_cam, effectControl.Update_effect_f);
 									//最終描画
-									HostpassPTs->Set_MAIN_Draw();
+									PostPassParts->Set_MAIN_Draw();
 								}
 								GraphHandle::SetDraw_Screen(tmp, tmp_cam.campos, tmp_cam.camvec, tmp_cam.camup, tmp_cam.fov, tmp_cam.near_, tmp_cam.far_, false);
 								{
-									HostpassPTs->MAIN_Draw();											//デフォ描画
-									HostpassPTs->DrawUI(&scenes_ptr->Get_Camera(), DrawPts->use_vr);	//UI1
+									PostPassParts->MAIN_Draw();											//デフォ描画
+									PostPassParts->DrawUI(&scenes_ptr->Get_Camera(), DrawParts->use_vr);	//UI1
 									scenes_ptr->Item_Draw();											//UI2
 								}
 								}, scenes_ptr->Get_Camera());
@@ -86,19 +91,19 @@ namespace FPS_n2 {
 						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
 						{
 							//描画
-							if (DrawPts->use_vr) {
-								DrawBox(0, 0, DrawPts->disp_x, DrawPts->disp_y, GetColor(255, 255, 255), TRUE);
-								DrawPts->outScreen[0].DrawRotaGraph(DrawPts->disp_x / 2, DrawPts->disp_y / 2, 0.5f, 0, false);
+							if (DrawParts->use_vr) {
+								DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(255, 255, 255), TRUE);
+								DrawParts->outScreen[0].DrawRotaGraph(DrawParts->disp_x / 2, DrawParts->disp_y / 2, 0.5f, 0, false);
 							}
 							else {
-								DrawPts->outScreen[0].DrawGraph(0, 0, false);
+								DrawParts->outScreen[0].DrawGraph(0, 0, false);
 							}
 							//上に書く
 							scenes_ptr->LAST_Draw();
 							//デバッグ
 #ifdef DEBUG
-							DebugPTs->end_way();
-							DebugPTs->debug(10, 100, float(GetNowHiPerformanceCount() - waits) / 1000.f);
+							DebugParts->end_way();
+							DebugParts->debug(10, 100, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 #endif // DEBUG
 						}
 					}
@@ -108,7 +113,7 @@ namespace FPS_n2 {
 					printfDx("Async :%d\n", GetASyncLoadNum());
 #endif // DEBUG
 					//画面の反映
-					DrawPts->Screen_Flip();
+					DrawParts->Screen_Flip();
 					//終了判定
 					if (CheckHitKey(KEY_INPUT_ESCAPE) != 0) {
 						this->ending = false;
