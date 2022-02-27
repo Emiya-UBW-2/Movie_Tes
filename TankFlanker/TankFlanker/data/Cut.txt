@@ -2,6 +2,11 @@
 
 //
 		SetArg(Teio, "data/umamusume/teio/model.mv1");
+		
+		SetArg(Nice, "data/umamusume/nice/model.mv1");
+		SetArg(Tanhoiza, "data/umamusume/tanhoiza/model.mv1");
+		SetArg(Turbo, "data/umamusume/turbo/model.mv1");
+
 		SetArg(MAP, "data/model/map/model.mv1");
 		SetArg(SKY, "data/model/sky/model.mv1");
 		SetArg(SUN, "data/model/sun/model.mv1");
@@ -13,6 +18,10 @@
 		LoadModel(SUN, 1);
 		LoadModel(MAP, 1);
 		LoadModel(Teio, 1);
+		LoadModel(Nice, 1);
+		LoadModel(Tanhoiza, 1);
+		LoadModel(Turbo, 1);
+
 		LoadModel(LOGO, 1);
 //モデル読み込み終わり
 
@@ -33,10 +42,10 @@
 		SetDrawModel(Teio, 0, 0);
 		SetModelPhysicsSpeed(Teio, 0, 1);
 		SetModelAnime(Teio, 0, 0, FALSE, 0.3, 8);
-		SetDrawModel(MAP, 0, 13);
+		SetDrawModel(MAP, 0, 104);
 		SetModelMat(MAP, 0, 0, 0.0, -0.1, -2394.0, 90);
-		SetDrawModel(SKY, 0, 13);
-		SetDrawModel(SUN, 0, 13);
+		SetDrawModel(SKY, 0, 104);
+		SetDrawModel(SUN, 0, 104);
 		SetNextResetPhysics();
 	//羽広がり中 1
 		SetCut(1.714);
@@ -136,7 +145,7 @@
 		SetCamup(0, 1, 0);
 		SetCamInfo(25, 1.0, 60.0, 0.0);
 	//顔2 13
-		SetCut(25.0);
+		SetCut(21.589);
 		SetCamvec(5, 1, -38.5);
 		SetCampos_NoneRad(5, 8, -38);
 		SetCamup(0, 1, 0);
@@ -146,15 +155,56 @@
 		SetDrawGraph(LOGO1,0,13);
 		SetNextResetPhysics();
 	//顔2 14
-		SetCut(59.000);
-		SetCamvec(0, 15, 0);
-		SetCampos_NoneRad(-20, 15, -60);
+		SetCut(23.984);
+		SetCamvec(0, 3, 0);
+		SetCampos_NoneRad(0, 3, -60);
+		SetCamup(0.3, 0.9, 0);
+		SetCamInfo(15, 10.0, 100.0, 0.0);
+		SetDrawModel(Nice, 0, 14);
+		SetModelPhysicsSpeed(Nice, 0, 1);
+		SetModelAnime(Nice, 0, 0, TRUE, 0.5, 0);
+		SetNextResetPhysics();
+	//顔2 15
+		SetCut(24.400);
+		SetCamvec(0, 0, 0);
+		SetCampos_NoneRad(0, 0, 0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(5, 10.0, 100.0, 0.0);
+		SetDrawModel(Tanhoiza, 0, 15);
+		SetModelAnime(Tanhoiza, 0, 0, FALSE, 1.2, 0);
+		SetNextResetPhysics();
+	//顔2 16
+		SetCut(25.000);
+		SetCamvec(0, 0, 0);
+		SetCampos_NoneRad(0, 0, 0);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 1.0, 60.0, 0.0);
+		SetDrawModel(Tanhoiza, 0, 16);
+		SetModelAnime(Tanhoiza, 0, 0, FALSE, 1.0, 0);
+		SetNextResetPhysics();
+	//顔2 17
+		SetCut(26.000);
+		SetCamvec(0, 10, 3);
+		SetCampos_NoneRad(8, 12, -20);
+		SetCamup(0, 1, 0);
+		SetCamInfo(35, 1.0, 100.0, 0.0);
+		SetDrawModel(Turbo, 0, 18);
+		SetModelAnime(Turbo, 0, 0, FALSE, 0.8, 0);
+	//顔2 18
+		SetCut(30.000);
+		SetCamvec(1, 16, 0);
+		SetCampos_NoneRad(1, 16, -10);
+		SetCamup(0, 1, 0);
+		SetCamInfo(25, 1.0, 30.0, 0.0);
+	//リミット 30.000
+		SetCut(50.000);
+		SetCamvec(0, 17.5, 0);
+		SetCampos_NoneRad(-20, 17.5, -60);
 		SetCamup(0, 1, 0);
 		SetCamInfo(15, 10.0, 100.0, 0.0);
 		SetDrawModel(Teio, 0, 14);
 		SetModelPhysicsSpeed(Teio, 0, 1);
 		SetModelAnime(Teio, 0, 5, FALSE, 0.0, 0);
-		SetDrawGraph(LOGO1,0,14);
 //LAST
 
 
