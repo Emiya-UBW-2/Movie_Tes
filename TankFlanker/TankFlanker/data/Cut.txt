@@ -6,6 +6,13 @@
 		SetArg(Nice, "data/umamusume/nice/model.mv1");
 		SetArg(Tanhoiza, "data/umamusume/tanhoiza/model.mv1");
 		SetArg(Turbo, "data/umamusume/turbo/model.mv1");
+		SetArg(Ikuno, "data/umamusume/ikuno/model.mv1");
+
+		SetArg(Rudolf, "data/umamusume/rudolf/model.mv1");
+		SetArg(Rice, "data/umamusume/rice/model.mv1");
+		SetArg(Burbon, "data/umamusume/burbon/model.mv1");
+		SetArg(MAC, "data/umamusume/mac/model.mv1");
+		
 
 		SetArg(MAP, "data/model/map/model.mv1");
 		SetArg(SKY, "data/model/sky/model.mv1");
@@ -21,7 +28,12 @@
 		LoadModel(Nice, 1);
 		LoadModel(Tanhoiza, 1);
 		LoadModel(Turbo, 1);
-
+		LoadModel(Ikuno, 1);
+		LoadModel(Rudolf, 1);
+		LoadModel(Rice, 1);
+		LoadModel(Burbon, 1);
+		LoadModel(MAC, 1);
+		
 		LoadModel(LOGO, 1);
 //モデル読み込み終わり
 
@@ -42,10 +54,10 @@
 		SetDrawModel(Teio, 0, 0);
 		SetModelPhysicsSpeed(Teio, 0, 1);
 		SetModelAnime(Teio, 0, 0, FALSE, 0.3, 8);
-		SetDrawModel(MAP, 0, 104);
+		SetDrawModel(MAP, 0, 20);
 		SetModelMat(MAP, 0, 0, 0.0, -0.1, -2394.0, 90);
-		SetDrawModel(SKY, 0, 104);
-		SetDrawModel(SUN, 0, 104);
+		SetDrawModel(SKY, 0, 20);
+		SetDrawModel(SUN, 0, 20);
 		SetNextResetPhysics();
 	//羽広がり中 1
 		SetCut(1.714);
@@ -183,20 +195,88 @@
 		SetModelAnime(Tanhoiza, 0, 0, FALSE, 1.0, 0);
 		SetNextResetPhysics();
 	//顔2 17
-		SetCut(26.000);
-		SetCamvec(0, 10, 3);
-		SetCampos_NoneRad(8, 12, -20);
+		SetCut(25.700);
+		SetCamvec(0, 13, 3);
+		SetCampos_NoneRad(8, 15, -20);
 		SetCamup(0, 1, 0);
-		SetCamInfo(35, 1.0, 100.0, 0.0);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
 		SetDrawModel(Turbo, 0, 18);
 		SetModelAnime(Turbo, 0, 0, FALSE, 0.8, 0);
 	//顔2 18
-		SetCut(30.000);
-		SetCamvec(1, 16, 0);
-		SetCampos_NoneRad(1, 16, -10);
+		SetCut(27.200);
+		SetCamvec(5, 20, 0);
+		SetCampos_NoneRad(1, 16, -20);
 		SetCamup(0, 1, 0);
 		SetCamInfo(25, 1.0, 30.0, 0.0);
-	//リミット 30.000
+		SetNextResetPhysics();
+	//顔2 19
+		SetCut(28.500);
+		SetCamvec(0, 18, 0);
+		SetCampos_NoneRad(2, 18, -7);
+		SetCamup(0, 1, 0);
+		SetCamInfo(20, 1.0, 30.0, 0.0);
+		SetDrawModel(Ikuno, 0, 20);
+		SetModelAnime(Ikuno, 0, 0, FALSE, 0.5, 0);
+	//顔2 20
+		SetCut(30.000);
+		SetCamvec(2, 18.0, 0);
+		SetCampos_NoneRad(8, 18.5, -7);
+		SetCamup(0.2, 1, 0.05);
+		SetCamInfo(35, 1.0, 30.0, 0.975);
+		SetNextResetPhysics();
+	//顔2 21
+		SetCut(32.106);
+		SetCamvec(-10, 17.5, 30);
+		SetCampos_NoneRad(0, 18.5, 0);
+		SetCamup(0.0, 1, 0.0);
+		SetCamInfo(10, 1.0, 50.0, 0.0);
+		SetDrawModel(Teio, 0, 22);
+		SetModelAnime(Teio, 0, 6, FALSE, 0.0, 0);
+		SetModelMat(Teio, 0, 0.0, -2.0, 0.0, 30.0, 0);
+		SetNextResetPhysics();
+	//顔2 22
+		SetCut(34.560);
+		SetCamvec(30, 17.5, 0);
+		SetCampos_NoneRad(0, 18.5, 0);
+		SetCamup(0.0, 1, 0.0);
+		SetCamInfo(10, 1.0, 50.0, 0.95);
+		SetDrawModel(Rudolf, 0, 23);
+		SetModelAnime(Rudolf, 0, 0, FALSE, 0.0, 0);
+		SetModelMat(Rudolf, 0, 90.0, 30.0, -1.5, -2.0, 0);
+		SetNextResetPhysics();
+	//顔2 23
+		SetCut(37.840);
+		SetCamvec(10, 17.5, -30);
+		SetCampos_NoneRad(0, 18.5, 0);
+		SetCamup(0.0, 1, 0.0);
+		SetCamInfo(10, 1.0, 50.0, 0.95);
+		SetDrawModel(Rice, 0, 24);
+		SetModelAnime(Rice, 0, 0, FALSE, 0.0, 0);
+		SetModelMat(Rice, 0, 180.0, 4.0, 15.0, -30.0, 0);
+		SetNextResetPhysics();
+	//顔2 24
+		SetCut(40.728);
+		SetCamvec(-30, 17.5, 0);
+		SetCampos_NoneRad(0, 18.5, 0);
+		SetCamup(0.0, 1, 0.0);
+		SetCamInfo(10, 1.0, 50.0, 0.95);
+		SetDrawModel(Burbon, 0, 25);
+		SetModelAnime(Burbon, 0, 0, FALSE, 0.0, 0);
+		SetModelMat(Burbon, 0, -45.0, -30.0, -0.6, 2.0, 0);
+		SetNextResetPhysics();
+	//顔2 25
+		SetCut(44.000);
+		SetCamvec(-10, 17.5, 30);
+		SetCampos_NoneRad(0, 18.5, 0);
+		SetCamup(0.0, 1, 0.0);
+		SetCamInfo(10, 2.0, 50.0, 0.95);
+		SetDrawModel(MAC, 0, 25);
+		SetModelAnime(MAC, 0, 0, FALSE, 0.0, 0);
+		SetModelMat(MAC, 0, 0.0, -1.0, 0.0, 30.0, 0);
+		SetNextResetPhysics();
+
+		
+	//リミット
 		SetCut(50.000);
 		SetCamvec(0, 17.5, 0);
 		SetCampos_NoneRad(-20, 17.5, -60);
