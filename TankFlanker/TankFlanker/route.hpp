@@ -41,6 +41,7 @@ namespace FPS_n2 {
 				scenes_ptr->Set();
 				selend = true;
 				selpause = false;
+				auto OLDwaits = GetNowHiPerformanceCount();
 				//
 				while (ProcessMessage() == 0) {
 					clsDx();
@@ -57,6 +58,9 @@ namespace FPS_n2 {
 						}
 						//VR空間に適用
 						DrawParts->Move_Player();
+#ifdef DEBUG
+						DebugParts->end_way();
+#endif // DEBUG
 						//描画
 						{
 							//エフェクシアのアプデを60FPS相当に変更
@@ -90,6 +94,9 @@ namespace FPS_n2 {
 						//ディスプレイ描画
 						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
 						{
+#ifdef DEBUG
+							DebugParts->end_way();
+#endif // DEBUG
 							//描画
 							if (DrawParts->use_vr) {
 								DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(255, 255, 255), TRUE);
@@ -109,11 +116,14 @@ namespace FPS_n2 {
 					}
 					//MAPPTs->DepthScreen.DrawExtendGraph(0, 0, 960, 540, false);
 #ifdef DEBUG
-					printfDx("call  :%d\n", GetDrawCallCount());
-					printfDx("Async :%d\n", GetASyncLoadNum());
+					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
+					printfDx("Drawcall   :%d\n", GetDrawCallCount());
+					printfDx("DrawTime   :%5.2f ms\n", float(GetNowHiPerformanceCount() - OLDwaits) / 1000.f);
+					OLDwaits = GetNowHiPerformanceCount();
 #endif // DEBUG
 					//画面の反映
 					DrawParts->Screen_Flip();
+					while(float(GetNowHiPerformanceCount() - waits) / 1000.f <=16.66f){}
 					//終了判定
 					if (CheckHitKey(KEY_INPUT_ESCAPE) != 0) {
 						this->ending = false;

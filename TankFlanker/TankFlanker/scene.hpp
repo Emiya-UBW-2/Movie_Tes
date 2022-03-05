@@ -125,6 +125,23 @@ namespace FPS_n2 {
 				bool isFirstCut = false;
 
 				const bool GetSwitch() { return a_switch; }
+				void Start(int Cut) {
+					this->nowcut = 0;
+					while (true) {
+						if (this->Switch.size() > this->nowcut) {
+							auto& inf_b = this->Switch[this->nowcut];
+							if (Cut > inf_b.On) {
+								this->nowcut++;
+							}
+							else {
+								break;
+							}
+						}
+						else {
+							break;
+						}
+					}
+				}
 				bool Update_(int Cut) {
 					if (this->Switch.size() > this->nowcut) {
 						auto& inf_b = this->Switch[this->nowcut];
@@ -250,6 +267,12 @@ namespace FPS_n2 {
 						}
 					}
 					return nullptr;
+				}
+				void Start(int Cut) {
+					for (size_t i = 0; i < Max; i++) {
+						auto& m = model[i];
+						m.Cutinfo.Start(Cut);
+					}
 				}
 				void FirstUpdate(int Cut, bool isFirstLoop) {
 					for (size_t i = 0; i < Max; i++) {
@@ -535,6 +558,15 @@ namespace FPS_n2 {
 					}
 					return nullptr;
 				}
+				void Start(int Cut) {
+					for (size_t i = 0; i < Max; i++) {
+						auto& m = model[i];
+						m.Cutinfo.Start(Cut);
+						for (auto& B : m.Cutinfo_) {
+							B.Blur.Start(Cut);
+						}
+					}
+				}
 				void FirstUpdate(int Cut, bool isFirstLoop) {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
@@ -709,10 +741,10 @@ namespace FPS_n2 {
 			}
 		private:
 			std::string LOGO1 = "data/picture/logo.png";
-			std::string BB = "data/picture/BACK.png";
-			GraphHandle m_BB[2];
-			float m_BB_x[2];
-			float m_BB_x_buf[2];
+			std::string BB = "data/picture/pic.png";
+			GraphHandle m_BB;
+			float m_BB_s;
+			float m_BB_buf;
 
 			float per_logo = 1.f;
 			//データ
@@ -737,6 +769,7 @@ namespace FPS_n2 {
 			LONGLONG BaseTime = 0;
 			LONGLONG WaitTime = 0;
 			GraphHandle movie;
+			const bool isDrawMovie = true;// false;
 			bool reset_p = true;
 			bool isNextreset = true;//カット終了時に物理をリセットするかどうか
 			bool isFirstLoop = true;//カット最初のループ化取得
@@ -766,6 +799,7 @@ namespace FPS_n2 {
 			float Gate_Xpos = 0;
 			//
 			float Box_ALPHA = 0.f;
+			float Box_ALPHA2 = 0.f;
 			//
 			float ship_z = 0.f;
 			float ship_zadd = 0.f;
@@ -784,6 +818,8 @@ namespace FPS_n2 {
 			float camxb_23 = 0.f;
 			float camzb_24 = 0.f;
 			float camxb_25 = 0.f;
+			VECTOR_ref campos_rec35;
+			VECTOR_ref randcamup;
 			//
 		private:
 			bool Time_Over() { return Cut >= Cut_Pic.size(); }
@@ -802,12 +838,9 @@ namespace FPS_n2 {
 					SetUseASyncLoadFlag(FALSE);
 					{
 						graphs.Load((float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)), 0, 1.f, 0.5f, LOGO1);
-						m_BB[0] = GraphHandle::Load(BB);
-						m_BB_x[0] = DrawParts->disp_x / 2;
-						m_BB_x_buf[0] = 0.f;
-						m_BB[1] = GraphHandle::Load(BB);
-						m_BB_x[1] = -DrawParts->disp_x / 2;
-						m_BB_x_buf[1] = 0.f;
+						m_BB = GraphHandle::Load(BB);
+						m_BB_s = 0.8f;
+						m_BB_buf = 0.f;
 					}
 					LONGLONG StartF = 0;
 					LONGLONG ContiF = 0;
@@ -1031,13 +1064,18 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				std::string SUN = "data/model/sun/model.mv1";
 				models.Get(SUN, 0)->obj.SetMatrix( MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				Cut = 13;
+				Cut = 36;
 				Cut = 0;
+				models.Start(Cut);
+				graphs.Start(Cut);
+				attached.Start(Cut);
 				SetUseASyncLoadFlag(FALSE);
 				BGM = SoundHandle::Load("data/sound2.wav");
 				///*
-				movie = GraphHandle::Load("data/base_movie.mp4");
-				PauseMovieToGraph(movie.get());
+				if (isDrawMovie) {
+					movie = GraphHandle::Load("data/base_movie.mp4");
+					PauseMovieToGraph(movie.get());
+				}
 				//*/
 				//プレイ用意
 				PostPassParts->Set_Bright(255, 255, 255);
@@ -1058,11 +1096,16 @@ namespace FPS_n2 {
 					}
 					else {
 						if (isfast) {
-							//BGM.play(DX_PLAYTYPE_BACK, TRUE);
-							//BGM.vol(64);
-							PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
-							//ChangeMovieVolumeToGraph(0, movie.get());
-							SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000);
+							if (isDrawMovie) {
+								PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
+								//ChangeMovieVolumeToGraph(0, movie.get());
+								SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000);
+							}
+							else {
+								BGM.play(DX_PLAYTYPE_BACK, TRUE);
+								SetSoundCurrentTime((LONGLONG)(Cut > 0 ? Cut_Pic[Cut - 1].TIME : 0) / 1000, BGM.get());
+								//BGM.vol(64);
+							}
 						}
 						isfast = false;
 					}
@@ -1313,7 +1356,7 @@ namespace FPS_n2 {
 								}
 							}
 							SEL++;
-							//21
+							//25
 							if (Cut == SEL) {
 								if (isFirstLoop) {
 									camxb_25 = 0.f;
@@ -1322,6 +1365,298 @@ namespace FPS_n2 {
 									easing_set(&Cut_Pic[Cut].Aim_camera.camvec, VECTOR_ref::vget(0 + camxb_25, 17.5, 30), 0.95f);//頭
 									Cut_Pic[Cut].cam_per = 0.9f;
 									camxb_25 += 1.f / FPS;
+								}
+							}
+							SEL++;
+							//26
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+								}
+								else {
+									std::string spe = "data/umamusume/spe/model.mv1";
+									easing_set(&Cut_Pic[Cut].Aim_camera.camvec, models.Get(spe, 0)->obj.frame(184), 0.925f);//左目
+
+									easing_set(&Cut_Pic[Cut].Aim_camera.fov, deg2rad(20), 0.95f);//頭
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+							}
+							SEL+=2;
+							//28
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+								}
+								else {
+									std::string szk = "data/umamusume/suzuka/model.mv1";
+									easing_set(&Cut_Pic[Cut].Aim_camera.camvec, models.Get(szk, 0)->obj.frame(13), 0.925f);//左目
+								}
+							}
+							SEL++;
+							//29
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									std::string szk = "data/umamusume/suzuka/model.mv1";
+									std::string spe = "data/umamusume/spe/model.mv1";
+
+									Cut_Pic[Cut].Aim_camera.camvec = (models.Get(spe, 0)->obj.frame(184) + models.Get(szk, 0)->obj.frame(13)) / 2.f;
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(0, -15.f, -20.f);
+									randcam.clear();
+								}
+								else {
+									range_b = 10.f;
+									easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b / 2.f), GetRandf(0.f)), 0.9f);
+
+									std::string szk = "data/umamusume/suzuka/model.mv1";
+									std::string spe = "data/umamusume/spe/model.mv1";
+
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.camvec,
+										(models.Get(spe, 0)->obj.frame(184) + models.Get(szk, 0)->obj.frame(13)) / 2.f + randcam,
+										0.9f
+									);
+
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.campos + VECTOR_ref::vget(0, 0, 100.f / FPS);
+
+									Cut_Pic[Cut].cam_per = 0.9f;
+								}
+							}
+							SEL++;
+							//30
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									std::string rice = "data/umamusume/rice/model.mv1";
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(rice, 0)->obj.frame(15);
+								}
+								else {
+									std::string rice = "data/umamusume/rice/model.mv1";
+									easing_set(&Cut_Pic[Cut].Aim_camera.camvec, models.Get(rice, 0)->obj.frame(15), 0.9f);
+
+									Cut_Pic[Cut].cam_per = 0.9f;
+								}
+							}
+							SEL+=4;
+							//34
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									randcam.clear();
+								}
+								else {
+									range_b = 40.f;
+									easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b / 3.f), GetRandf(0.f)), 0.95f);
+
+
+									if (NowTime - WaitTime > (LONGLONG)(1000000.f * 62.0f)) {
+										easing_set(&Cut_Pic[Cut].Aim_camera.fov, deg2rad(2), 0.95f);//頭
+										std::string TEIO = "data/umamusume/teio/model.mv1";
+
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.camvec,
+											models.Get(TEIO, 0)->obj.frame(44) + randcam,
+											0.95f
+										);
+									}
+									else {
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.camvec,
+											VECTOR_ref::vget(0, 10.f, -40.f) + randcam,
+											0.95f
+										);
+									}
+
+									Cut_Pic[Cut].cam_per = 0.9f;
+								}
+							}
+							SEL++;
+							//35
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+
+									std::string TEIO = "data/umamusume/teio/model.mv1";
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(TEIO, 0)->obj.frame(44);
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(-10, -5, -20.f);
+									campos_rec35 = Cut_Pic[Cut].Aim_camera.campos;
+									Cut_Pic[Cut].Aim_camera.fov =  deg2rad(5);
+									Cut_Pic[Cut].cam_per = 0.0f;
+									randcam.clear();
+								}
+								else {
+									std::string TEIO = "data/umamusume/teio/model.mv1";
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.camvec,
+										models.Get(TEIO, 0)->obj.frame(44),
+										0.9f
+									);
+
+									range_b = 5.f;
+									easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b*2.f), GetRandf(range_b)), 0.8f);
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.campos,
+										campos_rec35 + randcam,
+										0.9f
+									);
+
+
+									easing_set(&Cut_Pic[Cut].Aim_camera.fov, deg2rad(20), 0.95f);//頭
+
+									Cut_Pic[Cut].cam_per = 0.9f;
+
+									if (NowTime - WaitTime > (LONGLONG)(1000000.f * 64.4f)) {
+										easing_set(&Box_ALPHA2, 1.f, 0.975f);
+									}
+								}
+							}
+							SEL++;
+							//36
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									std::string Rudolf2 = "data/umamusume/rudolf2/model.mv1";
+									models.Get(Rudolf2, 0)->OpacityRate = 1.f;
+								}
+								easing_set(&Box_ALPHA2, 0.f, 0.95f);
+
+								Cut_Pic[Cut].Aim_camera.campos += VECTOR_ref::vget(2.f / FPS, 0, 0);
+							}
+							SEL++;
+							//37
+							if (Cut == SEL) {
+								Cut_Pic[Cut].Aim_camera.campos += VECTOR_ref::vget(2.f / FPS, 0, 0);
+							}
+							SEL++;
+							//38
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									std::string TEIO = "data/umamusume/teio/model.mv1";
+									Cut_Pic[Cut].Aim_camera.camvec = models.Get(TEIO, 0)->obj.frame(64);
+									Cut_Pic[Cut].Aim_camera.campos = Cut_Pic[Cut].Aim_camera.camvec + VECTOR_ref::vget(10, 0, 0);
+								}
+								else {
+									std::string TEIO = "data/umamusume/teio/model.mv1";
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.camvec,
+										models.Get(TEIO, 0)->obj.frame(64),
+										0.9f
+									);
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+							}
+							SEL++;
+							//39
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+								}
+								else {
+									easing_set(&Cut_Pic[Cut].Aim_camera.fov, deg2rad(25), 0.95f);//頭
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+							}
+							SEL++;
+							//40
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+								}
+								else {
+									std::string gate = "data/model/map/model_gate.mv1";
+									easing_set(&models.Get(gate, 0)->OpacityRate, 1.f,0.9f);
+								}
+							}
+							SEL++;
+							//41
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									randcam.clear();
+								}
+								else {
+									range_b = 25.f;
+									easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b*2.f), GetRandf(range_b)), 0.8f);
+
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.camvec,
+										VECTOR_ref::vget(60.f, 15.0f, 0.0f) + randcam,
+										0.9f
+									);
+									Cut_Pic[Cut].Aim_camera.campos += VECTOR_ref::vget(-20.f / FPS, 0, 0);
+									Cut_Pic[Cut].cam_per = 0.95f;
+								}
+							}
+							SEL++;
+							//42
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									randcam.Set(0.f,1.f,0.f);
+									randcamup.clear();
+									Cut_Pic[Cut].Aim_camera.camvec = VECTOR_ref::vget(0.f, 25.f, -100.f);
+									Cut_Pic[Cut].Aim_camera.campos = VECTOR_ref::vget(0.f, 17.f, 0.f);
+
+								}
+								else {
+									if (NowTime - WaitTime > (LONGLONG)(1000000.f * 83.594f)) {
+										range_b = 2.f;
+										easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b / 2.f), GetRandf(range_b / 10.f)), 0.95f);
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.campos,
+											VECTOR_ref::vget(0.f, 17.f, -1.5f) + randcam,
+											0.95f
+										);
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.camvec,
+											VECTOR_ref::vget(0.f, 6.f, -200.f),
+											0.95f
+										);
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.camup,
+											VECTOR_ref::vget(0.f, 1.f, 0.f),
+											0.95f
+										);
+										Cut_Pic[Cut].cam_per = 0.95f;
+									}
+									else {
+										range_b = 5.f;
+										easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b / 2.f), GetRandf(range_b / 10.f)), 0.95f);
+										range_b = 0.1f;
+										easing_set(&randcamup, VECTOR_ref::vget(GetRandf(range_b), 1.f, 0.f), 0.95f);
+
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.campos,
+											VECTOR_ref::vget(0.f, 17.f, 0.f) + randcam,
+											0.95f
+										);
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.camvec,
+											VECTOR_ref::vget(0.f, 17.f, -1000.f),
+											0.9f
+										);
+										easing_set(&
+											Cut_Pic[Cut].Aim_camera.camup,
+											randcamup,
+											0.95f
+										);
+										Cut_Pic[Cut].cam_per = 0.95f;
+									}
+								}
+							}
+							SEL++;
+							//43
+							if (Cut == SEL) {
+								if (isFirstLoop) {
+									Cut_Pic[Cut].Aim_camera = Cut_Pic[Cut - 1].Aim_camera;
+									Cut_Pic[Cut].cam_per = 0.0f;
+								}
+								else {
+									range_b = 2.f;
+									easing_set(&randcam, VECTOR_ref::vget(GetRandf(range_b), GetRandf(range_b / 2.f), GetRandf(range_b / 10.f)), 0.95f);
+
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.campos,
+										VECTOR_ref::vget(0.f, 17.f, -1000.f) + randcam,
+										0.95f
+									);
+									easing_set(&
+										Cut_Pic[Cut].Aim_camera.camvec,
+										VECTOR_ref::vget(0.f, 17.f, -500.f),
+										0.95f
+									);
+									Cut_Pic[Cut].cam_per = 0.95f;
+
+									easing_set(&Box_ALPHA2, 1.f, 0.95f);
 								}
 							}
 							SEL++;
@@ -1397,7 +1732,9 @@ namespace FPS_n2 {
 				for (auto& p : Cut_Pic) { p.Dispose(); }
 				Cut_Pic.clear();
 				//BGM.Dispose();
-				movie.Dispose();
+				if (isDrawMovie) {
+					movie.Dispose();
+				}
 			}
 			void UI_Draw(void) noexcept  override {
 				//printfDx("Cut : %d\n", Cut);
@@ -1416,7 +1753,7 @@ namespace FPS_n2 {
 				if (!Time_Over()) {
 					auto* DrawParts = DXDraw::Instance();
 					//if (Cut == 14) {
-					//	DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(128, 128, 142), TRUE);
+						//DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(128, 128, 142), TRUE);
 					//}
 				}
 				models.Draw_Far();
@@ -1429,28 +1766,48 @@ namespace FPS_n2 {
 			}
 			void Main_Draw(void) noexcept override {
 				auto* DrawParts = DXDraw::Instance();
-				if (!Time_Over()) {
-					auto* DrawParts = DXDraw::Instance();
-					//Cut_Pic[Cut%Cut_Pic.size()].Cut.DrawExtendGraph(0, 0, DrawParts->disp_x, DrawParts->disp_y, false);
-					/*
-					if (Cut == 14) {
-						auto NowTime = GetNowHiPerformanceCount() - BaseTime;
-						if ((NowTime - WaitTime) > (LONGLONG)(1000000.f * 25.5f)) {
-							m_BB_x_buf[0] += -15.f / FPS;
-							m_BB_x_buf[1] += 15.f / FPS;
-							easing_set(&m_BB_x[0], m_BB_x_buf[0], 0.9f);
-							easing_set(&m_BB_x[1], m_BB_x_buf[1], 0.9f);
-						}
-						m_BB[0].DrawRotaGraph(DrawParts->disp_x / 2 + m_BB_x[0], DrawParts->disp_y / 2, 1.f, 0.f, true);
-						m_BB[1].DrawRotaGraph(DrawParts->disp_x / 2 + m_BB_x[1], DrawParts->disp_y / 2, 1.f, DX_PI_F, true);
-					}
-					//*/
-				}
 				{
 					SetFogEnable(TRUE);
 					SetFogColor(128, 128, 128);
 					SetFogDensity(0.01f);
 					SetFogStartEnd(200, 300000);
+				}
+				if (!Time_Over()) {
+					//*
+					if (Cut == 26) {
+						auto NowTime = GetNowHiPerformanceCount() - BaseTime;
+						//if ((NowTime - WaitTime) > (LONGLONG)(1000000.f * 25.5f)) {
+						SetDrawBright(192, 192, 192);
+						DrawBillboard3D(VECTOR_ref::vget(0, 15.f, 20.f).get(), 0.5f, 0.5f, 15.f, 0.f, m_BB.get(), TRUE);//m_BB_s
+						SetDrawBright(255, 255, 255);
+						//}
+						easing_set(&m_BB_s, 0.5f, 0.975f);
+						{
+							SetFogEnable(TRUE);
+							SetFogColor(0, 0, 0);
+							SetFogDensity(0.01f);
+							SetFogStartEnd(10, 150);
+						}
+					}
+					if (Cut == 34) {
+						SetFogEnable(TRUE);
+						SetFogColor(224, 224, 224);
+						SetFogDensity(0.01f);
+						SetFogStartEnd(250, 900);
+					}
+					if (Cut == 35) {
+						SetFogEnable(TRUE);
+						SetFogColor(128, 128, 128);
+						SetFogDensity(0.01f);
+						SetFogStartEnd(200, 3000);
+					}
+					if (Cut >= 42) {
+						SetFogEnable(TRUE);
+						SetFogColor(255,255,255);
+						SetFogDensity(0.01f);
+						SetFogStartEnd(50, 300);
+					}
+					//*/
 				}
 				models.Draw(false, false);
 				if (isFreepos) {
@@ -1471,13 +1828,20 @@ namespace FPS_n2 {
 						DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(0, 0, 0), TRUE);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
+					if (Box_ALPHA2 != 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA2));
+						DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(255, 255, 255), TRUE);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					}
 					graphs.Draw(DrawParts->disp_y);
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 			void LAST_Draw(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
-				movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 3 / 4, DrawParts->disp_x, DrawParts->disp_y, FALSE);
+				if (isDrawMovie) {
+					auto* DrawParts = DXDraw::Instance();
+					movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 3 / 4, DrawParts->disp_x, DrawParts->disp_y, FALSE);
+				}
 			}
 		};
 	};
