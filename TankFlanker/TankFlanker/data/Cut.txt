@@ -66,6 +66,9 @@
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamvec(0.0, -1.0, 3.0, 0.0);
+		SetUpdateCampos(0.0, -1.0, 5.0, -16.0);
 
 		SetDrawModel(Teio, 0, 0);
 		SetModelPhysicsSpeed(Teio, 0, 1);
@@ -86,6 +89,9 @@
 		SetCamInfo(45, 1.0, 10.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamvec(0.0, 0.0, 3.0, -7.0);
+		SetUpdateCampos(0.0, -14.0, 5.0, -14.0);
 
 		SetDrawModel(Teio, 0, 1);
 		SetModelPhysicsSpeed(Teio, 0, 1);
@@ -109,6 +115,7 @@
 		SetCamInfo(45, 1.0, 40.0, 0.95);
 
 		SetUpdateEnable();
+		SetUpdateCampos(0.8, 20.0, 4.0, -45.0);
 
 		SetNextResetPhysics();
 	//”w’† 4
@@ -119,6 +126,9 @@
 		SetCamInfo(45, 1.0, 40.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamvec(0.0, -1.5, 35.0, -45.0);
+		SetUpdateCampos(0.0, 10.0, 60.0, -35.0);
 
 		SetDrawModel(Teio, 0, 4);
 		SetModelPhysicsSpeed(Teio, 0, 1);
@@ -133,6 +143,8 @@
 		SetCamInfo(25, 1.0, 40.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCampos(0.995, 30.0, 18.0, 10.0);
 
 		SetDrawModel(Teio, 0, 5);
 		SetModelPhysicsSpeed(Teio, 0, 1);
@@ -171,6 +183,8 @@
 		SetCamInfo(50, 1.0, 200.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCampos(0.995, 10.0, 10.0, 60.0);
 
 		SetNextResetPhysics();
 //10
@@ -213,6 +227,8 @@
 		SetCamInfo(15, 10.0, 100.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCampos(0.9, 0.0, 10.0, -60.0);
 
 		SetDrawModel(Nice, 0, 14);
 		SetModelPhysicsSpeed(Nice, 0, 1);
@@ -227,6 +243,7 @@
 		SetCamInfo(5, 10.0, 100.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdateCamfov(0.95, 15.0);
 
 		SetDrawModel(Tanhoiza, 0, 15);
 		SetModelAnime(Tanhoiza, 0, 0, FALSE, 1.2, 0);
@@ -261,6 +278,7 @@
 		SetCamInfo(25, 1.0, 30.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.5);
 
 		SetNextResetPhysics();
 	//Šç2 19
@@ -289,6 +307,8 @@
 		SetCamInfo(10, 1.0, 50.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamvec(0.95, 0.0, 17.5, 30.0);
 
 		SetDrawModel(Teio, 0, 22);
 		SetModelAnime(Teio, 0, 6, FALSE, 0.0, 0);
@@ -303,6 +323,8 @@
 		SetCamInfo(10, 1.0, 50.0, 0.95);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamvec(0.95, 30.0, 17.5, 0.0);
 
 		SetDrawModel(Rudolf, 0, 23);
 		SetModelAnime(Rudolf, 0, 0, FALSE, 0.0, 0);
@@ -317,6 +339,8 @@
 		SetCamInfo(10, 1.0, 50.0, 0.95);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamvec(0.95, 0.0, 17.5, -30.0);
 
 		SetDrawModel(Rice, 0, 24);
 		SetModelAnime(Rice, 0, 0, FALSE, 0.0, 0);
@@ -331,6 +355,8 @@
 		SetCamInfo(10, 1.0, 50.0, 0.95);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamvec(0.95, -30.0, 17.5, 0.0);
 
 		SetDrawModel(Burbon, 0, 25);
 		SetModelAnime(Burbon, 0, 0, FALSE, 0.0, 0);
@@ -345,6 +371,8 @@
 		SetCamInfo(10, 2.0, 50.0, 0.95);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamvec(0.95, 0.0, 17.5, 30.0);
 
 		SetDrawModel(MAC, 0, 25);
 		SetModelAnime(MAC, 0, 0, FALSE, 0.0, 0);
@@ -359,6 +387,8 @@
 		SetCamInfo(5, 2.0, 50.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamfov(0.95, 20.0);
 
 		SetDrawModel(SPE, 0, 26);
 		SetModelAnime(SPE, 0, 0, FALSE, 1.0, 0);
@@ -408,6 +438,7 @@
 		SetCamInfo(45, 2.0, 120.0, 0.0);
 		
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
 
 		SetDrawModel(SZK, 0, 29);
 		SetModelAnime(SZK, 0, 2, FALSE, 1.0, 0);
@@ -425,6 +456,8 @@
 		SetCamInfo(15, 2.0, 50.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCampos(0.0, -10.0, 18.5, -30.0);
 
 		SetDrawModel(Rice, 0, 31);
 		SetModelAnime(Rice, 0, 1, FALSE, 1.0, 0);
@@ -476,6 +509,9 @@
 		SetCamInfo(4, 1.0, 50.0, 0.0);
 		
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamvec(0.95, 0.0, 10.0, -40.0);
+		SetUpdateCamfov(0.95, 4.0);
 
 		SetDrawModel(MAP, 0, 37);
 		SetModelMat(MAP, 0, 0, 0.0, -0.1, 2394.0, 90);
@@ -532,6 +568,8 @@
 		SetCamInfo(5, 1.0, 50.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.9);
+		SetUpdateCamfov(0.95, 20.0);
 
 
 		SetDrawModel(Turbo, 0, 35);
@@ -570,6 +608,7 @@
 		SetCamInfo(20, 1.0, 50.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdateCampos(0.0, -10.0, 10.0, -20.0);
 
 		SetNextResetPhysics();
 	//37
@@ -580,6 +619,7 @@
 		SetCamInfo(45, 1.0, 30.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdateCampos(0.0, -3.8, 24.0, -10.0);
 
 		SetDrawModel(Teio, 0, 37);
 		SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0);
@@ -593,6 +633,7 @@
 		SetCamInfo(15, 1.0, 30.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
 
 		SetDrawModel(Teio, 0, 40);
 		SetModelAnime(Teio, 0, 10, FALSE, 0.8, 0);
@@ -610,6 +651,8 @@
 		SetCamInfo(15, 1.0, 50.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamfov(0.95, 25.0);
 
 	//40
 		SetCut(76.000);
@@ -629,6 +672,9 @@
 		SetCamInfo(35, 1.0, 100.0, 0.0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamvec(0.9, 60.0, 15.0, 0.0);
+		SetUpdateCampos(0.0, -10.0, 400.0, -240.0);
 
 	//42
 		SetCut(86.000);
@@ -639,6 +685,9 @@
 		SetDrawModel(GATE, 0, 42);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamvec(0.95, 0.0, 17.0, -1000.0);
+		SetUpdateCampos(0.95, 0.0, 17.0, 0.0);
 
 	//43
 		SetCut(200.000);
@@ -650,6 +699,9 @@
 		SetModelAnime(GATE, 0, 1, FALSE, 1.0, 0);
 
 		SetUpdateEnable();
+		SetUpdatePer(0.95);
+		SetUpdateCamvec(0.95, 0.0, 17.0, -1000.0);
+		SetUpdateCampos(0.95, 0.0, 17.0, -500.0);
 
 //LAST
 
