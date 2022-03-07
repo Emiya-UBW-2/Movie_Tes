@@ -193,7 +193,8 @@ namespace FPS_n2 {
 
 					float b_run = 0;
 					float b_runrange = 0;
-
+					
+					std::vector<std::pair<int, std::string>> FrameNum;
 					MV1 obj;
 					moves move;
 					bool isDraw = false;
@@ -202,6 +203,27 @@ namespace FPS_n2 {
 					std::vector<Cutinfo_g> Cutinfo_;//オンにするカット
 					float OpacityRate = 1.f;
 					int Anim_Sel = 0;
+
+					void AddFrame(std::string_view FrameName) {
+						size_t siz = obj.frame_num();
+						for (size_t i = 0; i < siz; i++) {
+							if (obj.frame_name(i) == FrameName) {
+								FrameNum.resize(FrameNum.size() + 1);
+								FrameNum.back().first = (int)i;
+								FrameNum.back().second = FrameName;
+								return;
+							}
+						}
+					}
+					const auto GetFrame(std::string_view FrameName) {
+						for (auto& F : FrameNum) {
+							if (F.second == FrameName) {
+								return obj.frame(F.first);
+							}
+						}
+						return VECTOR_ref::zero();
+					}
+
 					void UpdateAnim(int ID, bool isloop, float speed) {
 						Sel_AnimNum(this->obj, ID);
 						this->obj.get_anime(ID).Update(isloop, speed);
@@ -248,10 +270,21 @@ namespace FPS_n2 {
 					}
 					model[Max].Path = Path;
 					model[Max].isBase = true;
-					MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME,-127.f);
+					MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);
 					Max++;
 				}
 				void Set_Anime(void) {
+					//
+					for (size_t i = 0; i < Max; i++) {
+						model[i].AddFrame("上半身2");
+						model[i].AddFrame("首");
+						model[i].AddFrame("頭");
+						model[i].AddFrame("右目");
+						model[i].AddFrame("左目");
+						model[i].AddFrame("右人指２");
+						model[i].AddFrame("右ひざ");
+					}
+					//
 					for (size_t i = 0; i < Max; i++) {
 						MV1::SetAnime(&(model[i].obj), model[i].obj);
 					}
@@ -612,9 +645,6 @@ namespace FPS_n2 {
 			};
 			class Cut_buf {
 			public:
-				bool isUseInFirst = false;
-				float per_InFirst = 0.f;
-				cam_info CameraInFirst;
 				bool isUseNotFirst = false;
 				float campos_per = 0.f;
 				float camvec_per = 0.f;
@@ -1048,6 +1078,19 @@ namespace FPS_n2 {
 							else if (func.find("SetUpdatePer") != std::string::npos) {
 								m_CamBuf.back().NotFirst_per = std::stof(args[0]);
 							}
+							else if (func.find("SetCamPosRand") != std::string::npos) {
+							m_CamBuf.back().m_RandcamposSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+							m_CamBuf.back().m_RandcamposPer = std::stof(args[3]);
+							}
+							else if (func.find("SetCamVecRand") != std::string::npos) {
+							m_CamBuf.back().m_RandcamvecSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+							m_CamBuf.back().m_RandcamvecPer = std::stof(args[3]);
+							}
+							else if (func.find("SetCamUpRand") != std::string::npos) {
+								m_CamBuf.back().m_RandcamupSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+								m_CamBuf.back().m_RandcamupPer = std::stof(args[3]);
+							}
+
 						}
 						//テロップ
 						{
@@ -1147,6 +1190,19 @@ namespace FPS_n2 {
 			}
 			bool isfast = true;
 			bool Update(void) noexcept override {
+
+				std::string GATE = "data/model/map/model_gate.mv1";
+				std::string LOGO = "data/model/logo/model.mv1";
+
+				std::string TEIO = "data/umamusume/teio/model.mv1";
+				std::string Rudolf2 = "data/umamusume/rudolf2/model.mv1";
+				std::string Nice = "data/umamusume/nice/model.mv1";
+				std::string Tanhoiza = "data/umamusume/tanhoiza/model.mv1";
+				std::string Turbo = "data/umamusume/turbo/model.mv1";
+				std::string spe = "data/umamusume/spe/model.mv1";
+				std::string szk = "data/umamusume/suzuka/model.mv1";
+				std::string rice = "data/umamusume/rice/model.mv1";
+
 				auto* PostPassParts = PostPassEffect::Instance();
 				//auto* DrawParts = DXDraw::Instance();
 				TEMPSCENE::Update();
@@ -1212,14 +1268,8 @@ namespace FPS_n2 {
 							SEL += 2;
 							//3
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].camvec_per = 0.8f;
-
-									m_CamBuf[Cut].m_RandcamvecSet.Set(10.f, 10.f, 10.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.8f;
-								}
-								std::string TEIO = "data/umamusume/teio/model.mv1";
-								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->obj.frame(162) + VECTOR_ref::vget(0, 15.f, 0);//右ひざ
+								m_CamBuf[Cut].camvec_per = 0.8f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->GetFrame("右ひざ") + VECTOR_ref::vget(0, 15.f, 0);//右ひざ
 							}
 							SEL += 1;
 							//4
@@ -1232,96 +1282,68 @@ namespace FPS_n2 {
 							SEL += 1;
 							//5
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].camvec_per = 0.995f;
-								}
-								std::string TEIO = "data/umamusume/teio/model.mv1";
-								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->obj.frame(6) + VECTOR_ref::vget(0, 3.f, 0);//右ひざ
+								m_CamBuf[Cut].camvec_per = 0.995f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->GetFrame("上半身2") + VECTOR_ref::vget(0, 3.f, 0);//右ひざ
 							}
 							SEL += 4;
 							//9
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].camvec_per = 0.9f;
-
-									m_CamBuf[Cut].m_RandcamposSet.Set(20.f, 7.f, 0.f);
-									m_CamBuf[Cut].m_RandcamposPer = 0.8f;
-								}
-								else {
+								if (!isFirstLoop) {
 									m_CamBuf[Cut].CameraNotFirst.campos.xadd(-15.f / FPS);
 								}
-								std::string TEIO = "data/umamusume/teio/model.mv1";
-								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->obj.frame(6) + VECTOR_ref::vget(0, 3.f, 0);
-
+								m_CamBuf[Cut].camvec_per = 0.9f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->GetFrame("上半身2") + VECTOR_ref::vget(0, 3.f, 0);
 							}
 							SEL += 4;
 							//13
 							if (Cut == SEL) {
-								std::string LOGO = "data/model/logo/model.mv1";
-								std::string MAP = "data/model/map/model.mv1";
 								if (NowTimeWait > (LONGLONG)(1000000.f * 19.55f)) {
 									easing_set(&Box_ALPHA, 1.f, 0.95f);
 									easing_set(&models.Get(LOGO, 0)->OpacityRate, 0.f, 0.95f);
 									graphs.Get(LOGO1, 0)->Alpha.Set(1.f, 0.95f);
 								}
+								else if (NowTimeWait > (LONGLONG)(1000000.f * 16.55f)) {
+									models.Get(LOGO, 0)->OpacityRate = 1.f;
+								}
 								else {
-									if (NowTimeWait > (LONGLONG)(1000000.f * 16.55f)) {
-										models.Get(LOGO, 0)->OpacityRate = 1.f;
-									}
-									else {
-										models.Get(LOGO, 0)->OpacityRate = 0.f;
-									}
+									models.Get(LOGO, 0)->OpacityRate = 0.f;
 									graphs.Get(LOGO1, 0)->Alpha.Set(0.f, 0.f);
 								}
 							}
 							SEL++;
 							//14
 							if (Cut == SEL) {
-								std::string Nice = "data/umamusume/nice/model.mv1";
-								auto BUF = models.Get(Nice, 0)->obj.frame(92);
+								auto BUF = models.Get(Nice, 0)->GetFrame("頭");
 								if (isFirstLoop) {
 									PostPassParts->Set_Bright(255, 216, 192);
 
 									Box_ALPHA = 0.f;
 
-									m_CamBuf[Cut].isUseInFirst = true;
-									m_CamBuf[Cut].CameraInFirst = Cut_Pic[Cut].Aim_camera;
-									m_CamBuf[Cut].CameraInFirst.camvec = BUF;
-
-									m_CamBuf[Cut].camvec_per = 0.9f;
-
-									m_CamBuf[Cut].m_RandcamvecSet.Set(10.f, 5.f, 0.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.9f;
+									Cut_Pic[Cut].Aim_camera.camvec = BUF;
 								}
 								else {
 									m_CamBuf[Cut].CameraNotFirst.campos.yadd(1.f / FPS);
 								}
+								m_CamBuf[Cut].camvec_per = 0.9f;
 								m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
 							}
 							SEL++;
 							//15
 							if (Cut == SEL) {
-
-								std::string Tanhoiza = "data/umamusume/tanhoiza/model.mv1";
-								auto BUF = models.Get(Tanhoiza, 0)->obj.frame(11) + VECTOR_ref::vget(0.f, -1.5f, 0.f);
+								auto BUF = models.Get(Tanhoiza, 0)->GetFrame("首") + VECTOR_ref::vget(0.f, -1.5f, 0.f);
 								if (isFirstLoop) {
 									PostPassParts->Set_Bright(255, 255, 255);
 									camxb_15 = -3.f;
-
-									m_CamBuf[Cut].isUseInFirst = true;
-									m_CamBuf[Cut].CameraInFirst = Cut_Pic[Cut].Aim_camera;
-									m_CamBuf[Cut].CameraInFirst.camvec = BUF;
-									m_CamBuf[Cut].CameraInFirst.campos = BUF + VECTOR_ref::vget(camxb_15, 0.f, -60.f);
-
-									m_CamBuf[Cut].campos_per = 0.9f;
-
-									m_CamBuf[Cut].camvec_per = 0.9f;
+									Cut_Pic[Cut].Aim_camera.camvec = BUF;
+									Cut_Pic[Cut].Aim_camera.campos = BUF + VECTOR_ref::vget(camxb_15, 0.f, -60.f);
 								}
-								else {
-									m_CamBuf[Cut].m_RandcamvecSet.Set(3.f, 1.5f, 0.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.9f;
-								}
+								m_CamBuf[Cut].m_RandcamvecSet.Set(3.f, 1.5f, 0.f);
+								m_CamBuf[Cut].m_RandcamvecPer = 0.9f;
+
+								m_CamBuf[Cut].camvec_per = 0.9f;
 								m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
+
+								m_CamBuf[Cut].campos_per = 0.9f;
 								m_CamBuf[Cut].CameraNotFirst.campos = BUF + VECTOR_ref::vget(camxb_15, 0.f, -60.f);
 								camxb_15 += 1.f / FPS;
 							}
@@ -1329,8 +1351,7 @@ namespace FPS_n2 {
 							//16
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									std::string Tanhoiza = "data/umamusume/tanhoiza/model.mv1";
-									auto BUF = models.Get(Tanhoiza, 0)->obj.frame(11);
+									auto BUF = models.Get(Tanhoiza, 0)->GetFrame("首");
 
 									m_CamBuf[Cut].campos_per = 0.f;
 									m_CamBuf[Cut].CameraNotFirst.campos = BUF + VECTOR_ref::vget(30.f, 0.f, -10.f);
@@ -1347,23 +1368,15 @@ namespace FPS_n2 {
 							//18
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									m_CamBuf[Cut].m_RandcamvecSet.Set(1.f, 0.5f, 1.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.9f;
-
 									camupxb_18 = 0.f;
-
-									m_CamBuf[Cut].camvec_per = 0.925f;
-
-									m_CamBuf[Cut].camup_per = 0.95f;
 								}
-								else {
-									std::string Turbo = "data/umamusume/turbo/model.mv1";
-									m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(Turbo, 0)->obj.frame(23);
+								m_CamBuf[Cut].camvec_per = 0.925f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(Turbo, 0)->GetFrame("頭");
 
-									auto nowupxb = Cut_Pic[Cut].Aim_camera.camvec.x();
-									m_CamBuf[Cut].CameraNotFirst.camup = VECTOR_ref::vget(std::clamp((camupxb_18 - nowupxb)*1.5f, -0.5f, 0.5f), 1.f, 0);
-									camupxb_18 = nowupxb;
-								}
+								m_CamBuf[Cut].camup_per = 0.95f;
+								auto nowupxb = Cut_Pic[Cut].Aim_camera.camvec.x();
+								m_CamBuf[Cut].CameraNotFirst.camup = VECTOR_ref::vget(std::clamp((camupxb_18 - nowupxb)*1.5f, -0.5f, 0.5f), 1.f, 0);
+								camupxb_18 = nowupxb;
 							}
 							SEL += 3;
 							//21
@@ -1403,103 +1416,69 @@ namespace FPS_n2 {
 							SEL++;
 							//26
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].camvec_per = 0.925f;
-								}
-								std::string spe = "data/umamusume/spe/model.mv1";
-								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(spe, 0)->obj.frame(184);
+								m_CamBuf[Cut].camvec_per = 0.925f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(spe, 0)->GetFrame("左目");
 							}
 							SEL += 2;
 							//28
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].camvec_per = 0.925f;
-								}
-								std::string szk = "data/umamusume/suzuka/model.mv1";
-								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(szk, 0)->obj.frame(13);
+								m_CamBuf[Cut].camvec_per = 0.925f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(szk, 0)->GetFrame("右目");
 							}
 							SEL++;
 							//29
 							if (Cut == SEL) {
-								std::string szk = "data/umamusume/suzuka/model.mv1";
-								std::string spe = "data/umamusume/spe/model.mv1";
-								auto BUF = (models.Get(spe, 0)->obj.frame(184) + models.Get(szk, 0)->obj.frame(13)) / 2.f;
+								auto BUF = (models.Get(spe, 0)->GetFrame("左目") + models.Get(szk, 0)->GetFrame("右目")) / 2.f;
 								if (isFirstLoop) {
-									m_CamBuf[Cut].isUseInFirst = true;
-									m_CamBuf[Cut].CameraInFirst = Cut_Pic[Cut].Aim_camera;
-									m_CamBuf[Cut].CameraInFirst.camvec = BUF;
-									m_CamBuf[Cut].CameraInFirst.campos = BUF + VECTOR_ref::vget(0.f, -15.f, -20.f);
+									Cut_Pic[Cut].Aim_camera.camvec = BUF;
+									Cut_Pic[Cut].Aim_camera.campos = BUF + VECTOR_ref::vget(0.f, -15.f, -20.f);
 
 									m_CamBuf[Cut].campos_per = 0.f;
 									m_CamBuf[Cut].CameraNotFirst.campos = BUF + VECTOR_ref::vget(0.f, -15.f, -20.f);
-
-									m_CamBuf[Cut].camvec_per = 0.9f;
-
-									m_CamBuf[Cut].m_RandcamvecSet.Set(10.f, 5.f, 0.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.9f;
 								}
 								else {
 									m_CamBuf[Cut].CameraNotFirst.campos.zadd(100.f / FPS);
 								}
+								m_CamBuf[Cut].camvec_per = 0.9f;
 								m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
 							}
 							SEL++;
 							//30
 							if (Cut == SEL) {
-								std::string rice = "data/umamusume/rice/model.mv1";
-								auto BUF = models.Get(rice, 0)->obj.frame(15);
+								auto BUF = models.Get(rice, 0)->GetFrame("頭");
 								if (isFirstLoop) {
-									m_CamBuf[Cut].isUseInFirst = true;
-									m_CamBuf[Cut].CameraInFirst = Cut_Pic[Cut].Aim_camera;
-									m_CamBuf[Cut].CameraInFirst.camvec = BUF;
-
-									m_CamBuf[Cut].camvec_per = 0.9f;
+									Cut_Pic[Cut].Aim_camera.camvec = BUF;
 								}
+								m_CamBuf[Cut].camvec_per = 0.9f;
 								m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
 							}
 							SEL+=4;
 							//34
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].m_RandcamvecSet.Set(40.f, 13.f, 0.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.95f;
-								}
-								else {
-									if (NowTimeWait > (LONGLONG)(1000000.f * 62.0f)) {
-										std::string TEIO = "data/umamusume/teio/model.mv1";
-										m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->obj.frame(44);
-										m_CamBuf[Cut].CameraNotFirst.fov = deg2rad(2);
-									}
+								if (NowTimeWait > (LONGLONG)(1000000.f * 62.0f)) {
+									m_CamBuf[Cut].CameraNotFirst.camvec = models.Get(TEIO, 0)->GetFrame("右目");
+									m_CamBuf[Cut].CameraNotFirst.fov = deg2rad(2);
 								}
 							}
 							SEL++;
 							//35
 							if (Cut == SEL) {
-								std::string TEIO = "data/umamusume/teio/model.mv1";
-								auto BUF = models.Get(TEIO, 0)->obj.frame(44);
+								auto BUF = models.Get(TEIO, 0)->GetFrame("右目");
 								if (isFirstLoop) {
-									m_CamBuf[Cut].isUseInFirst = true;
-									m_CamBuf[Cut].CameraInFirst = Cut_Pic[Cut].Aim_camera;
-									m_CamBuf[Cut].CameraInFirst.camvec = BUF;
-									m_CamBuf[Cut].CameraInFirst.campos = BUF + VECTOR_ref::vget(-18, -5, -20.f);
+									Cut_Pic[Cut].Aim_camera.camvec = BUF;
+									Cut_Pic[Cut].Aim_camera.campos = BUF + VECTOR_ref::vget(-18, -5, -20.f);
 
-									m_CamBuf[Cut].camvec_per = 0.9f;
-
-									m_CamBuf[Cut].m_RandcamposSet.Set(5.f, 2.5f, 5.f);
-									m_CamBuf[Cut].m_RandcamposPer = 0.8f;
 								}
-								else {
-									m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
-									if (NowTimeWait > (LONGLONG)(1000000.f * 64.4f)) {
-										easing_set(&Box_ALPHA2, 1.f, 0.975f);
-									}
+								if (NowTimeWait > (LONGLONG)(1000000.f * 64.4f)) {
+									easing_set(&Box_ALPHA2, 1.f, 0.975f);
 								}
+								m_CamBuf[Cut].camvec_per = 0.9f;
+								m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
 							}
 							SEL++;
 							//36
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									std::string Rudolf2 = "data/umamusume/rudolf2/model.mv1";
 									models.Get(Rudolf2, 0)->OpacityRate = 1.f;
 								}
 								else {
@@ -1517,33 +1496,25 @@ namespace FPS_n2 {
 							SEL++;
 							//38
 							if (Cut == SEL) {
-								std::string TEIO = "data/umamusume/teio/model.mv1";
-								auto BUF = models.Get(TEIO, 0)->obj.frame(64);
+								auto BUF = models.Get(TEIO, 0)->GetFrame("右人指２");
 								if (isFirstLoop) {
-									m_CamBuf[Cut].isUseInFirst = true;
-									m_CamBuf[Cut].CameraInFirst = Cut_Pic[Cut].Aim_camera;
-									m_CamBuf[Cut].CameraInFirst.camvec = BUF;
-									m_CamBuf[Cut].CameraInFirst.campos = BUF + VECTOR_ref::vget(10, 0, 0.f);
-
-									m_CamBuf[Cut].camvec_per = 0.9f;
+									Cut_Pic[Cut].Aim_camera.camvec = BUF;
+									Cut_Pic[Cut].Aim_camera.campos = BUF + VECTOR_ref::vget(10, 0, 0.f);
 								}
+								m_CamBuf[Cut].camvec_per = 0.9f;
 								m_CamBuf[Cut].CameraNotFirst.camvec = BUF;
 							}
 							SEL += 2;
 							//40
 							if (Cut == SEL) {
 								if (!isFirstLoop) {
-									std::string gate = "data/model/map/model_gate.mv1";
-									easing_set(&models.Get(gate, 0)->OpacityRate, 1.f,0.9f);
+									easing_set(&models.Get(GATE, 0)->OpacityRate, 1.f,0.9f);
 								}
 							}
 							SEL++;
 							//41
 							if (Cut == SEL) {
-								if (isFirstLoop) {
-									m_CamBuf[Cut].m_RandcamvecSet.Set(25.f, 12.5f, 25.f);
-									m_CamBuf[Cut].m_RandcamvecPer = 0.8f;
-								}else{
+								if (!isFirstLoop) {
 									m_CamBuf[Cut].CameraNotFirst.campos.xadd(-20.f / FPS);
 								}
 							}
@@ -1556,17 +1527,18 @@ namespace FPS_n2 {
 								else {
 									if (NowTimeWait > (LONGLONG)(1000000.f * 83.594f)) {
 										m_CamBuf[Cut].CameraNotFirst.campos = VECTOR_ref::vget(0.f, 17.f, -1.5f);
+
 										m_CamBuf[Cut].CameraNotFirst.camvec = VECTOR_ref::vget(0.f, 6.f, -200.f);
+
 										m_CamBuf[Cut].m_RandcamposSet.Set(2.f, 1.f, 0.2f);
 										m_CamBuf[Cut].m_RandcamposPer = 0.95f;
+
 										m_CamBuf[Cut].m_RandcamupSet.clear();
 										m_CamBuf[Cut].m_RandcamupPer = 0.f;
 									}
 									else {
 										m_CamBuf[Cut].m_RandcamposSet.Set(5.f, 2.5f, 0.5f);
 										m_CamBuf[Cut].m_RandcamposPer = 0.95f;
-										m_CamBuf[Cut].m_RandcamupSet.Set(0.2f, 0.f, 0.f);
-										m_CamBuf[Cut].m_RandcamupPer = 0.95f;
 									}
 								}
 							}
@@ -1574,9 +1546,6 @@ namespace FPS_n2 {
 							//43
 							if (Cut == SEL) {
 								if (isFirstLoop) {
-									m_CamBuf[Cut].m_RandcamposSet.Set(2.f, 1.f, 0.2f);
-									m_CamBuf[Cut].m_RandcamposPer = 0.95f;
-
 									Cut_Pic[Cut].Aim_camera = Cut_Pic[Cut - 1].Aim_camera;
 								}
 								else {
@@ -1587,15 +1556,7 @@ namespace FPS_n2 {
 						}
 
 						//
-						if (isFirstLoop) {
-							if (m_CamBuf[Cut].isUseInFirst) {
-								Cut_Pic[Cut].Aim_camera.camvec = m_CamBuf[Cut].CameraInFirst.camvec;
-								Cut_Pic[Cut].Aim_camera.campos = m_CamBuf[Cut].CameraInFirst.campos;
-								Cut_Pic[Cut].Aim_camera.camup = m_CamBuf[Cut].CameraInFirst.camup;
-								Cut_Pic[Cut].Aim_camera.fov = m_CamBuf[Cut].CameraInFirst.fov;
-							}
-						}
-						else {
+						if (!isFirstLoop) {
 							if (m_CamBuf[Cut].NotFirst_per >= 0.f) {
 								Cut_Pic[Cut].cam_per = m_CamBuf[Cut].NotFirst_per;
 							}

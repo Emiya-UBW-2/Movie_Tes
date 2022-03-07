@@ -117,6 +117,8 @@
 		SetUpdateEnable();
 		SetUpdateCampos(0.8, 20.0, 4.0, -45.0);
 
+		SetCamVecRand(10.0, 10.0, 10.0, 0.8);
+
 		SetNextResetPhysics();
 	//îwíÜ 4
 		SetCut(3.919);
@@ -186,6 +188,8 @@
 		SetUpdatePer(0.95);
 		SetUpdateCampos(0.995, 10.0, 10.0, 60.0);
 
+		SetCamPosRand(20.0, 7.0, 0.0, 0.8);
+
 		SetNextResetPhysics();
 //10
 	//éaêV 10
@@ -229,6 +233,8 @@
 		SetUpdateEnable();
 		SetUpdatePer(0.95);
 		SetUpdateCampos(0.9, 0.0, 10.0, -60.0);
+
+		SetCamVecRand(10.0, 5.0, 0.0, 0.9);
 
 		SetDrawModel(Nice, 0, 14);
 		SetModelPhysicsSpeed(Nice, 0, 1);
@@ -279,6 +285,8 @@
 
 		SetUpdateEnable();
 		SetUpdatePer(0.5);
+
+		SetCamVecRand(1.0, 0.5, 1.0, 0.9);
 
 		SetNextResetPhysics();
 	//äÁ2 19
@@ -440,6 +448,8 @@
 		SetUpdateEnable();
 		SetUpdatePer(0.9);
 
+		SetCamVecRand(10.0, 5.0, 0.0, 0.9);
+
 		SetDrawModel(SZK, 0, 29);
 		SetModelAnime(SZK, 0, 2, FALSE, 1.0, 0);
 
@@ -508,6 +518,8 @@
 		SetCamup(0.0, 1, 0.0);
 		SetCamInfo(4, 1.0, 50.0, 0.0);
 		
+		SetCamVecRand(40.0, 13.0, 0.0, 0.95);
+
 		SetUpdateEnable();
 		SetUpdatePer(0.9);
 		SetUpdateCamvec(0.95, 0.0, 10.0, -40.0);
@@ -570,6 +582,8 @@
 		SetUpdateEnable();
 		SetUpdatePer(0.9);
 		SetUpdateCamfov(0.95, 20.0);
+
+		SetCamPosRand(5.0, 2.5, 5.0, 0.8);
 
 
 		SetDrawModel(Turbo, 0, 35);
@@ -676,6 +690,8 @@
 		SetUpdateCamvec(0.9, 60.0, 15.0, 0.0);
 		SetUpdateCampos(0.0, -10.0, 400.0, -240.0);
 
+		SetCamVecRand(25.0, 12.5, 25.0, 0.8);
+
 	//42
 		SetCut(86.000);
 		SetCamvec(0, 25.0, -100.0);
@@ -688,6 +704,8 @@
 		SetUpdatePer(0.95);
 		SetUpdateCamvec(0.95, 0.0, 17.0, -1000.0);
 		SetUpdateCampos(0.95, 0.0, 17.0, 0.0);
+
+		SetCamUpRand(0.2, 0.0, 0.0, 0.95);
 
 	//43
 		SetCut(200.000);
@@ -702,6 +720,8 @@
 		SetUpdatePer(0.95);
 		SetUpdateCamvec(0.95, 0.0, 17.0, -1000.0);
 		SetUpdateCampos(0.95, 0.0, 17.0, -500.0);
+		
+		SetCamPosRand(2.0, 1.0, 0.2, 0.95);
 
 //LAST
 
