@@ -116,10 +116,10 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning 
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning C4100: 'texte': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'times': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'id_': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1171): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1172): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1173): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1656): warning C4189: 'DrawParts': ローカル変数が初期化されましたが、参照されていません
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1260): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1261): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1262): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1673): warning C4189: 'DrawParts': ローカル変数が初期化されましたが、参照されていません
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
