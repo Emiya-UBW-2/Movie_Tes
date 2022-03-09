@@ -245,7 +245,7 @@ namespace FPS_n2 {
 								this->obj.PhysicsResetState();
 							}
 							else {
-								this->obj.PhysicsCalculation(30.f / FPS * this->PhysicsSpeed);
+								this->obj.PhysicsCalculation(1000.0f / FPS * this->PhysicsSpeed);
 							}
 						}
 					}
@@ -287,6 +287,7 @@ namespace FPS_n2 {
 					//
 					for (size_t i = 0; i < Max; i++) {
 						MV1::SetAnime(&(model[i].obj), model[i].obj);
+						MV1SetPhysicsWorldGravity(model[i].obj.get(), VECTOR_ref::vget(0.f, -1.f, 0.f).get());
 					}
 				}
 				Model* Get(std::string_view Path, size_t Sel = 0) {

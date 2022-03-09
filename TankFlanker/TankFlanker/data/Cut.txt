@@ -61,7 +61,6 @@
 		SetUpdateCampos(0.0, -1.0, 5.0, -16.0);
 
 			SetDrawModel(Teio, 0, 0);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 0, FALSE, 0.3, 8);
 
 			SetDrawModel(MAP, 0, 20);
@@ -84,7 +83,6 @@
 		SetUpdateCampos(0.0, -14.0, 5.0, -14.0);
 
 			SetDrawModel(Teio, 0, 1);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 0, FALSE, 0.5, 6);
 
 			SetNextResetPhysics();
@@ -96,7 +94,6 @@
 		SetCamInfo(25, 1.0, 40.0, 0.0);
 
 			SetDrawModel(Teio, 0, 3);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 1, FALSE, 0.65, 0);
 	//îwíÜ 3
 		SetCut(3.419);
@@ -124,7 +121,6 @@
 		SetUpdateCampos(0.0, 10.0, 60.0, -35.0);
 
 			SetDrawModel(Teio, 0, 4);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 1, FALSE, 0.5, 28);
 
 			SetNextResetPhysics();
@@ -141,7 +137,6 @@
 		SetUpdateCamForcus(0.995, Teio,0, UPPER_2, 0.0,3.0,0.0);
 
 			SetDrawModel(Teio, 0, 5);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 2, FALSE, 0.6, 0);
 
 			SetNextResetPhysics();
@@ -153,7 +148,6 @@
 		SetCamInfo(35, 1.0, 60.0, 0.0);
 
 			SetDrawModel(Teio, 0, 9);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 3, FALSE, 0.75, 0);
 			SetNextResetPhysics();
 	//âHêÿÇÈÇÕÇ∂Çﬂ 7
@@ -191,7 +185,6 @@
 		SetCamInfo(25, 1.0, 60.0, 0.0);
 
 			SetDrawModel(Teio, 0, 13);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 4, FALSE, 0.65, 0);
 	//ÅÉÅÑ 11
 		SetCut(14.00);
@@ -230,7 +223,6 @@
 		SetCamVecRand(10.0, 5.0, 0.0, 0.9);
 
 			SetDrawModel(Nice, 0, 14);
-			SetModelPhysicsSpeed(Nice, 0, 1);
 			SetModelAnime(Nice, 0, 0, TRUE, 0.5, 0);
 
 			SetNextResetPhysics();
@@ -586,30 +578,36 @@
 
 			SetDrawModel(Turbo, 0, 36);
 			SetModelMat(Turbo, 0, 0.0, -15.0, 0.0, -110.0, 0);
+			SetModelPhysicsSpeed(Turbo, 0, 1);
 			SetModelAnime(Turbo, 0, 2, FALSE, 1.01, 8);
 
 			SetDrawModel(Rice, 0, 36);
 			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -20.0, 0);
+			SetModelPhysicsSpeed(Rice, 0, 1);
 			SetModelAnime(Rice, 0, 2, FALSE, 0.95, 5);
 
 			SetDrawModel(Teio, 0, 36);
 			SetModelMat(Teio, 0, 0.0, -25.0, 0.0, -30.0, 0);
+			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 8, FALSE, 1.09, 10);
 
 			SetDrawModel(Ikuno, 0, 36);
 			SetModelMat(Ikuno, 0, 0.0, -10.0, 0.0, -10.0, 0);
+			SetModelPhysicsSpeed(Ikuno, 0, 1);
 			SetModelAnime(Ikuno, 0, 1, FALSE, 0.99, 5);
 
 			SetDrawModel(SPE, 0, 36);
 			SetModelMat(SPE, 0, 0.0, -20.0, 0.0, 10.0, 0);
+			SetModelPhysicsSpeed(SPE, 0, 0.01);
 			SetModelAnime(SPE, 0, 2, FALSE, 1.0, 1);
 
 			SetDrawModel(SZK, 0, 36);
 			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -100.0, 1);
+			SetModelPhysicsSpeed(SZK, 0, 1);
 			SetModelAnime(SZK, 0, 2, FALSE,1.01, 14);
 
 			SetDrawModel(Rudolf2, 0, 37);
-			SetModelPhysicsSpeed(Rudolf2, 0, 100);
+			SetModelPhysicsSpeed(Rudolf2, 0, 0.01);
 			SetModelAnime(Rudolf2, 0, 0, FALSE,1.0, 0);
 			SetModelOpacityRate(Rudolf2, 0 ,0.0);
 	//37
@@ -635,7 +633,6 @@
 
 			SetDrawModel(Teio, 0, 38);
 			SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0);
-			SetModelPhysicsSpeed(Teio, 0, 1);
 			SetModelAnime(Teio, 0, 9, FALSE, 0.0, 0);
 	//39
 		SetCut(74.000);
