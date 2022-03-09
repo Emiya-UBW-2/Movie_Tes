@@ -119,6 +119,7 @@ namespace FPS_n2 {
 					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
 					printfDx("Drawcall   :%d\n", GetDrawCallCount());
 					printfDx("DrawTime   :%5.2f ms\n", float(GetNowHiPerformanceCount() - OLDwaits) / 1000.f);
+					printfDx("Cut        :%d\n", MAINLOOPscene->GetCut());
 					OLDwaits = GetNowHiPerformanceCount();
 #endif // DEBUG
 					//‰æ–Ê‚Ì”½‰f
