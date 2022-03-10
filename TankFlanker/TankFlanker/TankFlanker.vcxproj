@@ -110,8 +110,6 @@
   <ItemGroup>
     <ClInclude Include="Enums.hpp" />
     <ClInclude Include="Header.hpp" />
-    <ClInclude Include="map.hpp" />
-    <ClInclude Include="Ptr_common.hpp" />
     <ClInclude Include="route.hpp" />
     <ClInclude Include="scene.hpp" />
     <ClInclude Include="sub.hpp" />

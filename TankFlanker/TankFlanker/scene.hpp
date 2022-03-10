@@ -66,8 +66,8 @@ namespace FPS_n2 {
 			}
 			virtual bool Update(void) noexcept {
 				if (use_bless) {
-					bless += deg2rad(float(100 + GetRand(600)) / 100.f * Frame_Rate / FPS);
-					bless_ratio -= (0.03f / 90.f) * Frame_Rate / FPS;
+					bless += deg2rad(float(100 + GetRand(600)) / 100.f * Frame_Rate / FPS * GameSpeed);
+					bless_ratio -= (0.03f / 90.f) * Frame_Rate / FPS * GameSpeed;
 					if (bless_ratio <= 0.f) {
 						use_bless = false;
 					}
@@ -193,7 +193,7 @@ namespace FPS_n2 {
 
 					float b_run = 0;
 					float b_runrange = 0;
-					
+
 					std::vector<std::pair<int, std::string>> FrameNum;
 					MV1 obj;
 					moves move;
@@ -245,7 +245,7 @@ namespace FPS_n2 {
 								this->obj.PhysicsResetState();
 							}
 							else {
-								this->obj.PhysicsCalculation(1000.0f / FPS * this->PhysicsSpeed);
+								this->obj.PhysicsCalculation(1000.0f / (FPS * GameSpeed * (120.f / 60.f)) * this->PhysicsSpeed);
 							}
 						}
 					}
@@ -333,7 +333,7 @@ namespace FPS_n2 {
 								}
 								//アニメーション動作
 								if (inf.animsel >= 0) {
-									m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed);
+									m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * GameSpeed);
 								}
 							}
 							if (tt) {
@@ -421,7 +421,7 @@ namespace FPS_n2 {
 								Per = m_per;
 							}
 							void UpdateRand() {
-								easing_set(&this->Ans, GetRandf(this->Base), this->Per);
+								easing_set_SetSpeed(&this->Ans, GetRandf(this->Base), this->Per);
 							}
 						};
 					public:
@@ -449,7 +449,7 @@ namespace FPS_n2 {
 						*/
 						void Update() {
 							Rand_.UpdateRand();
-							easing_set(&this->Ans, this->Base + this->Rand_.Ans, this->Per);
+							easing_set_SetSpeed(&this->Ans, this->Base + this->Rand_.Ans, this->Per);
 						}
 					};
 				private:
@@ -827,12 +827,16 @@ namespace FPS_n2 {
 			ModelControl models;
 			GraphControl graphs;
 			SoundHandle BGM;
+			int BGM_Frequency;
 
 			GraphHandle m_BB;
 
-			GraphHandle movie;
-			const bool isDrawMovie = true;// false;
 			//ビュワー
+			GraphHandle movie;
+			switchs LookMovie;
+			switchs SpeedUp;
+			switchs SpeedDown;
+			int spd_x = 10;
 			cam_info camera_buf;
 			bool isFreepos = false;
 			int x_m, y_m;
@@ -1220,16 +1224,16 @@ namespace FPS_n2 {
 								m_CutInfo.back().isResetRandCampos = true;
 							}
 							else if (func.find("SetCamPosRand") != std::string::npos) {
-							m_CutInfoUpdate.back().m_RandcamposSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-							m_CutInfoUpdate.back().m_RandcamposPer = std::stof(args[3]);
+								m_CutInfoUpdate.back().m_RandcamposSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+								m_CutInfoUpdate.back().m_RandcamposPer = std::stof(args[3]);
 							}
 
 							else if (func.find("ResetCamVecRand") != std::string::npos) {
 								m_CutInfo.back().isResetRandCamvec = true;
 							}
 							else if (func.find("SetCamVecRand") != std::string::npos) {
-							m_CutInfoUpdate.back().m_RandcamvecSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-							m_CutInfoUpdate.back().m_RandcamvecPer = std::stof(args[3]);
+								m_CutInfoUpdate.back().m_RandcamvecSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+								m_CutInfoUpdate.back().m_RandcamvecPer = std::stof(args[3]);
 							}
 
 							else if (func.find("ResetCamUpRand") != std::string::npos) {
@@ -1312,35 +1316,73 @@ namespace FPS_n2 {
 				auto* PostPassParts = PostPassEffect::Instance();
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
-				models.Get(SUN, 0)->obj.SetMatrix( MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
+				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				Cut = 32;
 				Cut = 0;
 				models.Start(Cut);
 				graphs.Start(Cut);
 				attached.Start(Cut);
 				SetUseASyncLoadFlag(FALSE);
-				BGM = SoundHandle::Load("data/sound2.wav");
+				BGM = SoundHandle::Load("data/sound.wav");
 				///*
-				if (isDrawMovie) {
-					movie = GraphHandle::Load("data/base_movie.mp4");
-					PauseMovieToGraph(movie.get());
-				}
+				movie = GraphHandle::Load("data/base_movie.mp4");
+				PauseMovieToGraph(movie.get());
 				//*/
 				//プレイ用意
+				GameSpeed = (float)(spd_x) / 10.f;
+
 				PostPassParts->Set_Bright(255, 255, 255);
-				BaseTime = GetNowHiPerformanceCount() - (Cut > 0 ? m_CutInfo[Cut - 1].TIME : 0);
+				BaseTime = GetMocroSec() - (Cut > 0 ? m_CutInfo[Cut - 1].TIME : 0);
 				WaitTime = (Cut != 0) ? 0 : 1000000;
+				NowTimeWait = -WaitTime;
 
 				m_RandcamupBuf.clear();
 				m_RandcamvecBuf.clear();
 				m_RandcamposBuf.clear();
+
+				LookMovie.Init(false);
 			}
 			bool Update(void) noexcept override {
 
 				auto* PostPassParts = PostPassEffect::Instance();
 				//auto* DrawParts = DXDraw::Instance();
 				TEMPSCENE::Update();
-				NowTimeWait = GetNowHiPerformanceCount() - BaseTime - WaitTime;
+				auto time = GetMocroSec() - BaseTime;
+
+				SpeedUp.GetInput(CheckHitKey(KEY_INPUT_RIGHT) != 0);
+				SpeedDown.GetInput(CheckHitKey(KEY_INPUT_LEFT) != 0);
+				LookMovie.GetInput(CheckHitKey(KEY_INPUT_M) != 0);
+				if (SpeedUp.trigger() || SpeedDown.trigger()) {
+					if (SpeedUp.trigger()) {
+						spd_x++;
+					}
+					if (SpeedDown.trigger()) {
+						spd_x--;
+					}
+
+					spd_x = std::clamp(spd_x, 0, 20);
+
+					GameSpeed = (float)(spd_x)/10.f;
+
+					if (GameSpeed >= 0.1f) {
+						SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
+						if (!BGM.check()) {
+							BGM.play(DX_PLAYTYPE_BACK, FALSE);
+						}
+					}
+					else {
+						BGM.stop();
+					}
+				}
+
+				if (LookMovie.trigger() && LookMovie.on()) {
+					PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
+					ChangeMovieVolumeToGraph(0, movie.get());
+					SeekMovieToGraph(movie.get(), (int)(NowTimeWait / 1000));
+				}
+				NowTimeWait += (time);
+				BaseTime = GetMocroSec();
 				//待ち
 				if (NowTimeWait < 0) {
 					isfast = true;
@@ -1349,16 +1391,12 @@ namespace FPS_n2 {
 				else {
 					if (isfast) {
 						isfast = false;
-						if (isDrawMovie) {
-							PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
-							//ChangeMovieVolumeToGraph(0, movie.get());
-							SeekMovieToGraph(movie.get(), (int)(Cut > 0 ? m_CutInfo[Cut - 1].TIME : 0) / 1000);
-						}
-						else {
-							BGM.play(DX_PLAYTYPE_BACK, TRUE);
-							//BGM.vol(64);
-							SetSoundCurrentTime((LONGLONG)(Cut > 0 ? m_CutInfo[Cut - 1].TIME : 0) / 1000, BGM.get());
-						}
+						BGM_Frequency = GetFrequencySoundMem(BGM.get());
+						BGM.play(DX_PLAYTYPE_BACK, TRUE);
+						//BGM.vol(64);
+						SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+
+						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
 					}
 				}
 				//カットの処理
@@ -1387,41 +1425,41 @@ namespace FPS_n2 {
 						//0
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(2.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(2.f / FPS * GameSpeed);
 
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(2.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(2.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 1;
 						//1
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(-10.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(-10.f / FPS * GameSpeed);
 
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(-10.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(-10.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 3;
 						//4
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(-30.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(-30.f / FPS * GameSpeed);
 
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(-30.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(-30.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 5;
 						//9
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(-15.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(-15.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 6;
 						//15
 						if (Cut == SEL) {
-							easing_set(&Box_ALPHA, 1.f, 0.95f);
-							easing_set(&models.Get(LOGO, 0)->OpacityRate, 0.f, 0.95f);
+							easing_set_SetSpeed(&Box_ALPHA, 1.f, 0.95f);
+							easing_set_SetSpeed(&models.Get(LOGO, 0)->OpacityRate, 0.f, 0.95f);
 							graphs.Get(LOGO1, 0)->Alpha.Set(1.f, 0.95f);
 						}
 						SEL++;
@@ -1432,7 +1470,7 @@ namespace FPS_n2 {
 								PostPassParts->Set_Bright(255, 216, 192);
 							}
 							else {
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.yadd(1.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.yadd(1.f / FPS * GameSpeed);
 							}
 						}
 						SEL++;
@@ -1444,7 +1482,7 @@ namespace FPS_n2 {
 							}
 							m_CutInfoUpdate[Cut].campos_per = 0.9f;
 							m_CutInfoUpdate[Cut].CameraNotFirst.campos = m_CutInfoUpdate[Cut].CameraNotFirst.camvec + VECTOR_ref::vget(camxb_15, 0.f, -60.f);
-							camxb_15 += 1.f / FPS;
+							camxb_15 += 1.f / FPS * GameSpeed;
 						}
 						SEL++;
 						//18
@@ -1460,8 +1498,8 @@ namespace FPS_n2 {
 								m_CutInfoUpdate[Cut].CameraNotFirst.camvec = models.Get(m_CutInfoUpdate[Cut].ForcusModel, 0)->GetFrame(m_CutInfoUpdate[Cut].ForcusFrame) + m_CutInfoUpdate[Cut].ForcusAdd;
 							}
 							else {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(50.f / FPS);
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(50.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(50.f / FPS * GameSpeed);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(50.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 2;
@@ -1479,35 +1517,35 @@ namespace FPS_n2 {
 						//22
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(1.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(1.f / FPS * GameSpeed);
 							}
 						}
 						SEL++;
 						//23
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(-1.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(-1.f / FPS * GameSpeed);
 							}
 						}
 						SEL++;
 						//24
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(-1.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(-1.f / FPS * GameSpeed);
 							}
 						}
 						SEL++;
 						//25
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(1.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(1.f / FPS * GameSpeed);
 							}
 						}
 						SEL++;
 						//26
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(1.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.xadd(1.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 4;
@@ -1521,7 +1559,7 @@ namespace FPS_n2 {
 								m_CutInfoUpdate[Cut].CameraNotFirst.campos = BUF + VECTOR_ref::vget(0.f, -15.f, -20.f);
 							}
 							else {
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(100.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.zadd(100.f / FPS * GameSpeed);
 							}
 							m_CutInfoUpdate[Cut].camvec_per = 0.9f;
 							m_CutInfoUpdate[Cut].CameraNotFirst.camvec = BUF;
@@ -1530,7 +1568,7 @@ namespace FPS_n2 {
 						//37
 						if (Cut == SEL) {
 							if (NowTimeWait > (LONGLONG)(1000000.f * 64.4f)) {
-								easing_set(&Box_ALPHA2, 1.f, 0.975f);
+								easing_set_SetSpeed(&Box_ALPHA2, 1.f, 0.975f);
 							}
 						}
 						SEL++;
@@ -1540,36 +1578,36 @@ namespace FPS_n2 {
 								models.Get(Rudolf2, 0)->OpacityRate = 1.f;
 							}
 							else {
-								easing_set(&Box_ALPHA2, 0.f, 0.95f);
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(2.f / FPS);
+								easing_set_SetSpeed(&Box_ALPHA2, 0.f, 0.95f);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(2.f / FPS * GameSpeed);
 							}
 						}
 						SEL++;
 						//39
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(2.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(2.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 3;
 						//42
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								easing_set(&models.Get(GATE, 0)->OpacityRate, 1.f, 0.9f);
+								easing_set_SetSpeed(&models.Get(GATE, 0)->OpacityRate, 1.f, 0.9f);
 							}
 						}
 						SEL++;
 						//43
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(-20.f / FPS);
+								m_CutInfoUpdate[Cut].CameraNotFirst.campos.xadd(-20.f / FPS * GameSpeed);
 							}
 						}
 						SEL += 3;
 						//46
 						if (Cut == SEL) {
 							if (!isFirstLoop) {
-								easing_set(&Box_ALPHA2, 1.f, 0.95f);
+								easing_set_SetSpeed(&Box_ALPHA2, 1.f, 0.95f);
 							}
 						}
 						SEL++;
@@ -1603,25 +1641,25 @@ namespace FPS_n2 {
 						if (m_CutInfoUpdate[Cut].NotFirst_per >= 0.f) {
 							m_CutInfo[Cut].cam_per = m_CutInfoUpdate[Cut].NotFirst_per;
 						}
-						easing_set(&m_RandcamposBuf, VECTOR_ref::vget(GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.x()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.y()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.z())), m_CutInfoUpdate[Cut].m_RandcamposPer);
-						easing_set(&m_RandcamvecBuf, VECTOR_ref::vget(GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.x()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.y()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.z())), m_CutInfoUpdate[Cut].m_RandcamvecPer);
+						easing_set_SetSpeed(&m_RandcamposBuf, VECTOR_ref::vget(GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.x()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.y()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.z())), m_CutInfoUpdate[Cut].m_RandcamposPer);
+						easing_set_SetSpeed(&m_RandcamvecBuf, VECTOR_ref::vget(GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.x()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.y()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.z())), m_CutInfoUpdate[Cut].m_RandcamvecPer);
 						if (m_CutInfoUpdate[Cut].isUseNotFirst) {
 							if (m_CutInfoUpdate[Cut].UseForcus) {
 								m_CutInfoUpdate[Cut].CameraNotFirst.camvec = models.Get(m_CutInfoUpdate[Cut].ForcusModel, 0)->GetFrame(m_CutInfoUpdate[Cut].ForcusFrame) + m_CutInfoUpdate[Cut].ForcusAdd;
 							}
-							easing_set(&m_CutInfo[Cut].Aim_camera.camvec, m_CutInfoUpdate[Cut].CameraNotFirst.camvec + m_RandcamvecBuf, m_CutInfoUpdate[Cut].camvec_per);
-							easing_set(&m_CutInfo[Cut].Aim_camera.campos, m_CutInfoUpdate[Cut].CameraNotFirst.campos + m_RandcamposBuf, m_CutInfoUpdate[Cut].campos_per);
-							easing_set(&m_CutInfo[Cut].Aim_camera.camup, m_CutInfoUpdate[Cut].CameraNotFirst.camup, m_CutInfoUpdate[Cut].camup_per);
-							easing_set(&m_CutInfo[Cut].Aim_camera.fov, m_CutInfoUpdate[Cut].CameraNotFirst.fov, m_CutInfoUpdate[Cut].fov_per);
+							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.camvec, m_CutInfoUpdate[Cut].CameraNotFirst.camvec + m_RandcamvecBuf, m_CutInfoUpdate[Cut].camvec_per);
+							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.campos, m_CutInfoUpdate[Cut].CameraNotFirst.campos + m_RandcamposBuf, m_CutInfoUpdate[Cut].campos_per);
+							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.camup, m_CutInfoUpdate[Cut].CameraNotFirst.camup, m_CutInfoUpdate[Cut].camup_per);
+							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.fov, m_CutInfoUpdate[Cut].CameraNotFirst.fov, m_CutInfoUpdate[Cut].fov_per);
 						}
 					}
 					//
-					easing_set(&camera_buf.campos, m_CutInfo[Cut].Aim_camera.campos, m_CutInfo[Cut].cam_per);
-					easing_set(&camera_buf.camvec, m_CutInfo[Cut].Aim_camera.camvec, m_CutInfo[Cut].cam_per);
-					easing_set(&camera_buf.camup, m_CutInfo[Cut].Aim_camera.camup, m_CutInfo[Cut].cam_per);
-					easing_set(&camera_buf.fov, m_CutInfo[Cut].Aim_camera.fov, m_CutInfo[Cut].cam_per);
-					easing_set(&camera_buf.far_, m_CutInfo[Cut].Aim_camera.far_, m_CutInfo[Cut].cam_per);
-					easing_set(&camera_buf.near_, m_CutInfo[Cut].Aim_camera.near_, m_CutInfo[Cut].cam_per);
+					easing_set_SetSpeed(&camera_buf.campos, m_CutInfo[Cut].Aim_camera.campos, m_CutInfo[Cut].cam_per);
+					easing_set_SetSpeed(&camera_buf.camvec, m_CutInfo[Cut].Aim_camera.camvec, m_CutInfo[Cut].cam_per);
+					easing_set_SetSpeed(&camera_buf.camup, m_CutInfo[Cut].Aim_camera.camup, m_CutInfo[Cut].cam_per);
+					easing_set_SetSpeed(&camera_buf.fov, m_CutInfo[Cut].Aim_camera.fov, m_CutInfo[Cut].cam_per);
+					easing_set_SetSpeed(&camera_buf.far_, m_CutInfo[Cut].Aim_camera.far_, m_CutInfo[Cut].cam_per);
+					easing_set_SetSpeed(&camera_buf.near_, m_CutInfo[Cut].Aim_camera.near_, m_CutInfo[Cut].cam_per);
 					camera_buf.set_cam_info(camera_buf.fov, camera_buf.near_, camera_buf.far_);
 					//
 					isFreepos = (CheckHitKey(KEY_INPUT_SPACE) != 0);
@@ -1645,6 +1683,8 @@ namespace FPS_n2 {
 				graphs.Update();
 				models.Update();
 				if (!Time_Over()) {
+					models.SetPhysics(ResetPhysics);
+
 					isFirstLoop = false;
 					if (NowTimeWait > m_CutInfo[Cut%m_CutInfo.size()].TIME) {
 						bool IsResetPhysics = m_CutInfo[Cut].IsResetPhysics;
@@ -1655,25 +1695,20 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						models.SetPhysics(ResetPhysics);
 						ResetPhysics = false;
 					}
 				}
 				Effect_UseControl::Update_Effect();
 				if (Time_Over()) { return false; }
-				if (!isDrawMovie && !BGM.check()) { return false; }
+				//if (!BGM.check()) { return false; }
 				return true;
 			}
 			void Dispose(void) noexcept override {
 				Effect_UseControl::Dispose_Effect();
 				m_CutInfo.clear();
 				m_CutInfoUpdate.clear();
-				if (isDrawMovie) {
-					movie.Dispose();
-				}
-				else {
-					BGM.Dispose();
-				}
+				movie.Dispose();
+				BGM.Dispose();
 			}
 			//
 			void UI_Draw(void) noexcept  override {
@@ -1721,7 +1756,7 @@ namespace FPS_n2 {
 						SetFogStartEnd(200, 3000);
 					}
 					if (Cut >= 45) {
-						SetFogColor(255,255,255);
+						SetFogColor(255, 255, 255);
 						SetFogStartEnd(50, 300);
 					}
 					//*/
@@ -1755,7 +1790,7 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 			void LAST_Draw(void) noexcept override {
-				if (isDrawMovie) {
+				if (LookMovie.on()) {
 					auto* DrawParts = DXDraw::Instance();
 					movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 3 / 4, DrawParts->disp_x, DrawParts->disp_y, FALSE);
 				}

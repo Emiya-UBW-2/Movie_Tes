@@ -12,6 +12,22 @@ namespace std {
 }; // namespace std
 //
 namespace FPS_n2 {
+
+	float GameSpeed = 1.0f;
+
+	static const auto GetMocroSec() noexcept {
+		return GetNowHiPerformanceCount() * (int)(GameSpeed*1000.f)/1000;
+	}
+	template <class T>
+	static void easing_set_SetSpeed(T* first, const T& aim, const float& ratio) {
+		if (ratio == 0.f) {
+			*first = aim;
+		}
+		else {
+			*first = *first + (aim - *first) * (1.f - std::powf(ratio, 60.f / FPS * GameSpeed));
+		}
+	};
+
 	//ファイル走査
 	std::vector<WIN32_FIND_DATA> data_t;
 	void GetFileNames(std::string path_t) {
@@ -40,7 +56,7 @@ namespace FPS_n2 {
 			const auto& Get_handle(void)const noexcept { return handle; }
 			void Set(int siz_t) {
 				this->size = siz_t;
-				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE,-1,2);
+				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE, -1, 2);
 			}
 		};
 	private:
@@ -77,13 +93,13 @@ namespace FPS_n2 {
 			}
 			effsorce.resize(effsorce.size() + 1);
 			effsorce.back() = EffekseerEffectHandle::load("data/effect/gndsmk.efk");								//戦車用エフェクト
-			Update_effect_was = GetNowHiPerformanceCount();
+			Update_effect_was = GetMocroSec();
 		}
 
 		void Calc(void) noexcept {
-			Update_effect_f = ((GetNowHiPerformanceCount() - Update_effect_was) >= 1000000 / 60);
+			Update_effect_f = ((GetMocroSec() - Update_effect_was) >= 1000000 / 60);
 			if (Update_effect_f) {
-				Update_effect_was = GetNowHiPerformanceCount();
+				Update_effect_was = GetMocroSec();
 			}
 		}
 
@@ -110,7 +126,7 @@ namespace FPS_n2 {
 			if (handles[now].handle.get() != -1) {
 				handles[now].handle.Dispose();
 			}
-			handles[now].time = GetNowHiPerformanceCount();
+			handles[now].time = GetMocroSec();
 			handles[now].handle = LightHandle::Create(pos, 2.5f, 0.5f, 1.5f, 0.5f);
 			SetLightDifColorHandle(handles[now].handle.get(), GetColorF(1.f, 1.f, 0.f, 1.f));
 			++now %= handles.size();
@@ -120,7 +136,7 @@ namespace FPS_n2 {
 			campos = campos_t;
 			for (auto& h : handles) {
 				if (h.handle.get() != -1) {
-					if ((GetNowHiPerformanceCount() - h.time) >= 1000000 / 30) {
+					if ((GetMocroSec() - h.time) >= 1000000 / 30) {
 						h.handle.Dispose();
 					}
 				}

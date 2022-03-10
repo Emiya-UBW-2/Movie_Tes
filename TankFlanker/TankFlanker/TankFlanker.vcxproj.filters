@@ -29,16 +29,10 @@
     <ClInclude Include="scene.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="map.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Header.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Enums.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Ptr_common.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -17,8 +17,6 @@
 
 #include "Enums.hpp"
 #include "sub.hpp"
-#include "map.hpp"
-#include "Ptr_common.hpp"
 #include "scene.hpp"
 
 #include "route.hpp"

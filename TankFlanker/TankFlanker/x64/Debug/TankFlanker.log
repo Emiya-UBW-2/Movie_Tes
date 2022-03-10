@@ -116,9 +116,9 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning 
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning C4100: 'texte': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'times': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'id_': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1318): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1319): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1320): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1322): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1323): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1324): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。

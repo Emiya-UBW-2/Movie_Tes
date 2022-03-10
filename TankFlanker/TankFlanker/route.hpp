@@ -44,8 +44,8 @@ namespace FPS_n2 {
 				auto OLDwaits = GetNowHiPerformanceCount();
 				//
 				while (ProcessMessage() == 0) {
-					clsDx();
 					const auto waits = GetNowHiPerformanceCount();
+					clsDx();
 					FPS = GetFPS();
 #ifdef DEBUG
 					DebugParts->put_way();
@@ -89,7 +89,7 @@ namespace FPS_n2 {
 									PostPassParts->DrawUI(&scenes_ptr->Get_Camera(), DrawParts->use_vr);	//UI1
 									scenes_ptr->Item_Draw();											//UI2
 								}
-								}, scenes_ptr->Get_Camera());
+							}, scenes_ptr->Get_Camera());
 						}
 						//ディスプレイ描画
 						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 							//デバッグ
 #ifdef DEBUG
 							DebugParts->end_way();
-							DebugParts->debug(10, 100, float(GetNowHiPerformanceCount() - waits) / 1000.f);
+							DebugParts->debug(10, 150, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 #endif // DEBUG
 						}
 					}
@@ -118,13 +118,18 @@ namespace FPS_n2 {
 #ifdef DEBUG
 					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
 					printfDx("Drawcall   :%d\n", GetDrawCallCount());
-					printfDx("DrawTime   :%5.2f ms\n", float(GetNowHiPerformanceCount() - OLDwaits) / 1000.f);
+					printfDx("DrawTime   :%5.2f ms\n", float(OLDwaits) / 1000.f);
 					printfDx("Cut        :%d\n", MAINLOOPscene->GetCut());
-					OLDwaits = GetNowHiPerformanceCount();
+					printfDx("GameSpeed  :%3.1f\n", GameSpeed);
+					printfDx("\n");
+					printfDx("SPACE : View Change\n");
+					printfDx("M     : Movie Switch\n");
+					printfDx("←→  : Speed Change\n");
 #endif // DEBUG
 					//画面の反映
 					DrawParts->Screen_Flip();
-					while(float(GetNowHiPerformanceCount() - waits) / 1000.f <=16.66f){}
+					while ((GetNowHiPerformanceCount() - waits) <= (1000 * 1000 / 60)) {}
+					OLDwaits = GetNowHiPerformanceCount() - waits;
 					//終了判定
 					if (CheckHitKey(KEY_INPUT_ESCAPE) != 0) {
 						this->ending = false;
