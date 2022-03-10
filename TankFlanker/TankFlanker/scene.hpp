@@ -1715,17 +1715,20 @@ namespace FPS_n2 {
 				if (!isFreepos && NowTimeWait > 0) {
 					for (auto& t : Texts) {
 						t.Draw(NowTimeWait);
-
 					}
 				}
 			}
+			//‘¼ 32
 			void BG_Draw(void) noexcept override {
+				//+3
 				models.Draw_Far();
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
+				//+12
 				models.Draw(false, true);
 			}
 			void Shadow_Draw(void) noexcept override {
+				//+52
 				models.Draw(true, false);
 			}
 			void Main_Draw(void) noexcept override {
@@ -1761,6 +1764,7 @@ namespace FPS_n2 {
 					}
 					//*/
 				}
+				//+201 = 67x3
 				models.Draw(false, false);
 				if (isFreepos) {
 					VECTOR_ref vec = (camera_buf.camvec - camera_buf.campos);

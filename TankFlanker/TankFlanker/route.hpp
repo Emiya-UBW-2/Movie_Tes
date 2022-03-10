@@ -110,7 +110,7 @@ namespace FPS_n2 {
 							//デバッグ
 #ifdef DEBUG
 							DebugParts->end_way();
-							DebugParts->debug(10, 150, float(GetNowHiPerformanceCount() - waits) / 1000.f);
+							//DebugParts->debug(10, 150, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 #endif // DEBUG
 						}
 					}
