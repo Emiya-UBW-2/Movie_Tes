@@ -116,9 +116,12 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning 
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning C4100: 'texte': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'times': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'id_': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1322): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1323): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1324): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(283): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1342): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1343): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1344): warning C4267: '引数': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1833): warning C4456: 'DrawParts' を宣言すると、以前のローカル宣言が隠蔽されます
+  c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\scene.hpp(1830): note: 'DrawParts' の宣言を確認してください
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
@@ -128,5 +131,4 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(81): warning 
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(109): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(124): warning C4505: 'StringToWString': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(139): warning C4505: 'CheckHitKey_M': 参照されていないローカル関数は削除されました。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(147): warning C4505: 'GetMouseInput_M': 参照されていないローカル関数は削除されました。
   TankFlanker.vcxproj -> C:\Users\a6m3z\source\repos\Movie_Tes\TankFlanker\x64\Debug\FPS_n2.exe

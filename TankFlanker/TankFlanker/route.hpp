@@ -110,7 +110,7 @@ namespace FPS_n2 {
 							//ƒfƒoƒbƒO
 #ifdef DEBUG
 							DebugParts->end_way();
-							//DebugParts->debug(10, 150, float(GetNowHiPerformanceCount() - waits) / 1000.f);
+							DebugParts->debug(10, 150, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 #endif // DEBUG
 						}
 					}
@@ -122,9 +122,10 @@ namespace FPS_n2 {
 					printfDx("Cut        :%d\n", MAINLOOPscene->GetCut());
 					printfDx("GameSpeed  :%3.1f\n", GameSpeed);
 					printfDx("\n");
-					printfDx("SPACE : View Change\n");
+					printfDx("ENTER : View Change\n");
 					printfDx("M     : Movie Switch\n");
-					printfDx("©¨  : Speed Change\n");
+					printfDx("©¨  : Speed Change(x0.0`x2.0)\n");
+					printfDx("SPACE : STOP \n");
 #endif // DEBUG
 					//‰æ–Ê‚Ì”½‰f
 					DrawParts->Screen_Flip();

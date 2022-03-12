@@ -722,7 +722,7 @@
 		SetCamPosRand(2.0, 1.0, 0.2, 0.95);
 		SetCamUpRand(0.0, 0.0, 0.0, 0.95);
 	//45
-		SetCut(200.000);
+		SetCut(96.000);
 		SetPrevCamInfo();
 
 		SetUpdateEnable();

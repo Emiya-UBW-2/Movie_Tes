@@ -109,6 +109,7 @@ namespace FPS_n2 {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
 			class Cutinfo_Common {
+			public:
 				class On_Off {
 				public:
 					int On = 0;
@@ -118,6 +119,7 @@ namespace FPS_n2 {
 						Off = off;
 					}
 				};
+			private:
 				bool a_switch = false;
 			public:
 				std::vector<On_Off> Switch;
@@ -159,6 +161,14 @@ namespace FPS_n2 {
 					}
 					return false;
 				}
+
+				void SortSwitch() {
+					std::sort(Switch.begin(), Switch.end(), [](On_Off a, On_Off b) { return a.On < b.On; });
+				}
+				void Insert(int ID, int Start, int End) {
+					Switch.insert(Switch.begin() + ID, On_Off());
+					Switch[ID].SetSwitch(Start, End);
+				}
 			};
 			class Cutinfo_g {
 			public:
@@ -182,11 +192,12 @@ namespace FPS_n2 {
 						}
 					}
 				public:
-					bool isFar = false;
+					bool isBGModel = false;
 					bool IsNearShadow = true;
 					bool IsFarShadow = false;
 					bool isBase = true;
 					std::string Path;
+					int BaseID = 0;
 
 					size_t numBase = 0;
 					float PhysicsSpeed = 1.f;
@@ -197,8 +208,9 @@ namespace FPS_n2 {
 					std::vector<std::pair<int, std::string>> FrameNum;
 					MV1 obj;
 					moves move;
+					//private:
 					bool isDraw = false;
-
+				public:
 					Cutinfo_Common Cutinfo;
 					std::vector<Cutinfo_g> Cutinfo_;//オンにするカット
 					float OpacityRate = 1.f;
@@ -245,7 +257,7 @@ namespace FPS_n2 {
 								this->obj.PhysicsResetState();
 							}
 							else {
-								this->obj.PhysicsCalculation(1000.0f / (FPS * GameSpeed * (120.f / 60.f)) * this->PhysicsSpeed);
+								this->obj.PhysicsCalculation(1000.0f / (FPS * std::max(GameSpeed, 0.1f) * (120.f / 60.f)) * this->PhysicsSpeed);
 							}
 						}
 					}
@@ -254,6 +266,9 @@ namespace FPS_n2 {
 				std::vector<Model> model;
 				size_t Max = 0;
 			public:
+				const auto& GetMax() noexcept { return Max; }
+				const auto& GetModel() noexcept { return model; }
+
 				ModelControl() {
 					model.resize(64);
 					Max = 0;
@@ -264,12 +279,16 @@ namespace FPS_n2 {
 							model[Max].Path = Path;
 							model[Max].isBase = false;
 							model[Max].obj = model[i].obj.Duplicate();
+							model[i].numBase++;
+							model[Max].BaseID = model[i].numBase;
 							Max++;
 							return;
 						}
 					}
 					model[Max].Path = Path;
 					model[Max].isBase = true;
+					model[Max].numBase = 0;
+					model[Max].BaseID = 0;
 					MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);
 					Max++;
 				}
@@ -291,13 +310,9 @@ namespace FPS_n2 {
 					}
 				}
 				Model* Get(std::string_view Path, size_t Sel = 0) {
-					int Cnt = 0;
 					for (size_t i = 0; i < Max; i++) {
-						if (model[i].Path == Path) {
-							if (Cnt >= Sel) {
-								return &(model[i]);
-							}
-							Cnt++;
+						if (model[i].Path == Path && model[i].BaseID == Sel) {
+							return &(model[i]);
 						}
 					}
 					return nullptr;
@@ -368,7 +383,7 @@ namespace FPS_n2 {
 					{
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
-							if (m.isFar) {
+							if (m.isBGModel) {
 								m.Draw();
 							}
 						}
@@ -380,7 +395,7 @@ namespace FPS_n2 {
 					if (infarshadow) {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
-							if (!m.isFar && m.IsFarShadow) {
+							if (!m.isBGModel && m.IsFarShadow) {
 								m.Draw();
 							}
 						}
@@ -388,7 +403,7 @@ namespace FPS_n2 {
 					else if (innearshadow) {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
-							if (!m.isFar && m.IsNearShadow) {
+							if (!m.isBGModel && m.IsNearShadow) {
 								m.Draw();
 							}
 						}
@@ -396,7 +411,7 @@ namespace FPS_n2 {
 					else {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
-							if (!m.isFar) {
+							if (!m.isBGModel) {
 								m.Draw();
 							}
 						}
@@ -798,13 +813,10 @@ namespace FPS_n2 {
 			std::string LOGO = "data/model/logo/model.mv1";
 			std::string SUN = "data/model/sun/model.mv1";
 
-			std::string TEIO = "data/umamusume/teio/model.mv1";
 			std::string Rudolf2 = "data/umamusume/rudolf2/model.mv1";
-			std::string Nice = "data/umamusume/nice/model.mv1";
 			std::string Tanhoiza = "data/umamusume/tanhoiza/model.mv1";
 			std::string spe = "data/umamusume/spe/model.mv1";
 			std::string szk = "data/umamusume/suzuka/model.mv1";
-			std::string rice = "data/umamusume/rice/model.mv1";
 		private:
 			//スクリプト読み込み
 			std::string func;
@@ -828,14 +840,22 @@ namespace FPS_n2 {
 			GraphControl graphs;
 			SoundHandle BGM;
 			int BGM_Frequency;
-
 			GraphHandle m_BB;
-
 			//ビュワー
 			GraphHandle movie;
 			switchs LookMovie;
 			switchs SpeedUp;
 			switchs SpeedDown;
+			switchs Start;
+			switchs MouseClick;
+			//
+			int X_now = 0;
+			int CutNow = 0;
+			int SetAnimStart = -1;
+			int SetAnimEnd = -1;
+			ModelControl::Model* ChangeModel = nullptr;
+			Cutinfo_g* ModelEdit = nullptr;
+			//
 			int spd_x = 10;
 			cam_info camera_buf;
 			bool isFreepos = false;
@@ -1150,7 +1170,7 @@ namespace FPS_n2 {
 							else if (func.find("SetModelMode") != std::string::npos) {
 								auto* t = models.Get(args[0], std::stoi(args[1]));
 								if (args[2] == "SKY_TRUE") {
-									t->isFar = true;
+									t->isBGModel = true;
 								}
 								if (args[2] == "NEAR_FALSE") {
 									t->IsNearShadow = false;
@@ -1341,6 +1361,7 @@ namespace FPS_n2 {
 				m_RandcamposBuf.clear();
 
 				LookMovie.Init(false);
+				Start.Init(true);
 			}
 			bool Update(void) noexcept override {
 
@@ -1349,20 +1370,31 @@ namespace FPS_n2 {
 				TEMPSCENE::Update();
 				auto time = GetMocroSec() - BaseTime;
 
+				MouseClick.GetInput((GetMouseInput_M() & MOUSE_INPUT_LEFT) != 0);
 				SpeedUp.GetInput(CheckHitKey(KEY_INPUT_RIGHT) != 0);
 				SpeedDown.GetInput(CheckHitKey(KEY_INPUT_LEFT) != 0);
 				LookMovie.GetInput(CheckHitKey(KEY_INPUT_M) != 0);
-				if (SpeedUp.trigger() || SpeedDown.trigger()) {
+				Start.GetInput(CheckHitKey(KEY_INPUT_SPACE) != 0);
+
+				if (SpeedUp.trigger() || SpeedDown.trigger() || Start.trigger()) {
 					if (SpeedUp.trigger()) {
 						spd_x++;
 					}
 					if (SpeedDown.trigger()) {
 						spd_x--;
 					}
+					if (Start.trigger()) {
+						if (Start.on()) {
+							spd_x = 10;
+						}
+						else {
+							spd_x = 0;
+						}
+					}
 
 					spd_x = std::clamp(spd_x, 0, 20);
 
-					GameSpeed = (float)(spd_x)/10.f;
+					GameSpeed = (float)(spd_x) / 10.f;
 
 					if (GameSpeed >= 0.1f) {
 						SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
@@ -1662,7 +1694,7 @@ namespace FPS_n2 {
 					easing_set_SetSpeed(&camera_buf.near_, m_CutInfo[Cut].Aim_camera.near_, m_CutInfo[Cut].cam_per);
 					camera_buf.set_cam_info(camera_buf.fov, camera_buf.near_, camera_buf.far_);
 					//
-					isFreepos = (CheckHitKey(KEY_INPUT_SPACE) != 0);
+					isFreepos = (CheckHitKey(KEY_INPUT_RETURN) != 0);
 					int x_o = x_m;
 					int y_o = y_m;
 					GetMousePoint(&x_m, &y_m);
@@ -1684,7 +1716,6 @@ namespace FPS_n2 {
 				models.Update();
 				if (!Time_Over()) {
 					models.SetPhysics(ResetPhysics);
-
 					isFirstLoop = false;
 					if (NowTimeWait > m_CutInfo[Cut%m_CutInfo.size()].TIME) {
 						bool IsResetPhysics = m_CutInfo[Cut].IsResetPhysics;
@@ -1793,11 +1824,303 @@ namespace FPS_n2 {
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
+
+
 			void LAST_Draw(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
+
 				if (LookMovie.on()) {
 					auto* DrawParts = DXDraw::Instance();
 					movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 3 / 4, DrawParts->disp_x, DrawParts->disp_y, FALSE);
 				}
+				{
+					int x_p = DrawParts->disp_x * 1 / 10;
+					int x_s = DrawParts->disp_x * 8 / 10;
+					int y_p = DrawParts->disp_y * 5 / 10;
+					int y_s = DrawParts->disp_y * 4 / 10;
+
+					int BaseWidth = DrawParts->disp_x / 64;
+					int hight = y_s / (int)(models.GetMax());
+					int x_now = -1;
+
+					int mouse_x, mouse_y;
+					GetMousePoint(&mouse_x, &mouse_y);
+
+					LONGLONG now2 = (Cut >= 1) ? m_CutInfo[Cut - 1].TIME : 0;
+					int width_Time = BaseWidth * (int)(NowTimeWait - now2) / 1000000;
+					//オフセット計算
+					{
+						//現在地
+						{
+							int x1 = x_p;
+							int i = 0;
+							while (true) {
+								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
+								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+								x1 += BaseWidth * (int)(now - base) / 1000000;
+								//NOW
+								if (i == Cut) {
+									x_now = x1;
+									break;
+								}
+								i++;
+								if (i >= m_CutInfo.size()) { break; }
+							}
+						}
+						//SetNOW
+						if (x_now >= 0) {
+							X_now = std::min(-(x_now + width_Time - (x_p + x_s / 4)), 0);
+						}
+						//CutNow計算
+						{
+							int x1 = x_p + X_now;
+							int i = 0;
+							while (true) {
+								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
+								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+
+								x1 += BaseWidth * (int)(now - base) / 1000000;
+								if (x1 > x_p) {
+									CutNow = std::max(i - 1, 0);
+									break;
+								}
+								i++;
+								if (i - 1 >= m_CutInfo.size()) { break; }
+							}
+						}
+						//現在地再計算
+						{
+							int x1 = x_p;
+							int i = CutNow;
+							while (true) {
+								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
+								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+								x1 += BaseWidth * (int)(now - base) / 1000000;
+								//NOW
+								if (i == Cut) {
+									x_now = x1;
+									break;
+								}
+								i++;
+								if (i >= m_CutInfo.size()) { break; }
+							}
+						}
+						//SetNOW再計算
+						if (x_now >= 0) {
+							X_now = std::min(-(x_now + width_Time - (x_p + x_s / 4)), 0);
+						}
+					}
+					//判定演算
+					if (MouseClick.press()) {
+						int x1 = x_p + X_now;
+						int i = CutNow;
+						while (true) {
+							LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
+							LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+
+							x1 += BaseWidth * (int)(now - base) / 1000000;
+							if (x1 > x_p + x_s) { break; }
+							if (x1 > x_p) {
+								int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+								int msel = (mouse_y - y_p) / hight;
+								int y1 = y_p + msel * hight;
+								if (in2_(mouse_x, mouse_y, x1, y1, x1 + width_Next, y1 + hight)) {
+									auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
+									bool EditModelInfo = false;
+									for (auto& c : tmp->Cutinfo.Switch) {
+										if (c.On <= i && i <= c.Off) {
+											EditModelInfo = true;
+											ModelEdit = &tmp->Cutinfo_[&c - &tmp->Cutinfo.Switch.front()];
+											break;
+										}
+									}
+									if (!EditModelInfo || ModelEdit == nullptr) {
+										if (ChangeModel == nullptr) { ChangeModel = tmp; }
+										if (SetAnimStart == -1) { SetAnimStart = i; }
+										SetAnimEnd = std::max(i, SetAnimStart);
+									}
+								}
+							}
+							i++;
+							if (i >= m_CutInfo.size()) { break; }
+						}
+					}
+					else {
+						if (ChangeModel != nullptr) {
+							//被りの修正
+							for (const auto& c : ChangeModel->Cutinfo.Switch) {
+								if (SetAnimStart >= c.Off) {
+									SetAnimStart = std::max(SetAnimStart, c.Off + 1);
+								}
+								if (SetAnimStart < c.On) {
+									SetAnimEnd = std::min(SetAnimEnd, c.On - 1);
+								}
+							}
+							//被りの確認
+							for (const auto& c : ChangeModel->Cutinfo.Switch) {
+								if (SetAnimStart == c.On || SetAnimEnd == c.Off) {
+									ChangeModel = nullptr;
+									break;
+								}
+							}
+							//登録できるなら作成
+							if (ChangeModel != nullptr) {
+								int id = 0;
+								for (const auto& c : ChangeModel->Cutinfo.Switch) {
+									if (SetAnimStart == c.On || SetAnimEnd == c.Off) {
+										ChangeModel = nullptr;
+										break;
+									}
+									if (SetAnimStart < c.On) {
+										break;
+									}
+									id++;
+								}
+								ChangeModel->Cutinfo.Insert(id, SetAnimStart, SetAnimEnd);
+								ChangeModel->Cutinfo_.insert(ChangeModel->Cutinfo_.begin() + id, Cutinfo_g());
+								auto& info = ChangeModel->Cutinfo_[id];
+								info.animsel = 0;
+								info.isloop = true;
+								info.animspeed = 1.0f;
+								info.startframe = 0.f;
+
+								ChangeModel = nullptr;
+							}
+							SetAnimStart = -1;
+							SetAnimEnd = -1;
+						}
+						if (ModelEdit != nullptr) {
+							//モデルデータエディット
+							ModelEdit->animsel = 2;
+
+							ModelEdit = nullptr;
+						}
+					}
+					//BACK
+					{
+						//BG
+						{
+							SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+							DrawBox(x_p, y_p, x_p + x_s, y_p + y_s, GetColor(0, 0, 0), TRUE);
+							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+						}
+						//line
+						{
+							for (int i = 0; i < models.GetMax() + 1; i++) {
+								int y1 = y_p + i * hight;
+								DrawLine(x_p, y1, x_p + x_s, y1, GetColor(128, 128, 128), 3);
+							}
+							int x1 = x_p + X_now;
+							int i = CutNow;
+							while (true) {
+								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
+								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+
+								x1 += BaseWidth * (int)(now - base) / 1000000;
+								if (x1 > x_p + x_s) { break; }
+								//LINE
+								if (x1 > x_p) {
+									DrawLine(x1, y_p, x1, y_p + y_s, GetColor(128, 128, 128), 3);
+									int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+
+									if (in2_(mouse_x, mouse_y, x1, y_p, x1 + width_Next, y_p + y_s)) {
+										int y1 = y_p + ((mouse_y - y_p) / hight) * hight;
+										SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+										DrawBox(x1, y1, x1 + width_Next, y1 + hight, GetColor(255, 255, 255), TRUE);
+										SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+									}
+								}
+								i++;
+								if (i >= m_CutInfo.size()) { break; }
+							}
+						}
+					}
+					//timeline
+					{
+						int x1 = x_p + X_now;
+						int i = CutNow;
+						while (true) {
+							LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
+							LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+							int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+
+							x1 += BaseWidth * (int)(now - base) / 1000000;
+							if (x1 > x_p + x_s) { break; }
+							//
+							int xp = 3, yp = 3;
+							int p2 = 2;
+							int y1 = y_p;
+							for (const auto& m : models.GetModel()) {
+								if (ChangeModel != nullptr) {
+									if (ChangeModel == (ModelControl::Model*)&m) {
+
+										if (SetAnimStart <= i && i <= SetAnimEnd) {
+											DrawBox(x1, y1 + yp, x1 + width_Next, y1 + hight - yp, GetColor(255, 255, 0), FALSE);
+										}
+									}
+								}
+								for (const auto& c : m.Cutinfo.Switch) {
+									if (c.On <= i && i <= c.Off) {
+										int x_b2 = std::max(x1 + ((i == c.On) ? p2 : 0), x_p);
+										int x_b1 = std::max(x1 + ((i == c.On) ? xp : 0), x_p);
+										int x_b4 = std::min(x1 + width_Next - ((i == c.Off) ? p2 : 0), x_p + x_s);
+										int x_b3 = std::min(x1 + width_Next - ((i == c.Off) ? xp : 0), x_p + x_s);
+
+										unsigned int color;
+										if (m.isBGModel) {
+											if (c.On <= Cut && Cut <= c.Off) {
+												color = GetColor(100, 216, 100);
+											}
+											else {
+												color = GetColor(60, 60, 192);
+											}
+										}
+										else {
+											if (c.On <= Cut && Cut <= c.Off) {
+												color = GetColor(150, 255, 150);
+											}
+											else {
+												color = GetColor(100, 100, 255);
+											}
+										}
+
+										DrawBox(x_b2, y1 + yp - p2, x_b4, y1 + hight - yp + p2, GetColor(0, 0, 0), TRUE);
+										DrawBox(x_b1, y1 + yp, x_b3, y1 + hight - yp, color, TRUE);
+									}
+								}
+								y1 += hight;
+							}
+							i++;
+							if (i >= m_CutInfo.size()) { break; }
+						}
+					}
+					//modelName
+					{
+						int y1 = y_p;
+						for (const auto& m : models.GetModel()) {
+							for (const auto& a : args2) {
+								if (a.After == m.Path) {
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+									for (const auto& c : m.Cutinfo.Switch) {
+										if (c.On <= Cut && Cut <= c.Off) {
+											SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+										}
+									}
+									Fonts.Get(hight).Get_handle().DrawString(x_p, y1, a.Base + " : " + std::to_string(m.BaseID), GetColor(255, 255, 255));
+									SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+									break;
+								}
+							}
+							y1 += hight;
+						}
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					}
+					//NOWline
+					if (x_now >= 0) {
+						DrawLine(x_now + X_now + width_Time, y_p, x_now + X_now + width_Time, y_p + y_s, GetColor(255, 255, 255), 3);
+					}
+				}
+				//
 			}
 		};
 	};
