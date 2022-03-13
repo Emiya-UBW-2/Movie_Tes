@@ -30,6 +30,7 @@ namespace FPS_n2 {
 			auto MAINLOOPscene = std::make_shared<Sceneclass::MAINLOOP>();
 			//開始処理
 			MAINLOOPscene->Awake();
+			if (!(ProcessMessage() == 0)) { return; }
 			//遷移先指定
 			MAINLOOPscene->Set_Next(MAINLOOPscene, scenes::MAIN_LOOP);
 			//開始時遷移先
@@ -110,7 +111,7 @@ namespace FPS_n2 {
 							//デバッグ
 #ifdef DEBUG
 							DebugParts->end_way();
-							DebugParts->debug(10, 150, float(GetNowHiPerformanceCount() - waits) / 1000.f);
+							DebugParts->debug(1920 - 300, 50, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 #endif // DEBUG
 						}
 					}
@@ -124,6 +125,7 @@ namespace FPS_n2 {
 					printfDx("\n");
 					printfDx("ENTER : View Change\n");
 					printfDx("M     : Movie Switch\n");
+					printfDx("N     : Editer Switch\n");
 					printfDx("←→  : Speed Change(x0.0～x2.0)\n");
 					printfDx("SPACE : STOP \n");
 #endif // DEBUG
@@ -153,6 +155,11 @@ namespace FPS_n2 {
 				}
 				WaitKey();
 			} while (this->ending);
+		}
+		~main_c() {
+			if (scenes_ptr != nullptr) {
+				scenes_ptr->Dispose();
+			}
 			effectControl.Dispose();
 		}
 	};
