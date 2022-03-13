@@ -106,56 +106,197 @@ namespace FPS_n2 {
 			virtual void KeyOperation(void) noexcept {}
 		};
 		//
-		class LoadScriptClass {
-		private:
-			class ARG {
-			public:
-				std::string Base;
-				std::string After;
-			};
-		private:
-			std::vector<ARG> args2;
-		public:
-			std::string func;
-			std::vector<std::string> args;
-		public:
-			const auto* GetArgFromPath(std::string_view Path) {
-				const ARG* sel = nullptr;
-				for (const auto& a : args2) {
-					if (a.After == Path) {
-						sel = &a;
+		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
+			//
+			class LoadScriptClass {
+			private:
+				class ARG {
+				public:
+					std::string Base;
+					std::string After;
+				};
+			private:
+				std::vector<ARG> args2;
+				std::string func;
+				std::vector<std::string> args;
+			private:
+				static void Sub_Func(std::string& func_t, const char& in_str) {
+					size_t str_switch = 0;
+					size_t str_in = std::string::npos;
+					bool in = false;
+					while (true) {
+						if (str_switch != std::string::npos) { str_switch = func_t.find('\"', str_switch + 1); in ^= 1; }
+						str_in = func_t.find(in_str, str_in + 1);
+						if (str_in != std::string::npos) {
+							if (str_switch != std::string::npos && str_switch < str_in && in) {
+								continue;
+							}
+							func_t = func_t.erase(str_in, 1);
+							continue;
+						}
 						break;
 					}
 				}
-				return sel;
-			}
-			void Calc() {
-				//変数登録
-				{
-					if (func.find("SetArg") != std::string::npos) {
-						args2.resize(args2.size() + 1);
-						args2.back().Base = args[0];
-						args2.back().After = args[1];
+			public:
+				//Getter
+				const auto& Getfunc() const noexcept { return func; }
+				const auto& Getargs() const noexcept { return args; }
+				const auto* GetArgFromPath(std::string_view Path) {
+					const ARG* sel = nullptr;
+					for (const auto& a : args2) {
+						if (a.After == Path) {
+							sel = &a;
+							break;
+						}
 					}
-					//変数変換処理
-					else {
-						for (auto& a1 : args) {
-							for (auto& a2 : args2) {
-								if (a1 == a2.Base) {
-									a1 = a2.After;
-									break;
-								}
+					return sel;
+				}
+				//スクリプト読み込み処理
+				void LoadScript(std::string_view func_t) {
+					args.clear();
+					func = func_t;
+					{
+						// //を削除
+						size_t sls = func.find("//");
+						if (sls != std::string::npos) { func = func.substr(0, sls); }
+						//いらない要素を排除
+						Sub_Func(func, '{');
+						Sub_Func(func, '}');
+						Sub_Func(func, ' ');
+						Sub_Func(func, '\t');
+						Sub_Func(func, ';');
+						Sub_Func(func, '\"');
+					}
+					//()と,で囲われた部分から引数を取得
+					if (func != "") {
+						std::string tmp_func = func;
+						size_t left = tmp_func.find("(");
+						size_t right = tmp_func.rfind(")");
+						if (left != std::string::npos && right != std::string::npos) {
+							tmp_func = tmp_func.substr(left + 1, right - 1 - left);
+						}
+						while (true) {
+							size_t in_str = tmp_func.find(",");
+							if (in_str == std::string::npos) {
+								args.emplace_back(tmp_func);
+								break;
+							}
+							else {
+								std::string arg = tmp_func.substr(0, in_str);
+								tmp_func = tmp_func.substr(in_str + 1);
+								args.emplace_back(arg);
 							}
 						}
 					}
 				}
-				//
-			}
-		};
-		//
-		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
+				//処理
+				void SetArgs() {
+					//変数登録
+					{
+						if (func.find("SetArg") != std::string::npos) {
+							args2.resize(args2.size() + 1);
+							args2.back().Base = args[0];
+							args2.back().After = args[1];
+						}
+						//変数変換処理
+						else {
+							for (auto& a1 : args) {
+								for (auto& a2 : args2) {
+									if (a1 == a2.Base) {
+										a1 = a2.After;
+										break;
+									}
+								}
+							}
+						}
+					}
+					//
+				}
+			};
+			//
+			class TelopClass {
+			private:
+				class Cut_tex {
+					int xpos = 0;
+					int ypos = 0;
+					int size = 0;
+					int LMR = 1;
+					std::string str;
+					LONGLONG START_TIME = 0;
+					LONGLONG END_TIME = 0;
+				public:
+					Cut_tex() {
+						xpos = 0;
+						ypos = 0;
+						size = 12;
+						str = "test";
+						START_TIME = (LONGLONG)(1000000.f * 0.01f);
+						END_TIME = (LONGLONG)(1000000.f * 1.01f);
+					}
+					void Set(int xp, int yp, int Fontsize, std::string_view mag, LONGLONG StartF, LONGLONG ContiF, int m_LMR) {
+						this->xpos = xp;
+						this->ypos = yp;
+						this->size = Fontsize;
+						this->str = mag;
+						this->START_TIME = StartF;
+						this->END_TIME = StartF + ContiF;;
+						this->LMR = m_LMR;
+					}
+					void Draw(LONGLONG nowTimeWait) {
+						if (this->START_TIME < nowTimeWait && nowTimeWait < this->END_TIME) {
+							switch (this->LMR)
+							{
+							case 0:
+								Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+								break;
+							case 1:
+								Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+								break;
+							case 2:
+								Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+								break;
+							default:
+								break;
+							}
+						}
+					}
+				};
+			private:
+				std::vector<Cut_tex> Texts;
+				LONGLONG StartF = 0;
+				LONGLONG ContiF = 0;
+			public:
+				void Init() {
+					StartF = 0;
+					ContiF = 0;
+				}
+				void LoadTelop(const std::string &func, const std::vector<std::string>& args) {
+					if (func.find("SetTelopTime") != std::string::npos) {
+						StartF = (LONGLONG)(1000000.f * std::stof(args[0]));
+						ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
+					}
+					else if (func.find("AddTelopTime") != std::string::npos) {
+						StartF += (LONGLONG)(1000000.f * std::stof(args[0]));
+						ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
+					}
+					else if (func.find("SetTelop") != std::string::npos) {
+						int t = 0;
+						if (args[4].find("LEFT") != std::string::npos) { t = 0; }
+						else if (args[4].find("MIDDLE") != std::string::npos) { t = 1; }
+						else if (args[4].find("RIGHT") != std::string::npos) { t = 2; }
+						Texts.resize(Texts.size() + 1);
+						Texts.back().Set(y_r(std::stoi(args[0])), y_r(std::stoi(args[1])), y_r(std::stoi(args[2])), args[3], StartF, ContiF, t);
+					}
+				}
+				void Draw(LONGLONG nowTimeWait) {
+					for (auto& t : Texts) {
+						t.Draw(nowTimeWait);
+					}
+				}
+			};
 		private:
-			class Cutinfo_Common {
+			//
+			class CutInfoClass {
 			public:
 				class On_Off {
 				public:
@@ -217,9 +358,10 @@ namespace FPS_n2 {
 					Switch[ID].SetSwitch(Start, End);
 				}
 			};
-			class Cutinfo_g {
+			//詳細
+			class CutinfoDetail {
 			public:
-				Cutinfo_Common Blur;
+				CutInfoClass Blur;
 				int animsel = -1;
 				bool isloop = false;
 				float animspeed = 0.f;
@@ -234,6 +376,15 @@ namespace FPS_n2 {
 				float PhysicsSpeed_ = -1.f;
 				float OpacityRate = -1.f;
 			};
+			class CutAttachDetail {
+			public:
+				bool isradcam = false;//角度、距離指定か座標指定か
+				float yradcam = 0.f;
+				float xradcam = 0.f;
+				float rangecam = 0.f;
+				VECTOR_ref poscam;
+			};
+			//モデルコントロール
 			class ModelControl {
 			public:
 				class Model {
@@ -264,8 +415,8 @@ namespace FPS_n2 {
 					bool isDraw = false;
 					bool isEndLoad = false;
 				public:
-					Cutinfo_Common Cutinfo;
-					std::vector<Cutinfo_g> CutDetail;//カットの詳細
+					CutInfoClass Cutinfo;
+					std::vector<CutinfoDetail> CutDetail;//カットの詳細
 					float OpacityRate = 1.f;
 					int Anim_Sel = 0;
 
@@ -539,8 +690,8 @@ namespace FPS_n2 {
 					int xsize = -1;
 					int ysize = -1;
 				public:
-					Cutinfo_Common Cutinfo;
-					std::vector<Cutinfo_g> CutDetail;//オンにするカット
+					CutInfoClass Cutinfo;
+					std::vector<CutinfoDetail> CutDetail;//オンにするカット
 					std::string Path;
 					void SetBright(int b_r, int b_g, int b_b) {
 						Bright_R = b_r;
@@ -715,6 +866,7 @@ namespace FPS_n2 {
 					}
 				}
 			};
+			//
 			class Cut_Info_First {
 			public:
 				bool UsePrevAim{ false };
@@ -746,19 +898,17 @@ namespace FPS_n2 {
 				}
 			};
 			class Cut_Info_Update {
-			public:
+			private:
 				bool isUseNotFirst{ false };
-				bool IsUsePrevBuf{ false };
 				bool UseForcus{ false };
 
-				float campos_per{ 0.f };
-				float camvec_per{ 0.f };
-				float camup_per{ 0.f };
-				float fov_per{ 0.f };
-
-				cam_info CameraNotFirst;
+				std::string ForcusModel;
+				std::string ForcusFrame;
+				VECTOR_ref ForcusAdd;
 
 				float NotFirst_per = -1.f;
+
+				float fov_per{ 0.f };
 
 				float m_RandcamupPer;
 				VECTOR_ref m_RandcamupSet;
@@ -766,11 +916,15 @@ namespace FPS_n2 {
 				VECTOR_ref m_RandcamvecSet;
 				float m_RandcamposPer;
 				VECTOR_ref m_RandcamposSet;
+			public:
+				bool IsUsePrevBuf{ false };
 
-				std::string ForcusModel;
-				std::string ForcusFrame;
-				VECTOR_ref ForcusAdd;
+				float campos_per{ 0.f };
+				float camvec_per{ 0.f };
+				float camup_per{ 0.f };
 
+				cam_info CameraNotFirst;
+			public:
 				Cut_Info_Update() {
 					isUseNotFirst = false;
 					IsUsePrevBuf = false;
@@ -794,64 +948,113 @@ namespace FPS_n2 {
 					ForcusFrame = "";
 					ForcusAdd.clear();
 				}
-
 				~Cut_Info_Update() {
 				}
-			};
 
-			class Cut_tex {
-				int xpos = 0;
-				int ypos = 0;
-				int size = 0;
-				int LMR = 1;
-				std::string str;
-				LONGLONG START_TIME = 0;
-				LONGLONG END_TIME = 0;
-			public:
-				Cut_tex() {
-					xpos = 0;
-					ypos = 0;
-					size = 12;
-					str = "test";
-					START_TIME = (LONGLONG)(1000000.f * 0.01f);
-					END_TIME = (LONGLONG)(1000000.f * 1.01f);
+				void SetForce(float camvecPer,std::string_view ModelPath,int ModelID,std::string_view Frame,const VECTOR_ref& Add) {
+					this->camvec_per = camvecPer;
+					this->ForcusModel = ModelPath;
+					if (Frame == "UPPER_2") {
+						this->ForcusFrame = "上半身2";
+					}
+					else if (Frame == "NECK") {
+						this->ForcusFrame = "首";
+					}
+					else if (Frame == "HEAD") {
+						this->ForcusFrame = "頭";
+					}
+
+					else if (Frame == "LEFT_EYE") {
+						this->ForcusFrame = "右目";
+					}
+					else if (Frame == "RIGHT_EYE") {
+						this->ForcusFrame = "左目";
+					}
+					else if (Frame == "RIGHT_FINGER") {
+						this->ForcusFrame = "右人指２";
+					}
+					else if (Frame == "FAR_TRUE") {
+						this->ForcusFrame = "右ひざ";
+					}
+					this->ForcusAdd = Add;
 				}
-				void Set(int xp, int yp, int Fontsize, std::string_view mag, LONGLONG StartF, LONGLONG ContiF, int m_LMR) {
-					this->xpos = xp;
-					this->ypos = yp;
-					this->size = Fontsize;
-					this->str = mag;
-					this->START_TIME = StartF;
-					this->END_TIME = StartF + ContiF;;
-					this->LMR = m_LMR;
+
+				void UpdateForce(ModelControl& models) {
+					this->CameraNotFirst.camvec = models.Get(this->ForcusModel, 0)->GetFrame(this->ForcusFrame) + this->ForcusAdd;
 				}
-				void Draw(LONGLONG nowTimeWait) {
-					if (this->START_TIME < nowTimeWait && nowTimeWait < this->END_TIME) {
-						switch (this->LMR)
-						{
-						case 0:
-							Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
-							break;
-						case 1:
-							Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
-							break;
-						case 2:
-							Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
-							break;
-						default:
-							break;
-						}
+
+				void LoadScript(const std::string &func, const std::vector<std::string>& args) {
+					//カメラのアップデート
+					if (func.find("SetUpdateEnable") != std::string::npos) {
+						this->isUseNotFirst = true;
+					}
+					//camvec
+					else if (func.find("SetUpdateCamvec") != std::string::npos) {
+						this->camvec_per = std::stof(args[0]);
+						this->CameraNotFirst.camvec.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+					}
+					else if (func.find("SetUpdateCamForcus") != std::string::npos) {
+						this->UseForcus = true;
+						this->SetForce(std::stof(args[0]), args[1], std::stoi(args[2]), args[3], VECTOR_ref::vget(std::stof(args[4]), std::stof(args[5]), std::stof(args[6])));
+					}
+					//campos
+					else if (func.find("SetUpdateCampos") != std::string::npos) {
+						this->campos_per = std::stof(args[0]);
+						this->CameraNotFirst.campos.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+					}
+					//camup
+					else if (func.find("SetUpdateCamup") != std::string::npos) {
+						this->camup_per = std::stof(args[0]);
+						this->CameraNotFirst.camup.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+					}
+					//fov
+					else if (func.find("SetUpdateCamfov") != std::string::npos) {
+						this->fov_per = std::stof(args[0]);
+						this->CameraNotFirst.fov = deg2rad(std::stof(args[1]));
+					}
+					//easing
+					else if (func.find("SetUpdatePer") != std::string::npos) {
+						this->NotFirst_per = std::stof(args[0]);
+					}
+					//前のカメラアップデートを使用
+					else if (func.find("SetPrevCamUpdate") != std::string::npos) {
+						this->IsUsePrevBuf = true;
+					}
+					//アップデートカメラにランダムを指定
+					else if (func.find("SetCamPosRand") != std::string::npos) {
+						this->m_RandcamposSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						this->m_RandcamposPer = std::stof(args[3]);
+					}
+					else if (func.find("SetCamVecRand") != std::string::npos) {
+						this->m_RandcamvecSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						this->m_RandcamvecPer = std::stof(args[3]);
+					}
+					else if (func.find("SetCamUpRand") != std::string::npos) {
+						this->m_RandcamupSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						this->m_RandcamupPer = std::stof(args[3]);
 					}
 				}
-			};
 
-			class CamAttachDetail {
-			public:
-				bool isradcam = false;//角度、距離指定か座標指定か
-				float yradcam = 0.f;
-				float xradcam = 0.f;
-				float rangecam = 0.f;
-				VECTOR_ref poscam;
+				void Update(Cut_Info_First& Camera, ModelControl& models,
+					VECTOR_ref& m_RandcamupBuf,
+					VECTOR_ref& m_RandcamvecBuf,
+					VECTOR_ref& m_RandcamposBuf
+				) {
+					if (this->NotFirst_per >= 0.f) {
+						Camera.cam_per = this->NotFirst_per;
+					}
+					easing_set_SetSpeed(&m_RandcamposBuf, VECTOR_ref::vget(GetRandf(this->m_RandcamposSet.x()), GetRandf(this->m_RandcamposSet.y()), GetRandf(this->m_RandcamposSet.z())), this->m_RandcamposPer);
+					easing_set_SetSpeed(&m_RandcamvecBuf, VECTOR_ref::vget(GetRandf(this->m_RandcamvecSet.x()), GetRandf(this->m_RandcamvecSet.y()), GetRandf(this->m_RandcamvecSet.z())), this->m_RandcamvecPer);
+					if (this->isUseNotFirst) {
+						if (this->UseForcus) {
+							this->UpdateForce(models);
+						}
+						easing_set_SetSpeed(&Camera.Aim_camera.camvec, this->CameraNotFirst.camvec + m_RandcamvecBuf, this->camvec_per);
+						easing_set_SetSpeed(&Camera.Aim_camera.campos, this->CameraNotFirst.campos + m_RandcamposBuf, this->campos_per);
+						easing_set_SetSpeed(&Camera.Aim_camera.camup, this->CameraNotFirst.camup, this->camup_per);
+						easing_set_SetSpeed(&Camera.Aim_camera.fov, this->CameraNotFirst.fov, this->fov_per);
+					}
+				}
 			};
 		private:
 			std::string LOGO1 = "data/picture/logo.png";
@@ -868,6 +1071,8 @@ namespace FPS_n2 {
 		private:
 			//スクリプト読み込み
 			LoadScriptClass LSClass;
+			//テロップ
+			TelopClass TLClass;
 			//カット
 			size_t Cut = 0;
 			std::vector<Cut_Info_First> m_CutInfo;
@@ -878,10 +1083,8 @@ namespace FPS_n2 {
 			bool isFirstLoop = true;//カット最初のループか
 			bool isfast = true;
 			//
-			Cutinfo_Common attached;
-			std::vector<CamAttachDetail> attachedDetail;
-			//
-			std::vector<Cut_tex> Texts;
+			CutInfoClass attached;
+			std::vector<CutAttachDetail> attachedDetail;
 			//データ
 			ModelControl models;
 			GraphControl graphs;
@@ -907,6 +1110,7 @@ namespace FPS_n2 {
 			size_t ModelEditCutNum = 0;
 			bool ModelEditMode = false;
 			bool ModelEditIn = false;
+			bool ModelEdit_PhysicsReset = false;
 			//
 			int spd_x = 10;
 			cam_info camera_buf;
@@ -932,62 +1136,6 @@ namespace FPS_n2 {
 			float camupxb_18 = 0.f;
 			//
 			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
-		private:
-			//スクリプト読み込み処理
-			static void Sub_Func(std::string& func_t, const char& in_str) {
-				size_t str_switch = 0;
-				size_t str_in = std::string::npos;
-				bool in = false;
-				while (true) {
-					if (str_switch != std::string::npos) { str_switch = func_t.find('\"', str_switch + 1); in ^= 1; }
-					str_in = func_t.find(in_str, str_in + 1);
-					if (str_in != std::string::npos) {
-						if (str_switch != std::string::npos && str_switch < str_in && in) {
-							continue;
-						}
-						func_t = func_t.erase(str_in, 1);
-						continue;
-					}
-					break;
-				}
-			}
-			void LoadScript(std::string_view func_t) {
-				LSClass.args.clear();
-				LSClass.func = func_t;
-				{
-					// //を削除
-					size_t sls = LSClass.func.find("//");
-					if (sls != std::string::npos) { LSClass.func = LSClass.func.substr(0, sls); }
-					//いらない要素を排除
-					Sub_Func(LSClass.func, '{');
-					Sub_Func(LSClass.func, '}');
-					Sub_Func(LSClass.func, ' ');
-					Sub_Func(LSClass.func, '\t');
-					Sub_Func(LSClass.func, ';');
-					Sub_Func(LSClass.func, '\"');
-				}
-				//()と,で囲われた部分から引数を取得
-				if (LSClass.func != "") {
-					std::string tmp_func = LSClass.func;
-					size_t left = tmp_func.find("(");
-					size_t right = tmp_func.rfind(")");
-					if (left != std::string::npos && right != std::string::npos) {
-						tmp_func = tmp_func.substr(left + 1, right - 1 - left);
-					}
-					while (true) {
-						size_t in_str = tmp_func.find(",");
-						if (in_str == std::string::npos) {
-							LSClass.args.emplace_back(tmp_func);
-							break;
-						}
-						else {
-							std::string arg = tmp_func.substr(0, in_str);
-							tmp_func = tmp_func.substr(in_str + 1);
-							LSClass.args.emplace_back(arg);
-						}
-					}
-				}
-			}
 		public:
 			//Getter
 			bool Time_Over() { return Cut >= m_CutInfo.size(); }
@@ -1011,8 +1159,7 @@ namespace FPS_n2 {
 							0, 1.f, 0.5f, LOGO1);
 						m_BB = GraphHandle::Load(BB);
 					}
-					LONGLONG StartF = 0;
-					LONGLONG ContiF = 0;
+					TLClass.Init();
 					int mdata = FileRead_open("data/Cut.txt", FALSE);
 					int cnt = 0;
 					SetUseASyncLoadFlag(TRUE);
@@ -1021,17 +1168,17 @@ namespace FPS_n2 {
 					auto TotalTime = GetNowHiPerformanceCount();
 
 					while (FileRead_eof(mdata) == 0) {
-						LoadScript(getparams::get_str(mdata));
-						if (LSClass.func == "") { continue; }
-						auto& args = LSClass.args;
-						auto& func = LSClass.func;
+						LSClass.LoadScript(getparams::get_str(mdata));
+						const auto& args = LSClass.Getargs();
+						const auto& func = LSClass.Getfunc();
+						if (func == "") { continue; }
 						//変数登録
-						LSClass.Calc();//todo
+						LSClass.SetArgs();
 						//モデル読み込み
 						{
-							if (LSClass.func.find("LoadModel") != std::string::npos) {
+							if (func.find("LoadModel") != std::string::npos) {
 								for (int i = 0; i < std::stoi(args[1]); i++) {
-									models.Load(args[0]);					//origin
+									models.Load(args[0]);
 								}
 							}
 						}
@@ -1224,110 +1371,22 @@ namespace FPS_n2 {
 									t->IsFarShadow = true;
 								}
 							}
-
-							//カメラのアップデート
-							else if (func.find("SetUpdateEnable") != std::string::npos) {
-								m_CutInfoUpdate.back().isUseNotFirst = true;
-							}
-							//camvec
-							else if (func.find("SetUpdateCamvec") != std::string::npos) {
-								m_CutInfoUpdate.back().camvec_per = std::stof(args[0]);
-								m_CutInfoUpdate.back().CameraNotFirst.camvec.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
-							}
-							else if (func.find("SetUpdateCamForcus") != std::string::npos) {
-								m_CutInfoUpdate.back().UseForcus = true;
-								m_CutInfoUpdate.back().camvec_per = std::stof(args[0]);
-								m_CutInfoUpdate.back().ForcusModel = args[1];
-								if (args[3] == "UPPER_2") {
-									m_CutInfoUpdate.back().ForcusFrame = "上半身2";
-								}
-								else if (args[3] == "NECK") {
-									m_CutInfoUpdate.back().ForcusFrame = "首";
-								}
-								else if (args[3] == "HEAD") {
-									m_CutInfoUpdate.back().ForcusFrame = "頭";
-								}
-
-								else if (args[3] == "LEFT_EYE") {
-									m_CutInfoUpdate.back().ForcusFrame = "右目";
-								}
-								else if (args[3] == "RIGHT_EYE") {
-									m_CutInfoUpdate.back().ForcusFrame = "左目";
-								}
-								else if (args[3] == "RIGHT_FINGER") {
-									m_CutInfoUpdate.back().ForcusFrame = "右人指２";
-								}
-								else if (args[3] == "FAR_TRUE") {
-									m_CutInfoUpdate.back().ForcusFrame = "右ひざ";
-								}
-								m_CutInfoUpdate.back().ForcusAdd.Set(std::stof(args[4]), std::stof(args[5]), std::stof(args[6]));
-							}
-							//campos
-							else if (func.find("SetUpdateCampos") != std::string::npos) {
-								m_CutInfoUpdate.back().campos_per = std::stof(args[0]);
-								m_CutInfoUpdate.back().CameraNotFirst.campos.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
-							}
-							//camup
-							else if (func.find("SetUpdateCamup") != std::string::npos) {
-								m_CutInfoUpdate.back().camup_per = std::stof(args[0]);
-								m_CutInfoUpdate.back().CameraNotFirst.camup.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
-							}
-							//fov
-							else if (func.find("SetUpdateCamfov") != std::string::npos) {
-								m_CutInfoUpdate.back().fov_per = std::stof(args[0]);
-								m_CutInfoUpdate.back().CameraNotFirst.fov = deg2rad(std::stof(args[1]));
-							}
-							//easing
-							else if (func.find("SetUpdatePer") != std::string::npos) {
-								m_CutInfoUpdate.back().NotFirst_per = std::stof(args[0]);
-							}
-							//前のカメラアップデートを使用
-							else if (func.find("SetPrevCamUpdate") != std::string::npos) {
-								m_CutInfoUpdate.back().IsUsePrevBuf = true;
-							}
-							//アップデートカメラにランダムを指定
 							else if (func.find("ResetCamPosRand") != std::string::npos) {
 								m_CutInfo.back().isResetRandCampos = true;
 							}
-							else if (func.find("SetCamPosRand") != std::string::npos) {
-								m_CutInfoUpdate.back().m_RandcamposSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-								m_CutInfoUpdate.back().m_RandcamposPer = std::stof(args[3]);
-							}
-
 							else if (func.find("ResetCamVecRand") != std::string::npos) {
 								m_CutInfo.back().isResetRandCamvec = true;
 							}
-							else if (func.find("SetCamVecRand") != std::string::npos) {
-								m_CutInfoUpdate.back().m_RandcamvecSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-								m_CutInfoUpdate.back().m_RandcamvecPer = std::stof(args[3]);
-							}
-
 							else if (func.find("ResetCamUpRand") != std::string::npos) {
 								m_CutInfo.back().isResetRandCamup = true;
 							}
-							else if (func.find("SetCamUpRand") != std::string::npos) {
-								m_CutInfoUpdate.back().m_RandcamupSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-								m_CutInfoUpdate.back().m_RandcamupPer = std::stof(args[3]);
+							else if (m_CutInfoUpdate.size() > 0) {
+								m_CutInfoUpdate.back().LoadScript(func, args);
 							}
 						}
 						//テロップ
 						{
-							if (func.find("SetTelopTime") != std::string::npos) {
-								StartF = (LONGLONG)(1000000.f * std::stof(args[0]));
-								ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
-							}
-							else if (func.find("AddTelopTime") != std::string::npos) {
-								StartF += (LONGLONG)(1000000.f * std::stof(args[0]));
-								ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
-							}
-							else if (func.find("SetTelop") != std::string::npos) {
-								int t = 0;
-								if (args[4].find("LEFT") != std::string::npos) { t = 0; }
-								else if (args[4].find("MIDDLE") != std::string::npos) { t = 1; }
-								else if (args[4].find("RIGHT") != std::string::npos) { t = 2; }
-								Texts.resize(Texts.size() + 1);
-								Texts.back().Set(y_r(std::stoi(args[0])), y_r(std::stoi(args[1])), y_r(std::stoi(args[2])), args[3], StartF, ContiF, t);
-							}
+							TLClass.LoadTelop(func, args);
 						}
 						//END
 						if (ProcessMessage() == 0) {
@@ -1411,7 +1470,7 @@ namespace FPS_n2 {
 				m_RandcamvecBuf.clear();
 				m_RandcamposBuf.clear();
 
-				LookEditer.Init(false);
+				LookEditer.Init(true);
 				LookMovie.Init(false);
 				Start.Init(true);
 			}
@@ -1575,14 +1634,12 @@ namespace FPS_n2 {
 						//18
 						if (Cut == SEL) {
 							if (isFirstLoop) {
+
 								m_CutInfoUpdate[Cut].campos_per = 0.f;
 								m_CutInfoUpdate[Cut].CameraNotFirst.campos = models.Get(Tanhoiza, 0)->GetFrame("首") + VECTOR_ref::vget(30.f, 0.f, -10.f);
 
-								m_CutInfoUpdate[Cut].camvec_per = 0.f;
-								m_CutInfoUpdate[Cut].ForcusModel = Tanhoiza;
-								m_CutInfoUpdate[Cut].ForcusFrame = "首";
-								m_CutInfoUpdate[Cut].ForcusAdd.Set(0.f, 0.f, 0.f);
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec = models.Get(m_CutInfoUpdate[Cut].ForcusModel, 0)->GetFrame(m_CutInfoUpdate[Cut].ForcusFrame) + m_CutInfoUpdate[Cut].ForcusAdd;
+								m_CutInfoUpdate[Cut].SetForce(0.f, Tanhoiza, 0, "NECK", VECTOR_ref::vget(0.f, 0.f, 0.f));
+								m_CutInfoUpdate[Cut].UpdateForce(models);
 							}
 							else {
 								m_CutInfoUpdate[Cut].CameraNotFirst.camvec.zadd(50.f / FPS * GameSpeed);
@@ -1725,20 +1782,8 @@ namespace FPS_n2 {
 						if (m_CutInfo[Cut].isResetRandCamup) { m_RandcamupBuf.clear(); }
 					}
 					else {
-						if (m_CutInfoUpdate[Cut].NotFirst_per >= 0.f) {
-							m_CutInfo[Cut].cam_per = m_CutInfoUpdate[Cut].NotFirst_per;
-						}
-						easing_set_SetSpeed(&m_RandcamposBuf, VECTOR_ref::vget(GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.x()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.y()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamposSet.z())), m_CutInfoUpdate[Cut].m_RandcamposPer);
-						easing_set_SetSpeed(&m_RandcamvecBuf, VECTOR_ref::vget(GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.x()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.y()), GetRandf(m_CutInfoUpdate[Cut].m_RandcamvecSet.z())), m_CutInfoUpdate[Cut].m_RandcamvecPer);
-						if (m_CutInfoUpdate[Cut].isUseNotFirst) {
-							if (m_CutInfoUpdate[Cut].UseForcus) {
-								m_CutInfoUpdate[Cut].CameraNotFirst.camvec = models.Get(m_CutInfoUpdate[Cut].ForcusModel, 0)->GetFrame(m_CutInfoUpdate[Cut].ForcusFrame) + m_CutInfoUpdate[Cut].ForcusAdd;
-							}
-							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.camvec, m_CutInfoUpdate[Cut].CameraNotFirst.camvec + m_RandcamvecBuf, m_CutInfoUpdate[Cut].camvec_per);
-							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.campos, m_CutInfoUpdate[Cut].CameraNotFirst.campos + m_RandcamposBuf, m_CutInfoUpdate[Cut].campos_per);
-							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.camup, m_CutInfoUpdate[Cut].CameraNotFirst.camup, m_CutInfoUpdate[Cut].camup_per);
-							easing_set_SetSpeed(&m_CutInfo[Cut].Aim_camera.fov, m_CutInfoUpdate[Cut].CameraNotFirst.fov, m_CutInfoUpdate[Cut].fov_per);
-						}
+						auto& u = m_CutInfoUpdate[Cut];
+						u.Update(m_CutInfo[Cut], models, m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
 					}
 					//
 					easing_set_SetSpeed(&camera_buf.campos, m_CutInfo[Cut].Aim_camera.campos, m_CutInfo[Cut].cam_per);
@@ -1770,7 +1815,8 @@ namespace FPS_n2 {
 				graphs.Update();
 				models.Update();
 				if (!Time_Over()) {
-					models.SetPhysics(ResetPhysics);
+					models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
+					ModelEdit_PhysicsReset = false;
 					isFirstLoop = false;
 					if (NowTimeWait > m_CutInfo[Cut%m_CutInfo.size()].TIME) {
 						bool IsResetPhysics = m_CutInfo[Cut].IsResetPhysics;
@@ -1799,9 +1845,7 @@ namespace FPS_n2 {
 			//
 			void UI_Draw(void) noexcept  override {
 				if (!isFreepos && NowTimeWait > 0) {
-					for (auto& t : Texts) {
-						t.Draw(NowTimeWait);
-					}
+					TLClass.Draw(NowTimeWait);
 				}
 			}
 			//他 32
@@ -2037,7 +2081,7 @@ namespace FPS_n2 {
 											id++;
 										}
 										ChangeModel->Cutinfo.Insert(id, SetAnimStart, SetAnimEnd);
-										ChangeModel->CutDetail.insert(ChangeModel->CutDetail.begin() + id, Cutinfo_g());
+										ChangeModel->CutDetail.insert(ChangeModel->CutDetail.begin() + id, CutinfoDetail());
 										auto& info = ChangeModel->CutDetail[id];
 										info.animsel = 0;
 										info.isloop = true;
@@ -2045,6 +2089,9 @@ namespace FPS_n2 {
 										info.startframe = 0.f;
 
 										ChangeModel = nullptr;
+										if (SetAnimStart <= Cut && Cut <= SetAnimEnd) {
+											ModelEdit_PhysicsReset = true;
+										}
 									}
 									SetAnimStart = -1;
 									SetAnimEnd = -1;
@@ -2223,13 +2270,16 @@ namespace FPS_n2 {
 						//
 					}
 					//モデルエディットモード
-					if (ModelEditMode) {
+					if (ModelEdit != nullptr && ModelEditMode) {
 						int x_p = DrawParts->disp_x * 5 / 10;
 						int x_s = DrawParts->disp_x * 4 / 10;
 						int y_p = DrawParts->disp_y * 2 / 10;
 						int y_s = DrawParts->disp_y * 5 / 20;
+
+						int hight = y_r(20);
+						auto& c = ModelEdit->CutDetail[ModelEditCutNum];
 						//モデルエディットモード判定
-						if (ModelEdit != nullptr && ModelEditMode) {
+						{
 							bool isend = false;
 							//EndMode
 							{
@@ -2243,10 +2293,89 @@ namespace FPS_n2 {
 									}
 								}
 							}
-
+							//info
+							{
+								int p2 = 2;
+								int y1 = y_p + hight + p2;
+								if (MouseClick.trigger()) {
+									//AnimeSel
+									{
+										if (in2_(mouse_x, mouse_y, x_p, y1, x_p + x_s, y1 + hight)) {
+											++c.animsel %= ModelEdit->obj.get_anime().size();
+											ModelEdit_PhysicsReset = true;
+										}
+										y1 += hight + p2;
+									}
+									//DrawMode
+									{
+										if (in2_(mouse_x, mouse_y, x_p, y1, x_p + x_s, y1 + hight)) {
+											if (
+												!ModelEdit->isBGModel && 
+												ModelEdit->IsNearShadow &&
+												!ModelEdit->IsFarShadow
+												) {
+												//ノーマルならBGモデルに
+												ModelEdit->isBGModel = true;
+											}
+											else if (
+												ModelEdit->isBGModel &&
+												ModelEdit->IsNearShadow &&
+												!ModelEdit->IsFarShadow
+												) {
+												//BGなら近距離影なしモデルに
+												ModelEdit->isBGModel = false;
+												ModelEdit->IsNearShadow = false;
+											}
+											else if (
+												!ModelEdit->isBGModel &&
+												!ModelEdit->IsNearShadow &&
+												!ModelEdit->IsFarShadow
+												) {
+												//近距離影なしなら遠距離影なしモデルに
+												ModelEdit->IsNearShadow = true;
+												ModelEdit->IsFarShadow = true;
+											}
+											else if (
+												!ModelEdit->isBGModel &&
+												ModelEdit->IsNearShadow &&
+												ModelEdit->IsFarShadow
+												) {
+												//遠距離影なしならノーマルモデルに
+												ModelEdit->IsFarShadow = false;
+												ModelEdit->isBGModel = false;
+											}
+											else {
+												//何か問題があったらnormalに
+												ModelEdit->isBGModel = false;
+												ModelEdit->IsNearShadow = true;
+												ModelEdit->IsFarShadow = false;
+											}
+										}
+										y1 += hight + p2;
+									}
+									//ModelPhysicsSpeed
+									{
+										if (in2_(mouse_x, mouse_y, x_p, y1, x_p + x_s, y1 + hight)) {
+										}
+										y1 += hight + p2;
+									}
+									//OpacityRate
+									{
+										if (in2_(mouse_x, mouse_y, x_p, y1, x_p + x_s, y1 + hight)) {
+										}
+										y1 += hight + p2;
+									}
+									//Matrix
+									{
+										if (in2_(mouse_x, mouse_y, x_p, y1, x_p + x_s, y1 + hight)) {
+										}
+										y1 += hight + p2;
+									}
+									//End
+								}
+							}
 							//適応
 							if (isend) {
-								//ModelEdit->CutDetail[ModelEditCutNum].animsel = 2;
 								ModelEdit = nullptr;
 								ModelEditCutNum = 0;
 								ModelEditMode = false;
@@ -2257,38 +2386,36 @@ namespace FPS_n2 {
 								//*/
 							}
 						}
-						//BACK
-						{
-							//BG
+						if (ModelEdit != nullptr) {
+							//BACK
 							{
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-								DrawBox(x_p, y_p, x_p + x_s, y_p + y_s, GetColor(0, 0, 0), TRUE);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+								//BG
+								{
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+									DrawBox(x_p, y_p, x_p + x_s, y_p + y_s, GetColor(0, 0, 0), TRUE);
+									SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+								}
 							}
-						}
-						//EndMode
-						{
-							int x1 = x_p + x_s - 32 - 6;
-							int y1 = y_p + y_s - 32 - 6;
-							int x2 = x1 + 32;
-							int y2 = y1 + 32;
-							unsigned int color;
-							if (in2_(mouse_x, mouse_y, x1, y1, x2, y2)) {
-								color = GetColor(200, 0, 0);
-							}
-							else {
-								color = GetColor(255, 0, 0);
-							}
+							//EndMode
+							{
+								int x1 = x_p + x_s - 32 - 6;
+								int y1 = y_p + y_s - 32 - 6;
+								int x2 = x1 + 32;
+								int y2 = y1 + 32;
+								unsigned int color;
+								if (in2_(mouse_x, mouse_y, x1, y1, x2, y2)) {
+									color = GetColor(200, 0, 0);
+								}
+								else {
+									color = GetColor(255, 0, 0);
+								}
 
-							DrawBox(x1, y1, x2, y2, color, TRUE);
-						}
-						//info
-						{
-							int hight = y_r(20);
-							int y1 = y_p;
-							int p2 = 2;
-							if (ModelEdit != nullptr) {
-								auto& c = ModelEdit->CutDetail[ModelEditCutNum];
+								DrawBox(x1, y1, x2, y2, color, TRUE);
+							}
+							//info
+							{
+								int y1 = y_p;
+								int p2 = 2;
 								//Name
 								{
 									const auto* sel = LSClass.GetArgFromPath(ModelEdit->Path);
