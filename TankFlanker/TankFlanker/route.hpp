@@ -120,14 +120,7 @@ namespace FPS_n2 {
 					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
 					printfDx("Drawcall   :%d\n", GetDrawCallCount());
 					printfDx("DrawTime   :%5.2f ms\n", float(OLDwaits) / 1000.f);
-					printfDx("Cut        :%d\n", MAINLOOPscene->GetCut());
 					printfDx("GameSpeed  :%3.1f\n", GameSpeed);
-					printfDx("\n");
-					printfDx("ENTER : View Change\n");
-					printfDx("M     : Movie Switch\n");
-					printfDx("N     : Editer Switch\n");
-					printfDx("©¨  : Speed Change(x0.0`x2.0)\n");
-					printfDx("SPACE : STOP \n");
 #endif // DEBUG
 					//‰æ–Ê‚Ì”½‰f
 					DrawParts->Screen_Flip();
