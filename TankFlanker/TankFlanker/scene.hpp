@@ -978,6 +978,13 @@ namespace FPS_n2 {
 
 				cam_info CameraNotFirst;
 				cam_info CameraNotFirst_Vec;
+
+				bool IsSetBlack{ false };
+				float Black_Per = 1.f;//Box_ALPHA = 0.f;
+				float Black = 0.f;//Box_ALPHA = 0.f;
+				bool IsSetWhite{ false };
+				float White_Per = 1.f;//Box_ALPHA2 = 0.f;
+				float White = 0.f;//Box_ALPHA2 = 0.f;
 			public:
 				Cut_Info_Update() {
 					isUseNotFirst = false;
@@ -1064,6 +1071,29 @@ namespace FPS_n2 {
 						this->m_RandcamupSet.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
 						this->m_RandcamupPer = std::stof(args[3]);
 					}
+					//
+					else if (func.find("WhiteOut") != std::string::npos) {
+						this->IsSetWhite = true;
+						this->White_Per = std::stof(args[0]);
+						this->White = 1.f;
+					}
+					else if (func.find("WhiteIn") != std::string::npos) {
+						this->IsSetWhite = true;
+						this->White_Per = std::stof(args[0]);
+						this->White = 0.f;
+					}
+					//
+					else if (func.find("BlackOut") != std::string::npos) {
+						this->IsSetBlack = true;
+						this->Black_Per = std::stof(args[0]);
+						this->Black = 1.f;
+					}
+					else if (func.find("BlackIn") != std::string::npos) {
+						this->IsSetBlack = true;
+						this->Black_Per = std::stof(args[0]);
+						this->Black = 0.f;
+					}
+					//
 				}
 				void Update(Cut_Info_First& Camera, ModelControl& models,
 					VECTOR_ref& m_RandcamupBuf,
@@ -1110,7 +1140,7 @@ namespace FPS_n2 {
 			//
 			LONGLONG BaseTime = 0, WaitTime = 0, NowTimeWait = 0;
 			bool ResetPhysics = true;
-			bool isFirstLoop = true;//カット最初のループか
+			bool isFirstLoop = true;		//カット最初のループか
 			bool isfast = true;
 			//
 			CutInfoClass attached;
@@ -1418,7 +1448,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				m_Counter = 32;
-				m_Counter = 0;
+				//m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1541,7 +1571,6 @@ namespace FPS_n2 {
 						SEL += 15;
 						//15
 						if (m_Counter == SEL) {
-							easing_set_SetSpeed(&Box_ALPHA, 1.f, 0.95f);
 							easing_set_SetSpeed(&models.Get(LOGO, 0)->OpacityRate, 0.f, 0.95f);
 							graphs.Get(LOGO1, 0)->Alpha.Set(1.f, 0.95f);
 						}
@@ -1549,7 +1578,6 @@ namespace FPS_n2 {
 						//16
 						if (m_Counter == SEL) {
 							if (isFirstLoop) {
-								Box_ALPHA = 0.f;
 								PostPassParts->Set_Bright(255, 216, 192);
 							}
 						}
@@ -1570,6 +1598,7 @@ namespace FPS_n2 {
 							if (isFirstLoop) {
 								m_CutInfoUpdate[m_Counter].campos_per = 0.f;
 								m_CutInfoUpdate[m_Counter].CameraNotFirst.campos = models.Get(Tanhoiza, 0)->GetFrame("首") + VECTOR_ref::vget(30.f, 0.f, -10.f);
+
 								m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = m_CutInfoUpdate[m_Counter].Forcus.GetForce(models);
 								m_CutInfoUpdate[m_Counter].Forcus.SetUse(false);
 							}
@@ -1598,38 +1627,23 @@ namespace FPS_n2 {
 							m_CutInfoUpdate[m_Counter].camvec_per = 0.9f;
 							m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = BUF;
 						}
-						SEL += 7;
-						//38
-						if (m_Counter == SEL) {
-							if (NowTimeWait > (LONGLONG)(1000000.f * 64.4f)) {
-								easing_set_SetSpeed(&Box_ALPHA2, 1.f, 0.975f);
-							}
-						}
-						SEL++;
-						//39
+						SEL += 9;
+						//40
 						if (m_Counter == SEL) {
 							if (isFirstLoop) {
 								models.Get(Rudolf2, 0)->OpacityRate = 1.f;
 							}
 							else {
-								easing_set_SetSpeed(&Box_ALPHA2, 0.f, 0.95f);
 							}
 						}
 						SEL += 4;
-						//43
+						//44
 						if (m_Counter == SEL) {
 							if (!isFirstLoop) {
 								easing_set_SetSpeed(&models.Get(GATE, 0)->OpacityRate, 1.f, 0.9f);
 							}
 						}
-						SEL += 4;
-						//47
-						if (m_Counter == SEL) {
-							if (!isFirstLoop) {
-								easing_set_SetSpeed(&Box_ALPHA2, 1.f, 0.95f);
-							}
-						}
-						SEL++;
+						SEL ++;
 					}
 					if (isFirstLoop) {
 						if (m_CutInfo[m_Counter].UsePrevAim) {
@@ -1637,7 +1651,27 @@ namespace FPS_n2 {
 							m_CutInfo[m_Counter].cam_per = m_CutInfo[m_Counter - 1].cam_per;
 						}
 						if (m_CutInfoUpdate[m_Counter].IsUsePrevBuf) {
+							//
+							auto White_Set = m_CutInfoUpdate[m_Counter].IsSetWhite;
+							auto White_Per = m_CutInfoUpdate[m_Counter].White_Per;
+							auto White = m_CutInfoUpdate[m_Counter].White;
+
+							auto Black_Set = m_CutInfoUpdate[m_Counter].IsSetBlack;
+							auto Black_Per = m_CutInfoUpdate[m_Counter].Black_Per;
+							auto Black = m_CutInfoUpdate[m_Counter].Black;
+							//
 							m_CutInfoUpdate[m_Counter] = m_CutInfoUpdate[m_Counter - 1];
+							//
+							if (White_Set) {
+								m_CutInfoUpdate[m_Counter].IsSetWhite = White_Set;
+								m_CutInfoUpdate[m_Counter].White_Per = White_Per;
+								m_CutInfoUpdate[m_Counter].White = White;
+							}
+							if (Black_Set) {
+								m_CutInfoUpdate[m_Counter].IsSetBlack = Black_Set;
+								m_CutInfoUpdate[m_Counter].Black_Per = Black_Per;
+								m_CutInfoUpdate[m_Counter].Black = Black;
+							}
 						}
 						//
 						if (m_CutInfo[m_Counter].Forcus.GetIsUse()) {
@@ -1662,6 +1696,9 @@ namespace FPS_n2 {
 
 						m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec += m_CutInfoUpdate[m_Counter].CameraNotFirst_Vec.camvec*(1.f / FPS * GameSpeed);
 						m_CutInfoUpdate[m_Counter].CameraNotFirst.campos += m_CutInfoUpdate[m_Counter].CameraNotFirst_Vec.campos*(1.f / FPS * GameSpeed);
+
+						easing_set_SetSpeed(&Box_ALPHA, m_CutInfoUpdate[m_Counter].Black, m_CutInfoUpdate[m_Counter].Black_Per);
+						easing_set_SetSpeed(&Box_ALPHA2, m_CutInfoUpdate[m_Counter].White, m_CutInfoUpdate[m_Counter].White_Per);
 					}
 					//
 					easing_set_SetSpeed(&camera_buf.campos, m_CutInfo[m_Counter].Aim_camera.campos, m_CutInfo[m_Counter].cam_per);
@@ -1761,11 +1798,11 @@ namespace FPS_n2 {
 						SetFogColor(224, 224, 224);
 						SetFogStartEnd(250, 900);
 					}
-					if (m_Counter == 38) {
+					if (m_Counter == 38 || m_Counter == 39) {
 						SetFogColor(128, 128, 128);
 						SetFogStartEnd(200, 3000);
 					}
-					if (m_Counter >= 45) {
+					if (m_Counter >= 46) {
 						SetFogColor(255, 255, 255);
 						SetFogStartEnd(50, 300);
 					}
