@@ -382,10 +382,6 @@ namespace FPS_n2 {
 			};
 			class CutAttachDetail {
 			public:
-				bool isradcam = false;//角度、距離指定か座標指定か
-				float yradcam = 0.f;
-				float xradcam = 0.f;
-				float rangecam = 0.f;
 				VECTOR_ref poscam;
 			};
 			//モデルコントロール
@@ -935,17 +931,22 @@ namespace FPS_n2 {
 
 			class Cut_Info_First {
 			public:
+				LONGLONG TimeLimit{ 0 };
+
 				bool UsePrevAim{ false };
 				bool IsResetPhysics{ false };
-
 				cam_info Aim_camera;
 				float cam_per{ 0.f };
-				LONGLONG TIME = 0;
-				ForcusControl Forcus;
 				bool isResetRandCampos{ false };
 				bool isResetRandCamvec{ false };
 				bool isResetRandCamup{ false };
-
+			public:
+				ForcusControl Forcus;
+			public:
+				//Getter
+				const auto& GetTimeLimit() const noexcept { return TimeLimit; }
+				void SetTimeLimit(LONGLONG value) noexcept { TimeLimit = value; }
+			public:
 				Cut_Info_First() {
 					Aim_camera.campos = VECTOR_ref::vget(0, 10, -30);
 					Aim_camera.camvec = VECTOR_ref::vget(0, 10, 0);
@@ -956,6 +957,61 @@ namespace FPS_n2 {
 				}
 				~Cut_Info_First() {
 				}
+				//
+				void SetPrev(const Cut_Info_First& tgt) {
+					if (this->UsePrevAim) {
+						this->Aim_camera = tgt.Aim_camera;
+						this->cam_per = tgt.cam_per;
+					}
+				}
+				//
+				bool LoadScript(const std::string &func, const std::vector<std::string>& args) {
+					//Campos
+					if (func.find("SetCampos_NoneRad") != std::string::npos) {
+						this->Aim_camera.campos = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						return true;
+					}
+					//Camvec
+					else if (func.find("SetCamvec") != std::string::npos) {
+						this->Aim_camera.camvec = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						return true;
+					}
+					else if (func.find("SetCamForcus") != std::string::npos) {
+						this->Forcus.Set(args[0], std::stol(args[1]), args[2], VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5])));
+					}
+					//CamUp
+					else if (func.find("SetCamup") != std::string::npos) {
+						this->Aim_camera.camup = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+						return true;
+					}
+					//Else
+					else if (func.find("SetCamInfo") != std::string::npos) {
+						this->Aim_camera.fov = deg2rad(std::stof(args[0]));
+						this->Aim_camera.near_ = std::stof(args[1]);
+						this->Aim_camera.far_ = std::stof(args[2]);
+						this->cam_per = std::stof(args[3]);
+					}
+					//物理を次でリセットする
+					else if (func.find("SetNextResetPhysics") != std::string::npos) {
+						this->IsResetPhysics = true;
+					}
+					//前のカットカメラを使用
+					else if (func.find("SetPrevCamInfo") != std::string::npos) {
+						this->UsePrevAim = true;
+					}
+					//どの距離で描画するかをセット
+					else if (func.find("ResetCamPosRand") != std::string::npos) {
+						this->isResetRandCampos = true;
+					}
+					else if (func.find("ResetCamVecRand") != std::string::npos) {
+						this->isResetRandCamvec = true;
+					}
+					else if (func.find("ResetCamUpRand") != std::string::npos) {
+						this->isResetRandCamup = true;
+					}
+					return false;
+				}
+				//
 			};
 			class Cut_Info_Update {
 			private:
@@ -980,11 +1036,11 @@ namespace FPS_n2 {
 				cam_info CameraNotFirst_Vec;
 
 				bool IsSetBlack{ false };
-				float Black_Per = 1.f;//Box_ALPHA = 0.f;
-				float Black = 0.f;//Box_ALPHA = 0.f;
+				float Black_Per = 1.f;
+				float Black = 0.f;
 				bool IsSetWhite{ false };
-				float White_Per = 1.f;//Box_ALPHA2 = 0.f;
-				float White = 0.f;//Box_ALPHA2 = 0.f;
+				float White_Per = 1.f;
+				float White = 0.f;;
 			public:
 				Cut_Info_Update() {
 					isUseNotFirst = false;
@@ -1021,7 +1077,9 @@ namespace FPS_n2 {
 					//camvec
 					else if (func.find("SetUpdateCamvec") != std::string::npos) {
 						this->camvec_per = std::stof(args[0]);
-						this->CameraNotFirst.camvec.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						if (args.size() > 1) {
+							this->CameraNotFirst.camvec.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						}
 					}
 					else if (func.find("SetUpdateCamForcus") != std::string::npos) {
 						this->SetForce(std::stof(args[0]), args[1], std::stoi(args[2]), args[3], VECTOR_ref::vget(std::stof(args[4]), std::stof(args[5]), std::stof(args[6])));
@@ -1032,7 +1090,9 @@ namespace FPS_n2 {
 					//campos
 					else if (func.find("SetUpdateCampos") != std::string::npos) {
 						this->campos_per = std::stof(args[0]);
-						this->CameraNotFirst.campos.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						if (args.size() > 1) {
+							this->CameraNotFirst.campos.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						}
 					}
 					else if (func.find("SetVectorUpdateCampos") != std::string::npos) {
 						this->CameraNotFirst_Vec.campos.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
@@ -1040,7 +1100,9 @@ namespace FPS_n2 {
 					//camup
 					else if (func.find("SetUpdateCamup") != std::string::npos) {
 						this->camup_per = std::stof(args[0]);
-						this->CameraNotFirst.camup.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						if (args.size() > 1) {
+							this->CameraNotFirst.camup.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						}
 					}
 					else if (func.find("SetVectorUpdateCamup") != std::string::npos) {
 						this->CameraNotFirst_Vec.camup.Set(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
@@ -1125,8 +1187,6 @@ namespace FPS_n2 {
 			std::string LOGO = "data/model/logo/model.mv1";
 			std::string SUN = "data/model/sun/model.mv1";
 
-			std::string Rudolf2 = "data/umamusume/rudolf2/model.mv1";
-			std::string Tanhoiza = "data/umamusume/tanhoiza/model.mv1";
 			std::string spe = "data/umamusume/spe/model.mv1";
 			std::string szk = "data/umamusume/suzuka/model.mv1";
 		private:
@@ -1179,18 +1239,13 @@ namespace FPS_n2 {
 			float x_rm = 0;
 			float y_rm = 0;
 			float r_rm = 100.f;
-			//campos
-			bool issetcampos = false;
-			bool isradcam = false;//角度、距離指定か座標指定か
-			float yradcam = 0.f, xradcam = 0.f, rangecam = 0.f;
-			VECTOR_ref poscam;
 			//
 			VECTOR_ref m_RandcamupBuf;
 			VECTOR_ref m_RandcamvecBuf;
 			VECTOR_ref m_RandcamposBuf;
 			//
-			float Box_ALPHA = 0.f;
-			float Box_ALPHA2 = 0.f;
+			float Black_Buf = 0.f;
+			float White_Buf = 0.f;
 			//後で消す
 			float camxb_15 = 0.f;
 			float camupxb_18 = 0.f;
@@ -1234,103 +1289,71 @@ namespace FPS_n2 {
 						//変数登録
 						LSClass.SetArgs();
 						//モデル読み込み
-						{
-							if (func.find("LoadModel") != std::string::npos) {
-								for (int i = 0; i < std::stoi(args[1]); i++) {
-									models.Load(args[0]);
-								}
+						if (func.find("LoadModel") != std::string::npos) {
+							for (int i = 0; i < std::stoi(args[1]); i++) {
+								models.Load(args[0]);
 							}
 						}
 						//カット
-						{
-
-							//新規カット
-							if (func.find("SetCut") != std::string::npos) {
-								m_CutInfo.resize(m_CutInfo.size() + 1);
-								m_CutInfo.back().TIME = (LONGLONG)(1000000.f * std::stof(args[0]));
-								m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
-							}
-							//Campos
-							else if (func.find("SetCampos_NoneRad") != std::string::npos) {
-								m_CutInfo.back().Aim_camera.campos = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-							}
-							else if (func.find("SetCampos_Attach") != std::string::npos) {
-								attached.Switch.resize(attached.Switch.size() + 1);
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								auto ofset = (std::stoi(args[0]) - 1);
-								attached.Switch.back().SetSwitch(startFrame, startFrame + ofset);
-								attachedDetail.resize(attachedDetail.size() + 1);
-								attachedDetail.back().isradcam = (args[1].find("TRUE") != std::string::npos);
-								if (attachedDetail.back().isradcam) {
-									attachedDetail.back().xradcam = std::stof(args[2]);
-									attachedDetail.back().yradcam = std::stof(args[3]);
-									attachedDetail.back().rangecam = std::stof(args[4]);
-								}
-								else {
-									attachedDetail.back().poscam.Set(std::stof(args[2]), std::stof(args[3]), std::stof(args[4]));
+						//新規カット
+						if (func.find("SetCut") != std::string::npos) {
+							m_CutInfo.resize(m_CutInfo.size() + 1);
+							m_CutInfo.back().SetTimeLimit((LONGLONG)(1000000.f * std::stof(args[0])));
+							m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
+						}
+						//Camposの指定
+						else if (func.find("SetCampos_Attach") != std::string::npos) {
+							auto startFrame = (int)(m_CutInfo.size()) - 1;
+							attached.Switch.resize(attached.Switch.size() + 1);
+							attached.Switch.back().SetSwitch(startFrame, startFrame + (std::stoi(args[0]) - 1));
+							attachedDetail.resize(attachedDetail.size() + 1);
+							attachedDetail.back().poscam.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						}
+						else {
+							//カメラ座標周り
+							if (m_CutInfo.size() > 0) {
+								if (m_CutInfo.back().LoadScript(func, args)) {
+									m_CutInfoUpdate.back().CameraNotFirst = m_CutInfo.back().Aim_camera;
 								}
 							}
-							//Camvec
-							else if (func.find("SetCamvec") != std::string::npos) {
-								m_CutInfo.back().Aim_camera.camvec = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
+							if (m_CutInfoUpdate.size() > 0) {
+								m_CutInfoUpdate.back().LoadScript(func, args);
 							}
-							else if (func.find("SetCamForcus") != std::string::npos) {
-								m_CutInfo.back().Forcus.Set(args[0], std::stol(args[1]), args[2], VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5])));
-							}
-							//CamUp
-							else if (func.find("SetCamup") != std::string::npos) {
-								m_CutInfo.back().Aim_camera.camup = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
-							}
-							//Else
-							else if (func.find("SetCamInfo") != std::string::npos) {
-								m_CutInfo.back().Aim_camera.fov = deg2rad(std::stof(args[0]));
-								m_CutInfo.back().Aim_camera.near_ = std::stof(args[1]);
-								m_CutInfo.back().Aim_camera.far_ = std::stof(args[2]);
-								m_CutInfo.back().cam_per = std::stof(args[3]);
-							}
-							//物理を次でリセットする
-							else if (func.find("SetNextResetPhysics") != std::string::npos) {
-								m_CutInfo.back().IsResetPhysics = true;
-							}
-							//前のカットカメラを使用
-							else if (func.find("SetPrevCamInfo") != std::string::npos) {
-								m_CutInfo.back().UsePrevAim = true;
-							}
-
 							//画像描画
-							else if (func.find("SetDrawGraph") != std::string::npos) {
+							if (func.find("SetDrawGraph") != std::string::npos) {
+								auto startFrame = (int)(m_CutInfo.size()) - 1;
 								size_t in_str = args[1].find("~");
 								if (in_str != std::string::npos) {
 									int start_t = std::stoi(args[1].substr(0, in_str));
 									int end_t = std::stoi(args[1].substr(in_str + 1));
 									for (int i = start_t; i <= end_t; i++) {
-										graphs.Get(args[0], i)->Init((int)(m_CutInfo.size()) - 1, std::stoi(args[2]) - 1);
+										graphs.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
 									}
 								}
 								else {
-									graphs.Get(args[0], std::stoi(args[1]))->Init((int)(m_CutInfo.size()) - 1, std::stoi(args[2]) - 1);
+									graphs.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
 								}
 							}
 							else if (func.find("SetGraphBlur") != std::string::npos) {
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init((int)(m_CutInfo.size()) - 1, std::stoi(args[2]) - 1);
+								auto startFrame = (int)(m_CutInfo.size()) - 1;
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init(startFrame, std::stoi(args[2]) - 1);
 							}
 							else if (func.find("SetGraphOpacityRate") != std::string::npos) {
-								auto* t = graphs.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().OpacityRate = std::stof(args[2]);
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate = std::stof(args[2]);
 							}
-
 							//モデル描画
 							else if (func.find("SetDrawModel") != std::string::npos) {
+								auto startFrame = (int)(m_CutInfo.size()) - 1;
 								size_t in_str = args[1].find("~");
 								if (in_str != std::string::npos) {
 									int start_t = std::stoi(args[1].substr(0, in_str));
 									int end_t = std::stoi(args[1].substr(in_str + 1));
 									for (int i = start_t; i <= end_t; i++) {
-										models.Get(args[0], i)->Init((int)(m_CutInfo.size()) - 1, std::stoi(args[2]) - 1);
+										models.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
 									}
 								}
 								else {
-									models.Get(args[0], std::stoi(args[1]))->Init((int)(m_CutInfo.size()) - 1, std::stoi(args[2]) - 1);
+									models.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
 								}
 							}
 							else if (func.find("SetModelAnime") != std::string::npos) {
@@ -1371,25 +1394,11 @@ namespace FPS_n2 {
 									t->IsFarShadow = true;
 								}
 							}
-							else if (func.find("ResetCamPosRand") != std::string::npos) {
-								m_CutInfo.back().isResetRandCampos = true;
-							}
-							else if (func.find("ResetCamVecRand") != std::string::npos) {
-								m_CutInfo.back().isResetRandCamvec = true;
-							}
-							else if (func.find("ResetCamUpRand") != std::string::npos) {
-								m_CutInfo.back().isResetRandCamup = true;
-							}
-							else if (m_CutInfoUpdate.size() > 0) {
-								m_CutInfoUpdate.back().LoadScript(func, args);
-							}
 						}
 						//テロップ
-						{
-							TLClass.LoadTelop(func, args);
-						}
+						TLClass.LoadTelop(func, args);
 						//END
-						if (ProcessMessage() == 0) {
+						{
 							float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
 							if (tim >= 0.001f) {
 								GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
@@ -1401,9 +1410,7 @@ namespace FPS_n2 {
 							NowTime = GetNowHiPerformanceCount();
 							cnt++;
 						}
-						else {
-							return;
-						}
+						if (ProcessMessage() != 0) { return; }
 					}
 					FileRead_close(mdata);
 					SetUseASyncLoadFlag(FALSE);
@@ -1448,7 +1455,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				m_Counter = 32;
-				//m_Counter = 0;
+				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1462,7 +1469,7 @@ namespace FPS_n2 {
 				GameSpeed = (float)(spd_x) / 10.f;
 
 				PostPassParts->Set_Bright(255, 255, 255);
-				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_CutInfo[m_Counter - 1].TIME : 0);
+				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
 				WaitTime = (m_Counter != 0) ? 0 : 1000000;
 				NowTimeWait = -WaitTime;
 
@@ -1510,16 +1517,19 @@ namespace FPS_n2 {
 
 					GameSpeed = (float)(spd_x) / 10.f;
 
-					if (GameSpeed >= 0.1f) {
-						SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
-						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
-						if (!BGM.check()) {
-							BGM.play(DX_PLAYTYPE_BACK, FALSE);
+					if (NowTimeWait >= 0) {
+						if (GameSpeed >= 0.1f) {
+							SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+							SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
+							if (!BGM.check()) {
+								BGM.play(DX_PLAYTYPE_BACK, FALSE);
+							}
+						}
+						else {
+							BGM.stop();
 						}
 					}
-					else {
-						BGM.stop();
-					}
+					//
 				}
 
 				if (LookMovie.trigger() && LookMovie.on()) {
@@ -1553,18 +1563,6 @@ namespace FPS_n2 {
 						}
 						models.FirstUpdate((int)m_Counter, isFirstLoop);
 						graphs.FirstUpdate((int)m_Counter, isFirstLoop);
-						issetcampos = attached.GetSwitch();
-						isradcam = (attachedDetail.size() > attached.nowcut) ? attachedDetail[attached.nowcut].isradcam : false;
-						if (isFirstLoop && attached.isFirstCut) {
-							if (isradcam) {
-								xradcam = attachedDetail[attached.nowcut].xradcam;
-								yradcam = attachedDetail[attached.nowcut].yradcam;
-								rangecam = attachedDetail[attached.nowcut].rangecam;
-							}
-							else {
-								poscam = attachedDetail[attached.nowcut].poscam;
-							}
-						}
 					}
 					int SEL = 0;
 					{
@@ -1596,11 +1594,8 @@ namespace FPS_n2 {
 						//18
 						if (m_Counter == SEL) {
 							if (isFirstLoop) {
-								m_CutInfoUpdate[m_Counter].campos_per = 0.f;
-								m_CutInfoUpdate[m_Counter].CameraNotFirst.campos = models.Get(Tanhoiza, 0)->GetFrame("首") + VECTOR_ref::vget(30.f, 0.f, -10.f);
-
-								m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = m_CutInfoUpdate[m_Counter].Forcus.GetForce(models);
-								m_CutInfoUpdate[m_Counter].Forcus.SetUse(false);
+								m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = m_CutInfo[m_Counter].Forcus.GetForce(models);
+								m_CutInfoUpdate[m_Counter].CameraNotFirst.campos = m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec + VECTOR_ref::vget(30.f, 0.f, -10.f);
 							}
 						}
 						SEL += 2;
@@ -1627,16 +1622,7 @@ namespace FPS_n2 {
 							m_CutInfoUpdate[m_Counter].camvec_per = 0.9f;
 							m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = BUF;
 						}
-						SEL += 9;
-						//40
-						if (m_Counter == SEL) {
-							if (isFirstLoop) {
-								models.Get(Rudolf2, 0)->OpacityRate = 1.f;
-							}
-							else {
-							}
-						}
-						SEL += 4;
+						SEL += 13;
 						//44
 						if (m_Counter == SEL) {
 							if (!isFirstLoop) {
@@ -1645,60 +1631,54 @@ namespace FPS_n2 {
 						}
 						SEL ++;
 					}
-					if (isFirstLoop) {
-						if (m_CutInfo[m_Counter].UsePrevAim) {
-							m_CutInfo[m_Counter].Aim_camera = m_CutInfo[m_Counter - 1].Aim_camera;
-							m_CutInfo[m_Counter].cam_per = m_CutInfo[m_Counter - 1].cam_per;
-						}
-						if (m_CutInfoUpdate[m_Counter].IsUsePrevBuf) {
-							//
-							auto White_Set = m_CutInfoUpdate[m_Counter].IsSetWhite;
-							auto White_Per = m_CutInfoUpdate[m_Counter].White_Per;
-							auto White = m_CutInfoUpdate[m_Counter].White;
-
-							auto Black_Set = m_CutInfoUpdate[m_Counter].IsSetBlack;
-							auto Black_Per = m_CutInfoUpdate[m_Counter].Black_Per;
-							auto Black = m_CutInfoUpdate[m_Counter].Black;
-							//
-							m_CutInfoUpdate[m_Counter] = m_CutInfoUpdate[m_Counter - 1];
-							//
-							if (White_Set) {
-								m_CutInfoUpdate[m_Counter].IsSetWhite = White_Set;
-								m_CutInfoUpdate[m_Counter].White_Per = White_Per;
-								m_CutInfoUpdate[m_Counter].White = White;
-							}
-							if (Black_Set) {
-								m_CutInfoUpdate[m_Counter].IsSetBlack = Black_Set;
-								m_CutInfoUpdate[m_Counter].Black_Per = Black_Per;
-								m_CutInfoUpdate[m_Counter].Black = Black;
-							}
-						}
-						//
-						if (m_CutInfo[m_Counter].Forcus.GetIsUse()) {
-							m_CutInfo[m_Counter].Aim_camera.camvec = m_CutInfo[m_Counter].Forcus.GetForce(models);
-						}
-						//
-						if (issetcampos) {
-							if (isradcam) {
-								m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec + GetVector(xradcam, yradcam)*rangecam;
-							}
-							else {
-								m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec + poscam;
-							}
-						}
-						if (m_CutInfo[m_Counter].isResetRandCampos) { m_RandcamposBuf.clear(); }
-						if (m_CutInfo[m_Counter].isResetRandCamvec) { m_RandcamvecBuf.clear(); }
-						if (m_CutInfo[m_Counter].isResetRandCamup) { m_RandcamupBuf.clear(); }
-					}
-					else {
+					{
 						auto& u = m_CutInfoUpdate[m_Counter];
-						u.Update(m_CutInfo[m_Counter], models, m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
+						if (isFirstLoop) {
+							m_CutInfo[m_Counter].SetPrev(m_CutInfo[m_Counter - 1]);
+							if (u.IsUsePrevBuf) {
+								//
+								auto White_Set = u.IsSetWhite;
+								auto White_Per = u.White_Per;
+								auto White = u.White;
 
-						m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec += m_CutInfoUpdate[m_Counter].CameraNotFirst_Vec.camvec*(1.f / FPS * GameSpeed);
-						m_CutInfoUpdate[m_Counter].CameraNotFirst.campos += m_CutInfoUpdate[m_Counter].CameraNotFirst_Vec.campos*(1.f / FPS * GameSpeed);
+								auto Black_Set = u.IsSetBlack;
+								auto Black_Per = u.Black_Per;
+								auto Black = u.Black;
+								//
+								u = m_CutInfoUpdate[m_Counter - 1];
+								//
+								if (White_Set) {
+									u.IsSetWhite = White_Set;
+									u.White_Per = White_Per;
+									u.White = White;
+								}
+								if (Black_Set) {
+									u.IsSetBlack = Black_Set;
+									u.Black_Per = Black_Per;
+									u.Black = Black;
+								}
+							}
+							//
+							if (m_CutInfo[m_Counter].Forcus.GetIsUse()) {
+								m_CutInfo[m_Counter].Aim_camera.camvec = m_CutInfo[m_Counter].Forcus.GetForce(models);
+							}
+							//
+							if (attached.GetSwitch()) {
+								m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec + attachedDetail[attached.nowcut].poscam;
+							}
+							if (m_CutInfo[m_Counter].isResetRandCampos) { m_RandcamposBuf.clear(); }
+							if (m_CutInfo[m_Counter].isResetRandCamvec) { m_RandcamvecBuf.clear(); }
+							if (m_CutInfo[m_Counter].isResetRandCamup) { m_RandcamupBuf.clear(); }
+						}
+						else {
+							u.Update(m_CutInfo[m_Counter], models, m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
 
-						easing_set_SetSpeed(&Box_ALPHA, m_CutInfoUpdate[m_Counter].Black, m_CutInfoUpdate[m_Counter].Black_Per);
-						easing_set_SetSpeed(&Box_ALPHA2, m_CutInfoUpdate[m_Counter].White, m_CutInfoUpdate[m_Counter].White_Per);
+							u.CameraNotFirst.camvec += u.CameraNotFirst_Vec.camvec*(1.f / FPS * GameSpeed);
+							u.CameraNotFirst.campos += u.CameraNotFirst_Vec.campos*(1.f / FPS * GameSpeed);
+
+							easing_set_SetSpeed(&Black_Buf, u.Black, u.Black_Per);
+							easing_set_SetSpeed(&White_Buf, u.White, u.White_Per);
+						}
 					}
 					//
 					easing_set_SetSpeed(&camera_buf.campos, m_CutInfo[m_Counter].Aim_camera.campos, m_CutInfo[m_Counter].cam_per);
@@ -1733,7 +1713,7 @@ namespace FPS_n2 {
 					models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
 					ModelEdit_PhysicsReset = false;
 					isFirstLoop = false;
-					if (NowTimeWait > m_CutInfo[m_Counter%m_CutInfo.size()].TIME) {
+					if (NowTimeWait > m_CutInfo[m_Counter%m_CutInfo.size()].GetTimeLimit()) {
 						isFirstLoop = true;
 						if (m_CutInfo[m_Counter].IsResetPhysics) {
 							ResetPhysics = true;
@@ -1823,13 +1803,13 @@ namespace FPS_n2 {
 
 				SetFogEnable(FALSE);
 				if (!isFreepos) {
-					if (Box_ALPHA != 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA));
+					if (Black_Buf != 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Black_Buf));
 						DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(0, 0, 0), TRUE);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-					if (Box_ALPHA2 != 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Box_ALPHA2));
+					if (White_Buf != 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*White_Buf));
 						DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_y, GetColor(255, 255, 255), TRUE);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
@@ -1858,7 +1838,7 @@ namespace FPS_n2 {
 						int BaseWidth = DrawParts->disp_x / 64;
 						int hight = y_s / (int)(models.GetMax());
 						int x_now = -1;
-						LONGLONG now2 = (m_Counter >= 1) ? m_CutInfo[m_Counter - 1].TIME : 0;
+						LONGLONG now2 = (m_Counter >= 1) ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0;
 						int width_Time = BaseWidth * (int)(NowTimeWait - now2) / 1000000;
 						//オフセット計算
 						{
@@ -1868,8 +1848,8 @@ namespace FPS_n2 {
 								int x1 = x_p;
 								int i = 0;
 								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 									x1 += BaseWidth * (int)(now - base) / 1000000;
 									//NOW
 									if (i == m_Counter) {
@@ -1889,8 +1869,8 @@ namespace FPS_n2 {
 								int x1 = x_p + X_now;
 								int i = 0;
 								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 
 									x1 += BaseWidth * (int)(now - base) / 1000000;
 									if (x1 > x_p) {
@@ -1906,8 +1886,8 @@ namespace FPS_n2 {
 								int x1 = x_p;
 								int i = CutNow;
 								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 									x1 += BaseWidth * (int)(now - base) / 1000000;
 									//NOW
 									if (i == m_Counter) {
@@ -1929,13 +1909,13 @@ namespace FPS_n2 {
 								int x1 = x_p + X_now;
 								int i = CutNow;
 								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 
 									x1 += BaseWidth * (int)(now - base) / 1000000;
 									if (x1 > x_p + x_s) { break; }
 									if (x1 > x_p) {
-										int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+										int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / 1000000;
 										int msel = (mouse_y - y_p) / hight;
 										if (msel >= 0) {
 											int y1 = y_p + msel * hight;
@@ -2034,15 +2014,15 @@ namespace FPS_n2 {
 								int x1 = x_p + X_now;
 								int i = CutNow;
 								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 
 									x1 += BaseWidth * (int)(now - base) / 1000000;
 									if (x1 > x_p + x_s) { break; }
 									//LINE
 									if (x1 > x_p) {
 										DrawLine(x1, y_p, x1, y_p + y_s, GetColor(128, 128, 128), 3);
-										int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+										int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / 1000000;
 
 										if (!ModelEditMode && in2_(mouse_x, mouse_y, x1, y_p, x1 + width_Next, y_p + y_s)) {
 											int y1 = y_p + ((mouse_y - y_p) / hight) * hight;
@@ -2061,9 +2041,9 @@ namespace FPS_n2 {
 							int x1 = x_p + X_now;
 							int i = CutNow;
 							while (true) {
-								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
-								int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
+								int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / 1000000;
 
 								x1 += BaseWidth * (int)(now - base) / 1000000;
 								if (x1 > x_p + x_s) { break; }
@@ -2155,13 +2135,13 @@ namespace FPS_n2 {
 								int x1 = x_p + X_now;
 								int i = CutNow;
 								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].TIME : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].TIME : 0;
+									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 
 									x1 += BaseWidth * (int)(now - base) / 1000000;
 									if (x1 > x_p + x_s) { break; }
 									if (x1 > x_p) {
-										int width_Next = BaseWidth * (int)(m_CutInfo[i].TIME - now) / 1000000;
+										int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / 1000000;
 										int msel = (mouse_y - y_p) / hight;
 										if (msel >= 0) {
 											int y1 = y_p + msel * hight;
