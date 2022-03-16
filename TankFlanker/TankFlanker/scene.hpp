@@ -378,7 +378,10 @@ namespace FPS_n2 {
 				bool usemat = false;
 				float startframe = 0.f;
 				float PhysicsSpeed_ = -1.f;
+
 				float OpacityRate = -1.f;
+				float OpacityRate_Dist = -1.f;
+				float OpacityRate_Per = -1.f;
 			};
 			class CutAttachDetail {
 			public:
@@ -418,6 +421,8 @@ namespace FPS_n2 {
 					CutInfoClass Cutinfo;
 					std::vector<CutinfoDetail> CutDetail;//カットの詳細
 					float OpacityRate = 1.f;
+					float OpacityRate_Dist = 1.f;
+					float OpacityRate_Per = 1.f;
 					int Anim_Sel = 0;
 
 					Model() {
@@ -456,6 +461,9 @@ namespace FPS_n2 {
 						this->obj.get_anime(ID).Update(isloop, speed);
 					}
 					void Update() {
+						if (this->OpacityRate_Per < 1.f) {
+							easing_set_SetSpeed(&this->OpacityRate, this->OpacityRate_Dist, this->OpacityRate_Per);
+						}
 						MV1SetOpacityRate(this->obj.get(), this->OpacityRate);
 						if (this->isDraw) {
 							this->obj.work_anime();
@@ -542,6 +550,12 @@ namespace FPS_n2 {
 									}
 									if (inf.OpacityRate >= 0.f) {
 										m.OpacityRate = inf.OpacityRate;
+									}
+									if (inf.OpacityRate_Dist >= 0.f) {
+										m.OpacityRate_Dist = inf.OpacityRate_Dist;
+									}
+									if (inf.OpacityRate_Per >= 0.f) {
+										m.OpacityRate_Per = inf.OpacityRate_Per;
 									}
 								}
 								//アニメーション動作
@@ -844,10 +858,17 @@ namespace FPS_n2 {
 								inf.Blur.Update_(Counter);
 								m.isblur = inf.Blur.GetSwitch();
 
-								if (isFirstLoop && m.Cutinfo.isFirstCut) {
-									//最初のアニメーション動作
-									if (inf.OpacityRate >= 0.f) {
-										m.Alpha.Set(inf.OpacityRate, 0.f);
+								if (inf.OpacityRate_Dist >= 0.f) {
+									if (inf.OpacityRate_Per == 0) {
+										if (isFirstLoop && m.Cutinfo.isFirstCut) {
+											//最初のアニメーション動作
+											m.Alpha.Set(inf.OpacityRate_Dist, inf.OpacityRate_Per);
+										}
+									}
+									//0以外はいーじんぐ
+									else  if (inf.OpacityRate_Per >= 0.f) {
+										m.Alpha.Set(inf.OpacityRate_Dist, inf.OpacityRate_Per);
+
 									}
 								}
 								//アニメーション動作
@@ -940,6 +961,11 @@ namespace FPS_n2 {
 				bool isResetRandCampos{ false };
 				bool isResetRandCamvec{ false };
 				bool isResetRandCamup{ false };
+
+				int bright[3]{ -1,-1,-1 };
+
+				int fog[3]{ -1,-1,-1 };
+				float fog_range[2]{ -1.f,-1.f };
 			public:
 				ForcusControl Forcus;
 			public:
@@ -1008,6 +1034,23 @@ namespace FPS_n2 {
 					}
 					else if (func.find("ResetCamUpRand") != std::string::npos) {
 						this->isResetRandCamup = true;
+					}
+					else if (func.find("SetBright") != std::string::npos) {
+						this->bright[0] = std::stoi(args[0]);
+						this->bright[1] = std::stoi(args[1]);
+						this->bright[2] = std::stoi(args[2]);
+					}
+					else if (func.find("SetFog") != std::string::npos) {
+						if(args.size() == 5) {
+							this->fog[0] = std::stoi(args[0]);
+							this->fog[1] = std::stoi(args[1]);
+							this->fog[2] = std::stoi(args[2]);
+							this->fog_range[1] = std::stof(args[3]);
+							this->fog_range[2] = std::stof(args[4]);
+						}
+						else {
+							this->fog[0] = -2;
+						}
 					}
 					return false;
 				}
@@ -1181,14 +1224,7 @@ namespace FPS_n2 {
 			};
 		private:
 			std::string LOGO1 = "data/picture/logo.png";
-			std::string BB = "data/picture/pic.png";
-
-			std::string GATE = "data/model/map/model_gate.mv1";
-			std::string LOGO = "data/model/logo/model.mv1";
 			std::string SUN = "data/model/sun/model.mv1";
-
-			std::string spe = "data/umamusume/spe/model.mv1";
-			std::string szk = "data/umamusume/suzuka/model.mv1";
 		private:
 			//
 			LoadScriptClass LSClass;		//スクリプト読み込み
@@ -1210,7 +1246,7 @@ namespace FPS_n2 {
 			GraphControl graphs;
 			SoundHandle BGM;
 			int BGM_Frequency;
-			GraphHandle m_BB;
+
 			//ビュワー
 			GraphHandle movie;
 			switchs LookMovie;
@@ -1246,6 +1282,9 @@ namespace FPS_n2 {
 			//
 			float Black_Buf = 0.f;
 			float White_Buf = 0.f;
+			//
+			int fog[3]{ -1,-1,-1 };
+			float fog_range[2]{ -1.f,-1.f };
 			//後で消す
 			float camxb_15 = 0.f;
 			float camupxb_18 = 0.f;
@@ -1271,7 +1310,6 @@ namespace FPS_n2 {
 						graphs.Load(
 							(float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)),
 							0, 1.f, 0.5f, LOGO1);
-						m_BB = GraphHandle::Load(BB);
 					}
 					TLClass.Init();
 					int mdata = FileRead_open("data/Cut.txt", FALSE);
@@ -1339,7 +1377,13 @@ namespace FPS_n2 {
 								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init(startFrame, std::stoi(args[2]) - 1);
 							}
 							else if (func.find("SetGraphOpacityRate") != std::string::npos) {
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = 0.f;
 								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate = std::stof(args[2]);
+							}
+							else if (func.find("SetGraphOpacityEasing") != std::string::npos) {
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
 							}
 							//モデル描画
 							else if (func.find("SetDrawModel") != std::string::npos) {
@@ -1380,6 +1424,11 @@ namespace FPS_n2 {
 							else if (func.find("SetModelOpacityRate") != std::string::npos) {
 								auto* t = models.Get(args[0], std::stoi(args[1]));
 								t->CutDetail.back().OpacityRate = std::stof(args[2]);
+							}
+							else if (func.find("SetModelOpacityEasing") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
+								t->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
 							}
 							//どの距離で描画するかをセット
 							else if (func.find("SetModelMode") != std::string::npos) {
@@ -1447,6 +1496,12 @@ namespace FPS_n2 {
 				}
 				//モデルの事前処理(非同期)
 				models.Set();
+				//
+				fog[0] = 128;
+				fog[1] = 128;
+				fog[2] = 128;
+				fog_range[0] = 200.f;
+				fog_range[1] = 300000.f;
 			}
 		public:
 			void Set(void) noexcept override {
@@ -1454,8 +1509,8 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(500.f, 50.f, 500.f), VECTOR_ref::vget(-500.f, -50.f, -500.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				m_Counter = 32;
-				m_Counter = 0;
+				m_Counter = 25;
+				//m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1564,26 +1619,12 @@ namespace FPS_n2 {
 						models.FirstUpdate((int)m_Counter, isFirstLoop);
 						graphs.FirstUpdate((int)m_Counter, isFirstLoop);
 					}
-					int SEL = 0;
+					//
 					{
-						SEL += 15;
-						//15
-						if (m_Counter == SEL) {
-							easing_set_SetSpeed(&models.Get(LOGO, 0)->OpacityRate, 0.f, 0.95f);
-							graphs.Get(LOGO1, 0)->Alpha.Set(1.f, 0.95f);
-						}
-						SEL++;
-						//16
-						if (m_Counter == SEL) {
-							if (isFirstLoop) {
-								PostPassParts->Set_Bright(255, 216, 192);
-							}
-						}
-						SEL++;
+						int SEL = 17;
 						//17
 						if (m_Counter == SEL) {
 							if (isFirstLoop) {
-								PostPassParts->Set_Bright(255, 255, 255);
 								camxb_15 = -3.f;
 							}
 							m_CutInfoUpdate[m_Counter].campos_per = 0.9f;
@@ -1612,6 +1653,9 @@ namespace FPS_n2 {
 						SEL += 11;
 						//31
 						if (m_Counter == SEL) {
+							std::string spe = "data/umamusume/spe/model.mv1";
+							std::string szk = "data/umamusume/suzuka/model.mv1";
+
 							auto BUF = (models.Get(spe, 0)->GetFrame("左目") + models.Get(szk, 0)->GetFrame("右目")) / 2.f;
 							if (isFirstLoop) {
 								m_CutInfo[m_Counter].Aim_camera.camvec = BUF;
@@ -1622,14 +1666,6 @@ namespace FPS_n2 {
 							m_CutInfoUpdate[m_Counter].camvec_per = 0.9f;
 							m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = BUF;
 						}
-						SEL += 13;
-						//44
-						if (m_Counter == SEL) {
-							if (!isFirstLoop) {
-								easing_set_SetSpeed(&models.Get(GATE, 0)->OpacityRate, 1.f, 0.9f);
-							}
-						}
-						SEL ++;
 					}
 					{
 						auto& u = m_CutInfoUpdate[m_Counter];
@@ -1657,6 +1693,25 @@ namespace FPS_n2 {
 									u.Black_Per = Black_Per;
 									u.Black = Black;
 								}
+							}
+							//
+							if (m_CutInfo[m_Counter].bright[0] >= 0) {
+								PostPassParts->Set_Bright(m_CutInfo[m_Counter].bright[0], m_CutInfo[m_Counter].bright[1], m_CutInfo[m_Counter].bright[2]);
+							}
+
+							if (m_CutInfo[m_Counter].fog[0] >= 0) {
+								fog[0] = m_CutInfo[m_Counter].fog[0];
+								fog[1] = m_CutInfo[m_Counter].fog[1];
+								fog[2] = m_CutInfo[m_Counter].fog[2];
+								fog_range[0] = m_CutInfo[m_Counter].fog_range[0];
+								fog_range[1] = m_CutInfo[m_Counter].fog_range[1];
+							}
+							else if (m_CutInfo[m_Counter].fog[0] == -2) {
+								fog[0] = 128;
+								fog[1] = 128;
+								fog[2] = 128;
+								fog_range[0] = 200.f;
+								fog_range[1] = 300000.f;
 							}
 							//
 							if (m_CutInfo[m_Counter].Forcus.GetIsUse()) {
@@ -1757,37 +1812,11 @@ namespace FPS_n2 {
 			}
 			void Main_Draw(void) noexcept override {
 				auto* DrawParts = DXDraw::Instance();
-				if (!Time_Over()) {
-					{
-						SetFogEnable(TRUE);
-						SetFogDensity(0.01f);
-						SetFogColor(128, 128, 128);
-						SetFogStartEnd(200, 300000);
-					}
-					//*
-					if (m_Counter == 28) {
-						SetDrawBright(192, 192, 192);
-						DrawBillboard3D(VECTOR_ref::vget(0, 15.f, 20.f).get(), 0.5f, 0.5f, 15.f, 0.f, m_BB.get(), TRUE);
-						SetDrawBright(255, 255, 255);
-						{
-							SetFogColor(0, 0, 0);
-							SetFogStartEnd(10, 150);
-						}
-					}
-					if (m_Counter == 36 || m_Counter == 37) {
-						SetFogColor(224, 224, 224);
-						SetFogStartEnd(250, 900);
-					}
-					if (m_Counter == 38 || m_Counter == 39) {
-						SetFogColor(128, 128, 128);
-						SetFogStartEnd(200, 3000);
-					}
-					if (m_Counter >= 46) {
-						SetFogColor(255, 255, 255);
-						SetFogStartEnd(50, 300);
-					}
-					//*/
-				}
+				SetFogEnable(TRUE);
+				SetFogDensity(0.01f);
+				SetFogColor(fog[0], fog[1], fog[2]);
+				SetFogStartEnd(fog_range[0], fog_range[1]);
+
 				//+201 = 67x3
 				models.Draw(false, false);
 				if (isFreepos) {
@@ -1843,7 +1872,7 @@ namespace FPS_n2 {
 						//オフセット計算
 						{
 							//現在地
-							int position = 5;// x_s / 4;
+							int position =  x_s / 5;
 							{
 								int x1 = x_p;
 								int i = 0;
@@ -1919,21 +1948,29 @@ namespace FPS_n2 {
 										int msel = (mouse_y - y_p) / hight;
 										if (msel >= 0) {
 											int y1 = y_p + msel * hight;
-											if (in2_(mouse_x, mouse_y, x1, y1, x1 + width_Next, y1 + hight)) {
-												auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
-												bool EditModelInfo = false;
-												for (auto& c : tmp->Cutinfo.Switch) {
-													if (c.On <= i && i <= c.Off) {
-														EditModelInfo = true;
-														ModelEdit = tmp;
-														ModelEditCutNum = &c - &tmp->Cutinfo.Switch.front();
-														break;
-													}
+											int xx = x1;
+											if (in2_(mouse_x, mouse_y, xx, y1, x1 + width_Next, y1 + hight)) {
+												if (x_now >= 0) {
+													xx = std::max(xx, x_now + X_now + width_Time);
 												}
-												if (!EditModelInfo || ModelEdit == nullptr) {
-													if (ChangeModel == nullptr) { ChangeModel = tmp; }
-													if (SetAnimStart == -1) { SetAnimStart = i; }
-													SetAnimEnd = std::max(i, SetAnimStart);
+											}
+											if (xx < x1 + width_Next) {
+												if (in2_(mouse_x, mouse_y, xx, y1, x1 + width_Next, y1 + hight)) {
+													auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
+													bool EditModelInfo = false;
+													for (auto& c : tmp->Cutinfo.Switch) {
+														if (c.On <= i && i <= c.Off) {
+															EditModelInfo = true;
+															ModelEdit = tmp;
+															ModelEditCutNum = &c - &tmp->Cutinfo.Switch.front();
+															break;
+														}
+													}
+													if (!EditModelInfo || ModelEdit == nullptr) {
+														if (ChangeModel == nullptr) { ChangeModel = tmp; }
+														if (SetAnimStart == -1) { SetAnimStart = i; }
+														SetAnimEnd = std::max(i, SetAnimStart);
+													}
 												}
 											}
 										}
@@ -2024,11 +2061,19 @@ namespace FPS_n2 {
 										DrawLine(x1, y_p, x1, y_p + y_s, GetColor(128, 128, 128), 3);
 										int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / 1000000;
 
-										if (!ModelEditMode && in2_(mouse_x, mouse_y, x1, y_p, x1 + width_Next, y_p + y_s)) {
-											int y1 = y_p + ((mouse_y - y_p) / hight) * hight;
-											SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-											DrawBox(x1, y1, x1 + width_Next, y1 + hight, GetColor(255, 255, 255), TRUE);
-											SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+										int xx = x1;
+										if (in2_(mouse_x, mouse_y, xx, y_p, x1 + width_Next, y_p + y_s)) {
+											if (x_now >= 0) {
+												xx = std::max(xx, x_now + X_now + width_Time);
+											}
+										}
+										if (xx < x1 + width_Next) {
+											if (!ModelEditMode && in2_(mouse_x, mouse_y, xx, y_p, x1 + width_Next, y_p + y_s)) {
+												int y1 = y_p + ((mouse_y - y_p) / hight) * hight;
+												SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+												DrawBox(xx, y1, x1 + width_Next, y1 + hight, GetColor(255, 255, 255), TRUE);
+												SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+											}
 										}
 									}
 									i++;
@@ -2054,7 +2099,9 @@ namespace FPS_n2 {
 								for (const auto& m : models.GetModel()) {
 									if (ChangeModel != nullptr && ChangeModel == (ModelControl::Model*)&m) {
 										if (SetAnimStart <= i && i <= SetAnimEnd) {
-											DrawBox(x1, y1 + yp, x1 + width_Next, y1 + hight - yp, GetColor(255, 255, 0), FALSE);
+											if (x1 < x1 + width_Next) {
+												DrawBox(x1, y1 + yp, x1 + width_Next, y1 + hight - yp, GetColor(255, 255, 0), FALSE);
+											}
 										}
 									}
 									for (const auto& c : m.Cutinfo.Switch) {
@@ -2120,6 +2167,9 @@ namespace FPS_n2 {
 						}
 						//NOWline
 						if (x_now >= 0) {
+							SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+							DrawBox(x_p, y_p, x_now + X_now + width_Time, y_p + y_s, GetColor(0, 0, 0), TRUE);
+							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 							DrawLine(x_now + X_now + width_Time, y_p, x_now + X_now + width_Time, y_p + y_s, GetColor(255, 255, 255), 3);
 						}
 						//OverRay
