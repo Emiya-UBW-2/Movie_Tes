@@ -5,9 +5,9 @@ namespace FPS_n2 {
 	class Sceneclass {
 	public:
 		template <class T>
-		static T Leap(const T& A, const T& B, float Per) { return A + (T)((float)(B - A)*Per); }
-		static float GetRandf(float m_arg) { return -m_arg + (float)(GetRand((int)(m_arg * 2.f * 10000.f))) / 10000.f; }
-		static VECTOR_ref GetVector(float Xrad, float Yrad) { return VECTOR_ref::vget(-cos(deg2rad(Xrad))*sin(-deg2rad(Yrad)), sin(deg2rad(Xrad)), -cos(deg2rad(Xrad))*cos(-deg2rad(Yrad))); }
+		static T Leap(const T& A, const T& B, float Per) noexcept { return A + (T)((float)(B - A)*Per); }
+		static float GetRandf(float m_arg) noexcept { return -m_arg + (float)(GetRand((int)(m_arg * 2.f * 10000.f))) / 10000.f; }
+		static VECTOR_ref GetVector(float Xrad, float Yrad) noexcept { return VECTOR_ref::vget(-cos(deg2rad(Xrad))*sin(-deg2rad(Yrad)), sin(deg2rad(Xrad)), -cos(deg2rad(Xrad))*cos(-deg2rad(Yrad))); }
 		class MAINLOOP;
 		//
 		class TEMPSCENE {
@@ -39,9 +39,9 @@ namespace FPS_n2 {
 			scenes Next_scene{ scenes::NONE_SCENE };			//現在のシーン
 			std::shared_ptr<Sceneclass::TEMPSCENE> Next_ptr{ nullptr };
 
-			TEMPSCENE() noexcept {
+			TEMPSCENE(void) noexcept {
 			}
-			void Set_Next(const std::shared_ptr<Sceneclass::TEMPSCENE>& Next_scenes_ptr_t, scenes NEXT) {
+			void Set_Next(const std::shared_ptr<Sceneclass::TEMPSCENE>& Next_scenes_ptr_t, scenes NEXT) noexcept {
 				Next_ptr = Next_scenes_ptr_t;
 				Next_scene = NEXT;
 			}
@@ -93,12 +93,12 @@ namespace FPS_n2 {
 			virtual void Shadow_Draw(void) noexcept {}
 			virtual void Main_Draw(void) noexcept {}
 
-			virtual const bool& is_lens(void) { return use_lens; }
-			virtual const float& zoom_lens(void) { return lens_zoom; }
-			virtual const float& size_lens(void) { return lens_size; }
-			virtual const bool& is_bless(void) { return use_bless; }
-			virtual const float& ratio_bless(void) { return bless_ratio; }
-			virtual const float& time_bless(void) { return bless; }
+			virtual const bool& is_lens(void) const noexcept { return use_lens; }
+			virtual const float& zoom_lens(void) const noexcept { return lens_zoom; }
+			virtual const float& size_lens(void) const noexcept { return lens_size; }
+			virtual const bool& is_bless(void) const noexcept { return use_bless; }
+			virtual const float& ratio_bless(void) const noexcept { return bless_ratio; }
+			virtual const float& time_bless(void) const noexcept { return bless; }
 
 			virtual void Item_Draw(void) noexcept {}
 			virtual void LAST_Draw(void) noexcept {}
@@ -119,7 +119,7 @@ namespace FPS_n2 {
 				std::string func;
 				std::vector<std::string> args;
 			private:
-				static void Sub_Func(std::string& func_t, const char& in_str) {
+				static void Sub_Func(std::string& func_t, const char& in_str) noexcept {
 					size_t str_switch = 0;
 					size_t str_in = std::string::npos;
 					bool in = false;
@@ -140,7 +140,7 @@ namespace FPS_n2 {
 				//Getter
 				const auto& Getfunc() const noexcept { return func; }
 				const auto& Getargs() const noexcept { return args; }
-				const auto* GetArgFromPath(std::string_view Path) {
+				const auto* GetArgFromPath(std::string_view Path) const noexcept {
 					const ARG* sel = nullptr;
 					for (const auto& a : args2) {
 						if (a.After == Path) {
@@ -151,7 +151,7 @@ namespace FPS_n2 {
 					return sel;
 				}
 				//スクリプト読み込み処理
-				void LoadScript(std::string_view func_t) {
+				void LoadScript(std::string_view func_t) noexcept {
 					args.clear();
 					func = func_t;
 					{
@@ -189,7 +189,7 @@ namespace FPS_n2 {
 					}
 				}
 				//処理
-				void SetArgs() {
+				void SetArgs(void) noexcept {
 					//変数登録
 					{
 						if (func.find("SetArg") != std::string::npos) {
@@ -223,7 +223,7 @@ namespace FPS_n2 {
 					LONGLONG START_TIME = 0;
 					LONGLONG END_TIME = 0;
 				public:
-					Cut_tex() {
+					Cut_tex(void) noexcept {
 						xpos = 0;
 						ypos = 0;
 						size = 12;
@@ -231,7 +231,7 @@ namespace FPS_n2 {
 						START_TIME = (LONGLONG)(1000000.f * 0.01f);
 						END_TIME = (LONGLONG)(1000000.f * 1.01f);
 					}
-					void Set(int xp, int yp, int Fontsize, std::string_view mag, LONGLONG StartF, LONGLONG ContiF, int m_LMR) {
+					void Set(int xp, int yp, int Fontsize, std::string_view mag, LONGLONG StartF, LONGLONG ContiF, int m_LMR) noexcept {
 						this->xpos = xp;
 						this->ypos = yp;
 						this->size = Fontsize;
@@ -240,7 +240,7 @@ namespace FPS_n2 {
 						this->END_TIME = StartF + ContiF;;
 						this->LMR = m_LMR;
 					}
-					void Draw(LONGLONG nowTimeWait) {
+					void Draw(LONGLONG nowTimeWait) const noexcept {
 						if (this->START_TIME < nowTimeWait && nowTimeWait < this->END_TIME) {
 							switch (this->LMR)
 							{
@@ -264,11 +264,11 @@ namespace FPS_n2 {
 				LONGLONG StartF = 0;
 				LONGLONG ContiF = 0;
 			public:
-				void Init() {
+				void Init(void) noexcept {
 					StartF = 0;
 					ContiF = 0;
 				}
-				void LoadTelop(const std::string &func, const std::vector<std::string>& args) {
+				void LoadTelop(const std::string &func, const std::vector<std::string>& args) noexcept {
 					if (func.find("SetTelopTime") != std::string::npos) {
 						StartF = (LONGLONG)(1000000.f * std::stof(args[0]));
 						ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
@@ -286,7 +286,7 @@ namespace FPS_n2 {
 						Texts.back().Set(y_r(std::stoi(args[0])), y_r(std::stoi(args[1])), y_r(std::stoi(args[2])), args[3], StartF, ContiF, t);
 					}
 				}
-				void Draw(LONGLONG nowTimeWait) {
+				void Draw(LONGLONG nowTimeWait) const noexcept {
 					for (auto& t : Texts) {
 						t.Draw(nowTimeWait);
 					}
@@ -295,12 +295,11 @@ namespace FPS_n2 {
 		private:
 			//
 			class CutInfoClass {
-			public:
 				class On_Off {
 				public:
 					int On = 0;
 					int Off = 0;
-					void SetSwitch(int on, int off) {
+					void SetSwitch(int on, int off) noexcept {
 						On = on;
 						Off = off;
 					}
@@ -311,15 +310,14 @@ namespace FPS_n2 {
 				std::vector<On_Off> Switch;
 				int nowcut = 0;
 				bool isFirstCut = false;
+			public:
+				const auto& GetSwitch() const noexcept { return a_switch; }
 
-				void Init(int startFrame, int ofset) {
+				void Init(int startFrame, int ofset) noexcept {
 					this->Switch.resize(this->Switch.size() + 1);
 					this->Switch.back().SetSwitch(startFrame, startFrame + ofset);
 				}
-
-
-				const bool GetSwitch() { return a_switch; }
-				void Start(size_t Counter) {
+				void Start(size_t Counter) noexcept {
 					this->nowcut = 0;
 					while (true) {
 						if (this->Switch.size() > this->nowcut) {
@@ -336,7 +334,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				bool Update_(size_t Counter) {
+				bool Update_(size_t Counter) noexcept {
 					if (this->Switch.size() > this->nowcut) {
 						auto& inf_b = this->Switch[this->nowcut];
 						isFirstCut = (Counter == inf_b.On);
@@ -353,11 +351,7 @@ namespace FPS_n2 {
 					}
 					return false;
 				}
-
-				void SortSwitch() {
-					std::sort(Switch.begin(), Switch.end(), [](On_Off a, On_Off b) { return a.On < b.On; });
-				}
-				void Insert(int ID, int Start, int End) {
+				void Insert(int ID, int Start, int End) noexcept {
 					Switch.insert(Switch.begin() + ID, On_Off());
 					Switch[ID].SetSwitch(Start, End);
 				}
@@ -392,7 +386,7 @@ namespace FPS_n2 {
 			public:
 				class Model {
 				private:
-					void Sel_AnimNum(MV1&model, int sel) {
+					void Sel_AnimNum(MV1&model, int sel) noexcept {
 						for (auto& anim_t : model.get_anime()) {
 							model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? 1.f : 0.f;
 						}
@@ -414,7 +408,7 @@ namespace FPS_n2 {
 					std::vector<std::pair<int, std::string>> FrameNum;
 					MV1 obj;
 					moves move;
-				//private:
+					//private:
 					bool isDraw = false;
 					bool isEndLoad = false;
 				public:
@@ -425,18 +419,18 @@ namespace FPS_n2 {
 					float OpacityRate_Per = 1.f;
 					int Anim_Sel = 0;
 
-					Model() {
+					Model(void) noexcept {
 						isDraw = false;
 						isEndLoad = false;
 					}
 
-					void Init(int startFrame, int ofset) {
+					void Init(int startFrame, int ofset) noexcept {
 						this->CutDetail.resize(this->CutDetail.size() + 1);
 						this->Cutinfo.Switch.resize(this->Cutinfo.Switch.size() + 1);
 						this->Cutinfo.Switch.back().SetSwitch(startFrame, startFrame + ofset);
 					}
 
-					void AddFrame(std::string_view FrameName) {
+					void AddFrame(std::string_view FrameName) noexcept {
 						size_t siz = obj.frame_num();
 						for (size_t i = 0; i < siz; i++) {
 							if (obj.frame_name(i) == FrameName) {
@@ -447,7 +441,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					const auto GetFrame(std::string_view FrameName) {
+					const auto GetFrame(std::string_view FrameName) const noexcept {
 						for (auto& F : FrameNum) {
 							if (F.second == FrameName) {
 								return obj.frame(F.first);
@@ -456,11 +450,11 @@ namespace FPS_n2 {
 						return VECTOR_ref::zero();
 					}
 
-					void UpdateAnim(int ID, bool isloop, float speed) {
+					void UpdateAnim(int ID, bool isloop, float speed) noexcept {
 						Sel_AnimNum(this->obj, ID);
 						this->obj.get_anime(ID).Update(isloop, speed);
 					}
-					void Update() {
+					void Update(void) noexcept {
 						if (this->OpacityRate_Per < 1.f) {
 							easing_set_SetSpeed(&this->OpacityRate, this->OpacityRate_Dist, this->OpacityRate_Per);
 						}
@@ -469,12 +463,12 @@ namespace FPS_n2 {
 							this->obj.work_anime();
 						}
 					}
-					void Draw() {
+					void Draw(void) const noexcept {
 						if (this->isDraw && this->OpacityRate > 0.f) {
 							this->obj.DrawModel();
 						}
 					}
-					void SetPhysics(bool isReset) {
+					void SetPhysics(bool isReset) noexcept {
 						if (this->isDraw) {
 							if (isReset) {
 								this->obj.PhysicsResetState();
@@ -489,14 +483,17 @@ namespace FPS_n2 {
 				std::vector<Model> model;
 				size_t Max = 0;
 			public:
-				const auto& GetMax() noexcept { return Max; }
-				const auto& GetModel() noexcept { return model; }
+				const auto& GetMax(void) const noexcept { return Max; }
+				const auto& GetModel(void) const noexcept { return model; }
 
-				ModelControl() {
+				ModelControl(void) noexcept {
 					model.resize(64);
 					Max = 0;
 				}
-				void Load(std::string_view Path) {
+				~ModelControl(void) noexcept {
+
+				}
+				void Load(std::string_view Path) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						if (model[i].isBase && model[i].Path == Path) {
 							model[Max].Path = Path;
@@ -515,7 +512,7 @@ namespace FPS_n2 {
 					MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);
 					Max++;
 				}
-				Model* Get(std::string_view Path, size_t Sel = 0) {
+				Model* Get(std::string_view Path, size_t Sel = 0) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						if (model[i].Path == Path && model[i].BaseID == Sel) {
 							return &(model[i]);
@@ -523,13 +520,13 @@ namespace FPS_n2 {
 					}
 					return nullptr;
 				}
-				void Start(size_t Counter) {
+				void Start(size_t Counter) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.Cutinfo.Start(Counter);
 					}
 				}
-				void FirstUpdate(int Counter, bool isFirstLoop) {
+				void FirstUpdate(int Counter, bool isFirstLoop) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						while (true) {
@@ -570,14 +567,14 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				void SetPhysics(bool reset_p) {
+				void SetPhysics(bool reset_p) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.SetPhysics(reset_p);
 					}
 				}
 
-				void Set() {
+				void Set(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						//
 						if (!model[i].isEndLoad && CheckHandleASyncLoad(model[i].obj.get()) == FALSE) {
@@ -595,13 +592,13 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				void Update() {
+				void Update(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.Update();
 					}
 				}
-				void Draw_Far() {
+				void Draw_Far(void) const noexcept {
 					auto fog_e = GetFogEnable();
 					SetFogEnable(FALSE);
 					SetUseLighting(FALSE);
@@ -616,7 +613,7 @@ namespace FPS_n2 {
 					SetUseLighting(TRUE);
 					SetFogEnable(fog_e);
 				}
-				void Draw(bool innearshadow, bool infarshadow) {
+				void Draw(bool innearshadow, bool infarshadow) const noexcept {
 					if (infarshadow) {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
@@ -651,16 +648,16 @@ namespace FPS_n2 {
 							float Ans = 0;
 							float Base = 0;
 							float Per = 1.f;
-							void Set(float m_p, float m_base, float m_per) {
+							void Set(float m_p, float m_base, float m_per) noexcept {
 								Ans = m_p;
 								Base = m_base;
 								Per = m_per;
 							}
-							void Set(float m_base, float m_per) {
+							void Set(float m_base, float m_per) noexcept {
 								Base = m_base;
 								Per = m_per;
 							}
-							void UpdateRand() {
+							void UpdateRand(void) noexcept {
 								easing_set_SetSpeed(&this->Ans, GetRandf(this->Base), this->Per);
 							}
 						};
@@ -669,25 +666,25 @@ namespace FPS_n2 {
 						float Base = 0;
 						float Per = 1.f;
 						infos_rand Rand_;
-						void Set(float m_p, float m_base, float m_per) {
+						void Set(float m_p, float m_base, float m_per) noexcept {
 							Ans = m_p;
 							Base = m_base;
 							Per = m_per;
 							Rand_.Set(0, 0, 1.f);
 						}
-						void Set(float m_base, float m_per) {
+						void Set(float m_base, float m_per) noexcept {
 							Base = m_base;
 							Per = m_per;
 						}
 						/*
-						void Set(float m_p, float m_base, float m_per, float m_rand, float m_randbase, float m_randper) {
+						void Set(float m_p, float m_base, float m_per, float m_rand, float m_randbase, float m_randper) noexcept {
 							Ans = m_p;
 							Base = m_base;
 							Per = m_per;
 							Rand_.Set(m_rand, m_randbase, m_randper);
 						}
 						*/
-						void Update() {
+						void Update(void) noexcept {
 							Rand_.UpdateRand();
 							easing_set_SetSpeed(&this->Ans, this->Base + this->Rand_.Ans, this->Per);
 						}
@@ -714,18 +711,18 @@ namespace FPS_n2 {
 					std::vector<CutinfoDetail> CutDetail;//オンにするカット
 					std::string Path;
 
-					void Init(int startFrame, int ofset) {
+					void Init(int startFrame, int ofset) noexcept {
 						this->CutDetail.resize(this->CutDetail.size() + 1);
 						this->Cutinfo.Switch.resize(this->Cutinfo.Switch.size() + 1);
 						this->Cutinfo.Switch.back().SetSwitch(startFrame, startFrame + ofset);
 					}
 
-					void SetBright(int b_r, int b_g, int b_b) {
+					void SetBright(int b_r, int b_g, int b_b) noexcept {
 						Bright_R = b_r;
 						Bright_G = b_g;
 						Bright_B = b_b;
 					}
-					void Set(float xp, float yp, float rd, float al, float sc, std::string_view Path_t) {
+					void Set(float xp, float yp, float rd, float al, float sc, std::string_view Path_t) noexcept {
 						this->X.Set(xp, 0.f, 1.f);
 						this->Y.Set(yp, 0.f, 1.f);
 						this->Rad.Set(rd, 0.f, 1.f);
@@ -737,7 +734,7 @@ namespace FPS_n2 {
 						this->handle.GetSize(&xsize, &ysize);
 						this->blur_t.resize(15);
 					}
-					void Set_Base(float xp, float xper, float yp, float yper, float rd, float scl, float rdper, float sclper, float alp, float alpper) {
+					void Set_Base(float xp, float xper, float yp, float yper, float rd, float scl, float rdper, float sclper, float alp, float alpper) noexcept {
 						this->X.Base = xp;
 						this->X.Per = xper;
 
@@ -753,13 +750,13 @@ namespace FPS_n2 {
 						this->Alpha.Base = alp;
 						this->Alpha.Per = alpper;
 					}
-					void Set_Rand(float xp, float xper, float yp, float yper, float rd, float rdper, float scl, float sclper) {
+					void Set_Rand(float xp, float xper, float yp, float yper, float rd, float rdper, float scl, float sclper) noexcept {
 						this->X.Rand_.Set(xp, xper);
 						this->Y.Rand_.Set(yp, yper);
 						this->Rad.Rand_.Set(deg2rad(rd), rdper);
 						this->Scale.Rand_.Set(scl, sclper);
 					}
-					void Update() {
+					void Update(void) noexcept {
 						this->X.Update();
 						this->Y.Update();
 						this->Rad.Update();
@@ -793,11 +790,11 @@ namespace FPS_n2 {
 							this->isblurstart = false;
 						}
 					}
-					void Draw_Common(GraphHandle& m_handle, float scale_) {
+					void Draw_Common(const GraphHandle& m_handle, float scale_) const noexcept {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*this->Alpha.Ans));
 						m_handle.DrawRotaGraph((int)(this->X.Ans), (int)(this->Y.Ans), scale_*this->Scale.Ans, this->Rad.Ans, true);
 					}
-					void Draw(float scale_) {
+					void Draw(float scale_) const noexcept {
 						if (this->isDraw && this->Alpha.Ans > 0.f) {
 							SetDrawBright(Bright_R, Bright_G, Bright_B);
 							if (this->isblur) {
@@ -816,16 +813,16 @@ namespace FPS_n2 {
 				std::vector<Graph> model;
 				size_t Max = 0;
 			public:
-				GraphControl() {
+				GraphControl(void) noexcept {
 					model.resize(64);
 					Max = 0;
 				}
-				void Load(float xp, float yp, float rd, float al, float sc, std::string_view Path) {
+				void Load(float xp, float yp, float rd, float al, float sc, std::string_view Path) noexcept {
 					model[Max].Path = Path;
 					model[Max].Set(xp, yp, rd, al, sc, Path);
 					Max++;
 				}
-				Graph* Get(std::string_view Path, size_t Sel = 0) {
+				Graph* Get(std::string_view Path, size_t Sel = 0) noexcept {
 					int Cnt = 0;
 					for (size_t i = 0; i < Max; i++) {
 						if (model[i].Path == Path) {
@@ -837,7 +834,7 @@ namespace FPS_n2 {
 					}
 					return nullptr;
 				}
-				void Start(size_t Counter) {
+				void Start(size_t Counter) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.Cutinfo.Start(Counter);
@@ -846,7 +843,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				void FirstUpdate(int Counter, bool isFirstLoop) {
+				void FirstUpdate(int Counter, bool isFirstLoop) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						while (true) {
@@ -881,19 +878,19 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				void Set() {
+				void Set(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.isDraw = false;
 					}
 				}
-				void Update() {
+				void Update(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.Update();
 					}
 				}
-				void Draw(int Disp_y) {
+				void Draw(int Disp_y) const noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						m.Draw((float)Disp_y / m.ysize);
@@ -910,14 +907,14 @@ namespace FPS_n2 {
 			public:
 				void SetUse(bool value) noexcept { Use = value; }
 				const auto& GetIsUse() const noexcept { return Use; }
-				void Init() {
+				void Init(void) noexcept {
 					Use = false;
 					Path = "";
 					ID = 0;
 					Frame = "";
 					Add.clear();
 				}
-				void Set(std::string_view path, size_t id, std::string_view frame, const VECTOR_ref& add) {
+				void Set(std::string_view path, size_t id, std::string_view frame, const VECTOR_ref& add) noexcept {
 					this->Use = true;
 					this->Path = path;
 					this->ID = id;
@@ -945,7 +942,7 @@ namespace FPS_n2 {
 					}
 					this->Add = add;
 				}
-				const auto GetForce(ModelControl& models) {
+				const auto GetForce(ModelControl& models) const noexcept {
 					return models.Get(this->Path, this->ID)->GetFrame(this->Frame) + this->Add;
 				}
 			};
@@ -973,7 +970,7 @@ namespace FPS_n2 {
 				const auto& GetTimeLimit() const noexcept { return TimeLimit; }
 				void SetTimeLimit(LONGLONG value) noexcept { TimeLimit = value; }
 			public:
-				Cut_Info_First() {
+				Cut_Info_First(void) noexcept {
 					Aim_camera.campos = VECTOR_ref::vget(0, 10, -30);
 					Aim_camera.camvec = VECTOR_ref::vget(0, 10, 0);
 					Aim_camera.camup = VECTOR_ref::up();
@@ -981,17 +978,17 @@ namespace FPS_n2 {
 					cam_per = 0.95f;
 					IsResetPhysics = false;
 				}
-				~Cut_Info_First() {
+				~Cut_Info_First(void) noexcept {
 				}
 				//
-				void SetPrev(const Cut_Info_First& tgt) {
+				void SetPrev(const Cut_Info_First& tgt) noexcept {
 					if (this->UsePrevAim) {
 						this->Aim_camera = tgt.Aim_camera;
 						this->cam_per = tgt.cam_per;
 					}
 				}
 				//
-				bool LoadScript(const std::string &func, const std::vector<std::string>& args) {
+				bool LoadScript(const std::string &func, const std::vector<std::string>& args) noexcept {
 					//Campos
 					if (func.find("SetCampos_NoneRad") != std::string::npos) {
 						this->Aim_camera.campos = VECTOR_ref::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]));
@@ -1041,7 +1038,7 @@ namespace FPS_n2 {
 						this->bright[2] = std::stoi(args[2]);
 					}
 					else if (func.find("SetFog") != std::string::npos) {
-						if(args.size() == 5) {
+						if (args.size() == 5) {
 							this->fog[0] = std::stoi(args[0]);
 							this->fog[1] = std::stoi(args[1]);
 							this->fog[2] = std::stoi(args[2]);
@@ -1085,7 +1082,7 @@ namespace FPS_n2 {
 				float White_Per = 1.f;
 				float White = 0.f;;
 			public:
-				Cut_Info_Update() {
+				Cut_Info_Update(void) noexcept {
 					isUseNotFirst = false;
 					IsUsePrevBuf = false;
 
@@ -1105,14 +1102,14 @@ namespace FPS_n2 {
 
 					Forcus.Init();
 				}
-				~Cut_Info_Update() {
+				~Cut_Info_Update(void) noexcept {
 				}
 
-				void SetForce(float camvecPer, std::string_view ModelPath, int ModelID, std::string_view Frame, const VECTOR_ref& Add) {
+				void SetForce(float camvecPer, std::string_view ModelPath, int ModelID, std::string_view Frame, const VECTOR_ref& Add) noexcept {
 					this->camvec_per = camvecPer;
 					this->Forcus.Set(ModelPath, ModelID, Frame, Add);
 				}
-				void LoadScript(const std::string &func, const std::vector<std::string>& args) {
+				void LoadScript(const std::string &func, const std::vector<std::string>& args) noexcept {
 					//カメラのアップデート
 					if (func.find("SetUpdateEnable") != std::string::npos) {
 						this->isUseNotFirst = true;
@@ -1204,7 +1201,7 @@ namespace FPS_n2 {
 					VECTOR_ref& m_RandcamupBuf,
 					VECTOR_ref& m_RandcamvecBuf,
 					VECTOR_ref& m_RandcamposBuf
-				) {
+				) noexcept {
 					if (this->NotFirst_per >= 0.f) {
 						Camera.cam_per = this->NotFirst_per;
 					}
@@ -1292,7 +1289,7 @@ namespace FPS_n2 {
 			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
 		public:
 			//Getter
-			bool Time_Over() { return m_Counter >= m_CutInfo.size(); }
+			bool Time_Over(void) const noexcept { return m_Counter >= m_CutInfo.size(); }
 		public:
 			using TEMPSCENE::TEMPSCENE;
 			void Awake(void) noexcept override {
@@ -1886,7 +1883,7 @@ namespace FPS_n2 {
 						//オフセット計算
 						{
 							//現在地
-							int position =  x_s / 5;
+							int position = x_s / 5;
 							{
 								int x1 = x_p;
 								int i = 0;
@@ -1963,13 +1960,13 @@ namespace FPS_n2 {
 										if (msel >= 0) {
 											int y1 = y_p + msel * hight;
 											int xx = x1;
-											if (in2_(mouse_x, mouse_y, xx, y1, x1 + width_Next, y1 + hight-1)) {
+											if (in2_(mouse_x, mouse_y, xx, y1, x1 + width_Next, y1 + hight - 1)) {
 												if (x_now >= 0) {
 													xx = std::max(xx, x_now + X_now + width_Time);
 												}
 											}
 											if (xx < x1 + width_Next) {
-												if (in2_(mouse_x, mouse_y, xx, y1, x1 + width_Next, y1 + hight-1)) {
+												if (in2_(mouse_x, mouse_y, xx, y1, x1 + width_Next, y1 + hight - 1)) {
 													auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
 													bool EditModelInfo = false;
 													for (auto& c : tmp->Cutinfo.Switch) {
@@ -2295,7 +2292,7 @@ namespace FPS_n2 {
 									{
 										if (in2_(mouse_x, mouse_y, x_p, y1, x_p + x_s, y1 + hight)) {
 											if (
-												!ModelEdit->isBGModel && 
+												!ModelEdit->isBGModel &&
 												ModelEdit->IsNearShadow &&
 												!ModelEdit->IsFarShadow
 												) {
