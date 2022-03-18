@@ -717,7 +717,7 @@
 		SetCamvec(0, 25.0, -100.0);
 		SetCampos_NoneRad(0.0, 17.0, 0);
 		SetCamInfo(35, 1.0, 100.0, 0.0);
-		SetFog(255,255,255 , 50,300);
+		SetFog(255,255,255 , 150,300);
 
 		SetUpdateEnable();
 		SetUpdatePer(0.95);

@@ -19,6 +19,7 @@ namespace FPS_n2 {
 	enum class scenes
 	{
 		NONE_SCENE,
+		LOAD_SCENE,
 		MAIN_LOOP
 	};
 

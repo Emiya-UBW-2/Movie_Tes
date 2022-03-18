@@ -2,7 +2,12 @@
 
 #define NOMINMAX
 
+#ifdef _DEBUG
+
 #define DEBUG
+
+#endif // _DEBUG
+
 
 #include <D3D11.h>
 #include <array>
@@ -17,6 +22,9 @@
 
 #include "Enums.hpp"
 #include "sub.hpp"
-#include "scene.hpp"
+#include "sequence.hpp"
+
+#include "LoadScene.hpp"
+#include "MainScene.hpp"
 
 #include "route.hpp"

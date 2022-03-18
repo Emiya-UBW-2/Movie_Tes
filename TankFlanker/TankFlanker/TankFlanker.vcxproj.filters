@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ソース ファイル\Scene">
+      <UniqueIdentifier>{e37a50cf-76fa-4680-ace3-8bdf5da87fd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -26,14 +29,20 @@
     <ClInclude Include="route.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="scene.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Header.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Enums.hpp">
       <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="sequence.hpp">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MainScene.hpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadScene.hpp">
+      <Filter>ソース ファイル\Scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
