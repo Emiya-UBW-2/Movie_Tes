@@ -26,9 +26,6 @@
     <ClInclude Include="sub.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="route.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Header.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>

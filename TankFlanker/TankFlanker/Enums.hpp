@@ -16,11 +16,12 @@ namespace FPS_n2 {
 		ef_greexp2,	//ÉOÉåîöî≠2
 		effects,	//ì«Ç›çûÇﬁ
 	};
-	enum class scenes
-	{
-		NONE_SCENE,
-		LOAD_SCENE,
-		MAIN_LOOP
+	namespace Sceneclass {
+		enum class scenes
+		{
+			NONE_SCENE,
+			LOAD_SCENE,
+			MAIN_LOOP
+		};
 	};
-
 }

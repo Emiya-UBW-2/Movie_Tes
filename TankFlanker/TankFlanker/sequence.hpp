@@ -256,7 +256,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				//‰æ–Ê‚Ì”½‰f
 				DrawParts->Screen_Flip();
-				while ((GetNowHiPerformanceCount() - waits) <= (1000 * 1000 / 60)) {}
+				/while ((GetNowHiPerformanceCount() - waits) <= (1000 * 1000 / 60)) {}
 			}
 			//
 			void NextScene(void) noexcept {

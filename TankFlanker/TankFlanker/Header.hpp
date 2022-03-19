@@ -8,6 +8,8 @@
 
 #endif // _DEBUG
 
+#define DEBUG
+
 
 #include <D3D11.h>
 #include <array>
@@ -26,5 +28,3 @@
 
 #include "LoadScene.hpp"
 #include "MainScene.hpp"
-
-#include "route.hpp"

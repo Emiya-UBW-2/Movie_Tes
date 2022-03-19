@@ -109,18 +109,6 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1623): warning C4
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1149): warning C4100: 'eye_type': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1159): warning C4100: 'handle_': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1218): warning C4100: 'eye_type': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning C4100: 'i': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1231): warning C4100: 'texte': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'times': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(1269): warning C4100: 'id_': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(1468): warning C4189: 'DrawParts': ローカル変数が初期化されましたが、参照されていません
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'nShowCmd': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\main.cpp(3): warning C4100: 'hInstance': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(78): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(81): warning C4505: 'Segment_Point_MinLen': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(109): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。
