@@ -1,32 +1,27 @@
 //
-		SetArg(Teio, "data/umamusume/teio/model.mv1");
-		SetArg(Nice, "data/umamusume/nice/model.mv1");
-		SetArg(Tanhoiza, "data/umamusume/tanhoiza/model.mv1");
-		SetArg(Turbo, "data/umamusume/turbo/model.mv1");
-		SetArg(Ikuno, "data/umamusume/ikuno/model.mv1");
-		SetArg(Rudolf, "data/umamusume/rudolf/model.mv1");
-		SetArg(Rice, "data/umamusume/rice/model.mv1");
-		SetArg(Burbon, "data/umamusume/burbon/model.mv1");
-		SetArg(MAC, "data/umamusume/mac/model.mv1");
-		SetArg(SPE, "data/umamusume/spe/model.mv1");
-		SetArg(SZK, "data/umamusume/suzuka/model.mv1");
-		SetArg(Rudolf2, "data/umamusume/rudolf2/model.mv1");
+		SetArg(Teio, "data/umamusume/teio/model.pmx");
+		SetArg(Nice, "data/umamusume/nice/model.pmx");
+		SetArg(Tanhoiza, "data/umamusume/tanhoiza/model.pmx");
+		SetArg(Turbo, "data/umamusume/turbo/model.pmx");
+		SetArg(Ikuno, "data/umamusume/ikuno/model.pmx");
+		SetArg(Rice, "data/umamusume/rice/model.pmx");
+		SetArg(Burbon, "data/umamusume/burbon/model.pmx");
+		SetArg(MAC, "data/umamusume/mac/model.pmx");
+		SetArg(SPE, "data/umamusume/spe/model.pmx");
+		SetArg(SZK, "data/umamusume/suzuka/model.pmx");
+		SetArg(Rudolf2, "data/umamusume/rudolf2/model.pmx");
 
 		SetArg(MAP, "data/model/map/model.mv1");
 		SetArg(SKY, "data/model/sky/model.mv1");
 		SetArg(SUN, "data/model/sun/model.mv1");
-		SetArg(LOGO, "data/model/logo/model.mv1");
-		SetArg(FOUR, "data/model/four/model.mv1");
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
 
-		SetArg(LOGO1, "data/picture/logo.png");
 //モデル読み込み
 		LoadModel(Teio, 1);
 		LoadModel(Nice, 1);
 		LoadModel(Tanhoiza, 1);
 		LoadModel(Turbo, 1);
 		LoadModel(Ikuno, 1);
-		LoadModel(Rudolf, 1);
 		LoadModel(Rice, 1);
 		LoadModel(Burbon, 1);
 		LoadModel(MAC, 1);
@@ -37,793 +32,85 @@
 		LoadModel(SKY, 1);
 		LoadModel(SUN, 1);
 		LoadModel(MAP, 1);
-		LoadModel(LOGO, 1);
-		LoadModel(FOUR, 1);
 		LoadModel(GATE, 1);//ゲート
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
-		SetModelMode(GATE, 0, FAR_TRUE);
+		//SetModelMode(GATE, 0, FAR_TRUE);
 		SetModelMode(MAP, 0, FAR_TRUE);
-		SetModelMode(MAP, 0, NEAR_FALSE);
+		//SetModelMode(MAP, 0, NEAR_FALSE);
 		SetModelMode(SKY, 0, SKY_TRUE);
 		SetModelMode(SUN, 0, SKY_TRUE);
-		SetModelMode(LOGO, 0, NEAR_FALSE);
-		SetModelMode(FOUR, 0, NEAR_FALSE);
 //カット設定
 //0
 	//0
-		SetCut(0.993);
-		SetCamvec(-3.0, 3.0, 0.0);
-		SetCampos_NoneRad(-3.0, 3.0, -16.0);
-		SetCamInfo(45, 1.0, 10.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.0, -1.0, 3.0, 0.0);
-		SetUpdateCampos(0.0, -1.0, 5.0, -16.0);
-		SetVectorUpdateCamvec(2.0, 0.0, 0.0);
-		SetVectorUpdateCampos(2.0, 0.0, 0.0);
-
-			SetDrawModel(Teio, 0, 1);
-			SetModelAnime(Teio, 0, 0, FALSE, 0.3, 8);
-
-			SetDrawModel(MAP, 0, 23);
-			SetModelMat(MAP, 0, 0, 0.0, -0.1, -2394.0, 90);
-
-			SetDrawModel(SKY, 0, 23);
-			SetDrawModel(SUN, 0, 23);
-
-			SetNextResetPhysics();
-	//1
-		SetCut(1.714);
+		SetCut(300.0);
 		SetCamvec(0.0, 3.0, 0.0);
-		SetCampos_NoneRad(-14.0, 5.0, -7.0);
-		SetCamInfo(45, 1.0, 10.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.0, 0.0, 3.0, -7.0);
-		SetUpdateCampos(0.0, -14.0, 5.0, -14.0);
-		SetVectorUpdateCamvec(0.0, 0.0, -10.0);
-		SetVectorUpdateCampos(0.0, 0.0, -10.0);
-
-			SetDrawModel(Teio, 0, 1);
-			SetModelAnime(Teio, 0, 0, FALSE, 0.5, 6);
-
-			SetNextResetPhysics();
-	//2
-		SetCut(2.154);
-		SetCamvec(0.0, 3, -7);
-		SetCampos_NoneRad(18, 4, -30);
-		SetCamInfo(25, 1.0, 40.0, 0.0);
-
-			SetDrawModel(Teio, 0, 2);
-			SetModelAnime(Teio, 0, 1, FALSE, 0.65, 0);
-	//3
-		SetCut(3.419);
-		SetCamvec(0.0, 3.0, -2.0);
-		SetCampos_NoneRad(20.0, 4.0, -45.0);
-		SetCamInfo(45, 1.0, 40.0, 0.95);
-
-		SetUpdateEnable();
-		SetUpdateCampos(0.8);
-		SetUpdateCamForcus(0.8, Teio, 0, FAR_TRUE, 0.0, 15.0, 0.0);
-		SetCamVecRand(10.0, 10.0, 10.0, 0.8);
-
-			SetNextResetPhysics();
-	//4
-		SetCut(3.919);
-		SetCamvec(-1.5, 35.0, -45.0);
-		SetCampos_NoneRad(10.0, 60.0, -35.0);
-		SetCamInfo(45, 1.0, 40.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.0);
-		SetUpdateCampos(0.0);
-		SetVectorUpdateCamvec(0.0, 0.0, -30.0);
-		SetVectorUpdateCampos(0.0, 0.0, -30.0);
-
-			SetDrawModel(Teio, 0, 1);
-			SetModelAnime(Teio, 0, 1, FALSE, 0.5, 28);
-
-			SetNextResetPhysics();
-	//5
-		SetCut(6.354);
-		SetCamvec(0, 18, 0);
-		SetCampos_NoneRad(30.0, 18.0, 10.0);
-		SetCamInfo(25, 1.0, 40.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCampos(0.995);
-		SetUpdateCamForcus(0.995, Teio, 0, UPPER_2, 0.0, 3.0, 0.0);
-
-			SetDrawModel(Teio, 0, 1);
-			SetModelAnime(Teio, 0, 2, FALSE, 0.6, 0);
-
-			SetNextResetPhysics();
-	//6
-		SetCut(7.0);
-		SetCamvec(0, 18, 0);
-		SetCampos_NoneRad(50, 10, 10);
-		SetCamInfo(35, 1.0, 60.0, 0.0);
-
-			SetDrawModel(Teio, 0, 4);
-			SetModelAnime(Teio, 0, 3, FALSE, 1.0, 0);
-	//7
-		SetCut(8.693);
-		SetCamvec(2, 6, 0);
-		SetCampos_NoneRad(5, 7, 15);
-		SetCamInfo(15, 1.0, 60.0, 0.0);
-	//8
-		SetCut(10.000);
-		SetCamvec(0, 14, 0);
-		SetCampos_NoneRad(25, 10, 20);
-		SetCamInfo(25, 1.0, 60.0, 0.0);
-	//9
-		SetCut(12.331);
-		SetCamvec(0, 18, 0);
-		SetCampos_NoneRad(20, 10, 60);
-		SetCamInfo(50, 1.0, 200.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCampos(0.995, 10.0, 10.0, 60.0);
-		SetUpdateCamForcus(0.9, Teio, 0, UPPER_2, 0.0, 3.0, 0.0);
-		SetCamPosRand(20.0, 7.0, 0.0, 0.8);
-		SetVectorUpdateCampos(-15.0, 0.0, 0.0);
-
-			SetNextResetPhysics();
-//10
-	//10
-		SetCut(13.100);
-		SetCamvec(0, 18, 0);
-		SetCampos_NoneRad(25, 10, 20);
-		SetCamInfo(25, 1.0, 60.0, 0.0);
-
-			SetDrawModel(Teio, 0, 5);
-			SetModelAnime(Teio, 0, 4, FALSE, 0.65, 0);
-	//11
-		SetCut(14.00);
-		SetCamvec(0, 18, -10);
-		SetCampos_NoneRad(25, 2, -50);
-		SetCamInfo(45, 1.0, 60.0, 0.0);
-	//12
-		SetCut(16.075);
-		SetCamvec(0, 2, -37);
-		SetCampos_NoneRad(15, 3, -37);
-		SetCamInfo(25, 1.0, 60.0, 0.0);
-	//13
-		SetCut(16.550);
-		SetCamvec(5, 1, -38.5);
-		SetCampos_NoneRad(5, 8, -38);
-		SetCamInfo(15, 1.0, 60.0, 0.0);
-	//14
-		SetCut(19.550);
-		SetPrevCamInfo();
-
-			SetDrawModel(LOGO, 0, 1);
-			SetModelMat(LOGO, 0, 180.0, 5, 0.05, -38.5, 0.0);
-			SetDrawGraph(LOGO1, 0, 1);
-			SetGraphOpacityRate(LOGO1, 0, 0.0);
-	//15
-		SetCut(21.589);
-		SetPrevCamInfo();
-
-		SetUpdateEnable();
-		BlackOut(0.95);
-
-			SetDrawModel(LOGO, 0, 1);
-			SetModelOpacityEasing(LOGO, 0, 0.0, 0.95f);
-
-			SetDrawGraph(LOGO1, 0, 1);
-			SetGraphOpacityEasing(LOGO1, 0, 1.0, 0.95);
-
-			SetNextResetPhysics();
-	//16
-		SetCut(23.984);
-		SetCamForcus(Nice, 0, HEAD, 0.0, 0.0, 0.0);
-		SetCampos_NoneRad(0, 3, -60);
-		SetCamup(0.3, 0.9, 0);
-		SetCamInfo(15, 10.0, 100.0, 0.0);
-
-		SetBright(255, 216, 192);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCampos(0.9, 0.0, 10.0, -60.0);
-		SetUpdateCamForcus(0.9, Nice, 0, HEAD, 0.0, 0.0, 0.0);
-		SetCamVecRand(10.0, 5.0, 0.0, 0.9);
-		SetVectorUpdateCampos(0.0, 1.0, 0.0);
-		BlackIn(0.0);
-
-			SetDrawModel(Nice, 0, 1);
-			SetModelAnime(Nice, 0, 0, TRUE, 0.5, 0);
-
-			SetNextResetPhysics();
-	//17
-		SetCut(24.400);
-		SetCamForcus(Tanhoiza, 0, NECK, 0.0, -1.5, 0.0);
-		SetCampos_Attach(1, -3.0, 0.0, -60.0);
-		SetCamInfo(5, 10.0, 100.0, 0.0);
-
-		SetBright(255, 255, 255);
-
-		SetUpdateEnable();
-		SetUpdateCamfov(0.95, 15.0);
-		SetUpdateCamForcus(0.9, Tanhoiza, 0, NECK, 0.0, -1.5, 0.0);
-		ResetCamVecRand();
-		SetCamVecRand(3.0, 1.5, 0.0, 0.9);
-
-			SetDrawModel(Tanhoiza, 0, 1);
-			SetModelAnime(Tanhoiza, 0, 0, FALSE, 1.2, 0);
-
-			SetNextResetPhysics();
-	//18
-		SetCut(25.000);
-		SetCamForcus(Tanhoiza, 0, NECK, 0.0, 0.0, 0.0);
-		SetCampos_Attach(1, 30.0, 0.0, -10.0);
-		SetCamInfo(25, 1.0, 60.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdateCamvec(0.0);
-		SetUpdateCampos(0.0);
-		SetVectorUpdateCamvec(0.0, 0.0, 50.0);
-		SetVectorUpdateCampos(0.0, 0.0, 50.0);
-
-			SetDrawModel(Tanhoiza, 0, 1);
-			SetModelAnime(Tanhoiza, 0, 0, FALSE, 1.0, 0);
-
-			SetNextResetPhysics();
-	//19
-		SetCut(25.700);
-		SetCamvec(0, 13, 3);
-		SetCampos_NoneRad(8, 15, -20);
-		SetCamInfo(25, 1.0, 100.0, 0.0);
-
-			SetDrawModel(Turbo, 0, 2);
-			SetModelAnime(Turbo, 0, 0, FALSE, 0.8, 0);
-//20
-	//20
-		SetCut(27.200);
-		SetCamvec(5, 20, 0);
-		SetCampos_NoneRad(1, 16, -20);
-		SetCamInfo(25, 1.0, 30.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.5);
-		SetUpdateCamForcus(0.925, Turbo, 0, HEAD, 0.0, 0.0, 0.0);
-		SetCamVecRand(1.0, 0.5, 1.0, 0.9);
-
-		SetNextResetPhysics();
-	//21
-		SetCut(28.500);
-		SetCamvec(0, 18, 0);
-		SetCampos_NoneRad(2, 18, -7);
-		SetCamInfo(20, 1.0, 30.0, 0.0);
-
-			SetDrawModel(Ikuno, 0, 2);
-			SetModelAnime(Ikuno, 0, 0, FALSE, 0.5, 0);
-	//22
-		SetCut(30.000);
-		SetCamvec(2, 18.0, 0);
-		SetCampos_NoneRad(8, 18.5, -7);
-		SetCamup(0.2, 1, 0.05);
-		SetCamInfo(35, 1.0, 30.0, 0.975);
-
-			SetNextResetPhysics();
-	//23
-		SetCut(32.106);
-		SetCamvec(-10, 17.5, 30);
-		SetCampos_NoneRad(0, 18.5, 0);
-		SetCamInfo(10, 3.0, 35.0, 0.0);
+		SetCamForcus(Teio, 0, NECK, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(-3.0, 3.0, -16.0);
+		SetCamInfo(45, 2.0, 100.0, 0.0);
 
 		SetUpdateEnable();
 		SetUpdatePer(0.9);
-		SetUpdateCamvec(0.95, 0.0, 17.5, 30.0);
-		SetVectorUpdateCamvec(1.0, 0.0, 0.0);
-
-			SetDrawModel(Teio, 0, 2);
-			SetModelAnime(Teio, 0, 6, FALSE, 0.0, 0);
-			SetModelMat(Teio, 0, 0.0, -2.0, 0.0, 30.0, 0);
-
-			SetNextResetPhysics();
-	//24
-		SetCut(34.560);
-		SetCamvec(30, 17.5, 0);
-		SetCampos_NoneRad(0, 18.5, 0);
-		SetCamInfo(10, 3.0, 35.0, 0.95);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamvec(0.95, 30.0, 17.5, 0.0);
-		SetVectorUpdateCamvec(0.0, 0.0, -1.0);
-
-			SetDrawModel(Rudolf, 0, 2);
-			SetModelAnime(Rudolf, 0, 0, FALSE, 0.0, 0);
-			SetModelMat(Rudolf, 0, 90.0, 30.0, -1.5, -2.0, 0);
-
-			SetNextResetPhysics();
-	//25
-		SetCut(37.840);
-		SetCamvec(10, 17.5, -30);
-		SetCampos_NoneRad(0, 18.5, 0);
-		SetCamInfo(10, 3.0, 35.0, 0.95);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamvec(0.95, 0.0, 17.5, -30.0);
-		SetVectorUpdateCamvec(-1.0, 0.0, 0.0);
-
-			SetDrawModel(Rice, 0, 2);
-			SetModelAnime(Rice, 0, 0, FALSE, 0.0, 0);
-			SetModelMat(Rice, 0, 180.0, 4.0, 15.0, -30.0, 0);
-
-			SetNextResetPhysics();
-	//26
-		SetCut(40.728);
-		SetCamvec(-30, 17.5, 0);
-		SetCampos_NoneRad(0, 18.5, 0);
-		SetCamInfo(10, 3.0, 35.0, 0.95);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamvec(0.95, -30.0, 17.5, 0.0);
-		SetVectorUpdateCamvec(0.0, 0.0, 1.0);
-
-			SetDrawModel(Burbon, 0, 2);
-			SetModelAnime(Burbon, 0, 0, FALSE, 0.0, 0);
-			SetModelMat(Burbon, 0, -45.0, -30.0, -0.6, 2.0, 0);
-
-			SetNextResetPhysics();
-	//27
-		SetCut(44.000);
-		SetCamvec(-10, 17.5, 30);
-		SetCampos_NoneRad(0, 18.5, 0);
-		SetCamInfo(10, 3.0, 35.0, 0.95);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamvec(0.95, 0.0, 17.5, 30.0);
-		SetVectorUpdateCamvec(1.0, 0.0, 0.0);
-
-			SetDrawModel(MAC, 0, 1);
-			SetModelAnime(MAC, 0, 0, FALSE, 0.0, 0);
-			SetModelMat(MAC, 0, 0.0, 0.5, 0.0, 30.0, 0);
-
-			SetNextResetPhysics();
-	//28
-		SetCut(47.302);
-		SetCamvec(0, 17.5, 0);
-		SetCampos_NoneRad(0, 18.5, -20);
-		SetCamInfo(5, 2.0, 50.0, 0.0);
-		SetFog(0,0,0 , 100,150);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamfov(0.95, 20.0);
-		SetUpdateCamForcus(0.925, SPE, 0, LEFT_EYE, 0.0, 0.0, 0.0);
-
-			SetDrawModel(SPE, 0, 1);
-			SetModelAnime(SPE, 0, 0, FALSE, 1.0, 0);
-
-			SetDrawModel(MAP, 0, 4);
-			SetModelMat(MAP, 0, 0, 0.0, -0.1, -2394.0, 90);
-
-			SetDrawModel(FOUR, 0, 1);
-			SetModelMat(FOUR, 0, 0, 0.0, 0.0, 50.0, 0);
-
-			SetNextResetPhysics();
-	//29
-		SetCut(49.965);
-		SetCamvec(0, 1.5, 0);
-		SetCampos_NoneRad(-15, 10.5, -3);
-		SetCamInfo(15, 2.0, 50.0, 0.0);
-		SetFog();
-
-			SetDrawModel(SZK, 0, 1);
-			SetModelAnime(SZK, 0, 0, FALSE, 0.7, 0);
-
-			SetDrawModel(SKY, 0, 3);
-			SetDrawModel(SUN, 0, 3);
-
-			SetNextResetPhysics();
-//30
-	//30
-		SetCut(51.604);
-		SetCamvec(0, 16.5, 0);
-		SetCampos_NoneRad(-20, 16.5, -4);
-		SetCamInfo(25, 2.0, 50.0, 0.95);
-
-		SetUpdateEnable();
-		SetUpdateCamForcus(0.925, SZK, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
-
-			SetDrawModel(SZK, 0, 1);
-			SetModelAnime(SZK, 0, 1, FALSE, 1.02, 0);
-
-			SetDrawModel(SPE, 0, 1);
-			SetModelAnime(SPE, 0, 1, FALSE, 0.98, 0);
-			SetModelMat(SPE, 0, 0, -10.0, 0.0, 0.0, 0);
-
-			SetNextResetPhysics();
-	//31
-		SetCut(52.394);
-		SetCampos_Attach(1, 0.0, -15.0, -20.0);
-		SetCamInfo(45, 2.0, 120.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetCamVecRand(10.0, 5.0, 0.0, 0.9);
-		SetVectorUpdateCampos(0.0, 0.0, 100.0);
-
-			SetDrawModel(SZK, 0, 1);
-			SetModelAnime(SZK, 0, 2, FALSE, 1.0, 0);
-
-			SetDrawModel(SPE, 0, 1);
-			SetModelAnime(SPE, 0, 2, FALSE, 1.0, 0);
-
-			SetNextResetPhysics();
-	//32
-		SetCut(54.000);
-		SetCamForcus(Rice, 0, HEAD, 0.0, 0.0, 0.0);
-		SetCampos_NoneRad(-10, 18.5, -80);
-		SetCamInfo(15, 2.0, 50.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCampos(0.0, -10.0, 18.5, -30.0);
-		SetUpdateCamForcus(0.9, Rice, 0, HEAD, 0.0, 0.0, 0.0);
-
-			SetDrawModel(Rice, 0, 2);
-			SetModelAnime(Rice, 0, 1, FALSE, 1.0, 0);
-			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, 0.0, 0);
-
-			SetNextResetPhysics();
-	//33
-		SetCut(55.600);
-		SetCamvec(30, 15.5, 50);
-		SetCampos_NoneRad(30, 18.5, 20);
-		SetCamInfo(15, 2.0, 50.0, 0.95);
-
-			SetDrawModel(Turbo, 0, 2);
-			SetModelAnime(Turbo, 0, 1, FALSE, 0.8, 0);
-			SetModelMat(Turbo, 0, 0.0, 30.0, 0.0, 50.0, 0);
-
-			SetNextResetPhysics();
-	//34
-		SetCut(57.000);
-		SetCamvec(0, 15.5, 100);
-		SetCampos_NoneRad(0, 18.5, 70);
-		SetCamInfo(15, 2.0, 50.0, 0.9);
-
-			SetDrawModel(MAC, 0, 2);
-			SetModelAnime(MAC, 0, 1, FALSE, 0.6, 0);
-			SetModelMat(MAC, 0, 0.0, -3.0, 0.0, 100.0, 0);
-
-			SetNextResetPhysics();
-	//35
-		SetCut(60.500);
-		SetCamvec(0, 15.5, 300);
-		SetCampos_NoneRad(0, 18.5, 270);
-		SetCamInfo(15, 2.0, 50.0, 0.95);
-
-			SetDrawModel(Teio, 0, 1);
-			SetModelAnime(Teio, 0, 7, FALSE, 0.9, -10);
-			SetModelPhysicsSpeed(Teio, 0, 0.7);
-			SetModelMat(Teio, 0, 0.0, 3.0, 0.0, 300.0, 0);
-
-			SetNextResetPhysics();
-	//36
-		SetCut(62.000);
-		SetCamvec(0, -5.0, -40);
-		SetCampos_NoneRad(-5, 8.0, -600);
-		SetCamInfo(4, 1.0, 50.0, 0.0);
-		SetFog(224,224,224 , 850,9000);
-
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamvec(0.95, 0.0, 10.0, -40.0);
-		SetUpdateCamfov(0.95, 4.0);
-		SetCamVecRand(40.0, 13.0, 0.0, 0.95);
+		SetUpdateCamForcus(0.9, Teio, 0, NECK, 0.0, 0.0, 0.0);
+		//SetUpdateCamvec(0.0, -1.0, 3.0, 0.0);
+		SetUpdateCampos(0.9, 5.0, 25.0, 20.0);
+		//SetVectorUpdateCamvec(0.0, 0.0, 0.0);
+		SetVectorUpdateCampos(0.0, 0.0, 1.0);
 
 			SetDrawModel(MAP, 0, 6);
 			SetModelMat(MAP, 0, 0, 0.0, -0.1, 2394.0, 90);
 			SetDrawModel(SKY, 0, 6);
 			SetDrawModel(SUN, 0, 6);
 
-			SetDrawModel(Turbo, 0, 2);
-			SetModelMat(Turbo, 0, 0.0, -15.0, 0.0, -110.0, 0);
-			SetModelPhysicsSpeed(Turbo, 0, 0.01);
-			SetModelAnime(Turbo, 0, 2, FALSE, 0.25, 8);
+			SetDrawModel(Turbo, 0, 20);
+			SetModelMat(Turbo, 0, 0.0, 0.0, 0.0, -200.0, 0);
+			SetModelAnime(Turbo, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(Rice, 0, 2);
-			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -20.0, 0);
-			SetModelAnime(Rice, 0, 2, FALSE, 0.24, 5);
+			SetDrawModel(Rice, 0, 20);
+			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -180.0, 0);
+			SetModelAnime(Rice, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(Burbon, 0, 2);
-			SetModelMat(Burbon, 0, 0.0, 25.0, 0.0, -80.0, 0);
-			SetModelAnime(Burbon, 0, 1, FALSE, 0.28, 10);
+			SetDrawModel(Burbon, 0, 20);
+			SetModelMat(Burbon, 0, 0.0, 0.0, 0.0, -160.0, 0);
+			SetModelAnime(Burbon, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(Teio, 0, 2);
-			SetModelMat(Teio, 0, 0.0, -25.0, 0.0, -30.0, 0);
-			SetModelPhysicsSpeed(Teio, 0, 0.01);
-			SetModelAnime(Teio, 0, 8, FALSE, 0.27, 10);
+			SetDrawModel(Ikuno, 0, 20);
+			SetModelMat(Ikuno, 0, 0.0, 0.0, 0.0, -140.0, 0);
+			SetModelAnime(Ikuno, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(Ikuno, 0, 2);
-			SetModelMat(Ikuno, 0, 0.0, -10.0, 0.0, -10.0, 0);
-			SetModelAnime(Ikuno, 0, 1, FALSE, 0.26, 5);
+			SetDrawModel(Tanhoiza, 0, 20);
+			SetModelMat(Tanhoiza, 0, 0.0, 0.0, 0.0, -120.0, 0);
+			SetModelAnime(Tanhoiza, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(Tanhoiza, 0, 2);
-			SetModelMat(Tanhoiza, 0, 0.0, 20.0, 0.0, 60.0, 0);
-			SetModelAnime(Tanhoiza, 0, 1, FALSE, 0.245, 2);
+			SetDrawModel(Nice, 0, 20);
+			SetModelMat(Nice, 0, 0.0, 0.0, 0.0, -100.0, 0);
+			SetModelAnime(Nice, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(Nice, 0, 2);
-			SetModelMat(Nice, 0, 0.0, 15.0, 0.0, 5.0, 0);
-			SetModelAnime(Nice, 0, 1, FALSE, 0.23, 7);
+			SetDrawModel(SPE, 0, 20);
+			SetModelMat(SPE, 0, 0.0, 0.0, 0.0, -80.0, 0);
+			SetModelAnime(SPE, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(SPE, 0, 2);
-			SetModelMat(SPE, 0, 0.0, -20.0, 0.0, 10.0, 0);
-			SetModelAnime(SPE, 0, 2, FALSE, 0.25, 1);
+			SetDrawModel(SZK, 0, 20);
+			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -60.0, 1);
+			SetModelAnime(SZK, 0, 2, TRUE, 1.0, 0);
 
-			SetDrawModel(SZK, 0, 2);
-			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -100.0, 1);
-			SetModelPhysicsSpeed(SZK, 0, 0.01);
-			SetModelAnime(SZK, 0, 2, FALSE, 0.24, 14);
-	//37
-		SetCut(62.800);
-		SetPrevCamInfo();
+			SetDrawModel(MAC, 0, 20);
+			SetModelMat(MAC, 0, 0.0, 0.0, 0.0, -40.0, 1);
+			SetModelAnime(MAC, 0, 2, TRUE, 1.0, 0);
 
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamForcus(0.95, Teio, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
-		SetUpdateCamfov(0.95, 2.0);
-		SetCamVecRand(40.0, 13.0, 0.0, 0.95);
+			SetDrawModel(Rudolf2, 0, 20);
+			SetModelMat(Rudolf2, 0, 0.0, 0.0, 0.0, -20.0, 1);
+			SetModelAnime(Rudolf2, 0, 2, TRUE, 1.0, 0);
 
-			SetNextResetPhysics();
-	//38
-		SetCut(64.400);
-		SetCamForcus(Teio, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
-		SetCampos_Attach(1, -18.0, -5.0, -20.0);
-		SetCamInfo(5, 1.0, 50.0, 0.0);
-		SetFog(128,128,128 , 200,3000);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamForcus(0.9, Teio, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
-		SetUpdateCamfov(0.95, 20.0);
-		SetCamPosRand(5.0, 2.5, 5.0, 0.8);
-
-			SetDrawModel(Turbo, 0, 2);
-			SetModelMat(Turbo, 0, 0.0, -15.0, 0.0, -110.0, 0);
-			SetModelPhysicsSpeed(Turbo, 0, 1);
-			SetModelAnime(Turbo, 0, 2, FALSE, 1.01, 8);
-
-			SetDrawModel(Rice, 0, 2);
-			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -20.0, 0);
-			SetModelPhysicsSpeed(Rice, 0, 1);
-			SetModelAnime(Rice, 0, 2, FALSE, 0.95, 5);
-
-			SetDrawModel(Teio, 0, 2);
-			SetModelMat(Teio, 0, 0.0, -25.0, 0.0, -30.0, 0);
-			SetModelPhysicsSpeed(Teio, 0, 1);
-			SetModelAnime(Teio, 0, 8, FALSE, 1.09, 10);
-
-			SetDrawModel(Ikuno, 0, 2);
-			SetModelMat(Ikuno, 0, 0.0, -10.0, 0.0, -10.0, 0);
-			SetModelPhysicsSpeed(Ikuno, 0, 1);
-			SetModelAnime(Ikuno, 0, 1, FALSE, 0.99, 5);
-
-			SetDrawModel(SPE, 0, 2);
-			SetModelMat(SPE, 0, 0.0, -20.0, 0.0, 10.0, 0);
-			SetModelPhysicsSpeed(SPE, 0, 0.01);
-			SetModelAnime(SPE, 0, 2, FALSE, 1.0, 1);
-
-			SetDrawModel(SZK, 0, 2);
-			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -100.0, 1);
-			SetModelPhysicsSpeed(SZK, 0, 1);
-			SetModelAnime(SZK, 0, 2, FALSE, 1.01, 14);
-	//39
-		SetCut(65.237);
-		SetPrevCamInfo();
-
-		SetUpdateEnable();
-		SetPrevCamUpdate();
-		WhiteOut(0.975);
-//40
-	//40
-		SetCut(70.000);
-		SetCamvec(0, 16.0, 0);
-		SetCampos_NoneRad(-10, 10.0, -20);
-		SetCamInfo(20, 1.0, 50.0, 0.0);
-		SetFog();
-
-		SetUpdateEnable();
-		SetUpdateCampos(0.0);
-		SetVectorUpdateCampos(2.0, 0.0, 0.0);
-		WhiteIn(0.975);
-
-			SetDrawModel(Rudolf2, 0, 1);
-			SetModelPhysicsSpeed(Rudolf2, 0, 0.01);
-			SetModelAnime(Rudolf2, 0, 0, FALSE, 1.0, 0);
-
-			SetNextResetPhysics();
-	//41
-		SetCut(73.000);
-		SetCamvec(0, 11.0, 2.8);
-		SetCampos_NoneRad(-3.8, 24.0, -10);
-		SetCamInfo(45, 1.0, 30.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdateCampos(0.0);
-		SetVectorUpdateCampos(2.0, 0.0, 0.0);
-
-			SetDrawModel(Teio, 0, 1);
+			SetDrawModel(Teio, 0, 20);
 			SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0);
-			SetModelAnime(Teio, 0, 9, FALSE, 0.0, 0);
-	//42
-		SetCut(74.000);
-		SetCamForcus(Teio, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
-		SetCampos_Attach(1, 10.0, 0.0, 0.0);
-		SetCamInfo(15, 1.0, 30.0, 0.0);
+			SetModelAnime(Teio, 0, 2, TRUE, 1.0, 0);
+			
+			SetNextResetPhysics();
 
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamForcus(0.9, Teio, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
-
-			SetDrawModel(Teio, 0, 3);
-			SetModelAnime(Teio, 0, 10, FALSE, 0.8, 0);
-
-			SetDrawModel(MAP, 0, 7);
-			SetModelMat(MAP, 0, 0, 0.0, -0.1, -2394.0, 90);
-
-			SetDrawModel(SKY, 0, 7);
-			SetDrawModel(SUN, 0, 7);
-	//43
-		SetCut(74.500);
-		SetCamvec(0, 15.0, 0.0);
-		SetCampos_NoneRad(-10.0, 15.0, 30);
-		SetCamInfo(15, 1.0, 50.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamfov(0.95, 25.0);
-	//44
-		SetCut(76.000);
-		SetCamvec(0, 15.0, 0.0);
-		SetCampos_NoneRad(-10.0, 15.0, 30);
-		SetCamInfo(25, 1.0, 50.0, 0.95);
-
-			SetDrawModel(GATE, 0, 2);
-			SetModelOpacityRate(GATE, 0, 0.0);
-			SetModelOpacityEasing(GATE, 0, 1.0, 0.9f);
-			SetModelMat(GATE, 0, 0, 120, 0.0, 0, 0);
-			SetModelAnime(GATE, 0, 0, FALSE, 0.0, 0);
-	//45
-		SetCut(78.421);
-		SetCamvec(60, 15.0, 0.0);
-		SetCampos_NoneRad(-10.0, 400.0, -240);
-		SetCamInfo(35, 1.0, 100.0, 0.0);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.9);
-		SetUpdateCampos(0.0);
-		SetCamVecRand(25.0, 12.5, 25.0, 0.8);
-		SetVectorUpdateCampos(-20.0, 0.0, 0.0);
-	//46
-		SetCut(83.594);
-		SetCamvec(0, 25.0, -100.0);
-		SetCampos_NoneRad(0.0, 17.0, 0);
-		SetCamInfo(35, 1.0, 100.0, 0.0);
-		SetFog(255,255,255 , 150,300);
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.95, 0.0, 17.0, -1000.0);
-		SetUpdateCampos(0.95);
-		SetUpdateCamup(0.95);
-		ResetCamPosRand();
-		SetCamPosRand(5.0, 2.5, 0.5, 0.95);
-		SetCamUpRand(0.2, 0.0, 0.0, 0.95);
-
-			SetDrawModel(GATE, 0, 2);
-	//47
-		SetCut(86.000);
-		SetPrevCamInfo();
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.95, 0.0, 6.0, -200.0);
-		SetUpdateCampos(0.95, 0.0, 17.0, -1.5);
-		SetCamPosRand(2.0, 1.0, 0.2, 0.95);
-		SetCamUpRand(0.0, 0.0, 0.0, 0.95);
-	//48
-		SetCut(96.000);
-		SetPrevCamInfo();
-
-		SetUpdateEnable();
-		SetUpdatePer(0.95);
-		SetUpdateCamvec(0.95, 0.0, 17.0, -1000.0);
-		SetUpdateCampos(0.95, 0.0, 17.0, -500.0);
-		SetCamPosRand(2.0, 1.0, 0.2, 0.95);
-		WhiteOut(0.95);
-
-			SetDrawModel(GATE, 0, 1);
-			SetModelAnime(GATE, 0, 1, FALSE, 1.0, 0);
 //LAST
 
 
 
 //テロップはじめ
-	//テロップ1
-		SetTelopTime(1.0, 4.0);
-		SetTelop(700, 600, 24, "原作  ", RIGHT);
-		SetTelop(700, 600, 32, "  ウマ娘 プリティーダービー", LEFT);
-	//テロップ2
-		AddTelopTime(5.0, 4.0);
-		SetTelop(880, 600, 24, "帝王  ", RIGHT);
-		SetTelop(880, 600, 32, "  トウカイテイオー", LEFT);
-	//テロップ3
-		AddTelopTime(5.0, 4.0);
-		SetTelop(800, 600, 24, "モデル", RIGHT);
-		SetTelop(800, 480, 16, "  つかさ氏", LEFT);
-		SetTelop(800, 500, 32, " つかさ式ていおーV2", LEFT);
-		SetTelop(800, 680, 16, "  ShiniNet氏", LEFT);
-		SetTelop(800, 700, 32, " メジ〇マoクイーン", LEFT);
-	//テロップ4
-		AddTelopTime(11.0, 4.0);
-		SetTelop(300, 600, 24, "モデル", RIGHT);
-		SetTelop(300, 480, 16, "  つかさ氏", LEFT);
-		SetTelop(300, 500, 32, " つかさ式ねいちゃ", LEFT);
-		SetTelop(300, 680, 16, "  トロポップ氏", LEFT);
-		SetTelop(300, 700, 32, " とろぽ式シンボリルドルフ", LEFT);
-	//テロップ5
-		AddTelopTime(5.0, 4.0);
-		SetTelop(1300, 650, 24, "モデル", RIGHT);
-		SetTelop(1300, 580, 16, "  つかさ氏", LEFT);
-		SetTelop(1300, 600, 32, " つかさ式まちたん", LEFT);
-		SetTelop(1300, 700, 32, "  つかさ式たーぼ", LEFT);
-		SetTelop(1300, 800, 32, " つかさ式いくの", LEFT);
-	//テロップ6
-		AddTelopTime(5.0, 3.0);
-		SetTelop(800, 840, 24, "モデル", RIGHT);
-		SetTelop(800, 780, 16, "  ppp21氏", LEFT);
-		SetTelop(800, 800, 32, "【MMD】笹かまスタジアム", LEFT);
-		SetTelop(800, 880, 16, "  Led/折鶴P氏", LEFT);
-		SetTelop(800, 900, 32, " なんちゃって競馬場セット", LEFT);
-	//テロップ7
-		AddTelopTime(3.5, 3.0);
-		SetTelop(800, 190, 24, "モデル", RIGHT);
-		SetTelop(800, 130, 16, "  つかさ氏", LEFT);
-		SetTelop(800, 150, 32, " つかさ式らいす", LEFT);
-		SetTelop(800, 230, 16, "  トロポップ氏", LEFT);
-		SetTelop(800, 250, 32, " とろぽ式ミホノブルボン", LEFT);
-	//テロップ7
-		AddTelopTime(5.0, 4.0);
-		SetTelop(800, 840, 24, "モデル", RIGHT);
-		SetTelop(800, 780, 16, "  warpstar氏", LEFT);
-		SetTelop(800, 800, 32, "スペシャルウィーク", LEFT);
-		SetTelop(800, 880, 16, "  卯月氏", LEFT);
-		SetTelop(800, 900, 32, " 卯月式サイレンススズカ", LEFT);
-	//テロップ8
-		AddTelopTime(20.0, 4.0);
-		SetTelop(800, 840, 24, "モデル", RIGHT);
-		SetTelop(800, 800, 32, " 卯月式グラスワンダー", LEFT);
-		SetTelop(800, 850, 32, " 卯月式エルコンドルパサー", LEFT);
-		SetTelop(800, 900, 32, " 卯月式セイウンスカイ", LEFT);
-		SetTelop(800, 930, 16, "  三柱氏", LEFT);
-		SetTelop(800, 950, 32, " 三柱式 キングヘイロー", LEFT);
-
-	//テロップ9
-		AddTelopTime(10.000, 4.000f);
-		SetTelop(1380, 720, 10, "オープニング主題歌", LEFT);
-		SetTelop(1320, 730, 36, "『青い果実』", LEFT);
-		SetTelop(1350, 766, 36, "doa", LEFT);
-		SetTelop(1490, 778, 24, "(GIZA studio)", LEFT);
-		SetTelop(1350, 813, 10, "作　　詞", LEFT);
-		SetTelop(1350, 845, 10, "作・編曲", LEFT);
-		SetTelop(1410, 802, 32, "吉本　大樹", LEFT);
-		SetTelop(1410, 834, 32, "徳永　暁人", LEFT);
 //テロップ終わり

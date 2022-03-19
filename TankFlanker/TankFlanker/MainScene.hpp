@@ -331,9 +331,17 @@ namespace FPS_n2 {
 					float OpacityRate_Per = 1.f;
 					int Anim_Sel = 0;
 
+					bool isFarPhysics = false;
+					bool isOutFrustum = false;
+					bool isBigModel = false;
+					int DrawCount;
+
 					Model(void) noexcept {
 						isDraw = false;
 						isEndLoad = false;
+						isFarPhysics = false;
+						isOutFrustum = false;
+						isBigModel = true;
 					}
 
 					void Init(int startFrame, int ofset) noexcept {
@@ -369,6 +377,7 @@ namespace FPS_n2 {
 						}
 					}
 					void Update(bool isUpdateAnim) noexcept {
+						this->DrawCount = 0;
 						if (this->OpacityRate_Per < 1.f) {
 							easing_set_SetSpeed(&this->OpacityRate, this->OpacityRate_Dist, this->OpacityRate_Per);
 						}
@@ -377,9 +386,30 @@ namespace FPS_n2 {
 							this->obj.work_anime();
 						}
 					}
-					void Draw(void) const noexcept {
+					void Draw(int isfar_ = -1) noexcept {
 						if (this->isDraw && this->OpacityRate > 0.f) {
-							this->obj.DrawModel();
+							if (!this->isBigModel) {
+								if (isfar_ == TRUE) {
+									if (this->isOutFrustum) {
+										this->DrawCount++;
+										this->obj.DrawModel();
+									}
+								}
+								else if (isfar_ == FALSE) {
+									if (!this->isOutFrustum) {
+										this->DrawCount++;
+										this->obj.DrawModel();
+									}
+								}
+								else {
+									this->DrawCount++;
+									this->obj.DrawModel();
+								}
+							}
+							else {
+								this->DrawCount++;
+								this->obj.DrawModel();
+							}
 						}
 					}
 					void SetPhysics(bool isReset,float x) noexcept {
@@ -442,7 +472,7 @@ namespace FPS_n2 {
 						m.isDraw = m.Cutinfo.GetSwitch();
 					}
 				}
-				void FirstUpdate(int Counter, bool isFirstLoop, bool reset_p) noexcept {
+				void FirstUpdate(int Counter, bool isFirstLoop) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
 						while (true) {
@@ -473,17 +503,7 @@ namespace FPS_n2 {
 								}
 								//アニメーション動作
 								if (inf.animsel >= 0) {
-									if (reset_p) {
-										m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * GameSpeed);
-									}
-									else {
-										m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * GameSpeed);
-										/*
-										if (i % 2 == P_cnt) {
-											m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * GameSpeed*2.f);
-										}
-										//*/
-									}
+									m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * GameSpeed);
 								}
 							}
 							if (tt) {
@@ -496,50 +516,67 @@ namespace FPS_n2 {
 				void SetPhysics(bool reset_p) noexcept {
 					if (reset_p) {
 						for (size_t i = 0; i < Max; i++) {
-							model[i].SetPhysics(reset_p, 1.f);
+							model[i].SetPhysics(true, 1.f);
 						}
 					}
 					else {
+						int sp = 0;
 						for (size_t i = 0; i < Max; i ++) {
-							model[i].SetPhysics(reset_p, 1.f);
-							/*
-							if (i % 2 == P_cnt) {
-								model[i].SetPhysics(reset_p, 2.f);
+							auto& m = model[i];
+							if (m.isOutFrustum) {
+								if (!m.isFarPhysics) {
+									m.SetPhysics(true, 1.f);
+									m.isFarPhysics = true;
+								}
 							}
 							else {
-								//model[i].SetPhysics(reset_p, 0.01f);
+								m.isFarPhysics = false;
+								if (m.isDraw) {
+									m.SetPhysics(false, 1.f);
+									/*
+									if (sp % 2 == P_cnt) {
+										m.SetPhysics(false, 2.f);
+									}
+									sp++;
+									//*/
+								}
 							}
-							//*/
 						}
+						//
 					}
 				}
 
 				void Set(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
+						auto& m = model[i];
 						//
-						if (!model[i].isEndLoad && CheckHandleASyncLoad(model[i].obj.get()) == FALSE) {
-							model[i].isEndLoad = true;
-
-							model[i].AddFrame("上半身2");
-							model[i].AddFrame("首");
-							model[i].AddFrame("頭");
-							model[i].AddFrame("右目");
-							model[i].AddFrame("左目");
-							model[i].AddFrame("右人指２");
-							model[i].AddFrame("右ひざ");
-
-							MV1::SetAnime(&(model[i].obj), model[i].obj);
+						if (!m.isEndLoad && CheckHandleASyncLoad(m.obj.get()) == FALSE) {
+							m.isEndLoad = true;
+							m.AddFrame("上半身");
+							m.AddFrame("上半身2");
+							m.AddFrame("首");
+							m.AddFrame("頭");
+							m.AddFrame("右目");
+							m.AddFrame("左目");
+							m.AddFrame("右人指２");
+							m.AddFrame("右ひざ");
+							MV1::SetAnime(&(m.obj), m.obj);
 						}
 					}
 				}
 				void Update(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
-						m.Update(true);/*i % 2 == P_cnt*/
+						if (!m.isFarPhysics) {
+							m.Update(true);/**/
+						}
+						else {
+							m.Update(i % 2 == P_cnt);/**/
+						}
 					}
-					//++P_cnt %= 2;
+					++P_cnt %= 2;
 				}
-				void Draw_Far(void) const noexcept {
+				void Draw_Far(void) noexcept {
 					auto fog_e = GetFogEnable();
 					SetFogEnable(FALSE);
 					SetUseLighting(FALSE);
@@ -554,12 +591,12 @@ namespace FPS_n2 {
 					SetUseLighting(TRUE);
 					SetFogEnable(fog_e);
 				}
-				void Draw(bool innearshadow, bool infarshadow) const noexcept {
+				void Draw(bool innearshadow, bool infarshadow, int isCheckFar = -1) noexcept {
 					if (infarshadow) {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
 							if (!m.isBGModel && m.IsFarShadow) {
-								m.Draw();
+								m.Draw(isCheckFar);
 							}
 						}
 					}
@@ -567,7 +604,7 @@ namespace FPS_n2 {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
 							if (!m.isBGModel && m.IsNearShadow) {
-								m.Draw();
+								m.Draw(isCheckFar);
 							}
 						}
 					}
@@ -575,7 +612,29 @@ namespace FPS_n2 {
 						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
 							if (!m.isBGModel) {
-								m.Draw();
+								m.Draw(isCheckFar);
+							}
+						}
+					}
+				}
+				void CheckInCamera(float far_) noexcept {
+					auto camfar = GetCameraFar();
+					//カメラのfarが適正範囲の設定の場合
+					if (far_ - 1.f < camfar&& camfar < far_ + 1.f) {
+						for (size_t i = 0; i < Max; i++) {
+							auto& m = model[i];
+							m.isOutFrustum = false;
+							m.isBigModel = false;
+							auto center = m.GetFrame("上半身");
+							if (center != VECTOR_ref::zero()) {
+								//center += (center - GetCameraPosition()).Norm()*-7.f;
+
+								if (CheckCameraViewClip(center.get()) == TRUE) {
+									m.isOutFrustum = true;
+								}
+							}
+							else {
+								m.isBigModel = true;
 							}
 						}
 					}
@@ -860,7 +919,10 @@ namespace FPS_n2 {
 					this->Use = true;
 					this->Path = path;
 					this->ID = id;
-					if (frame == "UPPER_2") {
+					if (frame == "UPPER") {
+						this->Frame = "上半身";
+					}
+					else if (frame == "UPPER_2") {
 						this->Frame = "上半身2";
 					}
 					else if (frame == "NECK") {
@@ -2241,6 +2303,12 @@ namespace FPS_n2 {
 					printfDx("\n");
 				}
 				//
+				for (const auto& m : models.GetModel()) {
+					const auto* sel = LSClass.GetArgFromPath(m.Path);
+					if (sel != nullptr) {
+						printfDx((" " + sel->Base + "(" + std::to_string(m.BaseID) + ") = %d\n").c_str(), m.DrawCount);
+					}
+				}
 			}
 		public:
 			void Set(void) noexcept override {
@@ -2256,6 +2324,7 @@ namespace FPS_n2 {
 
 				SetUseASyncLoadFlag(FALSE);
 				BGM = SoundHandle::Load("data/sound.wav");
+				BGM.vol(0);
 				///*
 				movie = GraphHandle::Load("data/base_movie.mp4");
 				PauseMovieToGraph(movie.get());
@@ -2371,56 +2440,18 @@ namespace FPS_n2 {
 						if (attached.Update_((int)m_Counter)) {
 							attached.Update_((int)m_Counter);
 						}
-						models.FirstUpdate((int)m_Counter, isFirstLoop, ResetPhysics || ModelEdit_PhysicsReset);
+						models.FirstUpdate((int)m_Counter, isFirstLoop);
 						graphs.FirstUpdate((int)m_Counter, isFirstLoop);
 					}
 					//
 					{
-						int SEL = 17;
-						//17
+						int SEL = 0;
+						//0
 						if (m_Counter == SEL) {
 							if (isFirstLoop) {
-								camxb_15 = -3.f;
 							}
-							m_CutInfoUpdate[m_Counter].campos_per = 0.9f;
-							m_CutInfoUpdate[m_Counter].CameraNotFirst.campos = m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec + VECTOR_ref::vget(camxb_15, 0.f, -60.f);
-							camxb_15 += 1.f / FPS * GameSpeed;
 						}
 						SEL++;
-						//18
-						if (m_Counter == SEL) {
-							if (isFirstLoop) {
-								m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = m_CutInfo[m_Counter].Forcus.GetForce(models);
-								m_CutInfoUpdate[m_Counter].CameraNotFirst.campos = m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec + VECTOR_ref::vget(30.f, 0.f, -10.f);
-							}
-						}
-						SEL += 2;
-						//20
-						if (m_Counter == SEL) {
-							if (isFirstLoop) {
-								camupxb_18 = 0.f;
-							}
-							m_CutInfoUpdate[m_Counter].camup_per = 0.95f;
-							auto nowupxb = m_CutInfo[m_Counter].Aim_camera.camvec.x();
-							m_CutInfoUpdate[m_Counter].CameraNotFirst.camup = VECTOR_ref::vget(std::clamp((camupxb_18 - nowupxb)*1.5f, -0.5f, 0.5f), 1.f, 0);
-							camupxb_18 = nowupxb;
-						}
-						SEL += 11;
-						//31
-						if (m_Counter == SEL) {
-							std::string spe = "data/umamusume/spe/model.mv1";
-							std::string szk = "data/umamusume/suzuka/model.mv1";
-
-							auto BUF = (models.Get(spe, 0)->GetFrame("左目") + models.Get(szk, 0)->GetFrame("右目")) / 2.f;
-							if (isFirstLoop) {
-								m_CutInfo[m_Counter].Aim_camera.camvec = BUF;
-
-								m_CutInfoUpdate[m_Counter].campos_per = 0.f;
-								m_CutInfoUpdate[m_Counter].CameraNotFirst.campos = BUF + VECTOR_ref::vget(0.f, -15.f, -20.f);
-							}
-							m_CutInfoUpdate[m_Counter].camvec_per = 0.9f;
-							m_CutInfoUpdate[m_Counter].CameraNotFirst.camvec = BUF;
-						}
 					}
 					{
 						auto& u = m_CutInfoUpdate[m_Counter];
@@ -2570,13 +2601,19 @@ namespace FPS_n2 {
 				//+3
 				models.Draw_Far();
 			}
-			void Shadow_Draw_NearFar(void) noexcept override {
+			//
+			void Shadow_Draw_Far(void) noexcept {
+				//特殊
 				//+12
 				models.Draw(false, true);
 			}
+			void Shadow_Draw_NearFar(void) noexcept override {
+				//todo:共通の影モデルを使用
+				//models.Draw(false, false, TRUE);
+			}
 			void Shadow_Draw(void) noexcept override {
 				//+52
-				models.Draw(true, false);
+				models.Draw(true, false, FALSE);
 			}
 			void Main_Draw(void) noexcept override {
 				auto* DrawParts = DXDraw::Instance();
@@ -2588,8 +2625,20 @@ namespace FPS_n2 {
 					SetFogStartEnd(fog_range[0], fog_range[1]);
 				}
 
+				models.CheckInCamera(camera_main.far_);
 				//+201 = 67x3
-				models.Draw(false, false);
+				auto camfar = GetCameraFar();
+				//カメラのfarが適正範囲の設定の場合
+				//near
+				if (camera_main.near_ - 1.f < camfar&& camfar < camera_main.near_ + 1.f) {
+				}
+				else if (camera_main.far_ - 1.f < camfar&& camfar < camera_main.far_ + 1.f) {
+					models.Draw(false, false, FALSE);
+				}
+				//far
+				else {
+					models.Draw(false, false, TRUE);
+				}
 				if (isFreepos) {
 					VECTOR_ref vec = (camera_buf.camvec - camera_buf.campos);
 					float range = vec.size();

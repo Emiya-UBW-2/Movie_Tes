@@ -78,7 +78,7 @@ namespace FPS_n2 {
 				//音位置指定
 				Set3DSoundListenerPosAndFrontPosAndUpVec(camera_main.campos.get(), camera_main.camvec.get(), camera_main.camup.get());
 				//影用意
-				DrawParts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(60.f, 30.f, 60.f), VECTOR_ref::vget(camera_main.far_, 40.f, camera_main.far_));//MAIN_LOOPのnearはこれ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
+				DrawParts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(camera_main.far_, 20.f, camera_main.far_), VECTOR_ref::vget(300.f, 40.f, 300.f));//MAIN_LOOPのnearはこれ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
 			}
 			virtual void UI_Draw(void) noexcept {}
 			virtual void BG_Draw(void) noexcept {
@@ -135,7 +135,7 @@ namespace FPS_n2 {
 			std::shared_ptr<Sceneclass::TEMPSCENE> scenes_ptr{ nullptr };
 			bool selend{ true };
 			bool selpause{ true };
-			LONGLONG OLDwaits, waits;
+			LONGLONG Drawwaits,OLDwaits, waits;
 		public:
 			SceneControl(void) noexcept {
 			}
@@ -161,6 +161,9 @@ namespace FPS_n2 {
 			}
 			//
 			bool Execute(void) noexcept {
+				OLDwaits = GetNowHiPerformanceCount() - waits;
+				waits = GetNowHiPerformanceCount();
+
 				auto* DrawParts = DXDraw::Instance();
 #ifdef DEBUG
 				auto DebugParts = DeBuG::Instance();					//デバッグ
@@ -170,9 +173,8 @@ namespace FPS_n2 {
 					this->ending = true;
 					selend = true;
 				}
-				OLDwaits = GetNowHiPerformanceCount() - waits;
-				waits = GetNowHiPerformanceCount();
 				clsDx();
+
 				FPS = GetFPS();
 #ifdef DEBUG
 				DebugParts->put_way();
@@ -246,7 +248,9 @@ namespace FPS_n2 {
 					DebugParts->debug(1920 - 300, 50, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
 					printfDx("Drawcall   :%d\n", GetDrawCallCount());
-					printfDx("DrawTime   :%5.2f ms\n", float(OLDwaits) / 1000.f);
+					printfDx("AllTime    :%5.2f ms\n", float(OLDwaits) / 1000.f);
+					printfDx("DrawTime   :%5.2f ms\n", float(Drawwaits) / 1000.f);
+					printfDx("All-Draw   :%5.2f ms\n", float(OLDwaits - Drawwaits) / 1000.f);
 					printfDx("GameSpeed  :%3.1f\n", GameSpeed);
 #endif // DEBUG
 				}
@@ -256,7 +260,8 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				//画面の反映
 				DrawParts->Screen_Flip();
-				/while ((GetNowHiPerformanceCount() - waits) <= (1000 * 1000 / 60)) {}
+				Drawwaits = GetNowHiPerformanceCount() - waits;
+				while ((GetNowHiPerformanceCount() - waits) <= (1000 * 1000 / 60)) {}
 			}
 			//
 			void NextScene(void) noexcept {
