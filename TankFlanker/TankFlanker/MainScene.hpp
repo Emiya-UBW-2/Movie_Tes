@@ -336,12 +336,33 @@ namespace FPS_n2 {
 					bool isBigModel = false;
 					int DrawCount;
 
+					MATRIX_ref mat_p;
+					//matrix用情報
+					VECTOR_ref pos_p;
+
+					float Yrad1_p;
+					float Zrad1_p;
+					float Yrad2_p;
+
+					VECTOR_ref Aim_p;
+					float pos_z_p;
+					float Yradaddbuf_p;
+					float Yradadd_p;
+					float Zrad1buf_p;
+					float animspd;
+
+					std::array<int, 1> GuideNum;
+
+					bool canUpdate = true;
+
 					Model(void) noexcept {
 						isDraw = false;
 						isEndLoad = false;
 						isFarPhysics = false;
 						isOutFrustum = false;
 						isBigModel = true;
+
+						animspd = 1.f;
 					}
 
 					void Init(int startFrame, int ofset) noexcept {
@@ -439,6 +460,12 @@ namespace FPS_n2 {
 
 				}
 				void Load(std::string_view Path) noexcept {
+					MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
+					for (int i = 0; i < 256; i++) {
+						MV1SetLoadCalcPhysicsWorldGravity(i, VECTOR_ref::vget(0, 0, 1.f).get());
+					}
+					MV1SetLoadModelPhysicsCalcPrecision(1);
+
 					for (size_t i = 0; i < Max; i++) {
 						if (model[i].isBase && model[i].Path == Path) {
 							model[Max].Path = Path;
@@ -454,7 +481,7 @@ namespace FPS_n2 {
 					model[Max].isBase = true;
 					model[Max].numBase = 0;
 					model[Max].BaseID = 0;
-					MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);
+					MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_LOADCALC);/*DX_LOADMODEL_PHYSICS_REALTIME*/
 					Max++;
 				}
 				Model* Get(std::string_view Path, size_t Sel = 0) noexcept {
@@ -503,7 +530,7 @@ namespace FPS_n2 {
 								}
 								//アニメーション動作
 								if (inf.animsel >= 0) {
-									m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * GameSpeed);
+									m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * m.animspd * GameSpeed);
 								}
 							}
 							if (tt) {
@@ -512,6 +539,17 @@ namespace FPS_n2 {
 							break;
 						}
 					}
+
+					int sp = 0;
+					for (size_t i = 0; i < Max; i++) {
+						auto& m = model[i];
+						m.canUpdate = true;
+						if (!m.isOutFrustum && m.isDraw) {
+							m.canUpdate = (sp % 2 == P_cnt);
+							//sp++;
+						}
+					}
+					//++P_cnt %= 2;
 				}
 				void SetPhysics(bool reset_p) noexcept {
 					if (reset_p) {
@@ -520,7 +558,6 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						int sp = 0;
 						for (size_t i = 0; i < Max; i ++) {
 							auto& m = model[i];
 							if (m.isOutFrustum) {
@@ -532,12 +569,11 @@ namespace FPS_n2 {
 							else {
 								m.isFarPhysics = false;
 								if (m.isDraw) {
-									m.SetPhysics(false, 1.f);
-									/*
-									if (sp % 2 == P_cnt) {
+									//m.SetPhysics(false, 1.f);
+									//*
+									if (m.canUpdate) {
 										m.SetPhysics(false, 2.f);
 									}
-									sp++;
 									//*/
 								}
 							}
@@ -567,14 +603,10 @@ namespace FPS_n2 {
 				void Update(void) noexcept {
 					for (size_t i = 0; i < Max; i++) {
 						auto& m = model[i];
-						if (!m.isFarPhysics) {
-							m.Update(true);/**/
-						}
-						else {
-							m.Update(i % 2 == P_cnt);/**/
+						if (m.isDraw) {
+							m.Update(m.canUpdate);/**/
 						}
 					}
-					++P_cnt %= 2;
 				}
 				void Draw_Far(void) noexcept {
 					auto fog_e = GetFogEnable();
@@ -1226,6 +1258,21 @@ namespace FPS_n2 {
 		private:
 			std::string LOGO1 = "data/picture/logo.png";
 			std::string SUN = "data/model/sun/model.mv1";
+
+			std::string Teio = "data/umamusume/teio/model.pmx";
+			std::string Nice = "data/umamusume/nice/model.pmx";
+			std::string Tanhoiza = "data/umamusume/tanhoiza/model.pmx";
+			std::string Turbo = "data/umamusume/turbo/model.pmx";
+			std::string Ikuno = "data/umamusume/ikuno/model.pmx";
+			std::string Rice = "data/umamusume/rice/model.pmx";
+			std::string Burbon = "data/umamusume/burbon/model.pmx";
+			std::string MAC = "data/umamusume/mac/model.pmx";
+			std::string SPE = "data/umamusume/spe/model.pmx";
+			std::string SZK = "data/umamusume/suzuka/model.pmx";
+			std::string Rudolf2 = "data/umamusume/rudolf2/model.pmx";
+
+			std::string MAP = "data/model/map/model.mv1";
+			std::vector<std::string> NAMES;
 		private:
 			//
 			LoadScriptClass LSClass;		//スクリプト読み込み
@@ -1251,6 +1298,7 @@ namespace FPS_n2 {
 			SoundHandle BGM;
 			int BGM_Frequency;
 
+			MV1 Guide;
 			//ビュワー
 			GraphHandle movie;
 			switchs LookMovie;
@@ -2330,6 +2378,7 @@ namespace FPS_n2 {
 				PauseMovieToGraph(movie.get());
 				//*/
 
+				MV1::Load("data/model/map/way.pmd", &Guide);
 				//プレイ用意
 				GameSpeed = (float)(spd_x) / 10.f;
 				PostPassParts->Set_Bright(255, 255, 255);
@@ -2341,7 +2390,9 @@ namespace FPS_n2 {
 				m_RandcamvecBuf.clear();
 				m_RandcamposBuf.clear();
 
-				LookEditer.Init(true);
+				ResetPhysics = true;
+
+				LookEditer.Init(false);
 				LookMovie.Init(false);
 				Start.Init(true);
 
@@ -2448,11 +2499,173 @@ namespace FPS_n2 {
 						int SEL = 0;
 						//0
 						if (m_Counter == SEL) {
+							int GudeStart = 0;
 							if (isFirstLoop) {
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Teio;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Nice;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Tanhoiza;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Turbo;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Ikuno;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Rice;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Burbon;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = MAC;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = SPE;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = SZK;
+								NAMES.resize(NAMES.size() + 1);
+								NAMES.back() = Rudolf2;
+
+
+								Guide.SetMatrix(models.Get(MAP, 0)->obj.GetMatrix());
+								for (int i = 0; i < Guide.frame_num(); i++) {
+									if (Guide.frame_child_num(i) > 0) {
+										GudeStart = i;
+										break;
+									}
+								}
 							}
+							//teio
+							{
+								auto dist = (models.Get(Teio, 0)->pos_p - m_CutInfo[m_Counter].Aim_camera.campos).size() + 50.f;
+
+								easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f/ dist*45.f,5.f,50.f)), 0.9f);
+								easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, std::max(2.f, dist / 10.f), 0.9f);
+								easing_set(&m_CutInfo[m_Counter].Aim_camera.far_, dist, 0.9f);
+							}
+							{
+								float xof = 0.f;
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									auto& inf = m->CutDetail[m->Cutinfo.nowcut];
+									if (isFirstLoop) {
+										if (inf.usemat) {
+											m->pos_p = VECTOR_ref::vget(0.f, 0.f, xof);
+											m->Yrad1_p = inf.Yrad1_p;
+											m->Zrad1_p = 0.f;
+											m->Yrad2_p = inf.Yrad2_p;
+											m->pos_z_p = 0.f;
+										}
+										m->animspd = 0.f;
+										m->GuideNum[0] = GudeStart;
+										for (int i = 1; i < m->GuideNum.size(); i++) {
+											if (Guide.frame_child_num(m->GuideNum[i]) >= 0) { m->GuideNum[i] = Guide.frame_child(m->GuideNum[i - 1], 0); }
+											else {
+												m->GuideNum[i] = -1;
+												break;
+											}
+										}
+										m->PhysicsSpeed = 10.f;
+
+
+										m->Aim_p = Guide.frame(m->GuideNum[0]);
+										auto vec = (m->Aim_p - m->pos_p);
+										vec.y(0.f);
+										float length = vec.size();
+										vec = vec.Norm();
+										auto vec2 = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
+										vec2.y(0.f);
+										vec2 = vec2.Norm();
+										float cosn = vec2.cross(vec).y();
+										float radn = -rad2deg(cosn);
+										m->Yradaddbuf_p = radn;
+										m->Yradadd_p = m->Yradaddbuf_p;
+										m->Zrad1buf_p = 0.f;
+									}
+									else {
+										float OLD = m->Yradadd_p;
+										VECTOR_ref Aim;
+										int aimcnt = 0;
+										for (int i = 0; i < m->GuideNum.size(); i++) {
+											if (m->GuideNum[i] >= 0) {
+												auto pb = Guide.frame(m->GuideNum[i]);
+												auto zvb = (Guide.frame(Guide.frame_child(m->GuideNum[i], 0)) - pb).Norm();
+												auto xvb = zvb.cross(VECTOR_ref::up());
+												Aim += pb + xvb * (50.f + xof); aimcnt++;
+											}
+										}
+										m->Aim_p = Aim * (1.f / (float)aimcnt);
+
+
+										auto vec = m->Aim_p - m->pos_p;
+										vec.y(0.f);
+
+										float length = vec.size();
+
+										vec = vec.Norm();
+										auto vec2 = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
+										vec2.y(0.f);
+										vec2 = vec2.Norm();
+										
+										float cosn = vec2.cross(vec).y();
+										float radn = std::clamp(-rad2deg(cosn), -45.f, 45.f);
+										easing_set(&m->Yradaddbuf_p, radn, 0.5f);
+										easing_set(&m->Yradadd_p, m->Yradaddbuf_p, 0.5f);
+
+										if (Guide.frame_child_num(m->GuideNum[0]) >= 0) {
+											//
+											if (length <= 10.f) {
+												m->GuideNum[0] = Guide.frame_child(m->GuideNum[0], 0);
+												for (int i = 1; i < m->GuideNum.size(); i++) {
+													if (Guide.frame_child_num(m->GuideNum[i]) >= 0) { m->GuideNum[i] = Guide.frame_child(m->GuideNum[i - 1], 0); }
+													else {
+														m->GuideNum[i] = -1;
+														break;
+													}
+												}
+												m->Zrad1buf_p = -radn * 50.f;
+											}
+											//
+										}
+										else {
+											//
+											{
+
+											}
+											//
+										}
+
+										m->Yrad1_p += m->Yradadd_p;
+
+										easing_set(&m->Zrad1_p, m->Zrad1buf_p, 0.95f);
+
+
+										m->pos_p += MATRIX_ref::Vtrans(VECTOR_ref::vget(0, 0, m->pos_z_p), MATRIX_ref::RotY(deg2rad(m->Yrad1_p)))*(1.f / FPS * GameSpeed);
+
+										m->mat_p = 
+											MATRIX_ref::RotY(deg2rad(m->Yrad1_p))
+											* MATRIX_ref::RotAxis(MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec(), deg2rad(m->Zrad1_p))
+											* MATRIX_ref::Mtrans(m->pos_p) * MATRIX_ref::RotY(deg2rad(m->Yrad2_p));
+										
+										if (m->canUpdate) {
+											m->obj.SetMatrix(m->mat_p);
+											//MV1SetPhysicsWorldGravity(m->obj.get(), VECTOR_ref::vget(0, 0, 1.f).get());
+										}
+
+										auto total = -19.4f * 12.5f;
+										if (m->pos_z_p >= total) { m->pos_z_p += -0.6f; }
+
+										//m->pos_z_p = total;
+										m->animspd = m->pos_z_p / total;
+									}
+
+									xof += 12.f;
+
+								}
+							}
+							//
 						}
 						SEL++;
 					}
+					//
 					{
 						auto& u = m_CutInfoUpdate[m_Counter];
 						if (isFirstLoop) {
@@ -2519,6 +2732,11 @@ namespace FPS_n2 {
 							u.CameraNotFirst.camvec += u.CameraNotFirst_Vec.camvec*(1.f / FPS * GameSpeed);
 							u.CameraNotFirst.campos += u.CameraNotFirst_Vec.campos*(1.f / FPS * GameSpeed);
 
+							//
+							if (attached.GetSwitch()) {
+								m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec + attachedDetail[attached.nowcut].poscam;
+							}
+
 							easing_set_SetSpeed(&Black_Buf, u.Black, u.Black_Per);
 							easing_set_SetSpeed(&White_Buf, u.White, u.White_Per);
 						}
@@ -2565,7 +2783,7 @@ namespace FPS_n2 {
 				graphs.Update();
 				models.Update();
 				{
-					models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
+					//models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
 					ModelEdit_PhysicsReset = false;
 					isFirstLoop = false;
 					if (NowTimeWait > m_CutInfo[m_Counter%m_CutInfo.size()].GetTimeLimit()) {
@@ -2665,6 +2883,19 @@ namespace FPS_n2 {
 					graphs.Draw(DrawParts->disp_y);
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				for (int i = 0; i < Guide.frame_num(); i++) {
+					auto pos = Guide.frame(i);
+					DrawLine3D((pos).get(), (pos + VECTOR_ref::up()*20.f).get(), GetColor(255, 0, 0));
+				}
+				for (auto& n : NAMES) {
+					auto* m = models.Get(n, 0);
+					auto pos = m->pos_p;
+					auto pos2 = m->Aim_p;
+					DrawLine3D((pos + VECTOR_ref::up()*5.f).get(), (pos2 + VECTOR_ref::up()*5.f).get(), GetColor(0, 0, 255));
+
+					pos = Guide.frame(m->GuideNum[0]);
+					DrawSphere3D((pos + VECTOR_ref::up()*20.f).get(), 5.f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+				}
 			}
 			//
 			void LAST_Draw(void) noexcept override {

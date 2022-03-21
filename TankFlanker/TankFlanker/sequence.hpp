@@ -248,6 +248,7 @@ namespace FPS_n2 {
 					DebugParts->debug(1920 - 300, 50, float(GetNowHiPerformanceCount() - waits) / 1000.f);
 					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
 					printfDx("Drawcall   :%d\n", GetDrawCallCount());
+					printfDx("FPS        :%5.2f fps\n", FPS);
 					printfDx("AllTime    :%5.2f ms\n", float(OLDwaits) / 1000.f);
 					printfDx("DrawTime   :%5.2f ms\n", float(Drawwaits) / 1000.f);
 					printfDx("All-Draw   :%5.2f ms\n", float(OLDwaits - Drawwaits) / 1000.f);

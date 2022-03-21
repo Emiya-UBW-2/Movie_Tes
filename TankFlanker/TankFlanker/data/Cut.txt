@@ -44,66 +44,67 @@
 //0
 	//0
 		SetCut(300.0);
-		SetCamvec(0.0, 3.0, 0.0);
 		SetCamForcus(Teio, 0, NECK, 0.0, 0.0, 0.0);
-		SetCampos_NoneRad(-3.0, 3.0, -16.0);
-		SetCamInfo(45, 2.0, 100.0, 0.0);
+		//SetCampos_Attach(1, -90.0, 20.0 , 0.0);
+		SetCampos_NoneRad( 2394.0,100,0);
+		SetCamInfo(15, 2.0, 100.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdatePer(0.9);
-		SetUpdateCamForcus(0.9, Teio, 0, NECK, 0.0, 0.0, 0.0);
+		SetUpdatePer(0.0);
+		SetUpdateCamForcus(0.5, Teio, 0, NECK, 0.0, 0.0, 0.0);
+
 		//SetUpdateCamvec(0.0, -1.0, 3.0, 0.0);
-		SetUpdateCampos(0.9, 5.0, 25.0, 20.0);
-		//SetVectorUpdateCamvec(0.0, 0.0, 0.0);
-		SetVectorUpdateCampos(0.0, 0.0, 1.0);
+		//SetUpdateCampos(0.9, 40.0, 25.0, 1.0);
+		//SetVectorUpdateCamvec(0.0, 0.0, -120.0);
+		//SetVectorUpdateCampos(0.0, 0.0, -60.0);
 
 			SetDrawModel(MAP, 0, 6);
-			SetModelMat(MAP, 0, 0, 0.0, -0.1, 2394.0, 90);
+			SetModelMat(MAP, 0, 0, 0.0, 0.0, -2394.0, 0.0);
 			SetDrawModel(SKY, 0, 6);
 			SetDrawModel(SUN, 0, 6);
 
 			SetDrawModel(Turbo, 0, 20);
-			SetModelMat(Turbo, 0, 0.0, 0.0, 0.0, -200.0, 0);
+			SetModelMat(Turbo, 0, 0.0, 0.0, 0.0, -200.0, 0.0);
 			SetModelAnime(Turbo, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Rice, 0, 20);
-			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -180.0, 0);
+			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -180.0, 0.0);
 			SetModelAnime(Rice, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Burbon, 0, 20);
-			SetModelMat(Burbon, 0, 0.0, 0.0, 0.0, -160.0, 0);
+			SetModelMat(Burbon, 0, 0.0, 0.0, 0.0, -160.0, 0.0);
 			SetModelAnime(Burbon, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Ikuno, 0, 20);
-			SetModelMat(Ikuno, 0, 0.0, 0.0, 0.0, -140.0, 0);
+			SetModelMat(Ikuno, 0, 0.0, 0.0, 0.0, -140.0, 0.0);
 			SetModelAnime(Ikuno, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Tanhoiza, 0, 20);
-			SetModelMat(Tanhoiza, 0, 0.0, 0.0, 0.0, -120.0, 0);
+			SetModelMat(Tanhoiza, 0, 0.0, 0.0, 0.0, -120.0, 0.0);
 			SetModelAnime(Tanhoiza, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Nice, 0, 20);
-			SetModelMat(Nice, 0, 0.0, 0.0, 0.0, -100.0, 0);
+			SetModelMat(Nice, 0, 0.0, 0.0, 0.0, -100.0, 0.0);
 			SetModelAnime(Nice, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(SPE, 0, 20);
-			SetModelMat(SPE, 0, 0.0, 0.0, 0.0, -80.0, 0);
+			SetModelMat(SPE, 0, 0.0, 0.0, 0.0, -80.0, 0.0);
 			SetModelAnime(SPE, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(SZK, 0, 20);
-			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -60.0, 1);
+			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -60.0, 0.0);
 			SetModelAnime(SZK, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(MAC, 0, 20);
-			SetModelMat(MAC, 0, 0.0, 0.0, 0.0, -40.0, 1);
+			SetModelMat(MAC, 0, 0.0, 0.0, 0.0, -40.0, 0.0);
 			SetModelAnime(MAC, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Rudolf2, 0, 20);
-			SetModelMat(Rudolf2, 0, 0.0, 0.0, 0.0, -20.0, 1);
+			SetModelMat(Rudolf2, 0, 0.0, 0.0, 0.0, -20.0, 0.0);
 			SetModelAnime(Rudolf2, 0, 2, TRUE, 1.0, 0);
 
 			SetDrawModel(Teio, 0, 20);
-			SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0);
+			SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			SetModelAnime(Teio, 0, 2, TRUE, 1.0, 0);
 			
 			SetNextResetPhysics();
