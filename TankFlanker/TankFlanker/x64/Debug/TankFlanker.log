@@ -109,24 +109,7 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1623): warning C4
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2560): warning C4267: '=': 'size_t' から '_Ty' に変換しました。データが失われているかもしれません。
-          with
-          [
-              _Ty=int
-          ]
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2590): warning C4267: '引数': 'size_t' から 'const int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2616): warning C4267: '=': 'size_t' から '_Ty' に変換しました。データが失われているかもしれません。
-          with
-          [
-              _Ty=int
-          ]
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2618): warning C4267: '=': 'size_t' から '_Ty' に変換しました。データが失われているかもしれません。
-          with
-          [
-              _Ty=int
-          ]
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2572): warning C4189: 'length': ローカル変数が初期化されましたが、参照されていません
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2584): warning C4189: 'OLD': ローカル変数が初期化されましたが、参照されていません
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(2795): warning C4189: 'p': ローカル変数が初期化されましたが、参照されていません
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(78): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(81): warning C4505: 'Segment_Point_MinLen': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_ref.h(109): warning C4505: 'WStringToString': 参照されていないローカル関数は削除されました。

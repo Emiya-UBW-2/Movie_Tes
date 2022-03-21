@@ -297,12 +297,6 @@ namespace FPS_n2 {
 			class ModelControl {
 			public:
 				class Model {
-				private:
-					void Sel_AnimNum(MV1&model, int sel) noexcept {
-						for (auto& anim_t : model.get_anime()) {
-							model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? 1.f : 0.f;
-						}
-					}
 				public:
 					bool isBGModel = false;
 					bool IsNearShadow = true;
@@ -345,15 +339,29 @@ namespace FPS_n2 {
 					float Yrad2_p;
 
 					VECTOR_ref Aim_p;
+					VECTOR_ref OLDPos_p;
+					VECTOR_ref OLDVec_p;
+					float dist;
+					float OLDDist;
 					float pos_z_p;
 					float Yradaddbuf_p;
 					float Yradadd_p;
 					float Zrad1buf_p;
 					float animspd;
+					float xposition = 0.f;
 
-					std::array<int, 1> GuideNum;
+					VECTOR_ref footEffPos;
+					bool footflag = true;
+					bool footok = false;
+					float foottime = 0.f;
+					int footLR{ 0 };
+
+					std::array<int, 2> GuideNum;
 
 					bool canUpdate = true;
+
+					int prevID = -1;
+					float AnimChange = 0.f;
 
 					Model(void) noexcept {
 						isDraw = false;
@@ -391,8 +399,22 @@ namespace FPS_n2 {
 						return VECTOR_ref::zero();
 					}
 
-					void UpdateAnim(int ID, bool isloop, float speed) noexcept {
-						Sel_AnimNum(this->obj, ID);
+					static void Sel_AnimNum(MV1&model, int sel,float pers) noexcept {
+						for (auto& anim_t : model.get_anime()) {
+							model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? pers : (1.f- pers);
+						}
+					}
+					void ChangeAnim(int ID, bool isloop, float speed, bool isfastchange) noexcept {
+						if (isfastchange) {
+							AnimChange = 1.f;
+						}
+						if (prevID != ID) {
+							AnimChange = 1.f;
+							this->obj.get_anime(ID).time = this->obj.get_anime(prevID).time;
+						}
+						prevID = ID;
+						Sel_AnimNum(this->obj, ID, AnimChange);
+						AnimChange = std::clamp(AnimChange + 1.f / FPS, 0.f, 1.f);
 						if (ID < this->obj.get_anime().size()) {
 							this->obj.get_anime(ID).Update(isloop, speed);
 						}
@@ -530,7 +552,7 @@ namespace FPS_n2 {
 								}
 								//アニメーション動作
 								if (inf.animsel >= 0) {
-									m.UpdateAnim(inf.animsel, inf.isloop, inf.animspeed * m.animspd * GameSpeed);
+									m.ChangeAnim(inf.animsel, inf.isloop, inf.animspeed * m.animspd * GameSpeed, isFirstLoop && m.Cutinfo.isFirstCut);
 								}
 							}
 							if (tt) {
@@ -596,6 +618,8 @@ namespace FPS_n2 {
 							m.AddFrame("左目");
 							m.AddFrame("右人指２");
 							m.AddFrame("右ひざ");
+							m.AddFrame("右つま先");
+							m.AddFrame("左つま先");
 							MV1::SetAnime(&(m.obj), m.obj);
 						}
 					}
@@ -1273,6 +1297,9 @@ namespace FPS_n2 {
 
 			std::string MAP = "data/model/map/model.mv1";
 			std::vector<std::string> NAMES;
+
+			int camsel = 0;
+			switchs ChangeCamSel;
 		private:
 			//
 			LoadScriptClass LSClass;		//スクリプト読み込み
@@ -1343,9 +1370,6 @@ namespace FPS_n2 {
 			//
 			int fog[3]{ -1,-1,-1 };
 			float fog_range[2]{ -1.f,-1.f };
-			//後で消す
-			float camxb_15 = 0.f;
-			float camupxb_18 = 0.f;
 			//
 			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
 		public:
@@ -2537,8 +2561,9 @@ namespace FPS_n2 {
 							{
 								auto dist = (models.Get(Teio, 0)->pos_p - m_CutInfo[m_Counter].Aim_camera.campos).size() + 50.f;
 
-								easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f/ dist*45.f,5.f,50.f)), 0.9f);
-								easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, std::max(2.f, dist / 10.f), 0.9f);
+								//printfDx("FOV = %5.2f", 100.f / dist * 45.f);
+								easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f / dist * 45.f, 1.f, 50.f)), 0.9f);
+								easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, std::max(2.f, dist / 3.f), 0.9f);
 								easing_set(&m_CutInfo[m_Counter].Aim_camera.far_, dist, 0.9f);
 							}
 							{
@@ -2549,6 +2574,7 @@ namespace FPS_n2 {
 									if (isFirstLoop) {
 										if (inf.usemat) {
 											m->pos_p = VECTOR_ref::vget(0.f, 0.f, xof);
+											m->xposition = xof;
 											m->Yrad1_p = inf.Yrad1_p;
 											m->Zrad1_p = 0.f;
 											m->Yrad2_p = inf.Yrad2_p;
@@ -2557,7 +2583,7 @@ namespace FPS_n2 {
 										m->animspd = 0.f;
 										m->GuideNum[0] = GudeStart;
 										for (int i = 1; i < m->GuideNum.size(); i++) {
-											if (Guide.frame_child_num(m->GuideNum[i]) >= 0) { m->GuideNum[i] = Guide.frame_child(m->GuideNum[i - 1], 0); }
+											if (Guide.frame_child_num(m->GuideNum[i]) > 0) { m->GuideNum[i] = (int)Guide.frame_child(m->GuideNum[i - 1], 0); }
 											else {
 												m->GuideNum[i] = -1;
 												break;
@@ -2569,7 +2595,7 @@ namespace FPS_n2 {
 										m->Aim_p = Guide.frame(m->GuideNum[0]);
 										auto vec = (m->Aim_p - m->pos_p);
 										vec.y(0.f);
-										float length = vec.size();
+										//float length = vec.size();
 										vec = vec.Norm();
 										auto vec2 = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
 										vec2.y(0.f);
@@ -2579,89 +2605,232 @@ namespace FPS_n2 {
 										m->Yradaddbuf_p = radn;
 										m->Yradadd_p = m->Yradaddbuf_p;
 										m->Zrad1buf_p = 0.f;
+
+										m->OLDPos_p = m->pos_p;
+										m->OLDVec_p = m->Aim_p - m->OLDPos_p;
+										m->OLDVec_p.y(0);
+										m->OLDDist = m->OLDVec_p.size();
+										m->OLDVec_p = m->OLDVec_p.Norm();
+										m->dist = 1000000.f;
 									}
 									else {
-										float OLD = m->Yradadd_p;
-										VECTOR_ref Aim;
-										int aimcnt = 0;
-										for (int i = 0; i < m->GuideNum.size(); i++) {
-											if (m->GuideNum[i] >= 0) {
-												auto pb = Guide.frame(m->GuideNum[i]);
-												auto zvb = (Guide.frame(Guide.frame_child(m->GuideNum[i], 0)) - pb).Norm();
-												auto xvb = zvb.cross(VECTOR_ref::up());
-												Aim += pb + xvb * (50.f + xof); aimcnt++;
-											}
-										}
-										m->Aim_p = Aim * (1.f / (float)aimcnt);
-
-
-										auto vec = m->Aim_p - m->pos_p;
-										vec.y(0.f);
-
-										float length = vec.size();
-
-										vec = vec.Norm();
-										auto vec2 = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
-										vec2.y(0.f);
-										vec2 = vec2.Norm();
-										
-										float cosn = vec2.cross(vec).y();
-										float radn = std::clamp(-rad2deg(cosn), -45.f, 45.f);
-										easing_set(&m->Yradaddbuf_p, radn, 0.5f);
-										easing_set(&m->Yradadd_p, m->Yradaddbuf_p, 0.5f);
-
-										if (Guide.frame_child_num(m->GuideNum[0]) >= 0) {
-											//
-											if (length <= 10.f) {
-												m->GuideNum[0] = Guide.frame_child(m->GuideNum[0], 0);
-												for (int i = 1; i < m->GuideNum.size(); i++) {
-													if (Guide.frame_child_num(m->GuideNum[i]) >= 0) { m->GuideNum[i] = Guide.frame_child(m->GuideNum[i - 1], 0); }
-													else {
-														m->GuideNum[i] = -1;
-														break;
+										if (m->GuideNum[0] >= 0) {
+											{
+												VECTOR_ref Aim;
+												int aimcnt = 0;
+												for (int i = 0; i < m->GuideNum.size(); i++) {
+													if (m->GuideNum[i] >= 0) {
+														auto pb = Guide.frame(m->GuideNum[i]);
+														auto zvb = (Guide.frame((int)Guide.frame_child(m->GuideNum[i], 0)) - pb).Norm();
+														auto xvb = zvb.cross(VECTOR_ref::up());
+														Aim += pb + xvb * (50.f + m->xposition); aimcnt++;
 													}
 												}
-												m->Zrad1buf_p = -radn * 50.f;
+												if (aimcnt > 0) {
+													m->Aim_p = Aim * (1.f / (float)aimcnt);
+												}
 											}
-											//
+
+											auto vec = m->Aim_p - m->pos_p;
+											vec.y(0.f);
+
+											float length = vec.size();
+
+											vec = vec.Norm();
+
+
+											float per_s = std::clamp(((length - 100.f) / m->dist) / 10.f, 0.0f, 1.0f);//0=>1
+											if (m->OLDDist > 1000.f) {
+												per_s = std::clamp(((length - 500.f) / m->dist) / 20.f, 0.0f, 1.0f);
+											}
+
+											//printfDx("PER = %5.2f(%5.2f)\n", per_s, ((length - 100.f) / m->dist) / 10.f);
+											vec = vec * (1.f - per_s) + m->OLDVec_p * per_s;
+
+											auto vec2 = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
+											vec2.y(0.f);
+											vec2 = vec2.Norm();
+
+											float cosn = vec2.cross(vec).y();
+											float radn = std::clamp(-rad2deg(cosn), -45.f, 45.f);
+											//printfDx("m->OLDDist = %f\n", m->OLDDist);
+											if (m->OLDDist > 1000.f) {
+												easing_set(&m->Yradaddbuf_p, radn, 0.f);
+												easing_set(&m->Yradadd_p, m->Yradaddbuf_p, 0.f);
+											}
+											else {
+												easing_set(&m->Yradaddbuf_p, radn, 0.5f);
+												easing_set(&m->Yradadd_p, m->Yradaddbuf_p, 0.5f);
+											}
+											if (Guide.frame_child_num(m->GuideNum[0]) > 0) {
+												//
+												if (length <= 20.f) {
+													m->GuideNum[0] = (int)Guide.frame_child(m->GuideNum[0], 0);
+													for (int i = 1; i < m->GuideNum.size(); i++) {
+														if (Guide.frame_child_num(m->GuideNum[i]) > 0) { m->GuideNum[i] = (int)Guide.frame_child(m->GuideNum[i - 1], 0); }
+														else {
+															m->GuideNum[i] = -1;
+															break;
+														}
+													}
+													//
+													auto aa = m->Aim_p - m->pos_p;
+													aa.y(0);
+													m->dist = aa.size();
+													//
+													{
+														VECTOR_ref Aim;
+														int aimcnt = 0;
+														for (int i = 0; i < m->GuideNum.size(); i++) {
+															if (m->GuideNum[i] >= 0) {
+																auto pb = Guide.frame(m->GuideNum[i]);
+																auto zvb = (Guide.frame((int)Guide.frame_child(m->GuideNum[i], 0)) - pb).Norm();
+																auto xvb = zvb.cross(VECTOR_ref::up());
+																Aim += pb + xvb * (50.f + m->xposition); aimcnt++;
+															}
+														}
+														if (aimcnt > 0) {
+															m->Aim_p = Aim * (1.f / (float)aimcnt);
+														}
+													}
+													//m->Zrad1buf_p = -radn * 1.f;
+													m->OLDVec_p = m->Aim_p - m->OLDPos_p;
+													m->OLDVec_p.y(0);
+													m->OLDDist = m->OLDVec_p.size();
+													m->OLDVec_p = m->OLDVec_p.Norm();
+													m->OLDPos_p = m->pos_p;
+
+												}
+												//
+											}
+											else {
+												//
+												if (length <= 20.f) {
+													m->GuideNum[0] = -1;
+													m->Yradadd_p = 0.f;
+												}
+												//
+											}
 										}
 										else {
-											//
-											{
-
-											}
-											//
+											m->Yradadd_p = 0.f;
 										}
 
 										m->Yrad1_p += m->Yradadd_p;
 
-										easing_set(&m->Zrad1_p, m->Zrad1buf_p, 0.95f);
-
+										easing_set(&m->Zrad1_p, std::clamp(m->Zrad1buf_p, -10.f, 10.f), 0.95f);
+										easing_set(&m->Zrad1buf_p, m->Yradaddbuf_p*50.f, 0.95f);
 
 										m->pos_p += MATRIX_ref::Vtrans(VECTOR_ref::vget(0, 0, m->pos_z_p), MATRIX_ref::RotY(deg2rad(m->Yrad1_p)))*(1.f / FPS * GameSpeed);
 
-										m->mat_p = 
-											MATRIX_ref::RotY(deg2rad(m->Yrad1_p))
-											* MATRIX_ref::RotAxis(MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec(), deg2rad(m->Zrad1_p))
-											* MATRIX_ref::Mtrans(m->pos_p) * MATRIX_ref::RotY(deg2rad(m->Yrad2_p));
-										
-										if (m->canUpdate) {
-											m->obj.SetMatrix(m->mat_p);
-											//MV1SetPhysicsWorldGravity(m->obj.get(), VECTOR_ref::vget(0, 0, 1.f).get());
-										}
-
 										auto total = -19.4f * 12.5f;
-										if (m->pos_z_p >= total) { m->pos_z_p += -0.6f; }
-
-										//m->pos_z_p = total;
-										m->animspd = m->pos_z_p / total;
+										if (m->GuideNum[0] >= 0) {
+											if (m->pos_z_p >= total + GetRandf(1.0f*12.5f)) { m->pos_z_p += -0.6f; }
+											else { m->pos_z_p -= -0.6f; }
+										}
+										else {
+											if (m->pos_z_p <= 0.f) { m->pos_z_p -= -1.2f; }
+										}
+										//anim
+										{
+											if (m->pos_z_p <= total * 2 / 3) {
+												inf.animsel = 2;
+											}
+											else  if (m->pos_z_p <= total / 3) {
+												inf.animsel = 1;
+											}
+											else  if (m->pos_z_p <= 0) {
+												inf.animsel = 0;
+											}
+										}
+										m->animspd = m->pos_z_p / total + GetRandf(0.05f);
+										//debug
+										if (m->footflag) {
+											if (m->footLR == 0) {
+												auto f = m->GetFrame("右つま先");
+												if (f.y() - m->pos_p.y() <= 0.1f) {
+													m->footEffPos = f;
+													m->footLR = 1;
+													m->footflag = false;
+													m->footok = true;
+												}
+											}
+											else {
+												auto f = m->GetFrame("左つま先");
+												if (f.y() - m->pos_p.y() <= 0.1f) {
+													m->footEffPos = f;
+													m->footLR = 0;
+													m->footflag = false;
+													m->footok = true;
+												}
+											}
+										}
+										if (m->xposition > xof + GetRandf(500.f)) {
+											m->xposition = std::max(m->xposition - 10.f / FPS * GameSpeed, 0.f);
+										}
+										else {
+											m->xposition += 10.f / FPS * GameSpeed;
+										}
 									}
-
 									xof += 12.f;
-
 								}
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									if (!m->footflag) {
+										if (Effect_UseControl::Check_FootEffectCnt() <= 2) {
+											if (m->footok) {
+												m->footok = false;
+												Effect_UseControl::Set_FootEffect(m->footEffPos, VECTOR_ref::up(), 5.f);
+												m->foottime = 0.5f;
+											}
+										}
+										if (!m->footok) {
+											if (m->foottime <= 0.f) { m->footflag = true; }
+											m->foottime -= 1.f / FPS * GameSpeed;
+										}
+									}
+								}
+								//当たり判定
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									for (auto& n2 : NAMES) {
+										auto* m2 = models.Get(n2, 0);
+										auto vec2 = (m2->pos_p - m->pos_p);
+										if (vec2.size() <= 15.f) {
+											auto zvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
+											auto xvb = zvb.cross(VECTOR_ref::up());
+
+											vec2 = vec2.Norm();
+											auto p = -zvb.cross(vec2).y();
+
+											vec2 = vec2 * 5.f*(1.f / FPS * GameSpeed);
+											m->pos_p -= vec2 / 2.f;
+											m2->pos_p += vec2 / 2.f;
+											break;
+										}
+									}
+								}
+								//
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									m->mat_p =
+										MATRIX_ref::RotY(deg2rad(m->Yrad1_p))
+										* MATRIX_ref::RotAxis(MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec(), deg2rad(m->Zrad1_p))
+										* MATRIX_ref::Mtrans(m->pos_p) * MATRIX_ref::RotY(deg2rad(m->Yrad2_p));
+
+									if (m->canUpdate) {
+										m->obj.SetMatrix(m->mat_p);
+										//MV1SetPhysicsWorldGravity(m->obj.get(), VECTOR_ref::vget(0, 0, 1.f).get());
+									}
+								}
+								//
 							}
 							//
+							ChangeCamSel.GetInput(CheckHitKey(KEY_INPUT_DOWN) != 0);
+							if (ChangeCamSel.trigger()) {
+								m_CutInfoUpdate[m_Counter].Forcus.Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+								++camsel %= (int)(NAMES.size());
+							}
 						}
 						SEL++;
 					}
@@ -2894,7 +3063,7 @@ namespace FPS_n2 {
 					DrawLine3D((pos + VECTOR_ref::up()*5.f).get(), (pos2 + VECTOR_ref::up()*5.f).get(), GetColor(0, 0, 255));
 
 					pos = Guide.frame(m->GuideNum[0]);
-					DrawSphere3D((pos + VECTOR_ref::up()*20.f).get(), 5.f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+					DrawSphere3D((pos + VECTOR_ref::up()*20.f).get(), 1.f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
 				}
 			}
 			//
