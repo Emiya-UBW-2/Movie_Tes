@@ -147,13 +147,14 @@ namespace FPS_n2 {
 	//エフェクト利用コントロール
 	class Effect_UseControl {
 		std::array<EffectS, int(Effect::effects)> effcs;	/*エフェクト*/
-		std::array<EffectS, 64> effcs_G;					/*エフェクト*/
+		std::array<EffectS, 256> effcs_G;					/*エフェクト*/
 		int G_cnt = 0;
 	public:
 		//
 		void Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
+			this->effcs_G[this->G_cnt].Stop();
 			this->effcs_G[this->G_cnt].Set(pos_t, nomal_t, scale);
-			++this->G_cnt %= 64;
+			++this->G_cnt %= 256;
 		}
 		const auto Check_FootEffectCnt() noexcept {
 			int cnt = 0;

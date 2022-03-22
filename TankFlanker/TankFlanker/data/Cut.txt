@@ -45,8 +45,8 @@
 	//0
 		SetCut(300.0);
 		SetCamForcus(Teio, 0, NECK, 0.0, 0.0, 0.0);
-		//SetCampos_Attach(1, 90.0, 20.0 , 0.0);
-		SetCampos_NoneRad( 2394.0,100,0);
+		//SetCampos_Attach(1, 90.0, 0.0 , 0.0);
+		SetCampos_NoneRad( 2300.0,100,0);
 		SetCamInfo(15, 2.0, 100.0, 0.0);
 
 		SetUpdateEnable();
@@ -59,7 +59,7 @@
 		//SetVectorUpdateCampos(0.0, 0.0, -60.0);
 
 			SetDrawModel(MAP, 0, 6);
-			SetModelMat(MAP, 0, 0, 0.0, 0.0, -2394.0, 0.0);
+			SetModelMat(MAP, 0, 0, 0.0, 0.0, -2300.0, 0.0);
 			SetDrawModel(SKY, 0, 6);
 			SetDrawModel(SUN, 0, 6);
 

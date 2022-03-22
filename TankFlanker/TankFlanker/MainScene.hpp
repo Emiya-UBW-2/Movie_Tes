@@ -360,6 +360,10 @@ namespace FPS_n2 {
 
 					bool canUpdate = true;
 
+					bool Lookok = false;
+					bool LookLR = false;
+					float Looktime = 0.f;
+
 					int prevID = -1;
 					float AnimChange = 0.f;
 
@@ -2557,15 +2561,6 @@ namespace FPS_n2 {
 									}
 								}
 							}
-							//teio
-							{
-								auto dist = (models.Get(Teio, 0)->pos_p - m_CutInfo[m_Counter].Aim_camera.campos).size() + 50.f;
-
-								//printfDx("FOV = %5.2f", 100.f / dist * 45.f);
-								easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f / dist * 45.f, 1.f, 50.f)), 0.9f);
-								easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, std::max(2.f, dist / 3.f), 0.9f);
-								easing_set(&m_CutInfo[m_Counter].Aim_camera.far_, dist, 0.9f);
-							}
 							{
 								float xof = 0.f;
 								for (auto& n : NAMES) {
@@ -2733,35 +2728,39 @@ namespace FPS_n2 {
 										}
 										//anim
 										{
-											if (m->pos_z_p <= total * 2 / 3) {
-												inf.animsel = 2;
-											}
-											else  if (m->pos_z_p <= total / 3) {
-												inf.animsel = 1;
-											}
-											else  if (m->pos_z_p <= 0) {
-												inf.animsel = 0;
+											if (inf.animsel <= 2) {
+												if (m->pos_z_p <= total * 2 / 3) {
+													inf.animsel = 2;
+												}
+												else  if (m->pos_z_p <= total / 3) {
+													inf.animsel = 1;
+												}
+												else  if (m->pos_z_p <= 0) {
+													inf.animsel = 0;
+												}
 											}
 										}
 										m->animspd = m->pos_z_p / total + GetRandf(0.05f);
 										//debug
 										if (m->footflag) {
-											if (m->footLR == 0) {
-												auto f = m->GetFrame("‰E‚Â‚Üæ");
-												if (f.y() - m->pos_p.y() <= 0.1f) {
-													m->footEffPos = f;
-													m->footLR = 1;
-													m->footflag = false;
-													m->footok = true;
+											if (!m->isOutFrustum) {
+												if (m->footLR == 0) {
+													auto f = m->GetFrame("‰E‚Â‚Üæ");
+													if (f.y() - m->pos_p.y() <= 0.1f) {
+														m->footEffPos = f;
+														m->footLR = 1;
+														m->footflag = false;
+														m->footok = true;
+													}
 												}
-											}
-											else {
-												auto f = m->GetFrame("¶‚Â‚Üæ");
-												if (f.y() - m->pos_p.y() <= 0.1f) {
-													m->footEffPos = f;
-													m->footLR = 0;
-													m->footflag = false;
-													m->footok = true;
+												else {
+													auto f = m->GetFrame("¶‚Â‚Üæ");
+													if (f.y() - m->pos_p.y() <= 0.1f) {
+														m->footEffPos = f;
+														m->footLR = 0;
+														m->footflag = false;
+														m->footok = true;
+													}
 												}
 											}
 										}
@@ -2772,7 +2771,7 @@ namespace FPS_n2 {
 											m->xposition += 10.f / FPS * GameSpeed;
 										}
 									}
-									xof += 12.f;
+									xof += 16.f;
 								}
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
@@ -2781,7 +2780,7 @@ namespace FPS_n2 {
 											if (m->footok) {
 												m->footok = false;
 												Effect_UseControl::Set_FootEffect(m->footEffPos, VECTOR_ref::up(), 5.f);
-												m->foottime = 0.5f;
+												m->foottime = 0.1f;
 											}
 										}
 										if (!m->footok) {
@@ -2793,15 +2792,16 @@ namespace FPS_n2 {
 								//“–‚½‚è”»’è
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
+									auto& inf = m->CutDetail[m->Cutinfo.nowcut];
+									auto zvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
 									for (auto& n2 : NAMES) {
 										auto* m2 = models.Get(n2, 0);
 										auto vec2 = (m2->pos_p - m->pos_p);
 										if (vec2.size() <= 15.f) {
-											auto zvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
-											auto xvb = zvb.cross(VECTOR_ref::up());
+											//auto xvb = zvb.cross(VECTOR_ref::up());
 
-											vec2 = vec2.Norm();
-											auto p = -zvb.cross(vec2).y();
+											//vec2 = vec2.Norm();
+											//auto p = -zvb.cross(vec2).y();
 
 											vec2 = vec2 * 5.f*(1.f / FPS * GameSpeed);
 											m->pos_p -= vec2 / 2.f;
@@ -2809,8 +2809,48 @@ namespace FPS_n2 {
 											break;
 										}
 									}
+									for (auto& n2 : NAMES) {
+										auto* m2 = models.Get(n2, 0);
+										auto vec2 = (m2->pos_p - m->pos_p);
+										//
+										if (!m->Lookok && inf.animsel) {
+											if (vec2.size() <= 60.f) {
+												vec2 = vec2.Norm();
+												auto LR = -zvb.cross(vec2).y();
+												auto FR = zvb.dot(vec2);
+												if (FR < 0) {
+													m->LookLR = LR > 0;
+													m->Lookok = true;
+												}
+											}
+										}
+										//
+									}
+									//
+									if (m->Lookok) {
+										if (m->Looktime == 0.f) {
+											if (m->obj.get_anime(inf.animsel).time == 0.0f) {
+												m->Looktime = (float)(10 + GetRand(10));
+												inf.animsel = m->LookLR ? 4 : 3;
+											}
+										}
+										else {
+											if (inf.animsel >= 3) {
+												if (m->obj.get_anime(inf.animsel).time == 0.0f) {
+													inf.animsel = 2;
+												}
+											}
+											m->Looktime -= 1.f / FPS * GameSpeed;
+											if (m->Looktime < 0.f) {
+												m->Looktime = 0.f;
+												m->Lookok = false;
+											}
+										}
+									}
 								}
 								//
+								float camto = 10.f;
+								auto camv = m_CutInfo[m_Counter].Aim_camera.camvec - m_CutInfo[m_Counter].Aim_camera.campos;
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
 									m->mat_p =
@@ -2822,6 +2862,26 @@ namespace FPS_n2 {
 										m->obj.SetMatrix(m->mat_p);
 										//MV1SetPhysicsWorldGravity(m->obj.get(), VECTOR_ref::vget(0, 0, 1.f).get());
 									}
+									//
+									{
+										auto camp = m->pos_p - m_CutInfo[m_Counter].Aim_camera.campos;
+										auto dist = (camp).size() + 50.f;
+
+										if (camp.dot(camp) > 0.f) {
+											if (dist > camto) {
+												camto = dist;
+											}
+										}
+									}
+								}
+								//cam
+								{
+									auto dist = (models.Get(NAMES[camsel], 0)->pos_p - m_CutInfo[m_Counter].Aim_camera.campos).size() + 50.f;
+									//printfDx("FOV = %5.2f", 100.f / dist * 45.f);
+									easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f / dist * 45.f, 1.f, 50.f)), 0.9f);
+
+									easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, std::clamp(camto / 4.f, 2.f, 1000.f), 0.9f);
+									easing_set(&m_CutInfo[m_Counter].Aim_camera.far_, camto, 0.9f);
 								}
 								//
 							}
