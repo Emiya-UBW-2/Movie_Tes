@@ -364,6 +364,13 @@ namespace FPS_n2 {
 					bool LookLR = false;
 					float Looktime = 0.f;
 
+					bool Turbook = false;
+					float Turbotime = 0.f;
+					float TurboSpeed = 0.f;
+
+					std::string NearID = "";
+					VECTOR_ref Nearest;
+
 					int prevID = -1;
 					float AnimChange = 0.f;
 
@@ -2720,7 +2727,7 @@ namespace FPS_n2 {
 
 										auto total = -19.4f * 12.5f;
 										if (m->GuideNum[0] >= 0) {
-											if (m->pos_z_p >= total + GetRandf(1.0f*12.5f)) { m->pos_z_p += -0.6f; }
+											if (m->pos_z_p >= total + GetRandf(1.0f*12.5f) - m->TurboSpeed) { m->pos_z_p += -0.6f; }
 											else { m->pos_z_p -= -0.6f; }
 										}
 										else {
@@ -2792,30 +2799,38 @@ namespace FPS_n2 {
 								//当たり判定
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
-									auto& inf = m->CutDetail[m->Cutinfo.nowcut];
-									auto zvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
+									m->Nearest = VECTOR_ref::up()*10000.f;
 									for (auto& n2 : NAMES) {
 										auto* m2 = models.Get(n2, 0);
-										auto vec2 = (m2->pos_p - m->pos_p);
-										if (vec2.size() <= 15.f) {
-											//auto xvb = zvb.cross(VECTOR_ref::up());
-
-											//vec2 = vec2.Norm();
-											//auto p = -zvb.cross(vec2).y();
-
-											vec2 = vec2 * 5.f*(1.f / FPS * GameSpeed);
-											m->pos_p -= vec2 / 2.f;
-											m2->pos_p += vec2 / 2.f;
-											break;
+										if (n != n2) {
+											auto vec = m2->pos_p - m->pos_p;
+											if (vec.size() > m->Nearest.size()) {
+												m->NearID = n2;
+												m->Nearest = vec;
+											}
 										}
 									}
-									for (auto& n2 : NAMES) {
-										auto* m2 = models.Get(n2, 0);
-										auto vec2 = (m2->pos_p - m->pos_p);
-										//
-										if (!m->Lookok && inf.animsel) {
-											if (vec2.size() <= 60.f) {
-												vec2 = vec2.Norm();
+								}
+
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									auto& inf = m->CutDetail[m->Cutinfo.nowcut];
+									auto zvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
+									//当たり判定
+									if (m->Nearest.size() <= 15.f) {
+										auto vec2 = m->Nearest.Norm() * 5.f*(1.f / FPS * GameSpeed);
+										m->pos_p -= vec2 / 2.f;
+										models.Get(m->NearID, 0)->pos_p += vec2 / 2.f;
+									}
+									//ターボ開始
+									if (!m->Turbook && inf.animsel == 2) {
+										m->Turbook = true;
+									}
+									//ターボしてないとき振り向き判定
+									if (!m->Turbook) {
+										if (!m->Lookok && inf.animsel == 2) {
+											if (m->Nearest.size() <= 60.f) {
+												auto vec2 = m->Nearest.Norm();
 												auto LR = -zvb.cross(vec2).y();
 												auto FR = zvb.dot(vec2);
 												if (FR < 0) {
@@ -2824,9 +2839,8 @@ namespace FPS_n2 {
 												}
 											}
 										}
-										//
 									}
-									//
+									//振り向き
 									if (m->Lookok) {
 										if (m->Looktime == 0.f) {
 											if (m->obj.get_anime(inf.animsel).time == 0.0f) {
@@ -2835,7 +2849,7 @@ namespace FPS_n2 {
 											}
 										}
 										else {
-											if (inf.animsel >= 3) {
+											if (inf.animsel == 3 || inf.animsel == 4) {
 												if (m->obj.get_anime(inf.animsel).time == 0.0f) {
 													inf.animsel = 2;
 												}
@@ -2847,41 +2861,88 @@ namespace FPS_n2 {
 											}
 										}
 									}
+									//ターボ
+									if (m->Turbook) {
+										if (m->Turbotime == 0.f) {
+											if (m->obj.get_anime(inf.animsel).time == 0.0f) {
+												m->Turbotime = (float)(20 + GetRand(20));
+												inf.animsel = 5;
+
+											}
+										}
+										else {
+											if (inf.animsel == 5) {
+												if (m->obj.get_anime(inf.animsel).time == 0.0f) {
+													inf.animsel = 2;
+												}
+											}
+											m->Turbotime -= 1.f / FPS * GameSpeed;
+											if (m->Turbotime < 0.f) {
+												m->Turbotime = 0.f;
+												m->Turbook = false;
+											}
+
+											easing_set(&m->TurboSpeed, m->Turbotime / 10.f, 0.9f);
+										}
+									}
+									//
 								}
-								//
-								float camto = 10.f;
-								auto camv = m_CutInfo[m_Counter].Aim_camera.camvec - m_CutInfo[m_Counter].Aim_camera.campos;
+								//座標の反映
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
 									m->mat_p =
 										MATRIX_ref::RotY(deg2rad(m->Yrad1_p))
 										* MATRIX_ref::RotAxis(MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec(), deg2rad(m->Zrad1_p))
 										* MATRIX_ref::Mtrans(m->pos_p) * MATRIX_ref::RotY(deg2rad(m->Yrad2_p));
-
 									if (m->canUpdate) {
 										m->obj.SetMatrix(m->mat_p);
-										//MV1SetPhysicsWorldGravity(m->obj.get(), VECTOR_ref::vget(0, 0, 1.f).get());
 									}
-									//
-									{
-										auto camp = m->pos_p - m_CutInfo[m_Counter].Aim_camera.campos;
+								}
+								//
+								float cam_near = 100000.f;
+								float cam_far = 10.f;
+								auto camv = m_CutInfo[m_Counter].Aim_camera.camvec - m_CutInfo[m_Counter].Aim_camera.campos;
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									auto camp = m->pos_p - m_CutInfo[m_Counter].Aim_camera.campos;
+									if (camv.dot(camp) > 0.f) {//カメラの向き
 										auto dist = (camp).size() + 50.f;
-
-										if (camp.dot(camp) > 0.f) {
-											if (dist > camto) {
-												camto = dist;
-											}
+										if (dist > cam_far) {
+											cam_far = dist;
+										}
+										if (dist < cam_near) {
+											cam_near = dist;
 										}
 									}
 								}
+								cam_far += 50.f;
+								cam_near = std::max(cam_near - 100.f, 2.f);
 								//cam
 								{
 									auto dist = (models.Get(NAMES[camsel], 0)->pos_p - m_CutInfo[m_Counter].Aim_camera.campos).size() + 50.f;
 									//printfDx("FOV = %5.2f", 100.f / dist * 45.f);
 									easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f / dist * 45.f, 1.f, 50.f)), 0.9f);
 
-									easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, std::clamp(camto / 4.f, 2.f, 1000.f), 0.9f);
-									easing_set(&m_CutInfo[m_Counter].Aim_camera.far_, camto, 0.9f);
+									if (cam_far > 6000.f) {
+										cam_near = std::clamp(cam_far / 2.f, 2.f, 3000.f);
+									}
+									else if (cam_far > 4000.f) {
+										cam_near = std::clamp(cam_far / 3.f, 2.f, 2000.f);
+									}
+									else if (cam_far > 2000.f) {
+										cam_near = std::clamp(cam_far / 6.f, 2.f, 2000.f);
+									}
+									else if (cam_far > 1000.f) {
+										cam_near = std::clamp(cam_far / 7.f, 2.f, 2000.f);
+									}
+									else {
+										cam_near = std::min(cam_near, std::clamp(cam_far / 7.f, 2.f, 1000.f));
+									}
+									printfDx("FAR  = %.2f\n", cam_far);
+									printfDx("NEAR = %.2f\n", cam_near);
+
+									easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, cam_near, 0.5f);
+									easing_set(&m_CutInfo[m_Counter].Aim_camera.far_, cam_far, 0.5f);
 								}
 								//
 							}
