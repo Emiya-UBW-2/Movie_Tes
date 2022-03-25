@@ -45,8 +45,8 @@
 	//0
 		SetCut(300.0);
 		SetCamForcus(Teio, 0, NECK, 0.0, 0.0, 0.0);
-		//SetCampos_Attach(1, 90.0, 0.0 , 0.0);
-		SetCampos_NoneRad( 2300.0,100,0);
+		SetCampos_Attach(1, 90.0, 20.0 , 0.0);
+		//SetCampos_NoneRad( 2300.0,100,0);
 		SetCamInfo(15, 2.0, 100.0, 0.0);
 
 		SetUpdateEnable();

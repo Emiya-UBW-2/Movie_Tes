@@ -410,9 +410,9 @@ namespace FPS_n2 {
 						return VECTOR_ref::zero();
 					}
 
-					static void Sel_AnimNum(MV1&model, int sel,float pers) noexcept {
+					static void Sel_AnimNum(MV1&model, int sel, float pers) noexcept {
 						for (auto& anim_t : model.get_anime()) {
-							model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? pers : (1.f- pers);
+							model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? pers : (1.f - pers);
 						}
 					}
 					void ChangeAnim(int ID, bool isloop, float speed, bool isfastchange) noexcept {
@@ -466,7 +466,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					void SetPhysics(bool isReset,float x) noexcept {
+					void SetPhysics(bool isReset, float x) noexcept {
 						if (this->isDraw) {
 							if (isReset) {
 								this->obj.PhysicsResetState();
@@ -591,7 +591,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						for (size_t i = 0; i < Max; i ++) {
+						for (size_t i = 0; i < Max; i++) {
 							auto& m = model[i];
 							if (m.isOutFrustum) {
 								if (!m.isFarPhysics) {
@@ -1421,22 +1421,16 @@ namespace FPS_n2 {
 					}
 
 					/*視界外か否かを判断*/
-					void Check_CameraViewClip(const VECTOR_ref& pos) noexcept {
-						float size = 24.f;
-						const int grass_x = 30;					/*grassの数*/
-						//*
-						VECTOR_ref min = pos - VECTOR_ref::vget(grass_x*size*0.5f, 0.f, grass_x*size*0.5f);
-						VECTOR_ref max = pos + VECTOR_ref::vget(grass_x*size*0.5f, 2.f, grass_x*size*0.5f);
+					void Check_CameraViewClip(const VECTOR_ref& mini, const VECTOR_ref& maxi) noexcept {
+						VECTOR_ref min = mini;
+						VECTOR_ref max = maxi;
 						min.y(-5.f);
 						max.y(5.f);
-						//*/
 						this->canlook = true;
-						//*
 						if (CheckCameraViewClip_Box(min.get(), max.get())) {
 							this->canlook = false;
 							return;
 						}
-						//*/
 					}
 
 					void Draw(void) noexcept {
@@ -1445,101 +1439,260 @@ namespace FPS_n2 {
 						}
 					}
 				};
-			private:
-				static const int grassDiv = 4;//6;
-				int size = 24.f;
-				const int grass_x = 30;					/*grassの数*/
-				int grasss = grass_x * grass_x;					/*grassの数*/
-				std::array<std::array<grass_t, grassDiv>, grassDiv>grass__;
-				std::array<std::array<VECTOR_ref, grassDiv>, grassDiv>grassPos;
-
-
-				static const int grass2Div = 4;//6;
-				int size2 = 24.f;
-				const int grass2_x = 10;					/*grassの数*/
-				int grasss2 = grass2_x * grass2_x;					/*grassの数*/
-				std::array<std::array<grass_t, grass2Div>, grass2Div>grass2__;
-				std::array<std::array<VECTOR_ref, grass2Div>, grass2Div>grass2Pos;
-
-				static const int grass3Div = 4;//6;
-				int size3 = 24.f;
-				const int grass3_x = 6;					/*grassの数*/
-				int grasss3 = grass3_x * grass3_x;					/*grassの数*/
-				std::array<std::array<grass_t, grass3Div>, grass3Div>grass3__;
-				std::array<std::array<VECTOR_ref, grass3Div>, grass3Div>grass3Pos;
 			public:
+				static const int grassDiv{ 12 };//6;
+				const int grassEdge = 50;					/*grassの数*/
+				const float size{ 24.f };
+			private:
+				const int grasss = grassEdge * grassEdge;	/*grassの数*/
+				std::array<grass_t, grassDiv>grass__;
+				std::array<VECTOR_ref, grassDiv>grassPosMin;
+				std::array<VECTOR_ref, grassDiv>grassPosMax;
+				int grasss2 = 20 * 20;					/*grassの数*/
+				std::array<grass_t, grassDiv>grass2__;
+				int grasss3 = 12 * 12;					/*grassの数*/
+				std::array<grass_t, grassDiv>grass3__;
+			public:
+				int GetColorSoftImage(int softimage, int x_, int y_) {
+					int _r_, _g_, _b_;
+					int CCC = 0;
+					GetPixelSoftImage(softimage, x_, y_, &_r_, &_g_, &_b_, nullptr);
+					if (_r_ <= 64) {}
+					else if (_r_ <= 192) { CCC |= (1 << 1); }
+					else if (_r_ <= 256) { CCC |= (1 << 2); }
+					if (_g_ <= 64) {}
+					else if (_g_ <= 192) { CCC |= (1 << 4); }
+					else if (_g_ <= 256) { CCC |= (1 << 5); }
+					if (_b_ <= 64) {}
+					else if (_b_ <= 192) { CCC |= (1 << 7); }
+					else if (_b_ <= 256) { CCC |= (1 << 8); }
+					return CCC;
+				}
+				int Flag = 0;
+
+				struct GrassPos {
+					int X_PosMin = 0;
+					int Y_PosMin = 0;
+					int X_PosMax = 0;
+					int Y_PosMax = 0;
+				};
+				std::array<GrassPos, 12> grassPos;
+				//y方向に操作する前提
+				void SetMinMax(int CCC, int ID, int softimage, int x_t, int y_t, int sizex, int sizey) {
+					int BufC = -1;
+					if ((Flag & (1 << ID)) == 0) {
+						Flag |= (1 << ID);
+						//xmin
+						grassPos[ID].X_PosMin = x_t;
+						//ymin
+						BufC = -1;
+						for (int y_ = 0; y_ < sizey; y_++) {
+							for (int x_ = grassPos[ID].X_PosMin; x_ < sizex; x_++) {
+								BufC = GetColorSoftImage(softimage, x_, y_);
+								if (BufC == CCC) {
+									grassPos[ID].Y_PosMin = y_;
+									break;
+								}
+								else {
+									BufC = -1;
+								}
+							}
+							if (BufC >= 0) { break; }
+						}
+						//xmax
+						BufC = -1;
+						for (int x_ = sizex - 1; x_ >= grassPos[ID].X_PosMin; x_--) {
+							for (int y_ = sizey - 1; y_ >= grassPos[ID].Y_PosMin; y_--) {
+								BufC = GetColorSoftImage(softimage, x_, y_);
+								if (BufC == CCC) {
+									grassPos[ID].X_PosMax = x_ + 1;
+									break;
+								}
+								else {
+									BufC = -1;
+								}
+							}
+							if (BufC >= 0) { break; }
+						}
+						//ymax
+						BufC = -1;
+						for (int y_ = sizey - 1; y_ >= grassPos[ID].Y_PosMin; y_--) {
+							for (int x_ = grassPos[ID].X_PosMax - 1; x_ >= grassPos[ID].X_PosMin; x_--) {
+								BufC = GetColorSoftImage(softimage, x_, y_);
+								if (BufC == CCC) {
+									grassPos[ID].Y_PosMax = y_ + 1;
+									break;
+								}
+								else {
+									BufC = -1;
+								}
+							}
+							if (BufC >= 0) { break; }
+						}
+						//ok
+					}
+				}
 				void Init(void) noexcept {
-					if (grasss != 0) {
+					float MAPX = 8367.5f;
+					float MAPZ = 5063.76f;
+					float PosX = 0.f;
+					float PosZ = -2300.0f;
+
+					float MINX = -MAPX / 2.f + PosX;
+					float MINZ = -MAPZ / 2.f + PosZ;
+
+					float MAXX = MAPX / 2.f + PosX;
+					float MAXZ = MAPZ / 2.f + PosZ;
+
+					auto softimage = LoadSoftImage("data/model/map/grass.png");
+
+					int sizex = 0, sizey = 0;
+					GetSoftImageSize(softimage, &sizex, &sizey);
+
+					float x_t = 0.f;
+					float z_t = 0.f;
+					Flag = 0;
+					for (int x_ = 0; x_ < sizex; x_++) {
+						for (int y_ = 0; y_ < sizey; y_++) {
+							int CCC = GetColorSoftImage(softimage, x_, y_);
+							//255,0,0
+							if (CCC == (1 << 2)) {
+								SetMinMax(CCC, 0, softimage, x_, y_, sizex, sizey);
+							}
+							//255,128,0
+							else if (CCC == ((1 << 2) | (1 << 4))) {
+								SetMinMax(CCC, 1, softimage, x_, y_, sizex, sizey);
+							}
+							//255,255,0
+							else if (CCC == ((1 << 2) | (1 << 5))) {
+								SetMinMax(CCC, 2, softimage, x_, y_, sizex, sizey);
+							}
+							//128,255,0
+							else if (CCC == ((1 << 1) | (1 << 5))) {
+								SetMinMax(CCC, 3, softimage, x_, y_, sizex, sizey);
+							}
+							//0,255,0
+							else if (CCC == (1 << 5)) {
+								SetMinMax(CCC, 4, softimage, x_, y_, sizex, sizey);
+							}
+							//0,255,128
+							else if (CCC == ((1 << 5) | (1 << 7))) {
+								SetMinMax(CCC, 5, softimage, x_, y_, sizex, sizey);
+							}
+							//0,255,255
+							else if (CCC == ((1 << 5) | (1 << 8))) {
+								SetMinMax(CCC, 6, softimage, x_, y_, sizex, sizey);
+							}
+							//0,128,255
+							else if (CCC == ((1 << 4) | (1 << 8))) {
+								SetMinMax(CCC, 7, softimage, x_, y_, sizex, sizey);
+							}
+							//0,0,255
+							else if (CCC == (1 << 8)) {
+								SetMinMax(CCC, 8, softimage, x_, y_, sizex, sizey);
+							}
+							//128,0,255
+							else if (CCC == ((1 << 1) | (1 << 8))) {
+								SetMinMax(CCC, 9, softimage, x_, y_, sizex, sizey);
+							}
+							//255,0,255
+							else if (CCC == ((1 << 2) | (1 << 8))) {
+								SetMinMax(CCC, 10, softimage, x_, y_, sizex, sizey);
+							}
+							//255,0,128
+							else if (CCC == ((1 << 2) | (1 << 7))) {
+								SetMinMax(CCC, 11, softimage, x_, y_, sizex, sizey);
+							}
+
+							//MINX + (MAXX - MINX) * x_ / sizex = x_t 
+							//MINZ + (MAXZ - MINZ) * y_ / sizey = z_t 
+						}
+					}
+					for (int ID = 0; ID < grassDiv; ID++) {
+						//ポジション決定
+						float xp = MINX + (MAXX - MINX) * grassPos[ID].X_PosMin / sizex;
+						float zp = MINZ + (MAXZ - MINZ) * grassPos[ID].Y_PosMin / sizey;
+						float xp2 = MINX + (MAXX - MINX) * grassPos[ID].X_PosMax / sizex;
+						float zp2 = MINZ + (MAXZ - MINZ) * grassPos[ID].Y_PosMax / sizey;
+						float xsize = xp2 - xp;
+						float zsize = zp2 - zp;
 						//
-						for (int x_ = 0; x_ < grassDiv; x_++) {
-							for (int z_ = 0; z_ < grassDiv; z_++) {
-								auto& tgt_g = grass__[x_][z_];
+						{
+							grassPosMin[ID] = VECTOR_ref::vget(xp, 0.2f, zp);
+							grassPosMax[ID] = grassPosMin[ID] + VECTOR_ref::vget(xsize, 1.f, zsize);
+							float xmid = xsize / 2.f;
+							float zmid = zsize / 2.f;
+							if (grasss != 0) {
+								auto& tgt_g = grass__[ID];
 								tgt_g.Init(grasss, 0);
-								{
-									float x1 = (float)(grass_x / 2 + grass_x * x_) * size;
-									float z1 = (float)(grass_x / 2 + grass_x * z_) * size - 500;
-									grassPos[x_][z_] = VECTOR_ref::vget(x1, 0.2f, z1);
-								}
 								for (int i = 0; i < grasss; ++i) {
-									float x1 = (float)((i % grass_x) + grass_x * x_) * size + GetRandf(size / 4.f);
-									float z1 = (float)((i / grass_x) + grass_x * z_) * size + GetRandf(size / 4.f) - 500;
-									auto tmpvect = VECTOR_ref::vget(x1, 0.2f, z1);
+									//float x1 = (float)(i % grassEdge) * size + GetRandf(size / 4.f);
+									//float z1 = (float)(i / grassEdge) * size + GetRandf(size / 4.f);
+									float x1 = xmid + GetRandf(xmid);
+									float z1 = zmid + GetRandf(zmid);
+									while (true) {
+										int CCC = GetColorSoftImage(softimage,
+											(int)(((grassPosMin[ID].x() + x1) - MINX) / (MAXX - MINX) * float(sizex)),
+											(int)(((grassPosMin[ID].z() + z1) - MINZ) / (MAXZ - MINZ) * float(sizey))
+										);
+										if (CCC != 0) {
+											break;
+										}
+										x1 = xmid + GetRandf(xmid);
+										z1 = zmid + GetRandf(zmid);
+									}
+
+									auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.2f, z1);
 									auto tmpscale = VECTOR_ref::vget(size*1.5f, 1.0f + GetRandf(0.5f), size*1.5f);
-									//
 									tgt_g.inst.hits.SetMatrix(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::Mtrans(tmpvect));
-									//
 									tgt_g.Set_one();
 								}
 								tgt_g.put();
 							}
-						}
-						//
-					}
-					if (grasss2 != 0) {
-						//
-						for (int x_ = 0; x_ < grass2Div; x_++) {
-							for (int z_ = 0; z_ < grass2Div; z_++) {
-								auto& tgt_g = grass2__[x_][z_];
+							if (grasss2 != 0) {
+								auto& tgt_g = grass2__[ID];
 								tgt_g.Init(grasss2, 1);
-								{
-									float x1 = (float)(grass_x / 2 + grass_x * x_) * size2;
-									float z1 = (float)(grass_x / 2 + grass_x * z_) * size2 - 500;
-									grass2Pos[x_][z_] = VECTOR_ref::vget(x1, 0.2f, z1);
-								}
 								for (int i = 0; i < grasss2; ++i) {
-									float x1 = (float)(GetRand(grass_x) + grass_x * x_) * size2;
-									float z1 = (float)(GetRand(grass_x) + grass_x * z_) * size2 - 500;
-									auto tmpvect = VECTOR_ref::vget(x1, 0.2f, z1);
-									auto tmpscale = VECTOR_ref::vget(size2*1.f, 1.1f + GetRandf(0.5f), size2*1.f);
-									//
+									float x1 = xmid + GetRandf(xmid);
+									float z1 = zmid + GetRandf(zmid);
+									while (true) {
+										int CCC = GetColorSoftImage(softimage,
+											(int)(((grassPosMin[ID].x() + x1) - MINX) / (MAXX - MINX) * float(sizex)),
+											(int)(((grassPosMin[ID].z() + z1) - MINZ) / (MAXZ - MINZ) * float(sizey))
+										);
+										if (CCC != 0) {
+											break;
+										}
+										x1 = xmid + GetRandf(xmid);
+										z1 = zmid + GetRandf(zmid);
+									}
+									auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.f, z1);
+									auto tmpscale = VECTOR_ref::vget(size*1.f, 1.2f + GetRandf(0.5f), size*1.f);
 									tgt_g.inst.hits.SetMatrix(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::Mtrans(tmpvect));
-									//
 									tgt_g.Set_one();
 								}
 								tgt_g.put();
 							}
-						}
-						//
-					}
-					if (grasss3 != 0) {
-						//
-						for (int x_ = 0; x_ < grass3Div; x_++) {
-							for (int z_ = 0; z_ < grass3Div; z_++) {
-								auto& tgt_g = grass3__[x_][z_];
+							if (grasss3 != 0) {
+								auto& tgt_g = grass3__[ID];
 								tgt_g.Init(grasss3, 2);
-								{
-									float x1 = (float)(grass_x / 2 + grass_x * x_) * size3;
-									float z1 = (float)(grass_x / 2 + grass_x * z_) * size3 - 500;
-									grass2Pos[x_][z_] = VECTOR_ref::vget(x1, 0.2f, z1);
-								}
 								for (int i = 0; i < grasss3; ++i) {
-									float x1 = (float)(GetRand(grass_x) + grass_x * x_) * size3;
-									float z1 = (float)(GetRand(grass_x) + grass_x * z_) * size3 - 500;
-									auto tmpvect = VECTOR_ref::vget(x1, 0.2f, z1);
-									auto tmpscale = VECTOR_ref::vget(size2*1.f, 1.1f + GetRandf(0.5f), size2*1.f);
-									//
+									float x1 = xmid + GetRandf(xmid);
+									float z1 = zmid + GetRandf(zmid);
+									while (true) {
+										int CCC = GetColorSoftImage(softimage,
+											(int)(((grassPosMin[ID].x() + x1) - MINX) / (MAXX - MINX) * float(sizex)),
+											(int)(((grassPosMin[ID].z() + z1) - MINZ) / (MAXZ - MINZ) * float(sizey))
+										);
+										if (CCC != 0) {
+											break;
+										}
+										x1 = xmid + GetRandf(xmid);
+										z1 = zmid + GetRandf(zmid);
+									}
+									auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.f, z1);
+									auto tmpscale = VECTOR_ref::vget(size*1.f, 1.2f + GetRandf(0.5f), size*1.f);
 									tgt_g.inst.hits.SetMatrix(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::Mtrans(tmpvect));
-									//
 									tgt_g.Set_one();
 								}
 								tgt_g.put();
@@ -1547,54 +1700,31 @@ namespace FPS_n2 {
 						}
 						//
 					}
+					DeleteSoftImage(softimage);
 				}
 				void Dispose(void) noexcept {
-					if (grasss != 0) {
-						for (int x_ = 0; x_ < grassDiv; x_++) {
-							for (int z_ = 0; z_ < grassDiv; z_++) {
-								auto& tgt_g = grass__[x_][z_];
-								tgt_g.Dispose();
-							}
+					for (int ID = 0; ID < grassDiv; ID++) {
+						if (grasss != 0) {
+							grass__[ID].Dispose();
 						}
-					}
-					if (grasss2 != 0) {
-						for (int x_ = 0; x_ < grass2Div; x_++) {
-							for (int z_ = 0; z_ < grass2Div; z_++) {
-								auto& tgt_g = grass2__[x_][z_];
-								tgt_g.Dispose();
-							}
+						if (grasss2 != 0) {
+							grass2__[ID].Dispose();
 						}
-					}
-					if (grasss3 != 0) {
-						for (int x_ = 0; x_ < grass3Div; x_++) {
-							for (int z_ = 0; z_ < grass3Div; z_++) {
-								auto& tgt_g = grass3__[x_][z_];
-								tgt_g.Dispose();
-							}
+						if (grasss3 != 0) {
+							grass3__[ID].Dispose();
 						}
 					}
 				}
-
 				void Check_CameraViewClip(void) noexcept {
-					if (grasss != 0) {
-						for (int x_ = 0; x_ < grassDiv; x_++) {
-							for (int z_ = 0; z_ < grassDiv; z_++) {
-								this->grass__[x_][z_].Check_CameraViewClip(grassPos[x_][z_]);
-							}
+					for (int ID = 0; ID < grassDiv; ID++) {
+						if (grasss != 0) {
+							this->grass__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
 						}
-					}
-					if (grasss2 != 0) {
-						for (int x_ = 0; x_ < grass2Div; x_++) {
-							for (int z_ = 0; z_ < grass2Div; z_++) {
-								this->grass2__[x_][z_].Check_CameraViewClip(grass2Pos[x_][z_]);
-							}
+						if (grasss2 != 0) {
+							this->grass2__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
 						}
-					}
-					if (grasss3 != 0) {
-						for (int x_ = 0; x_ < grass3Div; x_++) {
-							for (int z_ = 0; z_ < grass3Div; z_++) {
-								this->grass3__[x_][z_].Check_CameraViewClip(grass3Pos[x_][z_]);
-							}
+						if (grasss3 != 0) {
+							this->grass3__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
 						}
 					}
 				}
@@ -1604,43 +1734,23 @@ namespace FPS_n2 {
 					SetFogColor(184, 187, 118);
 
 					SetDrawAlphaTest(DX_CMP_GREATER, 128);
-					
+
 					SetUseLighting(FALSE);
 
 					//auto dir=GetLightDirection();
 					//VECTOR_ref vec = (VECTOR_ref)GetCameraPosition() - GetCameraTarget();
 					//SetLightDirection(vec.Norm().get());
 
-					if (grasss != 0) {
-						for (int x_ = 0; x_ < grassDiv; x_++) {
-							for (int z_ = 0; z_ < grassDiv; z_++) {
-								auto& tgt_g = grass__[x_][z_];
-								if (tgt_g.canlook) {
-									int size = 24.f;
-									const int grass_x = 30;					/*grassの数*/
-									auto pos = grassPos[x_][z_];
-									VECTOR_ref min = pos - VECTOR_ref::vget(grass_x*size*0.5f, 0.f, grass_x*size*0.5f);
-									VECTOR_ref max = pos + VECTOR_ref::vget(grass_x*size*0.5f, 2.f, grass_x*size*0.5f);
-									DrawCube3D(min.get(), max.get(), GetColor(255, 0, 0), GetColor(255, 255, 255), FALSE);
-								}
-								tgt_g.Draw();
-							}
+					for (int ID = 0; ID < grassDiv; ID++) {
+						DrawCube3D(grassPosMin[ID].get(), grassPosMax[ID].get(), GetColor(0, 0, 0), GetColor(0, 0, 0), FALSE);
+						if (grasss != 0) {
+							grass__[ID].Draw();
 						}
-					}
-					if (grasss2 != 0) {
-						for (int x_ = 0; x_ < grass2Div; x_++) {
-							for (int z_ = 0; z_ < grass2Div; z_++) {
-								auto& tgt_g = grass2__[x_][z_];
-								tgt_g.Draw();
-							}
+						if (grasss2 != 0) {
+							grass2__[ID].Draw();
 						}
-					}
-					if (grasss3 != 0) {
-						for (int x_ = 0; x_ < grass3Div; x_++) {
-							for (int z_ = 0; z_ < grass3Div; z_++) {
-								auto& tgt_g = grass3__[x_][z_];
-								tgt_g.Draw();
-							}
+						if (grasss3 != 0) {
+							grass3__[ID].Draw();
 						}
 					}
 					//SetLightDirection(dir);
@@ -1673,11 +1783,9 @@ namespace FPS_n2 {
 			int camsel = 0;
 			switchs ChangeCamSel;
 		private:
-			//
 			LoadScriptClass LSClass;		//スクリプト読み込み
 			TelopClass TLClass;				//テロップ
-			//カット
-			size_t m_Counter = 0;
+			size_t m_Counter = 0;			//カット
 			std::vector<Cut_Info_First> m_CutInfo;
 			std::vector<Cut_Info_Update> m_CutInfoUpdate;
 
@@ -2231,7 +2339,7 @@ namespace FPS_n2 {
 						int y_s = DrawParts->disp_y * 4 / 10;
 
 						int hight = y_s / (int)(models.GetMax());
-						
+
 						LONGLONG now2 = (m_Counter >= 1) ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0;
 						int width_Time = BaseWidth * (int)(NowTimeWait - now2) / WidthPer;
 
@@ -3431,7 +3539,7 @@ namespace FPS_n2 {
 						x_rm = std::clamp(x_rm + (float)(y_m - y_o) / 10.f, -20.f, 80.f);
 						y_rm += (float)(x_m - x_o) / 10.f;
 
-						r_rm = std::clamp(r_rm + (float)(GetMouseWheelRotVol())*10.f, 5.f, 300.f);
+						r_rm = std::clamp(r_rm + (float)(GetMouseWheelRotVol())*10.f, 5.f, 6000.f);
 
 						camera_main.set_cam_info(deg2rad(45), 1.f, 1000.f);
 						camera_main.camvec = VECTOR_ref::vget(0, 0, 0);
