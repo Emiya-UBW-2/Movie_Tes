@@ -1373,13 +1373,7 @@ namespace FPS_n2 {
 					SetIndexBufferData(0, this->hitsind.data(), this->IndexNum, this->IndexBuf);
 				}
 				void Draw(void) noexcept {
-					//SetDrawAlphaTest(DX_CMP_GREATER, 128);
-					//SetUseLighting(FALSE);
-					{
-						DrawPolygonIndexed3D_UseVertexBuffer(this->VerBuf, this->IndexBuf, this->hits_pic.get(), TRUE);
-					}
-					//SetUseLighting(TRUE);
-					//SetDrawAlphaTest(-1, 0);
+					DrawPolygonIndexed3D_UseVertexBuffer(this->VerBuf, this->IndexBuf, this->hits_pic.get(), TRUE);
 				}
 			};
 			//kusa
@@ -1393,11 +1387,16 @@ namespace FPS_n2 {
 				public:
 
 					void Init(int total, int sel) {
-						if (sel == 0) {
+						switch (sel) {
+						case 0:
 							this->inst.Init("data/model/grass/grass.png", "data/model/grass/model.mv1");
-						}
-						else {
+							break;
+						case 1:
 							this->inst.Init("data/model/grass/grass2.png", "data/model/grass/model.mv1");
+							break;
+						case 2:
+							this->inst.Init("data/model/grass/grass3.png", "data/model/grass/model.mv1");
+							break;
 						}
 						this->inst.Clear();
 						this->inst.hitss = total;
@@ -1451,7 +1450,6 @@ namespace FPS_n2 {
 				int size = 24.f;
 				const int grass_x = 30;					/*grassの数*/
 				int grasss = grass_x * grass_x;					/*grassの数*/
-
 				std::array<std::array<grass_t, grassDiv>, grassDiv>grass__;
 				std::array<std::array<VECTOR_ref, grassDiv>, grassDiv>grassPos;
 
@@ -1460,9 +1458,15 @@ namespace FPS_n2 {
 				int size2 = 24.f;
 				const int grass2_x = 10;					/*grassの数*/
 				int grasss2 = grass2_x * grass2_x;					/*grassの数*/
-
 				std::array<std::array<grass_t, grass2Div>, grass2Div>grass2__;
 				std::array<std::array<VECTOR_ref, grass2Div>, grass2Div>grass2Pos;
+
+				static const int grass3Div = 4;//6;
+				int size3 = 24.f;
+				const int grass3_x = 6;					/*grassの数*/
+				int grasss3 = grass3_x * grass3_x;					/*grassの数*/
+				std::array<std::array<grass_t, grass3Div>, grass3Div>grass3__;
+				std::array<std::array<VECTOR_ref, grass3Div>, grass3Div>grass3Pos;
 			public:
 				void Init(void) noexcept {
 					if (grasss != 0) {
@@ -1477,10 +1481,10 @@ namespace FPS_n2 {
 									grassPos[x_][z_] = VECTOR_ref::vget(x1, 0.2f, z1);
 								}
 								for (int i = 0; i < grasss; ++i) {
-									float x1 = (float)((i % grass_x) + grass_x * x_) * size;
-									float z1 = (float)((i / grass_x) + grass_x * z_) * size-500;
+									float x1 = (float)((i % grass_x) + grass_x * x_) * size + GetRandf(size / 4.f);
+									float z1 = (float)((i / grass_x) + grass_x * z_) * size + GetRandf(size / 4.f) - 500;
 									auto tmpvect = VECTOR_ref::vget(x1, 0.2f, z1);
-									auto tmpscale = VECTOR_ref::vget(size*2.f, float(100 - 20 + GetRand(20 * 2)) / 100.f*2.5f, size*2.f);
+									auto tmpscale = VECTOR_ref::vget(size*1.5f, 1.0f + GetRandf(0.5f), size*1.5f);
 									//
 									tgt_g.inst.hits.SetMatrix(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::Mtrans(tmpvect));
 									//
@@ -1506,7 +1510,33 @@ namespace FPS_n2 {
 									float x1 = (float)(GetRand(grass_x) + grass_x * x_) * size2;
 									float z1 = (float)(GetRand(grass_x) + grass_x * z_) * size2 - 500;
 									auto tmpvect = VECTOR_ref::vget(x1, 0.2f, z1);
-									auto tmpscale = VECTOR_ref::vget(size2*2.f, float(100 - 20 + GetRand(20 * 2)) / 100.f*3.5f, size2*2.f);
+									auto tmpscale = VECTOR_ref::vget(size2*1.f, 1.1f + GetRandf(0.5f), size2*1.f);
+									//
+									tgt_g.inst.hits.SetMatrix(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::Mtrans(tmpvect));
+									//
+									tgt_g.Set_one();
+								}
+								tgt_g.put();
+							}
+						}
+						//
+					}
+					if (grasss3 != 0) {
+						//
+						for (int x_ = 0; x_ < grass3Div; x_++) {
+							for (int z_ = 0; z_ < grass3Div; z_++) {
+								auto& tgt_g = grass3__[x_][z_];
+								tgt_g.Init(grasss3, 2);
+								{
+									float x1 = (float)(grass_x / 2 + grass_x * x_) * size3;
+									float z1 = (float)(grass_x / 2 + grass_x * z_) * size3 - 500;
+									grass2Pos[x_][z_] = VECTOR_ref::vget(x1, 0.2f, z1);
+								}
+								for (int i = 0; i < grasss3; ++i) {
+									float x1 = (float)(GetRand(grass_x) + grass_x * x_) * size3;
+									float z1 = (float)(GetRand(grass_x) + grass_x * z_) * size3 - 500;
+									auto tmpvect = VECTOR_ref::vget(x1, 0.2f, z1);
+									auto tmpscale = VECTOR_ref::vget(size2*1.f, 1.1f + GetRandf(0.5f), size2*1.f);
 									//
 									tgt_g.inst.hits.SetMatrix(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::Mtrans(tmpvect));
 									//
@@ -1535,6 +1565,14 @@ namespace FPS_n2 {
 							}
 						}
 					}
+					if (grasss3 != 0) {
+						for (int x_ = 0; x_ < grass3Div; x_++) {
+							for (int z_ = 0; z_ < grass3Div; z_++) {
+								auto& tgt_g = grass3__[x_][z_];
+								tgt_g.Dispose();
+							}
+						}
+					}
 				}
 
 				void Check_CameraViewClip(void) noexcept {
@@ -1552,6 +1590,13 @@ namespace FPS_n2 {
 							}
 						}
 					}
+					if (grasss3 != 0) {
+						for (int x_ = 0; x_ < grass3Div; x_++) {
+							for (int z_ = 0; z_ < grass3Div; z_++) {
+								this->grass3__[x_][z_].Check_CameraViewClip(grass3Pos[x_][z_]);
+							}
+						}
+					}
 				}
 				void Draw(cam_info camera_buf) noexcept {
 					SetFogEnable(TRUE);
@@ -1559,11 +1604,12 @@ namespace FPS_n2 {
 					SetFogColor(184, 187, 118);
 
 					SetDrawAlphaTest(DX_CMP_GREATER, 128);
-					//SetUseLighting(FALSE);
-					auto dir=GetLightDirection();
+					
+					SetUseLighting(FALSE);
 
-					VECTOR_ref vec = (VECTOR_ref)GetCameraPosition() - GetCameraTarget();
-					SetLightDirection(vec.Norm().get());
+					//auto dir=GetLightDirection();
+					//VECTOR_ref vec = (VECTOR_ref)GetCameraPosition() - GetCameraTarget();
+					//SetLightDirection(vec.Norm().get());
 
 					if (grasss != 0) {
 						for (int x_ = 0; x_ < grassDiv; x_++) {
@@ -1572,7 +1618,6 @@ namespace FPS_n2 {
 								if (tgt_g.canlook) {
 									int size = 24.f;
 									const int grass_x = 30;					/*grassの数*/
-									//*
 									auto pos = grassPos[x_][z_];
 									VECTOR_ref min = pos - VECTOR_ref::vget(grass_x*size*0.5f, 0.f, grass_x*size*0.5f);
 									VECTOR_ref max = pos + VECTOR_ref::vget(grass_x*size*0.5f, 2.f, grass_x*size*0.5f);
@@ -1586,22 +1631,22 @@ namespace FPS_n2 {
 						for (int x_ = 0; x_ < grass2Div; x_++) {
 							for (int z_ = 0; z_ < grass2Div; z_++) {
 								auto& tgt_g = grass2__[x_][z_];
-								if (tgt_g.canlook) {
-									int size = 24.f;
-									const int grass_x = 30;					/*grassの数*/
-									//*
-									auto pos = grassPos[x_][z_];
-									VECTOR_ref min = pos - VECTOR_ref::vget(grass_x*size*0.5f, 0.f, grass_x*size*0.5f);
-									VECTOR_ref max = pos + VECTOR_ref::vget(grass_x*size*0.5f, 2.f, grass_x*size*0.5f);
-									DrawCube3D(min.get(), max.get(), GetColor(255, 0, 0), GetColor(255, 255, 255), FALSE);
-								}
 								tgt_g.Draw();
 							}
 						}
 					}
+					if (grasss3 != 0) {
+						for (int x_ = 0; x_ < grass3Div; x_++) {
+							for (int z_ = 0; z_ < grass3Div; z_++) {
+								auto& tgt_g = grass3__[x_][z_];
+								tgt_g.Draw();
+							}
+						}
+					}
+					//SetLightDirection(dir);
 
-					SetLightDirection(dir);
-					//SetUseLighting(TRUE);
+					SetUseLighting(TRUE);
+
 					SetDrawAlphaTest(-1, 0);
 					SetFogEnable(FALSE);
 				}
@@ -1898,7 +1943,7 @@ namespace FPS_n2 {
 						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
 						printfDx("ロード全部完了　キーを押してください : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
 						DrawParts->Screen_Flip();
-						WaitKey();
+						//WaitKey();
 					}
 					else {
 						return;
@@ -1914,6 +1959,7 @@ namespace FPS_n2 {
 				fog_range[1] = 300000.f;
 
 				grassmodel.Init();
+				WaitKey();
 			}
 		private:
 			class CharaInfoEdit {
