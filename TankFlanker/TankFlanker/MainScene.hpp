@@ -371,6 +371,10 @@ namespace FPS_n2 {
 					std::string NearID = "";
 					VECTOR_ref Nearest;
 
+					std::string FrontID = "";
+					VECTOR_ref FrontVec;
+					int Rank = -1;
+
 					int prevID = -1;
 					float AnimChange = 0.f;
 
@@ -1290,94 +1294,94 @@ namespace FPS_n2 {
 					}
 				}
 			};
-			//インスタシング
-			class Model_Instance {
-			public:
-				int hitss = 0;					/*hitsの数*/
-				std::vector<VERTEX3D> hitsver;	/*hits*/
-				std::vector<DWORD> hitsind;	    /*hits*/
-				int VerBuf = -1, IndexBuf = -1;	/*hits*/
-				MV1 hits;						/*hitsモデル*/
-				GraphHandle hits_pic;			/*画像ハンドル*/
-				int IndexNum = -1, VerNum = -1;	/*hits*/
-				int vnum = -1, pnum = -1;		/*hits*/
-				MV1_REF_POLYGONLIST RefMesh{};	/*hits*/
-				//初期化
-				void Init(std::string pngpath, std::string mv1path) noexcept {
-					SetUseASyncLoadFlag(FALSE);
-					this->hits_pic = GraphHandle::Load(pngpath);		 /*grass*/
-					MV1::Load(mv1path, &this->hits, false);	//弾痕
-					Init_one();
-				}
-				void Init_one(void) noexcept {
-					MV1RefreshReferenceMesh(this->hits.get(), -1, TRUE);			/*参照用メッシュの更新*/
-					this->RefMesh = MV1GetReferenceMesh(this->hits.get(), -1, TRUE);	/*参照用メッシュの取得*/
-				}
-				//毎回のリセット
-				void Clear(void) noexcept {
-					this->hitss = 0;
-					this->vnum = 0;
-					this->pnum = 0;
-					this->hitsver.clear();								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-					this->hitsind.clear();								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-					this->hitsver.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-					this->hitsind.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-				}
-
-				void Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
-					this->hitss++;
-					Set_start();
-					{
-						float asize = 200.f * caliber;
-						const auto& y_vec = Normal;
-						auto z_vec = y_vec.cross(Zvec).Norm();
-						auto scale = VECTOR_ref::vget(asize / std::abs(y_vec.dot(Zvec)), asize, asize);
-						auto pos = Position + y_vec * 0.02f;
-						MATRIX_ref mat = MATRIX_ref::GetScale(scale) * MATRIX_ref::Axis1_YZ(y_vec, z_vec);
-
-						this->hits.SetMatrix(mat * MATRIX_ref::Mtrans(pos));
-					}
-					Set_one();
-				}
-				void Set_start(void) noexcept {
-					this->IndexNum = this->RefMesh.PolygonNum * 3 * this->hitss;				/*インデックスの数を取得*/
-					this->VerNum = this->RefMesh.VertexNum * this->hitss;						/*頂点の数を取得*/
-					this->hitsver.resize(this->VerNum);									/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-					this->hitsind.resize(this->IndexNum);								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-				}
-				void Set_one(void) noexcept {
-					Init_one();
-					for (size_t j = 0; j < size_t(this->RefMesh.VertexNum); ++j) {
-						auto& g = this->hitsver[j + this->vnum];
-						g.pos = this->RefMesh.Vertexs[j].Position;
-						g.norm = this->RefMesh.Vertexs[j].Normal;
-						g.dif = this->RefMesh.Vertexs[j].DiffuseColor;
-						g.spc = this->RefMesh.Vertexs[j].SpecularColor;
-						g.u = this->RefMesh.Vertexs[j].TexCoord[0].u;
-						g.v = this->RefMesh.Vertexs[j].TexCoord[0].v;
-						g.su = this->RefMesh.Vertexs[j].TexCoord[1].u;
-						g.sv = this->RefMesh.Vertexs[j].TexCoord[1].v;
-					}
-					for (size_t j = 0; j < size_t(this->RefMesh.PolygonNum); ++j) {
-						for (size_t k = 0; k < std::size(this->RefMesh.Polygons[j].VIndex); ++k)
-							this->hitsind[j * 3 + k + this->pnum] = WORD(this->RefMesh.Polygons[j].VIndex[k] + this->vnum);
-					}
-					this->vnum += this->RefMesh.VertexNum;
-					this->pnum += this->RefMesh.PolygonNum * 3;
-				}
-
-				void Update(void) noexcept {
-					this->VerBuf = CreateVertexBuffer(this->VerNum, DX_VERTEX_TYPE_NORMAL_3D);
-					this->IndexBuf = CreateIndexBuffer(this->IndexNum, DX_INDEX_TYPE_32BIT);
-					SetVertexBufferData(0, this->hitsver.data(), this->VerNum, this->VerBuf);
-					SetIndexBufferData(0, this->hitsind.data(), this->IndexNum, this->IndexBuf);
-				}
-				void Draw(void) noexcept {
-					DrawPolygonIndexed3D_UseVertexBuffer(this->VerBuf, this->IndexBuf, this->hits_pic.get(), TRUE);
-				}
-			};
 			//kusa
 			class Grass {
+				//インスタシング
+				class Model_Instance {
+				public:
+					int hitss = 0;					/*hitsの数*/
+					std::vector<VERTEX3D> hitsver;	/*hits*/
+					std::vector<DWORD> hitsind;	    /*hits*/
+					int VerBuf = -1, IndexBuf = -1;	/*hits*/
+					MV1 hits;						/*hitsモデル*/
+					GraphHandle hits_pic;			/*画像ハンドル*/
+					int IndexNum = -1, VerNum = -1;	/*hits*/
+					int vnum = -1, pnum = -1;		/*hits*/
+					MV1_REF_POLYGONLIST RefMesh{};	/*hits*/
+					//初期化
+					void Init(std::string pngpath, std::string mv1path) noexcept {
+						SetUseASyncLoadFlag(FALSE);
+						this->hits_pic = GraphHandle::Load(pngpath);		 /*grass*/
+						MV1::Load(mv1path, &this->hits, false);	//弾痕
+						Init_one();
+					}
+					void Init_one(void) noexcept {
+						MV1RefreshReferenceMesh(this->hits.get(), -1, TRUE);			/*参照用メッシュの更新*/
+						this->RefMesh = MV1GetReferenceMesh(this->hits.get(), -1, TRUE);	/*参照用メッシュの取得*/
+					}
+					//毎回のリセット
+					void Clear(void) noexcept {
+						this->hitss = 0;
+						this->vnum = 0;
+						this->pnum = 0;
+						this->hitsver.clear();								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+						this->hitsind.clear();								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+						this->hitsver.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+						this->hitsind.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+					}
+
+					void Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
+						this->hitss++;
+						Set_start();
+						{
+							float asize = 200.f * caliber;
+							const auto& y_vec = Normal;
+							auto z_vec = y_vec.cross(Zvec).Norm();
+							auto scale = VECTOR_ref::vget(asize / std::abs(y_vec.dot(Zvec)), asize, asize);
+							auto pos = Position + y_vec * 0.02f;
+							MATRIX_ref mat = MATRIX_ref::GetScale(scale) * MATRIX_ref::Axis1_YZ(y_vec, z_vec);
+
+							this->hits.SetMatrix(mat * MATRIX_ref::Mtrans(pos));
+						}
+						Set_one();
+					}
+					void Set_start(void) noexcept {
+						this->IndexNum = this->RefMesh.PolygonNum * 3 * this->hitss;				/*インデックスの数を取得*/
+						this->VerNum = this->RefMesh.VertexNum * this->hitss;						/*頂点の数を取得*/
+						this->hitsver.resize(this->VerNum);									/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+						this->hitsind.resize(this->IndexNum);								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+					}
+					void Set_one(void) noexcept {
+						Init_one();
+						for (size_t j = 0; j < size_t(this->RefMesh.VertexNum); ++j) {
+							auto& g = this->hitsver[j + this->vnum];
+							g.pos = this->RefMesh.Vertexs[j].Position;
+							g.norm = this->RefMesh.Vertexs[j].Normal;
+							g.dif = this->RefMesh.Vertexs[j].DiffuseColor;
+							g.spc = this->RefMesh.Vertexs[j].SpecularColor;
+							g.u = this->RefMesh.Vertexs[j].TexCoord[0].u;
+							g.v = this->RefMesh.Vertexs[j].TexCoord[0].v;
+							g.su = this->RefMesh.Vertexs[j].TexCoord[1].u;
+							g.sv = this->RefMesh.Vertexs[j].TexCoord[1].v;
+						}
+						for (size_t j = 0; j < size_t(this->RefMesh.PolygonNum); ++j) {
+							for (size_t k = 0; k < std::size(this->RefMesh.Polygons[j].VIndex); ++k)
+								this->hitsind[j * 3 + k + this->pnum] = WORD(this->RefMesh.Polygons[j].VIndex[k] + this->vnum);
+						}
+						this->vnum += this->RefMesh.VertexNum;
+						this->pnum += this->RefMesh.PolygonNum * 3;
+					}
+
+					void Update(void) noexcept {
+						this->VerBuf = CreateVertexBuffer(this->VerNum, DX_VERTEX_TYPE_NORMAL_3D);
+						this->IndexBuf = CreateIndexBuffer(this->IndexNum, DX_INDEX_TYPE_32BIT);
+						SetVertexBufferData(0, this->hitsver.data(), this->VerNum, this->VerBuf);
+						SetIndexBufferData(0, this->hitsind.data(), this->IndexNum, this->IndexBuf);
+					}
+					void Draw(void) noexcept {
+						DrawPolygonIndexed3D_UseVertexBuffer(this->VerBuf, this->IndexBuf, this->hits_pic.get(), TRUE);
+					}
+				};
 				class grass_t {
 				private:
 					//std::shared_ptr<Map> MAPPTs{ nullptr };
@@ -1441,16 +1445,15 @@ namespace FPS_n2 {
 				};
 			public:
 				static const int grassDiv{ 12 };//6;
-				const int grassEdge = 50;					/*grassの数*/
-				const float size{ 24.f };
+				const float size{ 20.f };
 			private:
-				const int grasss = grassEdge * grassEdge;	/*grassの数*/
+				const int grasss = 50 * 50;						/*grassの数*/
 				std::array<grass_t, grassDiv>grass__;
 				std::array<VECTOR_ref, grassDiv>grassPosMin;
 				std::array<VECTOR_ref, grassDiv>grassPosMax;
-				int grasss2 = 20 * 20;					/*grassの数*/
+				int grasss2 = 20 * 20;							/*grassの数*/
 				std::array<grass_t, grassDiv>grass2__;
-				int grasss3 = 12 * 12;					/*grassの数*/
+				int grasss3 = 12 * 12;							/*grassの数*/
 				std::array<grass_t, grassDiv>grass3__;
 			public:
 				int GetColorSoftImage(int softimage, int x_, int y_) {
@@ -1626,8 +1629,6 @@ namespace FPS_n2 {
 								auto& tgt_g = grass__[ID];
 								tgt_g.Init(grasss, 0);
 								for (int i = 0; i < grasss; ++i) {
-									//float x1 = (float)(i % grassEdge) * size + GetRandf(size / 4.f);
-									//float z1 = (float)(i / grassEdge) * size + GetRandf(size / 4.f);
 									float x1 = xmid + GetRandf(xmid);
 									float z1 = zmid + GetRandf(zmid);
 									while (true) {
@@ -1779,7 +1780,7 @@ namespace FPS_n2 {
 
 			std::string MAP = "data/model/map/model.mv1";
 			std::vector<std::string> NAMES;
-
+			std::vector<int> RankID;
 			int camsel = 0;
 			switchs ChangeCamSel;
 		private:
@@ -3041,7 +3042,7 @@ namespace FPS_n2 {
 								NAMES.resize(NAMES.size() + 1);
 								NAMES.back() = Rudolf2;
 
-
+								RankID.resize(NAMES.size());
 								Guide.SetMatrix(models.Get(MAP, 0)->obj.GetMatrix());
 								for (int i = 0; i < Guide.frame_num(); i++) {
 									if (Guide.frame_child_num(i) > 0) {
@@ -3052,6 +3053,7 @@ namespace FPS_n2 {
 							}
 							{
 								float xof = 0.f;
+								float xof2 = 0.f;
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
 									auto& inf = m->CutDetail[m->Cutinfo.nowcut];
@@ -3063,6 +3065,8 @@ namespace FPS_n2 {
 											m->Zrad1_p = 0.f;
 											m->Yrad2_p = inf.Yrad2_p;
 											m->pos_z_p = 0.f;
+
+											xof += 16.f;
 										}
 										m->animspd = 0.f;
 										m->GuideNum[0] = GudeStart;
@@ -3253,14 +3257,46 @@ namespace FPS_n2 {
 												}
 											}
 										}
-										if (m->xposition > xof + GetRandf(500.f)) {
-											m->xposition = std::max(m->xposition - 10.f / FPS * GameSpeed, 0.f);
+										auto xpos_buf = m->xposition;
+										switch (m->Rank) {
+										case 1:
+											xpos_buf = 30.f + GetRandf(20.f);
+											break;
+										default:
+										{
+											auto xvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).xvec();
+											auto Lcos = xvb.dot(m->Nearest);
+											if (Lcos>0 && m->Nearest.size()>80.f) {
+												xpos_buf = std::max(xpos_buf - 10.f / FPS * GameSpeed, 20.f + GetRandf(20.f));
+												xof2 = 0;
+											}
+											else if (m->Nearest.size() > 120.f) {
+												xpos_buf = std::max(xpos_buf - 5.f / FPS * GameSpeed, 20.f + GetRandf(20.f));
+												xof2 = 0;
+											}
+											else {
+												if (m->Rank > NAMES.size() / 2) {
+													xof2 -= 16.f;
+												}
+												else {
+													xof2 += 8.f;
+												}
+												xof2 = std::max(0.f, xof2);
+												xpos_buf = xof2 + GetRandf(50.f);
+											}
+											/*
+											//*/
+											break;
+										}
+										}
+										if (m->xposition > xpos_buf) {
+											m->xposition -= 5.f / FPS * GameSpeed;
 										}
 										else {
-											m->xposition += 10.f / FPS * GameSpeed;
+											m->xposition += 1.f / FPS * GameSpeed;
 										}
+										m->xposition = std::max(0.f, m->xposition);
 									}
-									xof += 16.f;
 								}
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
@@ -3278,20 +3314,62 @@ namespace FPS_n2 {
 										}
 									}
 								}
-								//当たり判定
 								for (auto& n : NAMES) {
 									auto* m = models.Get(n, 0);
 									m->Nearest = VECTOR_ref::up()*10000.f;
+									m->FrontVec = VECTOR_ref::up()*10000.f;
+									m->FrontID = "";
+									auto zvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec();
 									for (auto& n2 : NAMES) {
 										auto* m2 = models.Get(n2, 0);
 										if (n != n2) {
 											auto vec = m2->pos_p - m->pos_p;
-											if (vec.size() > m->Nearest.size()) {
+											//一番近い相手を更新
+											if (vec.size() < m->Nearest.size()) {
 												m->NearID = n2;
 												m->Nearest = vec;
 											}
+											//前後にいるIDを更新
+											{
+												auto FR = zvb.dot(vec.Norm());
+												if (FR <= 0) {
+													if (vec.size() < m->FrontVec.size()) {
+														m->FrontID = n2;
+														m->FrontVec = vec;
+													}
+												}
+											}
+											//
 										}
 									}
+								}
+								//順位判定
+								size_t RankBuf = NAMES.size();
+								for (int Rank = 0; Rank < NAMES.size(); Rank++) {
+									for (auto& n : NAMES) {
+										auto* m = models.Get(n, 0);
+										if (Rank == 0) {
+											if (m->FrontID == "") {
+												m->Rank = Rank + 1;
+												RankBuf = &n - &NAMES.front();
+												break;
+											}
+										}
+										else {
+											if (m->FrontID == NAMES[RankBuf]) {
+												m->Rank = Rank + 1;
+												RankBuf = &n - &NAMES.front();
+												break;
+											}
+										}
+									}
+									if (Rank == 0 && RankBuf == NAMES.size()) { break; }
+								}
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									RankID[m->Rank - 1] = &n - &NAMES.front();
+
+									printfDx("Rank%d = %s,(%s)\n", m->Rank, m->FrontID.c_str(), n.c_str());
 								}
 
 								for (auto& n : NAMES) {
