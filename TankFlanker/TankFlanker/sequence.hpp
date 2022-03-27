@@ -135,7 +135,7 @@ namespace FPS_n2 {
 			std::shared_ptr<Sceneclass::TEMPSCENE> scenes_ptr{ nullptr };
 			bool selend{ true };
 			bool selpause{ true };
-			LONGLONG Drawwaits,OLDwaits, waits;
+			LONGLONG Drawwaits, OLDwaits, waits;
 		public:
 			SceneControl(void) noexcept {
 			}

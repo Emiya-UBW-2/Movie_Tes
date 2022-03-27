@@ -19,6 +19,8 @@
 #include <vector>
 #include <fstream>
 #include <cassert>
+#include <filesystem>
+
 #include "DXLib_ref/DXLib_ref.h"
 #include "Box2D/Box2D.h"
 

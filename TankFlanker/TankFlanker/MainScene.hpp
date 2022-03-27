@@ -86,25 +86,39 @@ namespace FPS_n2 {
 					}
 				}
 				//処理
-				void SetArgs(void) noexcept {
+				bool SetArgs(std::vector<std::string>* NAMES) noexcept {
 					//変数登録
-					{
-						if (m_Func.find("SetArg") != std::string::npos) {
-							m_Variable.resize(m_Variable.size() + 1);
-							m_Variable.back().Base = m_Args[0];
+					if (m_Func.find("SetArg") != std::string::npos) {
+						m_Variable.resize(m_Variable.size() + 1);
+						m_Variable.back().Base = m_Args[0];
+						if (m_Args[1].find(".pmx") != std::string::npos) {
+							auto mv1s = m_Args[1].substr(0, m_Args[1].find(".pmx")) + ".mv1";
+							if (std::filesystem::exists(mv1s.c_str())) {
+								m_Variable.back().After = mv1s;
+							}
+							else {
+								m_Variable.back().After = m_Args[1];
+							}
+
+							NAMES->resize(NAMES->size() + 1);
+							NAMES->back() = m_Variable.back().After;
+						}
+						else {
 							m_Variable.back().After = m_Args[1];
 						}
-						//変数変換処理
-						else {
-							for (auto& a1 : m_Args) {
-								for (auto& a2 : m_Variable) {
-									if (a1 == a2.Base) {
-										a1 = a2.After;
-										break;
-									}
+						return true;
+					}
+					//変数変換処理
+					else {
+						for (auto& a1 : m_Args) {
+							for (auto& a2 : m_Variable) {
+								if (a1 == a2.Base) {
+									a1 = a2.After;
+									break;
 								}
 							}
 						}
+						return false;
 					}
 					//
 				}
@@ -1425,11 +1439,7 @@ namespace FPS_n2 {
 					}
 
 					/*視界外か否かを判断*/
-					void Check_CameraViewClip(const VECTOR_ref& mini, const VECTOR_ref& maxi) noexcept {
-						VECTOR_ref min = mini;
-						VECTOR_ref max = maxi;
-						min.y(-5.f);
-						max.y(5.f);
+					void Check_CameraViewClip(const VECTOR_ref& min, const VECTOR_ref& max) noexcept {
 						this->canlook = true;
 						if (CheckCameraViewClip_Box(min.get(), max.get())) {
 							this->canlook = false;
@@ -1443,6 +1453,12 @@ namespace FPS_n2 {
 						}
 					}
 				};
+				struct GrassPos {
+					int X_PosMin = 0;
+					int Y_PosMin = 0;
+					int X_PosMax = 0;
+					int Y_PosMax = 0;
+				};
 			public:
 				static const int grassDiv{ 12 };//6;
 				const float size{ 20.f };
@@ -1455,7 +1471,9 @@ namespace FPS_n2 {
 				std::array<grass_t, grassDiv>grass2__;
 				int grasss3 = 12 * 12;							/*grassの数*/
 				std::array<grass_t, grassDiv>grass3__;
-			public:
+				int Flag = 0;
+				std::array<GrassPos, grassDiv> grassPos;
+			private:
 				int GetColorSoftImage(int softimage, int x_, int y_) {
 					int _r_, _g_, _b_;
 					int CCC = 0;
@@ -1471,15 +1489,6 @@ namespace FPS_n2 {
 					else if (_b_ <= 256) { CCC |= (1 << 8); }
 					return CCC;
 				}
-				int Flag = 0;
-
-				struct GrassPos {
-					int X_PosMin = 0;
-					int Y_PosMin = 0;
-					int X_PosMax = 0;
-					int Y_PosMax = 0;
-				};
-				std::array<GrassPos, 12> grassPos;
 				//y方向に操作する前提
 				void SetMinMax(int CCC, int ID, int softimage, int x_t, int y_t, int sizex, int sizey) {
 					int BufC = -1;
@@ -1487,6 +1496,7 @@ namespace FPS_n2 {
 						Flag |= (1 << ID);
 						//xmin
 						grassPos[ID].X_PosMin = x_t;
+						y_t;
 						//ymin
 						BufC = -1;
 						for (int y_ = 0; y_ < sizey; y_++) {
@@ -1535,6 +1545,7 @@ namespace FPS_n2 {
 						//ok
 					}
 				}
+			public:
 				void Init(void) noexcept {
 					float MAPX = 8367.5f;
 					float MAPZ = 5063.76f;
@@ -1552,8 +1563,6 @@ namespace FPS_n2 {
 					int sizex = 0, sizey = 0;
 					GetSoftImageSize(softimage, &sizex, &sizey);
 
-					float x_t = 0.f;
-					float z_t = 0.f;
 					Flag = 0;
 					for (int x_ = 0; x_ < sizex; x_++) {
 						for (int y_ = 0; y_ < sizey; y_++) {
@@ -1716,26 +1725,11 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				void Check_CameraViewClip(void) noexcept {
-					for (int ID = 0; ID < grassDiv; ID++) {
-						if (grasss != 0) {
-							this->grass__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
-						}
-						if (grasss2 != 0) {
-							this->grass2__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
-						}
-						if (grasss3 != 0) {
-							this->grass3__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
-						}
-					}
-				}
 				void Draw(cam_info camera_buf) noexcept {
 					SetFogEnable(TRUE);
 					SetFogStartEnd(camera_buf.near_*3.f, camera_buf.far_*3.f);
 					SetFogColor(184, 187, 118);
-
 					SetDrawAlphaTest(DX_CMP_GREATER, 128);
-
 					SetUseLighting(FALSE);
 
 					//auto dir=GetLightDirection();
@@ -1743,21 +1737,25 @@ namespace FPS_n2 {
 					//SetLightDirection(vec.Norm().get());
 
 					for (int ID = 0; ID < grassDiv; ID++) {
+#ifdef DEBUG
 						DrawCube3D(grassPosMin[ID].get(), grassPosMax[ID].get(), GetColor(0, 0, 0), GetColor(0, 0, 0), FALSE);
+#endif
 						if (grasss != 0) {
+							this->grass__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
 							grass__[ID].Draw();
 						}
 						if (grasss2 != 0) {
+							this->grass2__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
 							grass2__[ID].Draw();
 						}
 						if (grasss3 != 0) {
+							this->grass3__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
 							grass3__[ID].Draw();
 						}
 					}
 					//SetLightDirection(dir);
 
 					SetUseLighting(TRUE);
-
 					SetDrawAlphaTest(-1, 0);
 					SetFogEnable(FALSE);
 				}
@@ -1765,25 +1763,14 @@ namespace FPS_n2 {
 		private:
 			std::string LOGO1 = "data/picture/logo.png";
 			std::string SUN = "data/model/sun/model.mv1";
-
-			std::string Teio = "data/umamusume/teio/model.pmx";
-			std::string Nice = "data/umamusume/nice/model.pmx";
-			std::string Tanhoiza = "data/umamusume/tanhoiza/model.pmx";
-			std::string Turbo = "data/umamusume/turbo/model.pmx";
-			std::string Ikuno = "data/umamusume/ikuno/model.pmx";
-			std::string Rice = "data/umamusume/rice/model.pmx";
-			std::string Burbon = "data/umamusume/burbon/model.pmx";
-			std::string MAC = "data/umamusume/mac/model.pmx";
-			std::string SPE = "data/umamusume/spe/model.pmx";
-			std::string SZK = "data/umamusume/suzuka/model.pmx";
-			std::string Rudolf2 = "data/umamusume/rudolf2/model.pmx";
-
 			std::string MAP = "data/model/map/model.mv1";
+			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
+		private:
 			std::vector<std::string> NAMES;
-			std::vector<int> RankID;
+			std::vector<size_t> RankID;
 			int camsel = 0;
 			switchs ChangeCamSel;
-		private:
+
 			LoadScriptClass LSClass;		//スクリプト読み込み
 			TelopClass TLClass;				//テロップ
 			size_t m_Counter = 0;			//カット
@@ -1853,223 +1840,6 @@ namespace FPS_n2 {
 			//
 			int fog[3]{ -1,-1,-1 };
 			float fog_range[2]{ -1.f,-1.f };
-			//
-			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
-		public:
-			//Getter
-			bool Time_Over(void) const noexcept { return m_Counter >= m_CutInfo.size(); }
-		public:
-			using TEMPSCENE::TEMPSCENE;
-			void Awake(void) noexcept {
-				auto* DrawParts = DXDraw::Instance();
-				//
-				camera_buf.campos = VECTOR_ref::vget(0, 20, -20);
-				camera_buf.camvec = VECTOR_ref::vget(0, 20, 0);
-				camera_buf.camup = VECTOR_ref::up();
-				camera_buf.set_cam_info(deg2rad(15), 1.f, 200.f);
-				//
-				{
-					SetUseASyncLoadFlag(FALSE);
-					{
-						graphs.Load(
-							(float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)),
-							0, 1.f, 0.5f, LOGO1);
-					}
-					TLClass.Init();
-					int mdata = FileRead_open("data/Cut.txt", FALSE);
-					int cnt = 0;
-					SetUseASyncLoadFlag(TRUE);
-					clsDx();
-					auto NowTime = GetNowHiPerformanceCount();
-					auto TotalTime = GetNowHiPerformanceCount();
-
-					while (FileRead_eof(mdata) == 0) {
-						LSClass.LoadScript(getparams::get_str(mdata));
-						const auto& args = LSClass.Getargs();
-						const auto& func = LSClass.Getfunc();
-						if (func == "") { continue; }
-						//変数登録
-						LSClass.SetArgs();
-						//モデル読み込み
-						if (func.find("LoadModel") != std::string::npos) {
-							for (int i = 0; i < std::stoi(args[1]); i++) {
-								models.Load(args[0]);
-							}
-						}
-						//カット
-						//新規カット
-						if (func.find("SetCut") != std::string::npos) {
-							m_CutInfo.resize(m_CutInfo.size() + 1);
-							m_CutInfo.back().SetTimeLimit((LONGLONG)(1000000.f * std::stof(args[0])));
-							m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
-						}
-						//Camposの指定
-						else if (func.find("SetCampos_Attach") != std::string::npos) {
-							auto startFrame = (int)(m_CutInfo.size()) - 1;
-							attached.Switch.resize(attached.Switch.size() + 1);
-							attached.Switch.back().SetSwitch(startFrame, startFrame + (std::stoi(args[0]) - 1));
-							attachedDetail.resize(attachedDetail.size() + 1);
-							attachedDetail.back().poscam.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
-						}
-						else {
-							//カメラ座標周り
-							if (m_CutInfo.size() > 0) {
-								if (m_CutInfo.back().LoadScript(func, args)) {
-									m_CutInfoUpdate.back().CameraNotFirst = m_CutInfo.back().Aim_camera;
-								}
-							}
-							if (m_CutInfoUpdate.size() > 0) {
-								m_CutInfoUpdate.back().LoadScript(func, args);
-							}
-							//画像描画
-							if (func.find("SetDrawGraph") != std::string::npos) {
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								size_t in_str = args[1].find("~");
-								if (in_str != std::string::npos) {
-									int start_t = std::stoi(args[1].substr(0, in_str));
-									int end_t = std::stoi(args[1].substr(in_str + 1));
-									for (int i = start_t; i <= end_t; i++) {
-										graphs.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
-									}
-								}
-								else {
-									graphs.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
-								}
-							}
-							else if (func.find("SetGraphBlur") != std::string::npos) {
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init(startFrame, std::stoi(args[2]) - 1);
-							}
-							else if (func.find("SetGraphOpacityRate") != std::string::npos) {
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = 0.f;
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate = std::stof(args[2]);
-							}
-							else if (func.find("SetGraphOpacityEasing") != std::string::npos) {
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
-							}
-							//モデル描画
-							else if (func.find("SetDrawModel") != std::string::npos) {
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								size_t in_str = args[1].find("~");
-								if (in_str != std::string::npos) {
-									int start_t = std::stoi(args[1].substr(0, in_str));
-									int end_t = std::stoi(args[1].substr(in_str + 1));
-									for (int i = start_t; i <= end_t; i++) {
-										models.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
-									}
-								}
-								else {
-									models.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
-								}
-							}
-							else if (func.find("SetModelAnime") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().animsel = std::stoi(args[2]);
-								t->CutDetail.back().isloop = (args[3].find("TRUE") != std::string::npos);
-								t->CutDetail.back().animspeed = std::stof(args[4]);
-								t->CutDetail.back().startframe = std::stof(args[5]);
-							}
-							else if (func.find("SetModelMat") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().usemat = true;
-
-								t->CutDetail.back().Yrad1_p = std::stof(args[2]);
-								t->CutDetail.back().pos_p = VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5]));
-								t->CutDetail.back().Yrad2_p = std::stof(args[6]);
-
-								t->CutDetail.back().mat_p = MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad1_p)) * MATRIX_ref::Mtrans(t->CutDetail.back().pos_p) * MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad2_p));
-							}
-							else if (func.find("SetModelPhysicsSpeed") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().PhysicsSpeed_ = std::stof(args[2]);
-							}
-							else if (func.find("SetModelOpacityRate") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().OpacityRate = std::stof(args[2]);
-							}
-							else if (func.find("SetModelOpacityEasing") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-								t->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
-							}
-							//どの距離で描画するかをセット
-							else if (func.find("SetModelMode") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								if (args[2] == ModelType[0]) {
-									t->isBGModel = true;
-								}
-								if (args[2] == ModelType[1]) {
-									t->IsNearShadow = false;
-								}
-								if (args[2] == ModelType[2]) {
-									t->IsFarShadow = true;
-								}
-							}
-						}
-						//テロップ
-						TLClass.LoadTelop(func, args);
-						//END
-						{
-							float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
-							if (tim >= 0.001f) {
-								GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-							}
-							printfDx("ロード%3d完了 [%7.3f s] : %s\n", cnt, tim, func.c_str());
-							if (tim >= 0.001f) {
-								DrawParts->Screen_Flip();
-							}
-							NowTime = GetNowHiPerformanceCount();
-							cnt++;
-						}
-						if (ProcessMessage() != 0) { return; }
-					}
-					FileRead_close(mdata);
-					SetUseASyncLoadFlag(FALSE);
-					printfDx("非同期読み込みオブジェクトの読み込み待ち…\n");
-					int prenum = GetASyncLoadNum(), prenumAll = prenum;
-					while (ProcessMessage() == 0 && GetASyncLoadNum() != 0) {
-						if (prenum != GetASyncLoadNum()) {
-							prenum = GetASyncLoadNum();
-							//END
-							{
-								float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
-								if (tim >= 0.001f) {
-									GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-								}
-								printfDx("ロード%3d完了 [%7.3f s] : %d / %d\n", cnt, tim, prenum, prenumAll);
-								if (tim >= 0.001f) {
-									DrawParts->Screen_Flip();
-								}
-								NowTime = GetNowHiPerformanceCount();
-								cnt++;
-							}
-							continue;
-						}
-					}
-					if (ProcessMessage() == 0) {
-						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-						printfDx("ロード全部完了　キーを押してください : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
-						DrawParts->Screen_Flip();
-						//WaitKey();
-					}
-					else {
-						return;
-					}
-				}
-				//モデルの事前処理(非同期)
-				models.Set();
-				//
-				fog[0] = 128;
-				fog[1] = 128;
-				fog[2] = 128;
-				fog_range[0] = 200.f;
-				fog_range[1] = 300000.f;
-
-				grassmodel.Init();
-				WaitKey();
-			}
 		private:
 			class CharaInfoEdit {
 			private:
@@ -2869,6 +2639,240 @@ namespace FPS_n2 {
 				}
 			}
 		public:
+			//Getter
+			bool Time_Over(void) const noexcept { return m_Counter >= m_CutInfo.size(); }
+		public:
+			using TEMPSCENE::TEMPSCENE;
+			void Awake(void) noexcept {
+				auto* DrawParts = DXDraw::Instance();
+				//
+				camera_buf.campos = VECTOR_ref::vget(0, 20, -20);
+				camera_buf.camvec = VECTOR_ref::vget(0, 20, 0);
+				camera_buf.camup = VECTOR_ref::up();
+				camera_buf.set_cam_info(deg2rad(15), 1.f, 200.f);
+				//
+				{
+					SetUseASyncLoadFlag(FALSE);
+					{
+						graphs.Load(
+							(float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)),
+							0, 1.f, 0.5f, LOGO1);
+					}
+					TLClass.Init();
+					int mdata = FileRead_open("data/Cut.txt", FALSE);
+					int cnt = 0;
+					SetUseASyncLoadFlag(TRUE);
+					clsDx();
+					auto NowTime = GetNowHiPerformanceCount();
+					auto TotalTime = GetNowHiPerformanceCount();
+					while (FileRead_eof(mdata) == 0) {
+						LSClass.LoadScript(getparams::get_str(mdata));
+						const auto& args = LSClass.Getargs();
+						const auto& func = LSClass.Getfunc();
+						if (func == "") { continue; }
+						//変数登録
+						LSClass.SetArgs(&NAMES);
+						//モデル読み込み
+						if (func.find("LoadModel") != std::string::npos) {
+							for (int i = 0; i < std::stoi(args[1]); i++) {
+								models.Load(args[0]);
+							}
+						}
+						//カット
+						//新規カット
+						if (func.find("SetCut") != std::string::npos) {
+							m_CutInfo.resize(m_CutInfo.size() + 1);
+							m_CutInfo.back().SetTimeLimit((LONGLONG)(1000000.f * std::stof(args[0])));
+							m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
+						}
+						//Camposの指定
+						else if (func.find("SetCampos_Attach") != std::string::npos) {
+							auto startFrame = (int)(m_CutInfo.size()) - 1;
+							attached.Switch.resize(attached.Switch.size() + 1);
+							attached.Switch.back().SetSwitch(startFrame, startFrame + (std::stoi(args[0]) - 1));
+							attachedDetail.resize(attachedDetail.size() + 1);
+							attachedDetail.back().poscam.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
+						}
+						else {
+							//カメラ座標周り
+							if (m_CutInfo.size() > 0) {
+								if (m_CutInfo.back().LoadScript(func, args)) {
+									m_CutInfoUpdate.back().CameraNotFirst = m_CutInfo.back().Aim_camera;
+								}
+							}
+							if (m_CutInfoUpdate.size() > 0) {
+								m_CutInfoUpdate.back().LoadScript(func, args);
+							}
+							//画像描画
+							if (func.find("SetDrawGraph") != std::string::npos) {
+								auto startFrame = (int)(m_CutInfo.size()) - 1;
+								size_t in_str = args[1].find("~");
+								if (in_str != std::string::npos) {
+									int start_t = std::stoi(args[1].substr(0, in_str));
+									int end_t = std::stoi(args[1].substr(in_str + 1));
+									for (int i = start_t; i <= end_t; i++) {
+										graphs.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
+									}
+								}
+								else {
+									graphs.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
+								}
+							}
+							else if (func.find("SetGraphBlur") != std::string::npos) {
+								auto startFrame = (int)(m_CutInfo.size()) - 1;
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init(startFrame, std::stoi(args[2]) - 1);
+							}
+							else if (func.find("SetGraphOpacityRate") != std::string::npos) {
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = 0.f;
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate = std::stof(args[2]);
+							}
+							else if (func.find("SetGraphOpacityEasing") != std::string::npos) {
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
+								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
+							}
+							//モデル描画
+							else if (func.find("SetDrawModel") != std::string::npos) {
+								auto startFrame = (int)(m_CutInfo.size()) - 1;
+								size_t in_str = args[1].find("~");
+								if (in_str != std::string::npos) {
+									int start_t = std::stoi(args[1].substr(0, in_str));
+									int end_t = std::stoi(args[1].substr(in_str + 1));
+									for (int i = start_t; i <= end_t; i++) {
+										models.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
+									}
+								}
+								else {
+									models.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
+								}
+							}
+							else if (func.find("SetModelAnime") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->CutDetail.back().animsel = std::stoi(args[2]);
+								t->CutDetail.back().isloop = (args[3].find("TRUE") != std::string::npos);
+								t->CutDetail.back().animspeed = std::stof(args[4]);
+								t->CutDetail.back().startframe = std::stof(args[5]);
+							}
+							else if (func.find("SetModelMat") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->CutDetail.back().usemat = true;
+
+								t->CutDetail.back().Yrad1_p = std::stof(args[2]);
+								t->CutDetail.back().pos_p = VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5]));
+								t->CutDetail.back().Yrad2_p = std::stof(args[6]);
+
+								t->CutDetail.back().mat_p = MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad1_p)) * MATRIX_ref::Mtrans(t->CutDetail.back().pos_p) * MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad2_p));
+							}
+							else if (func.find("SetModelPhysicsSpeed") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->CutDetail.back().PhysicsSpeed_ = std::stof(args[2]);
+							}
+							else if (func.find("SetModelOpacityRate") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->CutDetail.back().OpacityRate = std::stof(args[2]);
+							}
+							else if (func.find("SetModelOpacityEasing") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								t->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
+								t->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
+							}
+							//どの距離で描画するかをセット
+							else if (func.find("SetModelMode") != std::string::npos) {
+								auto* t = models.Get(args[0], std::stoi(args[1]));
+								if (args[2] == ModelType[0]) {
+									t->isBGModel = true;
+								}
+								if (args[2] == ModelType[1]) {
+									t->IsNearShadow = false;
+								}
+								if (args[2] == ModelType[2]) {
+									t->IsFarShadow = true;
+								}
+							}
+						}
+						//テロップ
+						TLClass.LoadTelop(func, args);
+						//END
+						{
+							float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
+							if (tim >= 0.001f) {
+								GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
+							}
+							printfDx("ロード%3d完了 [%7.3f s] : %s\n", cnt, tim, func.c_str());
+							if (tim >= 0.001f) {
+								DrawParts->Screen_Flip();
+							}
+							NowTime = GetNowHiPerformanceCount();
+							cnt++;
+						}
+						if (ProcessMessage() != 0) { return; }
+					}
+					FileRead_close(mdata);
+					SetUseASyncLoadFlag(FALSE);
+					printfDx("非同期読み込みオブジェクトの読み込み待ち…\n");
+					int prenum = GetASyncLoadNum(), prenumAll = prenum;
+					while (ProcessMessage() == 0 && GetASyncLoadNum() != 0) {
+						if (prenum != GetASyncLoadNum()) {
+							prenum = GetASyncLoadNum();
+							//END
+							{
+								float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
+								if (tim >= 0.001f) {
+									GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
+								}
+								printfDx("ロード%3d完了 [%7.3f s] : %d / %d\n", cnt, tim, prenum, prenumAll);
+								if (tim >= 0.001f) {
+									DrawParts->Screen_Flip();
+								}
+								NowTime = GetNowHiPerformanceCount();
+								cnt++;
+							}
+							continue;
+						}
+					}
+					if (ProcessMessage() != 0) {
+						return;
+					}
+					//モデルの事前処理(非同期)
+					{
+						models.Set();
+						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
+						printfDx("モデルのセット完了 : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
+						DrawParts->Screen_Flip();
+						for (auto& n : NAMES) {
+							if (n.find(".pmx") != std::string::npos) {
+								MV1SaveModelToMV1File(models.Get(n, 0)->obj.get(), (n.substr(0, n.find(".pmx")) + ".mv1").c_str(), MV1_SAVETYPE_NORMAL, -1, 1, 1, 1, 0, 0);
+							}
+						}
+						if (ProcessMessage() != 0) {
+							return;
+						}
+					}
+					//モデルのMV!保存
+					{
+						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
+						printfDx("モデルのMV1変換完了 : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
+						DrawParts->Screen_Flip();
+						if (ProcessMessage() != 0) {
+							return;
+						}
+					}
+					GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
+					printfDx("ロード全部完了　キーを押してください\n");
+					DrawParts->Screen_Flip();
+					//
+				}
+				//
+				fog[0] = 128;
+				fog[1] = 128;
+				fog[2] = 128;
+				fog_range[0] = 200.f;
+				fog_range[1] = 300000.f;
+
+				grassmodel.Init();
+				WaitKey();
+			}
+		public:
 			void Set(void) noexcept override {
 				auto* PostPassParts = PostPassEffect::Instance();
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
@@ -3019,29 +3023,6 @@ namespace FPS_n2 {
 						if (m_Counter == SEL) {
 							int GudeStart = 0;
 							if (isFirstLoop) {
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Teio;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Nice;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Tanhoiza;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Turbo;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Ikuno;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Rice;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Burbon;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = MAC;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = SPE;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = SZK;
-								NAMES.resize(NAMES.size() + 1);
-								NAMES.back() = Rudolf2;
-
 								RankID.resize(NAMES.size());
 								Guide.SetMatrix(models.Get(MAP, 0)->obj.GetMatrix());
 								for (int i = 0; i < Guide.frame_num(); i++) {
@@ -3266,26 +3247,24 @@ namespace FPS_n2 {
 										{
 											auto xvb = MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).xvec();
 											auto Lcos = xvb.dot(m->Nearest);
-											if (Lcos>0 && m->Nearest.size()>80.f) {
+											if (Lcos > 0 && m->Nearest.size() > 80.f) {
 												xpos_buf = std::max(xpos_buf - 10.f / FPS * GameSpeed, 20.f + GetRandf(20.f));
-												xof2 = 0;
+												xof2 = std::max(0.f, xof2 - 72.f);
 											}
-											else if (m->Nearest.size() > 120.f) {
+											else if (m->Nearest.size() > 240.f) {
 												xpos_buf = std::max(xpos_buf - 5.f / FPS * GameSpeed, 20.f + GetRandf(20.f));
-												xof2 = 0;
+												xof2 = std::max(0.f, xof2 - 72.f);
 											}
 											else {
 												if (m->Rank > NAMES.size() / 2) {
 													xof2 -= 16.f;
 												}
 												else {
-													xof2 += 8.f;
+													xof2 += 24.f;
 												}
 												xof2 = std::max(0.f, xof2);
 												xpos_buf = xof2 + GetRandf(50.f);
 											}
-											/*
-											//*/
 											break;
 										}
 										}
@@ -3293,7 +3272,7 @@ namespace FPS_n2 {
 											m->xposition -= 5.f / FPS * GameSpeed;
 										}
 										else {
-											m->xposition += 1.f / FPS * GameSpeed;
+											m->xposition += 5.f / FPS * GameSpeed;
 										}
 										m->xposition = std::max(0.f, m->xposition);
 									}
@@ -3704,12 +3683,10 @@ namespace FPS_n2 {
 				if (camera_main.near_ - 1.f < camfar&& camfar < camera_main.near_ + 1.f) {
 				}
 				else if (camera_main.far_ - 1.f < camfar&& camfar < camera_main.far_ + 1.f) {
-					grassmodel.Check_CameraViewClip();
 					models.Draw(false, false, FALSE);
 				}
 				//far
 				else {
-					grassmodel.Check_CameraViewClip();
 					models.Draw(false, false, TRUE);
 				}
 				if (isFreepos) {

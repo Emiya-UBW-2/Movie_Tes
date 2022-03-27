@@ -16,7 +16,7 @@ namespace FPS_n2 {
 	float GameSpeed = 1.0f;
 
 	static const auto GetMocroSec() noexcept {
-		return GetNowHiPerformanceCount() * (int)(GameSpeed*1000.f)/1000;
+		return GetNowHiPerformanceCount() * (int)(GameSpeed*1000.f) / 1000;
 	}
 	template <class T>
 	static void easing_set_SetSpeed(T* first, const T& aim, const float& ratio) {
