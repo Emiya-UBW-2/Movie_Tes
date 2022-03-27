@@ -226,7 +226,7 @@ namespace FPS_n2 {
 					}
 				}, scenes_ptr->Get_Camera());
 #ifdef DEBUG
-				DebugParts->end_way();
+				//DebugParts->end_way();
 #endif // DEBUG
 				//ディスプレイ描画
 				GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);

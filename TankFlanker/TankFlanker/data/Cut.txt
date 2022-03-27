@@ -50,8 +50,8 @@
 		SetCamInfo(15, 2.0, 100.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdatePer(0.0);
-		SetUpdateCamForcus(0.9, Teio, 0, NECK, 0.0, 0.0, 0.0);
+		SetUpdatePer(0.9);
+		SetUpdateCamForcus(0.0, Teio, 0, NECK, 0.0, 0.0, 0.0);
 
 		//SetUpdateCamvec(0.0, -1.0, 3.0, 0.0);
 		//SetUpdateCampos(0.9, 40.0, 25.0, 1.0);

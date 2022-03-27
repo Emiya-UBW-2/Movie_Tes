@@ -619,13 +619,8 @@ namespace FPS_n2 {
 							}
 							else {
 								m.isFarPhysics = false;
-								if (m.isDraw) {
-									//m.SetPhysics(false, 1.f);
-									//*
-									if (m.canUpdate) {
-										m.SetPhysics(false, 2.f);
-									}
-									//*/
+								if (m.isDraw && m.canUpdate) {
+									m.SetPhysics(false, 2.f);
 								}
 							}
 						}
@@ -3463,7 +3458,7 @@ namespace FPS_n2 {
 									easing_set(&m_CutInfo[m_Counter].Aim_camera.fov, deg2rad(std::clamp(100.f / dist * 45.f, 1.f, 50.f)), 0.9f);
 
 									if (cam_far > 6000.f) {
-										cam_near = std::clamp(cam_far / 2.f, 2.f, 3000.f);
+										cam_near = std::clamp(cam_far / 1.8f, 2.f, 3000.f);
 									}
 									else if (cam_far > 4000.f) {
 										cam_near = std::clamp(cam_far / 3.f, 2.f, 2000.f);
@@ -3472,10 +3467,10 @@ namespace FPS_n2 {
 										cam_near = std::clamp(cam_far / 6.f, 2.f, 2000.f);
 									}
 									else if (cam_far > 1000.f) {
-										cam_near = std::clamp(cam_far / 7.f, 2.f, 2000.f);
+										cam_near = std::clamp(cam_far / 8.f, 2.f, 2000.f);
 									}
 									else {
-										cam_near = std::min(cam_near, std::clamp(cam_far / 7.f, 2.f, 1000.f));
+										cam_near = std::min(cam_near, std::clamp(cam_far / 10.f, 2.f, 1000.f));
 									}
 									printfDx("FAR  = %.2f\n", cam_far);
 									printfDx("NEAR = %.2f\n", cam_near);
