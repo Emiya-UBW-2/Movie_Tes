@@ -986,6 +986,8 @@ namespace FPS_n2 {
 				std::string Frame;
 				VECTOR_ref Add;
 			public:
+				float Per = 1.f;
+
 				void SetUse(bool value) noexcept { Use = value; }
 				const auto& GetIsUse() const noexcept { return Use; }
 				void Init(void) noexcept {
@@ -1048,7 +1050,7 @@ namespace FPS_n2 {
 				int fog[3]{ -1,-1,-1 };
 				float fog_range[2]{ -1.f,-1.f };
 			public:
-				ForcusControl Forcus;
+				std::vector<ForcusControl> Forcus;
 			public:
 				//Getter
 				const auto& GetTimeLimit() const noexcept { return TimeLimit; }
@@ -1084,7 +1086,8 @@ namespace FPS_n2 {
 						return true;
 					}
 					else if (func.find("SetCamForcus") != std::string::npos) {
-						this->Forcus.Set(args[0], std::stol(args[1]), args[2], VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5])));
+						this->Forcus.resize(this->Forcus.size() + 1);
+						this->Forcus.back().Set(args[0], std::stol(args[1]), args[2], VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5])));
 					}
 					//CamUp
 					else if (func.find("SetCamup") != std::string::npos) {
@@ -1149,8 +1152,11 @@ namespace FPS_n2 {
 				float m_RandcamposPer;
 				VECTOR_ref m_RandcamposSet;
 			public:
-				ForcusControl Forcus;
+				std::vector<ForcusControl> Forcus;
 				bool IsUsePrevBuf{ false };
+
+				size_t CutSel = 0;
+				size_t OLDCutSel = SIZE_MAX;
 
 				float campos_per{ 0.f };
 				float camvec_per{ 0.f };
@@ -1183,15 +1189,17 @@ namespace FPS_n2 {
 					m_RandcamvecSet.clear();
 					m_RandcamposPer = 0.f;
 					m_RandcamposSet.clear();
-
-					Forcus.Init();
+					for (auto&f : Forcus) {
+						f.Init();
+					}
 				}
 				~Cut_Info_Update(void) noexcept {
 				}
 
 				void SetForce(float camvecPer, std::string_view ModelPath, int ModelID, std::string_view Frame, const VECTOR_ref& Add) noexcept {
 					this->camvec_per = camvecPer;
-					this->Forcus.Set(ModelPath, ModelID, Frame, Add);
+					this->Forcus.resize(this->Forcus.size() + 1);
+					this->Forcus.back().Set(ModelPath, ModelID, Frame, Add);
 				}
 				void LoadScript(const std::string &func, const std::vector<std::string>& args) noexcept {
 					//カメラのアップデート
@@ -1293,9 +1301,29 @@ namespace FPS_n2 {
 					easing_set_SetSpeed(&m_RandcamvecBuf, VECTOR_ref::vget(GetRandf(this->m_RandcamvecSet.x()), GetRandf(this->m_RandcamvecSet.y()), GetRandf(this->m_RandcamvecSet.z())), this->m_RandcamvecPer);
 					easing_set_SetSpeed(&m_RandcamupBuf, VECTOR_ref::vget(GetRandf(this->m_RandcamupSet.x()), GetRandf(this->m_RandcamupSet.y()), GetRandf(this->m_RandcamupSet.z())), this->m_RandcamupPer);
 					if (this->isUseNotFirst) {
-						if (this->Forcus.GetIsUse()) {
-							this->CameraNotFirst.camvec = this->Forcus.GetForce(models);
+						VECTOR_ref vec;
+						bool isforcus = false;
+#if 0
+						for (auto&f : Forcus) {
+							if (f.GetIsUse()) {
+								vec += f.GetForce(models);
+								isforcus = true;
+							}
 						}
+						if (isforcus) {
+							this->CameraNotFirst.camvec = vec / (float)(Forcus.size());
+						}
+#else
+						for (auto&f : Forcus) {
+							if (f.GetIsUse()) {
+								vec += f.GetForce(models) * f.Per;
+								isforcus = true;
+							}
+						}
+						if (isforcus) {
+							this->CameraNotFirst.camvec = vec;
+						}
+#endif
 						easing_set_SetSpeed(&Camera.Aim_camera.campos, this->CameraNotFirst.campos + m_RandcamposBuf, this->campos_per);
 						easing_set_SetSpeed(&Camera.Aim_camera.camvec, this->CameraNotFirst.camvec + m_RandcamvecBuf, this->camvec_per);
 						easing_set_SetSpeed(&Camera.Aim_camera.camup, this->CameraNotFirst.camup + m_RandcamupBuf, this->camup_per);
@@ -1765,6 +1793,7 @@ namespace FPS_n2 {
 			std::vector<size_t> RankID;
 			int camsel = 0;
 			switchs ChangeCamSel;
+			float Per_Change = 1.f;
 
 			LoadScriptClass LSClass;		//スクリプト読み込み
 			TelopClass TLClass;				//テロップ
@@ -3480,12 +3509,74 @@ namespace FPS_n2 {
 								}
 								//
 							}
-							//
-							ChangeCamSel.GetInput(CheckHitKey(KEY_INPUT_DOWN) != 0);
-							if (ChangeCamSel.trigger()) {
-								m_CutInfoUpdate[m_Counter].Forcus.Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
-								++camsel %= (int)(NAMES.size());
+							//カット設定
+							{
+								m_CutInfoUpdate[m_Counter].CutSel = 0;
 							}
+							//init
+							{
+								if (m_CutInfoUpdate[m_Counter].OLDCutSel != m_CutInfoUpdate[m_Counter].CutSel) {
+									switch (m_CutInfoUpdate[m_Counter].CutSel)
+									{
+									case 0:
+									{
+										m_CutInfoUpdate[m_Counter].Forcus.resize(2);
+
+										camsel = 0;
+										m_CutInfoUpdate[m_Counter].Forcus[0].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+										m_CutInfoUpdate[m_Counter].Forcus[1].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+
+										Per_Change = 0.f;
+
+
+										easing_set(&attachedDetail.back().poscam,
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).yvec() * 10.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).zvec() * -90.f
+											, 0.95f);
+									}
+									break;
+									case 1:
+									{
+									}
+									break;
+									default:
+										break;
+									}
+								}
+								m_CutInfoUpdate[m_Counter].OLDCutSel = m_CutInfoUpdate[m_Counter].CutSel;
+							}
+							//update
+							{
+								switch (m_CutInfoUpdate[m_Counter].CutSel)
+								{
+								case 0:
+								{
+									if (m_CutInfoUpdate[m_Counter].Forcus.size() == 2) {
+										ChangeCamSel.GetInput((CheckHitKey(KEY_INPUT_DOWN) != 0) && (Per_Change <= 0.001f));
+										if (ChangeCamSel.trigger()) {
+											m_CutInfoUpdate[m_Counter].Forcus[0].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+											++camsel %= (int)(NAMES.size());
+											m_CutInfoUpdate[m_Counter].Forcus[1].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+											Per_Change = 1.f;
+										}
+										else {
+											easing_set(&Per_Change, 0.f, 0.95f);
+										}
+										m_CutInfoUpdate[m_Counter].Forcus[0].Per = Per_Change;
+										m_CutInfoUpdate[m_Counter].Forcus[1].Per = 1.f - Per_Change;
+									}
+
+									easing_set(&attachedDetail.back().poscam,
+										MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).yvec() * 10.f +
+										MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).zvec() * -90.f
+										, 0.95f);
+								}
+								break;
+								default:
+									break;
+								}
+							}
+							//
 						}
 						SEL++;
 					}
@@ -3539,9 +3630,30 @@ namespace FPS_n2 {
 								fog_range[1] = 300000.f;
 							}
 							//
-							if (m_CutInfo[m_Counter].Forcus.GetIsUse()) {
-								m_CutInfo[m_Counter].Aim_camera.camvec = m_CutInfo[m_Counter].Forcus.GetForce(models);
+							VECTOR_ref vec;
+							bool isforcus = false;
+#if 1
+							for (auto&f : m_CutInfo[m_Counter].Forcus) {
+								if (f.GetIsUse()) {
+									vec += f.GetForce(models);
+									isforcus = true;
+								}
 							}
+							if (isforcus) {
+								m_CutInfo[m_Counter].Aim_camera.camvec = vec / (float)(m_CutInfo[m_Counter].Forcus.size());
+							}
+#else
+							for (auto&f : m_CutInfo[m_Counter].Forcus) {
+								if (f.GetIsUse()) {
+									vec += f.GetForce(models) * f.Per;
+									isforcus = true;
+								}
+							}
+							if (isforcus) {
+								m_CutInfo[m_Counter].Aim_camera.camvec = vec;
+							}
+#endif
+
 							//
 							if (attached.GetSwitch()) {
 								m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec + attachedDetail[attached.nowcut].poscam;
