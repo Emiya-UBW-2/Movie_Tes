@@ -109,12 +109,14 @@ c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1623): warning C4
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseer.modules.h(1642): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\effekseerrendererdx11.h(89): warning C4100: 'renderer': 引数は関数の本体部で 1 度も参照されません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3542): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3543): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3565): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3581): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3606): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3629): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
-c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3670): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3564): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3591): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3608): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3634): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3658): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
+c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3710): warning C4267: '=': 'size_t' から 'int' に変換しました。データが失われているかもしれません。
 c:\users\a6m3z\source\repos\movie_tes\tankflanker\tankflanker\mainscene.hpp(3504): warning C4189: 'dist': ローカル変数が初期化されましたが、参照されていません
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(78): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
 c:\users\a6m3z\source\repos\dxlib_vc\dx_vc\dxlib_ref\dxlib_vec.hpp(81): warning C4505: 'Segment_Point_MinLen': 参照されていないローカル関数は削除されました。
