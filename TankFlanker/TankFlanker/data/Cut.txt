@@ -35,7 +35,7 @@
 		LoadModel(GATE, 1);//ゲート
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
-		//SetModelMode(GATE, 0, FAR_TRUE);
+		SetModelMode(GATE, 0, FAR_TRUE);
 		SetModelMode(MAP, 0, FAR_TRUE);
 		//SetModelMode(MAP, 0, NEAR_FALSE);
 		SetModelMode(SKY, 0, SKY_TRUE);
@@ -61,6 +61,9 @@
 
 			SetDrawModel(MAP, 0, 6);
 			SetModelMat(MAP, 0, 0, 0.0, 0.0, -2300.0, 0.0);
+
+			SetDrawModel(GATE, 0, 6);
+
 			SetDrawModel(SKY, 0, 6);
 			SetDrawModel(SUN, 0, 6);
 

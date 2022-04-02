@@ -1790,6 +1790,7 @@ namespace FPS_n2 {
 			std::string LOGO1 = "data/picture/logo.png";
 			std::string SUN = "data/model/sun/model.mv1";
 			std::string MAP = "data/model/map/model.mv1";
+			std::string GATE = "data/model/map/model_gate.mv1";
 			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
 		private:
 			std::vector<std::string> NAMES;
@@ -1797,6 +1798,7 @@ namespace FPS_n2 {
 			int camsel = 0;
 			int camsel_buf = 0;
 			switchs ChangeCamSel;
+			switchs ChangeStart;
 			float Per_Change = 1.f;
 
 			float Change1Time = 1.f;
@@ -3064,7 +3066,34 @@ namespace FPS_n2 {
 										break;
 									}
 								}
+								{
+									auto* m = models.Get(GATE, 0);
+
+									m->pos_p.Set(0, 0, 160.f);
+									m->Yrad1_p = -90.f;
+									m->mat_p =
+										MATRIX_ref::RotY(deg2rad(m->Yrad1_p))
+										* MATRIX_ref::RotAxis(MATRIX_ref::RotY(deg2rad(m->Yrad1_p)).zvec(), deg2rad(m->Zrad1_p))
+										* MATRIX_ref::Mtrans(m->pos_p) * MATRIX_ref::RotY(deg2rad(m->Yrad2_p));
+									if (m->canUpdate) {
+										m->obj.SetMatrix(m->mat_p);
+									}
+								}
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									m->firststart = false;
+									m->pos_z_p = 0.f;
+								}
 							}
+
+							ChangeStart.GetInput(!ChangeStart.on() && (CheckHitKey(KEY_INPUT_V) != 0));
+							if (ChangeStart.trigger()) {
+								for (auto& n : NAMES) {
+									auto* m = models.Get(n, 0);
+									m->firststart = true;
+								}
+							}
+
 							{
 								float xof = 0.f;
 								float xof2 = 0.f;
@@ -3079,8 +3108,7 @@ namespace FPS_n2 {
 											m->Zrad1_p = 0.f;
 											m->Yrad2_p = inf.Yrad2_p;
 											m->pos_z_p = 0.f;
-											m->firststart = true;
-											xof += 16.f;
+											xof += 13.8f;
 										}
 										m->animspd = 0.f;
 										m->GuideNum[0] = GudeStart;
@@ -3129,7 +3157,9 @@ namespace FPS_n2 {
 													}
 												}
 												if (aimcnt > 0) {
-													m->Aim_p = Aim * (1.f / (float)aimcnt);
+													if (ChangeStart.on()) {
+														m->Aim_p = Aim * (1.f / (float)aimcnt);
+													}
 												}
 											}
 
@@ -3222,17 +3252,19 @@ namespace FPS_n2 {
 
 										easing_set(&m->Zrad1_p, std::clamp(m->Zrad1buf_p, -10.f, 10.f), 0.95f);
 										easing_set(&m->Zrad1buf_p, m->Yradaddbuf_p*50.f, 0.95f);
-
-										m->pos_p += MATRIX_ref::Vtrans(VECTOR_ref::vget(0, 0, m->pos_z_p), MATRIX_ref::RotY(deg2rad(m->Yrad1_p)))*(1.f / FPS * GameSpeed);
-
+										if (ChangeStart.on()) {
+											m->pos_p += MATRIX_ref::Vtrans(VECTOR_ref::vget(0, 0, m->pos_z_p), MATRIX_ref::RotY(deg2rad(m->Yrad1_p)))*(1.f / FPS * GameSpeed);
+										}
 										auto total = -19.4f * 12.5f;
 										if (m->GuideNum[0] >= 0) {
-											if (m->pos_z_p >= total + GetRandf(1.0f*12.5f) - m->TurboSpeed) { m->pos_z_p += -0.6f; }
-											else { m->pos_z_p -= -0.6f; }
+											if (m->pos_z_p != 0.f) {
+												if (m->pos_z_p >= total + GetRandf(1.0f*12.5f) - m->TurboSpeed) { m->pos_z_p += -0.6f; }
+												else { m->pos_z_p -= -0.6f; }
+											}
 											//
 											if (m->firststart) {
 												if (m->pos_z_p >= total / 2.f) {
-													m->pos_z_p += -3.f;
+													m->pos_z_p += -12.f;
 												}
 												else {
 													m->firststart = false;
@@ -3534,10 +3566,31 @@ namespace FPS_n2 {
 								m_CutInfoUpdate[m_Counter].CutSel = CutSel_Buf;
 							}
 							//init
+							enum {
+								CAMERA_1,
+
+								CAMERA_A,
+
+								CAMERA_2,
+								CAMERA_2_2,
+
+								CAMERA_B,
+
+								CAMERA_3,
+
+								CAMERA_4,
+
+								CAMERA_5,
+
+								CAMERA_6,
+
+								CAMERA_7,
+							};
 							{
+
 								if (m_CutInfoUpdate[m_Counter].OLDCutSel != m_CutInfoUpdate[m_Counter].CutSel) {
 									switch (m_CutInfoUpdate[m_Counter].CutSel) {
-									case 0:
+									case CAMERA_1:
 									{
 										camsel_buf = NAMES.size() / 2;
 										camsel = RankID[camsel_buf];
@@ -3558,7 +3611,31 @@ namespace FPS_n2 {
 									}
 									break;
 
-									case 1:
+									case CAMERA_A:
+									{
+										camsel_buf = 0;
+										camsel = RankID[camsel_buf];
+
+										m_CutInfoUpdate[m_Counter].m_RandcamvecSet.Set(0.f, 0.f, 0.f);
+										m_CutInfoUpdate[m_Counter].m_RandcamvecPer = 0.f;
+										m_CutInfoUpdate[m_Counter].camvec_per = 0.f;
+
+										m_CutInfoUpdate[m_Counter].Forcus.resize(1);
+										m_CutInfoUpdate[m_Counter].Forcus[0].Set(NAMES[camsel], 0, "HEAD", VECTOR_ref::zero());
+
+										attachedDetail.back().poscam =
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).xvec() * -90.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).yvec() * 5.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).zvec() * -30.f;
+										attached_override = true;
+
+										m_CutInfo[m_Counter].Aim_camera.fov = deg2rad(14.f);
+
+										Change1Time = 3.f;
+									}
+									break;
+
+									case CAMERA_2:
 									{
 										camsel_buf = 0;
 										camsel = RankID[camsel_buf];
@@ -3576,14 +3653,46 @@ namespace FPS_n2 {
 											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).zvec() * -90.f;
 										attached_override = true;
 
-										m_CutInfo[m_Counter].Aim_camera.fov = deg2rad(10.f);
+										m_CutInfo[m_Counter].Aim_camera.fov = deg2rad(14.f);
 
+										Change1Time = 1.5f;
+									}
+									break;
+
+									case CAMERA_2_2:
+									{
+										m_CutInfo[m_Counter].Aim_camera.fov = deg2rad(6.5f);
 										Change1Time = 3.f;
 									}
 									break;
 
+									case CAMERA_B:
+									{
+										camsel_buf = 0;
+										camsel = RankID[camsel_buf];
 
-									case 2:
+										m_CutInfoUpdate[m_Counter].Forcus.resize(1);
+										m_CutInfoUpdate[m_Counter].Forcus[0].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+
+
+										m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).xvec() * -150.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).yvec() * 3.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).zvec() * -400.f;
+										attached_override = false;
+
+
+										m_CutInfoUpdate[m_Counter].m_RandcamvecSet.Set(0.f, 0.f, 0.f);
+										m_CutInfoUpdate[m_Counter].m_RandcamvecPer = 0.f;
+										m_CutInfoUpdate[m_Counter].camvec_per = 0.f;
+
+										Change1Time = 2.25f;
+
+										m_CutInfo[m_Counter].Aim_camera.fov = deg2rad(25.f);
+									}
+									break;
+
+									case CAMERA_3:
 									{
 										m_CutInfoUpdate[m_Counter].Forcus.resize(2);
 
@@ -3602,7 +3711,7 @@ namespace FPS_n2 {
 									}
 									break;
 
-									case 3:
+									case CAMERA_4:
 									{
 										camsel_buf = 0;
 										camsel = RankID[camsel_buf];
@@ -3618,7 +3727,7 @@ namespace FPS_n2 {
 										attached_override = false;
 
 
-										m_CutInfoUpdate[m_Counter].m_RandcamvecSet.Set(30.f,30.f,30.f);
+										m_CutInfoUpdate[m_Counter].m_RandcamvecSet.Set(30.f, 30.f, 30.f);
 										m_CutInfoUpdate[m_Counter].m_RandcamvecPer = 0.9f;
 										m_CutInfoUpdate[m_Counter].camvec_per = 0.9f;
 
@@ -3628,7 +3737,7 @@ namespace FPS_n2 {
 									}
 									break;
 
-									case 4:
+									case CAMERA_5:
 									{
 										camsel_buf = 0;
 										camsel = RankID[camsel_buf];
@@ -3652,7 +3761,7 @@ namespace FPS_n2 {
 									}
 									break;
 
-									case 5:
+									case CAMERA_6:
 									{
 										camsel_buf = 1;
 										camsel = RankID[camsel_buf];
@@ -3673,6 +3782,31 @@ namespace FPS_n2 {
 									}
 									break;
 
+									case CAMERA_7:
+									{
+										camsel_buf = 0;
+										camsel = RankID[camsel_buf];
+
+										m_CutInfoUpdate[m_Counter].Forcus.resize(1);
+										m_CutInfoUpdate[m_Counter].Forcus[0].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
+
+
+										m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).xvec() * 70.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).yvec() * 12.f +
+											MATRIX_ref::RotY(deg2rad(models.Get(NAMES[camsel], 0)->Yrad1_p)).zvec() * -700.f;
+										attached_override = false;
+
+										Change1Time = 5.f;
+
+										m_CutInfoUpdate[m_Counter].m_RandcamvecSet.Set(5.f, 5.f, 5.f);
+										m_CutInfoUpdate[m_Counter].m_RandcamvecPer = 0.95f;
+										m_CutInfoUpdate[m_Counter].camvec_per = 0.95f;
+
+										m_CutInfo[m_Counter].Aim_camera.fov = deg2rad(45.f);
+									}
+									break;
+
 									default:
 										break;
 									}
@@ -3682,7 +3816,18 @@ namespace FPS_n2 {
 							//update
 							{
 								switch (m_CutInfoUpdate[m_Counter].CutSel) {
-								case 0:
+								case CAMERA_1:
+								{
+									if (ChangeStart.on()) {
+										Change1Time -= 1.f / FPS * GameSpeed;
+										if (Change1Time <= 0.f) {
+											CutSel_Buf++;
+										}
+									}
+								}
+								break;
+
+								case CAMERA_A:
 								{
 									Change1Time -= 1.f / FPS * GameSpeed;
 									if (Change1Time <= 0.f) {
@@ -3691,7 +3836,18 @@ namespace FPS_n2 {
 								}
 								break;
 
-								case 1:
+								case CAMERA_2:
+								{
+									m_CutInfo[m_Counter].Aim_camera.fov -= deg2rad(2.f * 1.f / FPS * GameSpeed);
+
+									Change1Time -= 1.f / FPS * GameSpeed;
+									if (Change1Time <= 0.f) {
+										CutSel_Buf++;
+									}
+								}
+								break;
+
+								case CAMERA_2_2:
 								{
 									Change1Time -= 1.f / FPS * GameSpeed;
 									if (Change1Time <= 0.f) {
@@ -3700,7 +3856,17 @@ namespace FPS_n2 {
 								}
 								break;
 
-								case 2:
+								case CAMERA_B:
+								{
+									m_CutInfo[m_Counter].Aim_camera.near_ = 3.f;
+									Change1Time -= 1.f / FPS * GameSpeed;
+									if (Change1Time <= 0.f) {
+										CutSel_Buf++;
+									}
+								}
+								break;
+
+								case CAMERA_3:
 								{
 									if (m_CutInfoUpdate[m_Counter].Forcus.size() == 2) {
 										ChangeCamSel.GetInput((CheckHitKey(KEY_INPUT_DOWN) != 0) && (Per_Change <= 0.001f));
@@ -3729,17 +3895,17 @@ namespace FPS_n2 {
 								}
 								break;
 
-								case 3:
+								case CAMERA_4:
 								{
 									m_CutInfo[m_Counter].Aim_camera.near_ = 3.f;
 									Change1Time -= 1.f / FPS * GameSpeed;
 									if (Change1Time <= 0.f) {
-										CutSel_Buf ++;
+										CutSel_Buf++;
 									}
 								}
 								break;
 
-								case 4:
+								case CAMERA_5:
 								{
 									Change1Time -= 1.f / FPS * GameSpeed;
 									if (Change1Time <= 0.f) {
@@ -3748,13 +3914,24 @@ namespace FPS_n2 {
 								}
 								break;
 
-								case 5:
+								case CAMERA_6:
 								{
 									m_CutInfo[m_Counter].Aim_camera.near_ = 3.f;
 
 									Change1Time -= 1.f / FPS * GameSpeed;
 									if (Change1Time <= 0.f) {
-										CutSel_Buf=1;
+										CutSel_Buf++;
+									}
+								}
+								break;
+
+								case CAMERA_7:
+								{
+									m_CutInfo[m_Counter].Aim_camera.near_ = 3.f;
+
+									Change1Time -= 1.f / FPS * GameSpeed;
+									if (Change1Time <= 0.f) {
+										CutSel_Buf = 1;
 									}
 								}
 								break;
