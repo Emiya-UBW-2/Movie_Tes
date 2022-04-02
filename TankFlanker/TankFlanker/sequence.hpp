@@ -4,7 +4,6 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		template <class T>
 		static T Leap(const T& A, const T& B, float Per) noexcept { return A + (T)((float)(B - A)*Per); }
-		static float GetRandf(float m_arg) noexcept { return -m_arg + (float)(GetRand((int)(m_arg * 2.f * 10000.f))) / 10000.f; }
 		static VECTOR_ref GetVector(float Xrad, float Yrad) noexcept { return VECTOR_ref::vget(-cos(deg2rad(Xrad))*sin(-deg2rad(Yrad)), sin(deg2rad(Xrad)), -cos(deg2rad(Xrad))*cos(-deg2rad(Yrad))); }
 		class MAINLOOP;
 		//
