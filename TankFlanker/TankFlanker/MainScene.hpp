@@ -63,112 +63,21 @@ namespace FPS_n2 {
 					return isResetPhusics;
 				}
 			};
-			class CharaInfoEdit {
-			private:
-				std::string Name;
-				std::string Info;
-				int x1;
-				int y1;
-				int xs;
-				int ys;
-				int thick = 2;
-			public:
-				CharaInfoEdit(void) noexcept {}
-				~CharaInfoEdit(void) noexcept {}
-
-				void Set(std::string_view name, int x_1, int y_1, int xsize, int ysize, int Thickness) noexcept {
-					Name = name;
-					x1 = x_1;
-					y1 = y_1;
-					xs = xsize;
-					ys = ysize;
-					thick = Thickness;
-				}
-
-				void Update(std::function<void()> DoInClick, std::string_view info) noexcept {
-					int mouse_x, mouse_y;
-					GetMousePoint(&mouse_x, &mouse_y);
-
-					if (in2_(mouse_x, mouse_y, x1, y1, x1 + xs, y1 + ys)) {
-						DoInClick();
-					}
-
-					Info = info;
-				}
-
-				void Draw(void) noexcept {
-					int mouse_x, mouse_y;
-					GetMousePoint(&mouse_x, &mouse_y);
-					//AnimeSel
-					{
-						if (in2_(mouse_x, mouse_y, x1, y1, x1 + xs, y1 + ys)) {
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-							DrawBox(x1 + thick, y1 + thick, x1 + xs - thick, y1 + ys - thick, GetColor(255, 255, 255), TRUE);
-							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-						}
-						auto length = Fonts.Get(ys).Get_handle().GetDrawWidth(Info);
-						if (length > xs / 2) {
-							Fonts.Get(ys).Get_handle().DrawString_RIGHT(x1 + xs, y1, Info, GetColor(255, 255, 255));
-						}
-						else {
-							Fonts.Get(ys).Get_handle().DrawString(x1 + xs / 2, y1, Info, GetColor(255, 255, 255));
-						}
-						Fonts.Get(ys).Get_handle().DrawString(x1, y1, Name, GetColor(255, 255, 255));
-					}
-				}
-			};
-		private:
-			std::string SUN = "data/model/sun/model.mv1";
-			std::string MAP = "data/model/map/model.mv1";
-			std::string GATE = "data/model/map/model_gate.mv1";
-			//
-			cam_info camera_buf;
-			int fog[3]{ -1,-1,-1 };
-			float fog_range[2]{ -1.f,-1.f };
-			std::vector<size_t> RankID;
-			size_t camsel{ 0 };
-			int camsel_buf{ 0 };
-			switchs ChangeCamSel;
-			switchs ChangeStart;
-			float Per_Change = 1.f;
-			float Change1Time = 1.f;
-			size_t m_Counter{ 0 };									//カット
-			std::vector<Cut_Info_First> m_CutInfo_Buf;
-			std::vector<Cut_Info_Update> m_CutInfoUpdate_Buf;
-			LONGLONG BaseTime = 0, WaitTime = 0, NowTimeWait{ 0 };
-			bool ResetPhysics = true;
-			bool isFirstLoop = true;								//カット最初のループか
-			bool isfast = true;
-			bool issecond = true;
-			bool attached_override = true;;
-			SoundHandle BGM;										//データ
-			int BGM_Frequency;
-			MV1 Guide;												//
-			GraphHandle movie;										//
-			switchs LookMovie;										//
-			switchs LookEditer;										//ビュワー
-			switchs SpeedUp;
-			switchs SpeedDown;
-			switchs Start;
-			switchs MouseClick;
-			bool PressSeek = false;
-			int changeSeekID{ -1 };
-			int x_now{ -1 };
-			int BaseWidth = 1920 / 64;
-			int WidthPer = 2000000;
-			int X_now{ 0 };
-			int CutNow{ 0 };
-
-			Change_Model m_ChangeModel;
 			class Edit_Model {
 			public:
 				ModelControl::Model* ModelEdit{ nullptr };
 				size_t ModelEditCutNum{ 0 };
 				bool ModelEditMode = false;
 
-				const auto IsEditModel(const ModelControl::Model* tgt) const noexcept { return (ModelEdit == tgt); }
-				const auto CanEdit(void) const noexcept { return ModelEdit != nullptr; }
-
+				const auto IsEditModel(const ModelControl::Model* tgt, size_t id) const noexcept { return (ModelEditMode && ModelEdit == tgt && ModelEditCutNum == id); }
+				bool IsEditMode() { return this->ModelEdit != nullptr && this->ModelEditMode; }
+				bool Switch() {
+					if (this->ModelEdit != nullptr && !ModelEditMode) {
+						ModelEditMode = true;
+						return true;
+					}
+					return false;
+				}
 				void SetModelEdit(ModelControl::Model* tmp, int value) noexcept {
 					ModelEdit = tmp;
 					ModelEditCutNum = value;
@@ -234,24 +143,121 @@ namespace FPS_n2 {
 					}
 				}
 			};
-			Edit_Model m_EditModel;
+			class CharaInfoEdit {
+			private:
+				std::string Name;
+				std::string Info;
+				int x1;
+				int y1;
+				int xs;
+				int ys;
+				int thick = 2;
+			public:
+				CharaInfoEdit(void) noexcept {}
+				~CharaInfoEdit(void) noexcept {}
 
-			bool ModelEditIn = false;
-			bool ModelEdit_PhysicsReset = false;
-			int spd_x = 10;
-			bool isFreepos = false;
-			int x_m, y_m;
-			int x_sav, y_sav;
-			float x_rm{ 0 };
-			float y_rm{ 0 };
-			float r_rm = 100.f;
-			size_t CutSel_Buf{ 0 };
-			VECTOR_ref m_RandcamupBuf;
-			VECTOR_ref m_RandcamvecBuf;
-			VECTOR_ref m_RandcamposBuf;
-			float Black_Buf = 0.f;
-			float White_Buf = 0.f;
-			std::vector<CharaInfoEdit> CharaEdit;
+				void Set(std::string_view name, int x_1, int y_1, int xsize, int ysize, int Thickness) noexcept {
+					Name = name;
+					x1 = x_1;
+					y1 = y_1;
+					xs = xsize;
+					ys = ysize;
+					thick = Thickness;
+				}
+
+				void Update(std::function<void()> DoInClick, std::string_view info) noexcept {
+					int mouse_x, mouse_y;
+					GetMousePoint(&mouse_x, &mouse_y);
+
+					if (in2_(mouse_x, mouse_y, x1, y1, x1 + xs, y1 + ys)) {
+						DoInClick();
+					}
+
+					Info = info;
+				}
+
+				void Draw(void) noexcept {
+					int mouse_x, mouse_y;
+					GetMousePoint(&mouse_x, &mouse_y);
+					//AnimeSel
+					{
+						if (in2_(mouse_x, mouse_y, x1, y1, x1 + xs, y1 + ys)) {
+							SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+							DrawBox(x1 + thick, y1 + thick, x1 + xs - thick, y1 + ys - thick, GetColor(255, 255, 255), TRUE);
+							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+						}
+						auto length = Fonts.Get(ys).Get_handle().GetDrawWidth(Info);
+						if (length > xs / 2) {
+							Fonts.Get(ys).Get_handle().DrawString_RIGHT(x1 + xs, y1, Info, GetColor(255, 255, 255));
+						}
+						else {
+							Fonts.Get(ys).Get_handle().DrawString(x1 + xs / 2, y1, Info, GetColor(255, 255, 255));
+						}
+						Fonts.Get(ys).Get_handle().DrawString(x1, y1, Name, GetColor(255, 255, 255));
+					}
+				}
+			};
+		private:
+			std::string SUN = "data/model/sun/model.mv1";
+			std::string MAP = "data/model/map/model.mv1";
+			std::string GATE = "data/model/map/model_gate.mv1";
+			//
+			cam_info camera_buf;									//
+			int fog[3]{ -1,-1,-1 };									//
+			float fog_range[2]{ -1.f,-1.f };						//
+			std::vector<size_t> RankID;								//
+			size_t camsel{ 0 };										//
+			int camsel_buf{ 0 };									//
+			switchs ChangeCamSel;									//
+			switchs ChangeStart;									//
+			float Per_Change{ 1.f };								//
+			float Change1Time{ 1.f };								//
+			size_t m_Counter{ 0 };									//カット
+			std::vector<Cut_Info_First> m_CutInfo_Buf;				//
+			std::vector<Cut_Info_Update> m_CutInfoUpdate_Buf;		//
+			LONGLONG BaseTime{ 0 }, WaitTime{ 0 }, NowTimeWait{ 0 };//
+			bool ResetPhysics{ true };								//
+			bool isFirstLoop{ true };								//カット最初のループか
+			bool isfast{ true };									//
+			bool issecond{ true };									//
+			bool attached_override{ true };							//
+			SoundHandle BGM;										//データ
+			int BGM_Frequency;										//
+			MV1 Guide;												//
+			switchs SpeedUp;										//
+			switchs SpeedDown;										//
+			switchs Start;											//
+			switchs MouseClick;										//
+			int changeSeekID{ -1 };									//
+			int x_now{ -1 };										//
+			int BaseWidth{ 1920 / 64 };								//
+			int WidthPer{ 2000000 };								//
+			int X_now{ 0 };											//
+			int CutNow{ 0 };										//
+			Change_Model m_ChangeModel;								//
+			Edit_Model m_EditModel;									//
+			int spd_x{ 10 };										//
+			bool isFreepos{ false };								//
+			int x_m{ 0 }, y_m{ 0 };									//
+			int x_sav{ 0 }, y_sav{ 0 };								//
+			float x_rm{ 0.f }, y_rm{ 0.f }, r_rm{ 100.f };			//
+			size_t CutSel_Buf{ 0 };									//
+			VECTOR_ref m_RandcamupBuf;								//
+			VECTOR_ref m_RandcamvecBuf;								//
+			VECTOR_ref m_RandcamposBuf;								//
+			float Black_Buf{ 0.f };									//
+			float White_Buf{ 0.f };									//
+			std::vector<CharaInfoEdit> CharaEdit;					//
+#define EditMode
+#ifdef EditMode
+			//エディター
+		private:
+			GraphHandle movie;										//
+			switchs LookMovie;										//
+			switchs LookEditer;										//ビュワー
+			bool ModelEdit_PhysicsReset{ false };					//
+			bool ModelEditIn{ false };								//
+			bool PressSeek{ false };								//
 		private:
 			//calc
 			int OffsetCalc(int x_p, int x_s)noexcept {
@@ -343,9 +349,7 @@ namespace FPS_n2 {
 			void SeekBer_Calc(int x_p, int x_s, int y_p, int y_s) noexcept {
 				int mouse_x, mouse_y;
 				GetMousePoint(&mouse_x, &mouse_y);
-
 				if (MouseClick.press()) {
-					//
 					if (MouseClick.trigger()) {
 						int x1 = x_p + X_now;
 						int i = CutNow;
@@ -362,20 +366,16 @@ namespace FPS_n2 {
 								if (in2_(mouse_x, mouse_y, x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight)) {
 									changeSeekID = std::max(i - 1, 0);
 									PressSeek = true;
-									//
 								}
 							}
 							i++;
 							if (i >= m_CutInfo.size()) { break; }
 						}
 					}
-					//
 				}
 				else {
-					//
 					if (PressSeek) {
 						PressSeek = false;
-						//
 						m_Counter = changeSeekID;
 						models.Start(m_Counter);
 						graphs.Start(m_Counter);
@@ -383,7 +383,6 @@ namespace FPS_n2 {
 						BaseTime = GetMocroSec();
 						WaitTime = 0;
 						NowTimeWait = (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
-
 						fog[0] = 128;
 						fog[1] = 128;
 						fog[2] = 128;
@@ -391,25 +390,16 @@ namespace FPS_n2 {
 						fog_range[1] = 300000.f;
 						Black_Buf = 0.f;
 						White_Buf = 0.f;
-
 						auto* PostPassParts = PostPassEffect::Instance();
-
 						PostPassParts->Set_Bright(255, 255, 255);
-
-
 						m_CutInfo = m_CutInfo_Buf;
 						m_CutInfoUpdate = m_CutInfoUpdate_Buf;
-
 						ModelEdit_PhysicsReset = true;
-						//
 						changeSeekID = -1;
-
 						if (Start.on()) {
 							ModelEditIn = true;
 						}
-
 					}
-					//
 				}
 			}
 			void Editer_Init(void) noexcept {
@@ -431,6 +421,12 @@ namespace FPS_n2 {
 				CharaEdit[2].Set("ModelPhysicsSpeed", x_p, y1, x_s, hight, p2); y1 += hight + p2;
 				CharaEdit[3].Set("OpacityRate", x_p, y1, x_s, hight, p2); y1 += hight + p2;
 				CharaEdit[4].Set("Matrix", x_p, y1, x_s, hight, p2); y1 += hight + p2;
+
+				LookEditer.Init(false);
+				LookMovie.Init(false);
+
+				movie = GraphHandle::Load("data/base_movie2.mp4");
+				PauseMovieToGraph(movie.get());
 			}
 			void Editer_Calc(void)noexcept {
 				auto* DrawParts = DXDraw::Instance();
@@ -440,6 +436,15 @@ namespace FPS_n2 {
 
 				BaseWidth = DrawParts->disp_x / 64;
 
+				LookMovie.GetInput(CheckHitKey(KEY_INPUT_M) != 0);
+				LookEditer.GetInput(CheckHitKey(KEY_INPUT_N) != 0);
+
+
+				if (LookMovie.trigger() && LookMovie.on()) {
+					PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
+					ChangeMovieVolumeToGraph(0, movie.get());
+					SeekMovieToGraph(movie.get(), (int)(NowTimeWait / 1000));
+				}
 				if (LookEditer.on()) {
 					//編集画面
 					{
@@ -509,53 +514,46 @@ namespace FPS_n2 {
 											ModelEdit_PhysicsReset = true;
 										}
 									}
-									else if (m_EditModel.CanEdit() && !m_EditModel.ModelEditMode) {
-										m_EditModel.ModelEditMode = true;
-										if (Start.on()) {
-											ModelEditIn = true;
-										}
+									else if (m_EditModel.Switch() && Start.on()) {
+										ModelEditIn = true;
 									}
-									//
-									//
 								}
 							}
 						}
 						//モデルエディットモード判定(参照変更)
-						if (m_EditModel.CanEdit() && m_EditModel.ModelEditMode) {
-							if (MouseClick.press()) {
-								int x1 = x_p + X_now;
-								int i = CutNow;
-								while (true) {
-									LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
-									LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
+						if (m_EditModel.IsEditMode() && MouseClick.press()) {
+							int x1 = x_p + X_now;
+							int i = CutNow;
+							while (true) {
+								LONGLONG base = (i >= 2) ? m_CutInfo[i - 2].GetTimeLimit() : 0;
+								LONGLONG now = (i >= 1) ? m_CutInfo[i - 1].GetTimeLimit() : 0;
 
-									x1 += BaseWidth * (int)(now - base) / WidthPer;
-									if (x1 > x_p + x_s) { break; }
-									if (x1 > x_p) {
-										int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / WidthPer;
-										int msel = std::min((mouse_y - y_p) / hight, (int)(models.GetMax()) - 1);
-										if (msel >= 0) {
-											int y1 = y_p + msel * hight;
-											if (in2_(mouse_x, mouse_y, x1, y1, x1 + width_Next, y1 + hight)) {
-												auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
-												for (auto& c : tmp->Cutinfo.Switch) {
-													if (c.IsIn(i)) {
-														m_EditModel.SetModelEdit(tmp, (int)(&c - &tmp->Cutinfo.Switch.front()));
-														break;
-													}
+								x1 += BaseWidth * (int)(now - base) / WidthPer;
+								if (x1 > x_p + x_s) { break; }
+								if (x1 > x_p) {
+									int width_Next = BaseWidth * (int)(m_CutInfo[i].GetTimeLimit() - now) / WidthPer;
+									int msel = std::min((mouse_y - y_p) / hight, (int)(models.GetMax()) - 1);
+									if (msel >= 0) {
+										int y1 = y_p + msel * hight;
+										if (in2_(mouse_x, mouse_y, x1, y1, x1 + width_Next, y1 + hight)) {
+											auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
+											for (auto& c : tmp->Cutinfo.Switch) {
+												if (c.IsIn(i)) {
+													m_EditModel.SetModelEdit(tmp, (int)(&c - &tmp->Cutinfo.Switch.front()));
+													break;
 												}
 											}
 										}
 									}
-									i++;
-									if (i >= m_CutInfo.size()) { break; }
 								}
+								i++;
+								if (i >= m_CutInfo.size()) { break; }
 							}
 						}
 						//
 					}
 					//モデルエディットモード
-					if (m_EditModel.CanEdit() && m_EditModel.ModelEditMode) {
+					if (m_EditModel.IsEditMode()) {
 						int x_p = DrawParts->disp_x * 5 / 10;
 						int x_s = DrawParts->disp_x * 4 / 10;
 						int y_p = DrawParts->disp_y * 2 / 10;
@@ -753,30 +751,17 @@ namespace FPS_n2 {
 											int x_b3 = std::min(x1 + width_Next - ((i == c.Off) ? xp : 0), x_p + x_s);
 
 											unsigned int color;
-											if (m.isBGModel) {
-												if (c.IsIn(m_Counter)) {
-													color = GetColor(100, 216, 100);
-												}
-												else {
-													color = GetColor(60, 60, 192);
-												}
-											}
-											else {
-												if (c.IsIn(m_Counter)) {
-													color = GetColor(150, 255, 150);
-												}
-												else {
-													color = GetColor(100, 100, 255);
-												}
-											}
-											if (
-												m_EditModel.ModelEditMode &&
-												m_EditModel.IsEditModel(&m) &&
-												m_EditModel.ModelEditCutNum == (size_t)(&c - &m.Cutinfo.Switch.front())
-												) {
+											if (m_EditModel.IsEditModel(&m, &c - &m.Cutinfo.Switch.front())) {
 												color = GetColor(255, 255, 0);
 											}
-
+											else {
+												if (m.isBGModel) {
+													color = c.IsIn(m_Counter) ? GetColor(100, 216, 100) : GetColor(60, 60, 192);
+												}
+												else {
+													color = c.IsIn(m_Counter) ? GetColor(150, 255, 150) : GetColor(100, 100, 255);
+												}
+											}
 											DrawBox(x_b2, y1 + yp - p2, x_b4, y1 + hight - yp + p2, GetColor(0, 0, 0), TRUE);
 											DrawBox(x_b1, y1 + yp, x_b3, y1 + hight - yp, color, TRUE);
 										}
@@ -823,7 +808,7 @@ namespace FPS_n2 {
 						//
 					}
 					//モデルエディットモード
-					if (m_EditModel.CanEdit() && m_EditModel.ModelEditMode) {
+					if (m_EditModel.IsEditMode()) {
 						int x_p = DrawParts->disp_x * 5 / 10;
 						int x_s = DrawParts->disp_x * 4 / 10;
 						int y_p = DrawParts->disp_y * 2 / 10;
@@ -892,7 +877,16 @@ namespace FPS_n2 {
 						printfDx((" " + sel->Base + "(" + std::to_string(m.BaseID) + ") = %d\n").c_str(), m.DrawCount);
 					}
 				}
+
+				if (LookMovie.on()) {
+					movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 1 / 5, DrawParts->disp_x, DrawParts->disp_y, FALSE);
+				}
 			}
+
+			void Editer_Dispose() {
+				movie.Dispose();
+			}
+#endif
 		public:
 			//Getter
 			bool Time_Over(void) const noexcept { return m_Counter >= m_CutInfo.size(); }
@@ -925,10 +919,7 @@ namespace FPS_n2 {
 				BGM = SoundHandle::Load("data/sound.wav");
 				BGM.vol(0);
 				///*
-				movie = GraphHandle::Load("data/base_movie2.mp4");
-				PauseMovieToGraph(movie.get());
 				//*/
-
 				MV1::Load("data/model/map/way.pmd", &Guide);
 				//プレイ用意
 				GameSpeed = (float)(spd_x) / 10.f;
@@ -936,29 +927,16 @@ namespace FPS_n2 {
 				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
 				WaitTime = (m_Counter != 0) ? 0 : 1000000;
 				NowTimeWait = -WaitTime;
-
 				m_RandcamupBuf.clear();
 				m_RandcamvecBuf.clear();
 				m_RandcamposBuf.clear();
-
 				ResetPhysics = true;
-
-				LookEditer.Init(false);
-				LookMovie.Init(false);
 				Start.Init(true);
-
 				m_CutInfo_Buf = m_CutInfo;
 				m_CutInfoUpdate_Buf = m_CutInfoUpdate;
-				/*
-				m_Counter = 0;
-				models.Start(m_Counter);
-				graphs.Start(m_Counter);
-				attached.Start(m_Counter);
-				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
-				WaitTime = 0;
-				NowTimeWait = (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
-				//*/
+#ifdef EditMode
 				Editer_Init();
+#endif
 			}
 			bool Update(void) noexcept override {
 				if (Time_Over()) { return false; }
@@ -972,32 +950,14 @@ namespace FPS_n2 {
 				MouseClick.GetInput((GetMouseInput_M() & MOUSE_INPUT_LEFT) != 0);
 				SpeedUp.GetInput(CheckHitKey(KEY_INPUT_RIGHT) != 0);
 				SpeedDown.GetInput(CheckHitKey(KEY_INPUT_LEFT) != 0);
-				LookMovie.GetInput(CheckHitKey(KEY_INPUT_M) != 0);
-				LookEditer.GetInput(CheckHitKey(KEY_INPUT_N) != 0);
 				Start.GetInput((!m_EditModel.ModelEditMode && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
 				ModelEditIn = false;
-				if (
-					(!m_EditModel.ModelEditMode && (SpeedUp.trigger() || SpeedDown.trigger())) ||
-					Start.trigger()) {
-					if (SpeedUp.trigger()) {
-						spd_x++;
-					}
-					if (SpeedDown.trigger()) {
-						spd_x--;
-					}
-					if (Start.trigger()) {
-						if (Start.on()) {
-							spd_x = 10;
-						}
-						else {
-							spd_x = 0;
-						}
-					}
-
+				if ((!m_EditModel.ModelEditMode && (SpeedUp.trigger() || SpeedDown.trigger())) || Start.trigger()) {
+					if (SpeedUp.trigger()) { spd_x++; }
+					if (SpeedDown.trigger()) { spd_x--; }
+					if (Start.trigger()) { spd_x = Start.on() ? 10 : 0; }
 					spd_x = std::clamp(spd_x, 0, 20);
-
 					GameSpeed = (float)(spd_x) / 10.f;
-
 					if (NowTimeWait >= 0) {
 						if (GameSpeed >= 0.1f) {
 							SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
@@ -1010,13 +970,6 @@ namespace FPS_n2 {
 							BGM.stop();
 						}
 					}
-					//
-				}
-
-				if (LookMovie.trigger() && LookMovie.on()) {
-					PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
-					ChangeMovieVolumeToGraph(0, movie.get());
-					SeekMovieToGraph(movie.get(), (int)(NowTimeWait / 1000));
 				}
 				NowTimeWait += (time);
 				BaseTime = GetMocroSec();
@@ -2085,7 +2038,7 @@ namespace FPS_n2 {
 				models.Update();
 				{
 					//models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
-					ModelEdit_PhysicsReset = false;
+					//ModelEdit_PhysicsReset = false;
 					isFirstLoop = false;
 					if (NowTimeWait > m_CutInfo[m_Counter%m_CutInfo.size()].GetTimeLimit()) {
 						isFirstLoop = true;
@@ -2106,9 +2059,10 @@ namespace FPS_n2 {
 				Effect_UseControl::Dispose_Effect();
 				m_CutInfo.clear();
 				m_CutInfoUpdate.clear();
-				movie.Dispose();
 				BGM.Dispose();
 				grassmodel.Dispose();
+
+				Editer_Dispose();
 			}
 			//
 			void UI_Draw(void) noexcept  override {
@@ -2204,13 +2158,11 @@ namespace FPS_n2 {
 			}
 			//
 			void LAST_Draw(void) noexcept override {
-				if (LookMovie.on()) {
-					auto* DrawParts = DXDraw::Instance();
-					movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 1 / 5, DrawParts->disp_x, DrawParts->disp_y, FALSE);
-				}
+#ifdef EditMode
 				Editer_Calc();
 
 				Editer_Draw();
+#endif
 			}
 		};
 	};
