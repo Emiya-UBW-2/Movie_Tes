@@ -16,9 +16,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//シーン
 	auto LoadScene = std::make_shared<FPS_n2::Sceneclass::LOADDATA>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
-	//開始処理
-	MAINLOOPscene->Awake();
-	if (!(ProcessMessage() == 0)) { return 0; }
 	//
 	FPS_n2::effectControl.Init();																						//エフェクト
 	//遷移先指定

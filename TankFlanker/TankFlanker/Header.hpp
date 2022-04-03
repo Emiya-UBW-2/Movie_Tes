@@ -28,5 +28,7 @@
 #include "sub.hpp"
 #include "sequence.hpp"
 
+#include "Common.hpp"
+
 #include "LoadScene.hpp"
 #include "MainScene.hpp"

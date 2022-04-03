@@ -15,7 +15,7 @@ namespace FPS_n2 {
 
 	float GameSpeed = 1.0f;
 
-	static const auto GetMocroSec() noexcept {
+	static const auto GetMocroSec(void) noexcept {
 		return GetNowHiPerformanceCount() * (int)(GameSpeed*1000.f) / 1000;
 	}
 	template <class T>
@@ -156,7 +156,7 @@ namespace FPS_n2 {
 			this->effcs_G[this->G_cnt].Set(pos_t, nomal_t, scale);
 			++this->G_cnt %= 256;
 		}
-		const auto Check_FootEffectCnt() noexcept {
+		const auto Check_FootEffectCnt(void) noexcept {
 			int cnt = 0;
 			for (auto& t : this->effcs_G) {
 				if (t.GetStart()) { cnt++; }
@@ -288,8 +288,8 @@ namespace FPS_n2 {
 		}
 	public:
 		//Getter
-		const auto& Getfunc() const noexcept { return m_Func; }
-		const auto& Getargs() const noexcept { return m_Args; }
+		const auto& Getfunc(void) const noexcept { return m_Func; }
+		const auto& Getargs(void) const noexcept { return m_Args; }
 		const auto* GetArgFromPath(std::string_view Path) const noexcept {
 			const VARIABLE* sel = nullptr;
 			for (const auto& a : m_Variable) {
@@ -478,7 +478,7 @@ namespace FPS_n2 {
 		int nowcut = 0;
 		bool isFirstCut = false;
 	public:
-		const auto& GetSwitch() const noexcept { return a_switch; }
+		const auto& GetSwitch(void) const noexcept { return a_switch; }
 
 		void Init(int startFrame, int ofset) noexcept {
 			this->Switch.resize(this->Switch.size() + 1);
@@ -1242,7 +1242,7 @@ namespace FPS_n2 {
 		float Per = 1.f;
 
 		void SetUse(bool value) noexcept { Use = value; }
-		const auto& GetIsUse() const noexcept { return Use; }
+		const auto& GetIsUse(void) const noexcept { return Use; }
 		void Init(void) noexcept {
 			Use = false;
 			Path = "";
@@ -1305,7 +1305,7 @@ namespace FPS_n2 {
 		std::vector<ForcusControl> Forcus;
 	public:
 		//Getter
-		const auto& GetTimeLimit() const noexcept { return TimeLimit; }
+		const auto& GetTimeLimit(void) const noexcept { return TimeLimit; }
 		void SetTimeLimit(LONGLONG value) noexcept { TimeLimit = value; }
 	public:
 		Cut_Info_First(void) noexcept {

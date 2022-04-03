@@ -4,95 +4,65 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
-		private:
-		private:
-			std::string SUN = "data/model/sun/model.mv1";
-			std::string MAP = "data/model/map/model.mv1";
-			std::string GATE = "data/model/map/model_gate.mv1";
-			std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
-			//ロードシーンに移管
-			std::string LOGO1 = "data/picture/logo.png";
-			std::vector<std::string> NAMES;
-			ModelControl models;
-			GraphControl graphs;
-			LoadScriptClass LSClass;		//スクリプト読み込み
-			TelopClass TLClass;				//テロップ
-			std::vector<Cut_Info_First> m_CutInfo;
-			std::vector<Cut_Info_Update> m_CutInfoUpdate;
-			CutInfoClass attached;
-			std::vector<CutAttachDetail> attachedDetail;
-			Grass grassmodel;
-		private:
-			cam_info camera_buf;
-			int fog[3]{ -1,-1,-1 };
-			float fog_range[2]{ -1.f,-1.f };
-
-			std::vector<size_t> RankID;
-			size_t camsel = 0;
-			int camsel_buf = 0;
-			switchs ChangeCamSel;
-			switchs ChangeStart;
-			float Per_Change = 1.f;
-			float Change1Time = 1.f;
-			size_t m_Counter = 0;			//カット
-			std::vector<Cut_Info_First> m_CutInfo_Buf;
-			std::vector<Cut_Info_Update> m_CutInfoUpdate_Buf;
-			//
-			LONGLONG BaseTime = 0, WaitTime = 0, NowTimeWait = 0;
-			bool ResetPhysics = true;
-			bool isFirstLoop = true;		//カット最初のループか
-			bool isfast = true;
-			bool issecond = true;
-			//
-			bool attached_override = true;;
-			//データ
-			SoundHandle BGM;
-			int BGM_Frequency;
-
-			MV1 Guide;
-			//ビュワー
-			GraphHandle movie;
-			switchs LookMovie;
-			//
-			switchs LookEditer;
-			switchs SpeedUp;
-			switchs SpeedDown;
-			switchs Start;
-			switchs MouseClick;
-			bool PressSeek = false;
-			int changeSeekID = -1;
-			//
-			int x_now = -1;
-			int BaseWidth = 1920 / 64;
-			int WidthPer = 2000000;
-			int X_now = 0;
-			int CutNow = 0;
-			int SetAnimStart = -1;
-			int SetAnimEnd = -1;
-			ModelControl::Model* ChangeModel = nullptr;
-			ModelControl::Model* ModelEdit = nullptr;
-			size_t ModelEditCutNum = 0;
-			bool ModelEditMode = false;
-			bool ModelEditIn = false;
-			bool ModelEdit_PhysicsReset = false;
-			//
-			int spd_x = 10;
-			bool isFreepos = false;
-			int x_m, y_m;
-			int x_sav, y_sav;
-			float x_rm = 0;
-			float y_rm = 0;
-			float r_rm = 100.f;
-			//
-			size_t CutSel_Buf = 0;
-			//
-			VECTOR_ref m_RandcamupBuf;
-			VECTOR_ref m_RandcamvecBuf;
-			VECTOR_ref m_RandcamposBuf;
-			//
-			float Black_Buf = 0.f;
-			float White_Buf = 0.f;
-		private:
+			class Change_Model {
+				ModelControl::Model* ChangeModel{ nullptr };
+				int SetAnimStart{ -1 };
+				int SetAnimEnd{ -1 };
+			private:
+				void Reset(void) noexcept {
+					ChangeModel = nullptr;
+					SetAnimStart = -1;
+					SetAnimEnd = -1;
+				}
+			public:
+				const auto IsChangeModel(const ModelControl::Model* tgt) const noexcept { return (tgt != nullptr && ChangeModel == tgt); }
+				const auto IsAnimIn(int In) const noexcept { return SetAnimStart <= In && In <= SetAnimEnd; }
+				//
+				void Set(ModelControl::Model* tmp, int value) noexcept {
+					if (ChangeModel == nullptr) { ChangeModel = tmp; }
+					if (SetAnimStart == -1) { SetAnimStart = value; }
+					SetAnimEnd = std::max(value, SetAnimStart);
+				}
+				//被りチェック
+				void Check(void) noexcept {
+					if (this->ChangeModel != nullptr) {
+						//修正
+						for (const auto& c : this->ChangeModel->Cutinfo.Switch) {
+							if (this->SetAnimStart >= c.Off) { this->SetAnimStart = std::max(this->SetAnimStart, c.Off + 1); }
+							if (this->SetAnimStart < c.On) { this->SetAnimEnd = std::min(this->SetAnimEnd, c.On - 1); }
+						}
+						//確認
+						for (const auto& c : this->ChangeModel->Cutinfo.Switch) {
+							if (this->SetAnimStart == c.On || this->SetAnimEnd == c.Off) {
+								this->Reset();
+								break;
+							}
+						}
+					}
+				}
+				//Create
+				bool Create(void) noexcept {
+					bool isResetPhusics = false;
+					if (this->ChangeModel != nullptr) {
+						for (const auto& c : this->ChangeModel->Cutinfo.Switch) {
+							if (this->SetAnimStart < c.On) {
+								int id = (int)(&c - &this->ChangeModel->Cutinfo.Switch.front());
+								this->ChangeModel->Cutinfo.Insert(id, this->SetAnimStart, this->SetAnimEnd);
+								this->ChangeModel->CutDetail.insert(this->ChangeModel->CutDetail.begin() + id, CutinfoDetail());
+								auto& info = this->ChangeModel->CutDetail[id];
+								info.animsel = 0;
+								info.isloop = true;
+								info.animspeed = 1.0f;
+								info.startframe = 0.f;
+								isResetPhusics = true;
+								break;
+							}
+						}
+						this->Reset();
+					}
+					return isResetPhusics;
+				}
+			};
 			class CharaInfoEdit {
 			private:
 				std::string Name;
@@ -103,8 +73,8 @@ namespace FPS_n2 {
 				int ys;
 				int thick = 2;
 			public:
-				CharaInfoEdit() {}
-				~CharaInfoEdit() {}
+				CharaInfoEdit(void) noexcept {}
+				~CharaInfoEdit(void) noexcept {}
 
 				void Set(std::string_view name, int x_1, int y_1, int xsize, int ysize, int Thickness) noexcept {
 					Name = name;
@@ -115,7 +85,7 @@ namespace FPS_n2 {
 					thick = Thickness;
 				}
 
-				void Update(std::function<void()> DoInClick, std::string_view info) {
+				void Update(std::function<void()> DoInClick, std::string_view info) noexcept {
 					int mouse_x, mouse_y;
 					GetMousePoint(&mouse_x, &mouse_y);
 
@@ -147,7 +117,142 @@ namespace FPS_n2 {
 					}
 				}
 			};
+		private:
+			std::string SUN = "data/model/sun/model.mv1";
+			std::string MAP = "data/model/map/model.mv1";
+			std::string GATE = "data/model/map/model_gate.mv1";
+			//
+			cam_info camera_buf;
+			int fog[3]{ -1,-1,-1 };
+			float fog_range[2]{ -1.f,-1.f };
+			std::vector<size_t> RankID;
+			size_t camsel{ 0 };
+			int camsel_buf{ 0 };
+			switchs ChangeCamSel;
+			switchs ChangeStart;
+			float Per_Change = 1.f;
+			float Change1Time = 1.f;
+			size_t m_Counter{ 0 };									//カット
+			std::vector<Cut_Info_First> m_CutInfo_Buf;
+			std::vector<Cut_Info_Update> m_CutInfoUpdate_Buf;
+			LONGLONG BaseTime = 0, WaitTime = 0, NowTimeWait{ 0 };
+			bool ResetPhysics = true;
+			bool isFirstLoop = true;								//カット最初のループか
+			bool isfast = true;
+			bool issecond = true;
+			bool attached_override = true;;
+			SoundHandle BGM;										//データ
+			int BGM_Frequency;
+			MV1 Guide;												//
+			GraphHandle movie;										//
+			switchs LookMovie;										//
+			switchs LookEditer;										//ビュワー
+			switchs SpeedUp;
+			switchs SpeedDown;
+			switchs Start;
+			switchs MouseClick;
+			bool PressSeek = false;
+			int changeSeekID{ -1 };
+			int x_now{ -1 };
+			int BaseWidth = 1920 / 64;
+			int WidthPer = 2000000;
+			int X_now{ 0 };
+			int CutNow{ 0 };
+
+			Change_Model m_ChangeModel;
+			class Edit_Model {
+			public:
+				ModelControl::Model* ModelEdit{ nullptr };
+				size_t ModelEditCutNum{ 0 };
+				bool ModelEditMode = false;
+
+				const auto IsEditModel(const ModelControl::Model* tgt) const noexcept { return (ModelEdit == tgt); }
+				const auto CanEdit(void) const noexcept { return ModelEdit != nullptr; }
+
+				void SetModelEdit(ModelControl::Model* tmp, int value) noexcept {
+					ModelEdit = tmp;
+					ModelEditCutNum = value;
+				}
+				void ResetModelEdit(void) noexcept {
+					ModelEdit = nullptr;
+					ModelEditCutNum = 0;
+				}
+				auto GetModeName(void) const noexcept {
+					std::string mode = "NORMAL";
+					if (this->ModelEdit->isBGModel) {
+						mode = ModelType[0];
+					}
+					else if (!this->ModelEdit->IsNearShadow) {
+						mode = ModelType[1];
+					}
+					else if (this->ModelEdit->IsFarShadow) {
+						mode = ModelType[2];
+					}
+					return mode;
+				}
+				void ChangeMode(void) noexcept {
+					if (
+						!this->ModelEdit->isBGModel &&
+						this->ModelEdit->IsNearShadow &&
+						!this->ModelEdit->IsFarShadow
+						) {
+						//ノーマルならBGモデルに
+						this->ModelEdit->isBGModel = true;
+					}
+					else if (
+						this->ModelEdit->isBGModel &&
+						this->ModelEdit->IsNearShadow &&
+						!this->ModelEdit->IsFarShadow
+						) {
+						//BGなら近距離影なしモデルに
+						this->ModelEdit->isBGModel = false;
+						this->ModelEdit->IsNearShadow = false;
+					}
+					else if (
+						!this->ModelEdit->isBGModel &&
+						!this->ModelEdit->IsNearShadow &&
+						!this->ModelEdit->IsFarShadow
+						) {
+						//近距離影なしなら遠距離影なしモデルに
+						this->ModelEdit->IsNearShadow = true;
+						this->ModelEdit->IsFarShadow = true;
+					}
+					else if (
+						!this->ModelEdit->isBGModel &&
+						this->ModelEdit->IsNearShadow &&
+						this->ModelEdit->IsFarShadow
+						) {
+						//遠距離影なしならノーマルモデルに
+						this->ModelEdit->IsFarShadow = false;
+						this->ModelEdit->isBGModel = false;
+					}
+					else {
+						//何か問題があったらnormalに
+						this->ModelEdit->isBGModel = false;
+						this->ModelEdit->IsNearShadow = true;
+						this->ModelEdit->IsFarShadow = false;
+					}
+				}
+			};
+			Edit_Model m_EditModel;
+
+			bool ModelEditIn = false;
+			bool ModelEdit_PhysicsReset = false;
+			int spd_x = 10;
+			bool isFreepos = false;
+			int x_m, y_m;
+			int x_sav, y_sav;
+			float x_rm{ 0 };
+			float y_rm{ 0 };
+			float r_rm = 100.f;
+			size_t CutSel_Buf{ 0 };
+			VECTOR_ref m_RandcamupBuf;
+			VECTOR_ref m_RandcamvecBuf;
+			VECTOR_ref m_RandcamposBuf;
+			float Black_Buf = 0.f;
+			float White_Buf = 0.f;
 			std::vector<CharaInfoEdit> CharaEdit;
+		private:
 			//calc
 			int OffsetCalc(int x_p, int x_s)noexcept {
 				LONGLONG now2 = (m_Counter >= 1) ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0;
@@ -307,24 +412,6 @@ namespace FPS_n2 {
 					//
 				}
 			}
-			void SetModelSel(ModelControl::Model* tmp, int value) noexcept {
-				if (ChangeModel == nullptr) { ChangeModel = tmp; }
-				if (SetAnimStart == -1) { SetAnimStart = value; }
-				SetAnimEnd = std::max(value, SetAnimStart);
-			}
-			void ResetModelSel(void) noexcept {
-				ChangeModel = nullptr;
-				SetAnimStart = -1;
-				SetAnimEnd = -1;
-			}
-			void SetModelEdit(ModelControl::Model* tmp, int value) noexcept {
-				ModelEdit = tmp;
-				ModelEditCutNum = value;
-			}
-			void ResetModelEdit(void) noexcept {
-				ModelEdit = nullptr;
-				ModelEditCutNum = 0;
-			}
 			void Editer_Init(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 
@@ -368,7 +455,7 @@ namespace FPS_n2 {
 
 						x_now = OffsetCalc(x_p, x_s);
 						//判定演算
-						if (!ModelEditMode) {
+						if (!m_EditModel.ModelEditMode) {
 							SeekBer_Calc(x_p, x_s, y_p, y_s);
 							if (!PressSeek) {
 								if (MouseClick.press()) {
@@ -398,12 +485,12 @@ namespace FPS_n2 {
 														for (auto& c : tmp->Cutinfo.Switch) {
 															if (c.IsIn(i)) {
 																EditModelInfo = true;
-																SetModelEdit(tmp, (int)(&c - &tmp->Cutinfo.Switch.front()));
+																m_EditModel.SetModelEdit(tmp, (int)(&c - &tmp->Cutinfo.Switch.front()));
 																break;
 															}
 														}
-														if (!EditModelInfo || ModelEdit == nullptr) {
-															SetModelSel(tmp, i);
+														if (!EditModelInfo || m_EditModel.ModelEdit == nullptr) {
+															m_ChangeModel.Set(tmp, i);
 														}
 													}
 												}
@@ -415,43 +502,15 @@ namespace FPS_n2 {
 								}
 								else {
 									//被りチェック
-									if (ChangeModel != nullptr) {
-										//修正
-										for (const auto& c : ChangeModel->Cutinfo.Switch) {
-											if (SetAnimStart >= c.Off) { SetAnimStart = std::max(SetAnimStart, c.Off + 1); }
-											if (SetAnimStart < c.On) { SetAnimEnd = std::min(SetAnimEnd, c.On - 1); }
-										}
-										//確認
-										for (const auto& c : ChangeModel->Cutinfo.Switch) {
-											if (SetAnimStart == c.On || SetAnimEnd == c.Off) {
-												ResetModelSel();
-												break;
-											}
-										}
-									}
+									m_ChangeModel.Check();
 									//登録できるなら作成
-									if (ChangeModel != nullptr) {
-										for (const auto& c : ChangeModel->Cutinfo.Switch) {
-											if (SetAnimStart < c.On) {
-												int id = (int)(&c - &ChangeModel->Cutinfo.Switch.front());
-												ChangeModel->Cutinfo.Insert(id, SetAnimStart, SetAnimEnd);
-												ChangeModel->CutDetail.insert(ChangeModel->CutDetail.begin() + id, CutinfoDetail());
-												auto& info = ChangeModel->CutDetail[id];
-												info.animsel = 0;
-												info.isloop = true;
-												info.animspeed = 1.0f;
-												info.startframe = 0.f;
-
-												if (SetAnimStart <= m_Counter && m_Counter <= SetAnimEnd) {
-													ModelEdit_PhysicsReset = true;
-												}
-												break;
-											}
+									if (m_ChangeModel.Create()) {
+										if (m_ChangeModel.IsAnimIn((int)m_Counter)) {
+											ModelEdit_PhysicsReset = true;
 										}
-										ResetModelSel();
 									}
-									else if (ModelEdit != nullptr && !ModelEditMode) {
-										ModelEditMode = true;
+									else if (m_EditModel.CanEdit() && !m_EditModel.ModelEditMode) {
+										m_EditModel.ModelEditMode = true;
 										if (Start.on()) {
 											ModelEditIn = true;
 										}
@@ -462,7 +521,7 @@ namespace FPS_n2 {
 							}
 						}
 						//モデルエディットモード判定(参照変更)
-						if (ModelEdit != nullptr && ModelEditMode) {
+						if (m_EditModel.CanEdit() && m_EditModel.ModelEditMode) {
 							if (MouseClick.press()) {
 								int x1 = x_p + X_now;
 								int i = CutNow;
@@ -481,7 +540,7 @@ namespace FPS_n2 {
 												auto* tmp = models.Get(models.GetModel()[msel].Path, models.GetModel()[msel].BaseID);
 												for (auto& c : tmp->Cutinfo.Switch) {
 													if (c.IsIn(i)) {
-														SetModelEdit(tmp, (int)(&c - &tmp->Cutinfo.Switch.front()));
+														m_EditModel.SetModelEdit(tmp, (int)(&c - &tmp->Cutinfo.Switch.front()));
 														break;
 													}
 												}
@@ -496,7 +555,7 @@ namespace FPS_n2 {
 						//
 					}
 					//モデルエディットモード
-					if (ModelEdit != nullptr && ModelEditMode) {
+					if (m_EditModel.CanEdit() && m_EditModel.ModelEditMode) {
 						int x_p = DrawParts->disp_x * 5 / 10;
 						int x_s = DrawParts->disp_x * 4 / 10;
 						int y_p = DrawParts->disp_y * 2 / 10;
@@ -508,8 +567,8 @@ namespace FPS_n2 {
 							int x2 = x1 + 32;
 							int y2 = y1 + 32;
 							if (MouseClick.trigger() && in2_(mouse_x, mouse_y, x1, y1, x2, y2)) {
-								ResetModelEdit();
-								ModelEditMode = false;
+								m_EditModel.ResetModelEdit();
+								m_EditModel.ModelEditMode = false;
 								/*
 								if (!Start.on()) {
 									ModelEditIn = true;
@@ -518,74 +577,19 @@ namespace FPS_n2 {
 							}
 						}
 						//info
-						if (ModelEditMode) {
-							std::string mode;
-							auto& c = ModelEdit->CutDetail[ModelEditCutNum];
+						if (m_EditModel.ModelEditMode) {
+							auto& c = m_EditModel.ModelEdit->CutDetail[m_EditModel.ModelEditCutNum];
 							//AnimeSel
 							CharaEdit[0].Update([&]() {
 								if (MouseClick.trigger()) {
-									++c.animsel %= ModelEdit->obj.get_anime().size();
+									++c.animsel %= m_EditModel.ModelEdit->obj.get_anime().size();
 									ModelEdit_PhysicsReset = true;
 								}
 							}, std::to_string(c.animsel));
 							//DrawMode
-							{
-								mode = "NORMAL";
-								if (ModelEdit->isBGModel) {
-									mode = ModelType[0];
-								}
-								else if (!ModelEdit->IsNearShadow) {
-									mode = ModelType[1];
-								}
-								else if (ModelEdit->IsFarShadow) {
-									mode = ModelType[2];
-								}
-							}
 							CharaEdit[1].Update([&]() {
-								if (MouseClick.trigger()) {
-									if (
-										!ModelEdit->isBGModel &&
-										ModelEdit->IsNearShadow &&
-										!ModelEdit->IsFarShadow
-										) {
-										//ノーマルならBGモデルに
-										ModelEdit->isBGModel = true;
-									}
-									else if (
-										ModelEdit->isBGModel &&
-										ModelEdit->IsNearShadow &&
-										!ModelEdit->IsFarShadow
-										) {
-										//BGなら近距離影なしモデルに
-										ModelEdit->isBGModel = false;
-										ModelEdit->IsNearShadow = false;
-									}
-									else if (
-										!ModelEdit->isBGModel &&
-										!ModelEdit->IsNearShadow &&
-										!ModelEdit->IsFarShadow
-										) {
-										//近距離影なしなら遠距離影なしモデルに
-										ModelEdit->IsNearShadow = true;
-										ModelEdit->IsFarShadow = true;
-									}
-									else if (
-										!ModelEdit->isBGModel &&
-										ModelEdit->IsNearShadow &&
-										ModelEdit->IsFarShadow
-										) {
-										//遠距離影なしならノーマルモデルに
-										ModelEdit->IsFarShadow = false;
-										ModelEdit->isBGModel = false;
-									}
-									else {
-										//何か問題があったらnormalに
-										ModelEdit->isBGModel = false;
-										ModelEdit->IsNearShadow = true;
-										ModelEdit->IsFarShadow = false;
-									}
-								}
-							}, mode);
+								if (MouseClick.trigger()) { m_EditModel.ChangeMode(); }
+							}, m_EditModel.GetModeName());
 							//ModelPhysicsSpeed
 							CharaEdit[2].Update([&]() {
 								if (MouseClick.trigger()) {
@@ -597,6 +601,7 @@ namespace FPS_n2 {
 								}
 							}, (c.OpacityRate >= 0.f) ? std::to_string(c.OpacityRate) : "continuous");
 							//Matrix
+							std::string mode;
 							{
 								if (c.usemat) {
 									char buf[256] = "";
@@ -671,7 +676,7 @@ namespace FPS_n2 {
 											}
 										}
 										if (xx < x1 + width_Next) {
-											if (!ModelEditMode && in2_(mouse_x, mouse_y, xx, y_p, x1 + width_Next, y_p + y_s - 1)) {
+											if (!m_EditModel.ModelEditMode && in2_(mouse_x, mouse_y, xx, y_p, x1 + width_Next, y_p + y_s - 1)) {
 												int y1 = y_p + ((mouse_y - y_p) / hight) * hight;
 												SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 												DrawBox(xx, y1, x1 + width_Next, y1 + hight, GetColor(255, 255, 255), TRUE);
@@ -709,7 +714,7 @@ namespace FPS_n2 {
 
 										DrawLine(x1, y_p + y_s, x1, y_p + y_s + y_hight, GetColor(128, 128, 128), 1);
 
-										if (!ModelEditMode && in2_(mouse_x, mouse_y, x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight)) {
+										if (!m_EditModel.ModelEditMode && in2_(mouse_x, mouse_y, x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight)) {
 											DrawBox(x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight, GetColor(255, 0, 0), TRUE);
 										}
 									}
@@ -735,11 +740,9 @@ namespace FPS_n2 {
 								int p2 = 2;
 								int y1 = y_p;
 								for (const auto& m : models.GetModel()) {
-									if (ChangeModel != nullptr && ChangeModel == (ModelControl::Model*)&m) {
-										if (SetAnimStart <= i && i <= SetAnimEnd) {
-											if (x1 < x1 + width_Next) {
-												DrawBox(x1, y1 + yp, x1 + width_Next, y1 + hight - yp, GetColor(255, 255, 0), FALSE);
-											}
+									if (m_ChangeModel.IsChangeModel(&m) && m_ChangeModel.IsAnimIn(i)) {
+										if (x1 < x1 + width_Next) {
+											DrawBox(x1, y1 + yp, x1 + width_Next, y1 + hight - yp, GetColor(255, 255, 0), FALSE);
 										}
 									}
 									for (const auto& c : m.Cutinfo.Switch) {
@@ -767,9 +770,9 @@ namespace FPS_n2 {
 												}
 											}
 											if (
-												ModelEditMode &&
-												ModelEdit == (ModelControl::Model*)&m &&
-												ModelEditCutNum == (size_t)(&c - &m.Cutinfo.Switch.front())
+												m_EditModel.ModelEditMode &&
+												m_EditModel.IsEditModel(&m) &&
+												m_EditModel.ModelEditCutNum == (size_t)(&c - &m.Cutinfo.Switch.front())
 												) {
 												color = GetColor(255, 255, 0);
 											}
@@ -792,7 +795,7 @@ namespace FPS_n2 {
 							DrawLine(x_now + X_now + width_Time, y_p, x_now + X_now + width_Time, y_p + y_s, GetColor(255, 255, 255), 3);
 						}
 						//OverRay
-						if (ModelEditMode) {
+						if (m_EditModel.ModelEditMode) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, 64);
 							DrawBox(x_p, y_p, x_p + x_s, y_p + y_s, GetColor(0, 0, 0), TRUE);
 							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
@@ -820,7 +823,7 @@ namespace FPS_n2 {
 						//
 					}
 					//モデルエディットモード
-					if (ModelEdit != nullptr && ModelEditMode) {
+					if (m_EditModel.CanEdit() && m_EditModel.ModelEditMode) {
 						int x_p = DrawParts->disp_x * 5 / 10;
 						int x_s = DrawParts->disp_x * 4 / 10;
 						int y_p = DrawParts->disp_y * 2 / 10;
@@ -855,9 +858,9 @@ namespace FPS_n2 {
 								int p2 = 2;
 								//Name
 								{
-									const auto* sel = LSClass.GetArgFromPath(ModelEdit->Path);
+									const auto* sel = LSClass.GetArgFromPath(m_EditModel.ModelEdit->Path);
 									if (sel != nullptr) {
-										Fonts.Get(hight).Get_handle().DrawStringFormat(x_p + x_s / 2, y1, GetColor(255, 255, 255), sel->Base + "(" + std::to_string(ModelEdit->BaseID) + ")");
+										Fonts.Get(hight).Get_handle().DrawStringFormat(x_p + x_s / 2, y1, GetColor(255, 255, 255), sel->Base + "(" + std::to_string(m_EditModel.ModelEdit->BaseID) + ")");
 									}
 									Fonts.Get(hight).Get_handle().DrawString(x_p, y1, "Name", GetColor(255, 255, 255));
 									y1 += hight + p2;
@@ -894,224 +897,6 @@ namespace FPS_n2 {
 			//Getter
 			bool Time_Over(void) const noexcept { return m_Counter >= m_CutInfo.size(); }
 		public:
-			void Awake(void) noexcept {
-				auto* DrawParts = DXDraw::Instance();
-				{
-					SetUseASyncLoadFlag(FALSE);
-					{
-						graphs.Load(
-							(float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)),
-							0, 1.f, 0.5f, LOGO1);
-					}
-					TLClass.Init();
-					int mdata = FileRead_open("data/Cut.txt", FALSE);
-					int cnt = 0;
-					SetUseASyncLoadFlag(TRUE);
-					clsDx();
-					auto NowTime = GetNowHiPerformanceCount();
-					auto TotalTime = GetNowHiPerformanceCount();
-					while (FileRead_eof(mdata) == 0) {
-						LSClass.LoadScript(getparams::get_str(mdata));
-						const auto& args = LSClass.Getargs();
-						const auto& func = LSClass.Getfunc();
-						if (func == "") { continue; }
-						//変数登録
-						LSClass.SetArgs(&NAMES);
-						//モデル読み込み
-						if (func.find("LoadModel") != std::string::npos) {
-							for (int i = 0; i < std::stoi(args[1]); i++) {
-								models.Load(args[0]);
-							}
-						}
-						//カット
-						//新規カット
-						if (func.find("SetCut") != std::string::npos) {
-							m_CutInfo.resize(m_CutInfo.size() + 1);
-							m_CutInfo.back().SetTimeLimit((LONGLONG)(1000000.f * std::stof(args[0])));
-							m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
-						}
-						//Camposの指定
-						else if (func.find("SetCampos_Attach") != std::string::npos) {
-							auto startFrame = (int)(m_CutInfo.size()) - 1;
-							attached.Switch.resize(attached.Switch.size() + 1);
-							attached.Switch.back().SetSwitch(startFrame, startFrame + (std::stoi(args[0]) - 1));
-							attachedDetail.resize(attachedDetail.size() + 1);
-							attachedDetail.back().poscam.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
-						}
-						else {
-							//カメラ座標周り
-							if (m_CutInfo.size() > 0) {
-								if (m_CutInfo.back().LoadScript(func, args)) {
-									m_CutInfoUpdate.back().CameraNotFirst = m_CutInfo.back().Aim_camera;
-								}
-							}
-							if (m_CutInfoUpdate.size() > 0) {
-								m_CutInfoUpdate.back().LoadScript(func, args);
-							}
-							//画像描画
-							if (func.find("SetDrawGraph") != std::string::npos) {
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								size_t in_str = args[1].find("~");
-								if (in_str != std::string::npos) {
-									int start_t = std::stoi(args[1].substr(0, in_str));
-									int end_t = std::stoi(args[1].substr(in_str + 1));
-									for (int i = start_t; i <= end_t; i++) {
-										graphs.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
-									}
-								}
-								else {
-									graphs.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
-								}
-							}
-							else if (func.find("SetGraphBlur") != std::string::npos) {
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init(startFrame, std::stoi(args[2]) - 1);
-							}
-							else if (func.find("SetGraphOpacityRate") != std::string::npos) {
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = 0.f;
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate = std::stof(args[2]);
-							}
-							else if (func.find("SetGraphOpacityEasing") != std::string::npos) {
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-								graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
-							}
-							//モデル描画
-							else if (func.find("SetDrawModel") != std::string::npos) {
-								auto startFrame = (int)(m_CutInfo.size()) - 1;
-								size_t in_str = args[1].find("~");
-								if (in_str != std::string::npos) {
-									int start_t = std::stoi(args[1].substr(0, in_str));
-									int end_t = std::stoi(args[1].substr(in_str + 1));
-									for (int i = start_t; i <= end_t; i++) {
-										models.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
-									}
-								}
-								else {
-									models.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
-								}
-							}
-							else if (func.find("SetModelAnime") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().animsel = std::stoi(args[2]);
-								t->CutDetail.back().isloop = (args[3].find("TRUE") != std::string::npos);
-								t->CutDetail.back().animspeed = std::stof(args[4]);
-								t->CutDetail.back().startframe = std::stof(args[5]);
-							}
-							else if (func.find("SetModelMat") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().usemat = true;
-
-								t->CutDetail.back().Yrad1_p = std::stof(args[2]);
-								t->CutDetail.back().pos_p = VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5]));
-								t->CutDetail.back().Yrad2_p = std::stof(args[6]);
-
-								t->CutDetail.back().mat_p = MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad1_p)) * MATRIX_ref::Mtrans(t->CutDetail.back().pos_p) * MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad2_p));
-							}
-							else if (func.find("SetModelPhysicsSpeed") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().PhysicsSpeed_ = std::stof(args[2]);
-							}
-							else if (func.find("SetModelOpacityRate") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().OpacityRate = std::stof(args[2]);
-							}
-							else if (func.find("SetModelOpacityEasing") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								t->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-								t->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
-							}
-							//どの距離で描画するかをセット
-							else if (func.find("SetModelMode") != std::string::npos) {
-								auto* t = models.Get(args[0], std::stoi(args[1]));
-								if (args[2] == ModelType[0]) {
-									t->isBGModel = true;
-								}
-								if (args[2] == ModelType[1]) {
-									t->IsNearShadow = false;
-								}
-								if (args[2] == ModelType[2]) {
-									t->IsFarShadow = true;
-								}
-							}
-						}
-						//テロップ
-						TLClass.LoadTelop(func, args);
-						//END
-						{
-							float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
-							if (tim >= 0.001f) {
-								GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-							}
-							printfDx("ロード%3d完了 [%7.3f s] : %s\n", cnt, tim, func.c_str());
-							if (tim >= 0.001f) {
-								DrawParts->Screen_Flip();
-							}
-							NowTime = GetNowHiPerformanceCount();
-							cnt++;
-						}
-						if (ProcessMessage() != 0) { return; }
-					}
-					FileRead_close(mdata);
-					SetUseASyncLoadFlag(FALSE);
-					printfDx("非同期読み込みオブジェクトの読み込み待ち…\n");
-					int prenum = GetASyncLoadNum(), prenumAll = prenum;
-					while (ProcessMessage() == 0 && GetASyncLoadNum() != 0) {
-						if (prenum != GetASyncLoadNum()) {
-							prenum = GetASyncLoadNum();
-							//END
-							{
-								float tim = float((GetNowHiPerformanceCount() - NowTime) / 1000) / 1000.f;
-								if (tim >= 0.001f) {
-									GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-								}
-								printfDx("ロード%3d完了 [%7.3f s] : %d / %d\n", cnt, tim, prenum, prenumAll);
-								if (tim >= 0.001f) {
-									DrawParts->Screen_Flip();
-								}
-								NowTime = GetNowHiPerformanceCount();
-								cnt++;
-							}
-							continue;
-						}
-					}
-					if (ProcessMessage() != 0) {
-						return;
-					}
-					//モデルの事前処理(非同期)
-					{
-						models.Set();
-						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-						printfDx("モデルのセット完了 : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
-						DrawParts->Screen_Flip();
-						for (auto& n : NAMES) {
-							if (n.find(".pmx") != std::string::npos) {
-								MV1SaveModelToMV1File(models.Get(n, 0)->obj.get(), (n.substr(0, n.find(".pmx")) + ".mv1").c_str(), MV1_SAVETYPE_NORMAL, -1, 1, 1, 1, 0, 0);
-							}
-						}
-						if (ProcessMessage() != 0) {
-							return;
-						}
-					}
-					//モデルのMV!保存
-					{
-						GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-						printfDx("モデルのMV1変換完了 : total = [%7.3f s]\n", float((GetNowHiPerformanceCount() - TotalTime) / 1000) / 1000.f);
-						DrawParts->Screen_Flip();
-						if (ProcessMessage() != 0) {
-							return;
-						}
-					}
-					GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-					printfDx("ロード全部完了　キーを押してください\n");
-					DrawParts->Screen_Flip();
-					//
-				}
-				//
-				grassmodel.Init();
-				WaitKey();
-			}
-		public:
 			using TEMPSCENE::TEMPSCENE;
 			void Set(void) noexcept override {
 				auto* PostPassParts = PostPassEffect::Instance();
@@ -1130,7 +915,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				m_Counter = 25;
+				//m_Counter = 25;
 				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
@@ -1189,10 +974,10 @@ namespace FPS_n2 {
 				SpeedDown.GetInput(CheckHitKey(KEY_INPUT_LEFT) != 0);
 				LookMovie.GetInput(CheckHitKey(KEY_INPUT_M) != 0);
 				LookEditer.GetInput(CheckHitKey(KEY_INPUT_N) != 0);
-				Start.GetInput((!ModelEditMode && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
+				Start.GetInput((!m_EditModel.ModelEditMode && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
 				ModelEditIn = false;
 				if (
-					(!ModelEditMode && (SpeedUp.trigger() || SpeedDown.trigger())) ||
+					(!m_EditModel.ModelEditMode && (SpeedUp.trigger() || SpeedDown.trigger())) ||
 					Start.trigger()) {
 					if (SpeedUp.trigger()) {
 						spd_x++;
