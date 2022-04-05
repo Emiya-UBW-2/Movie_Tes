@@ -65,81 +65,81 @@ namespace FPS_n2 {
 			};
 			class Edit_Model {
 			public:
-				ModelControl::Model* ModelEdit{ nullptr };
-				size_t ModelEditCutNum{ 0 };
-				bool ModelEditMode = false;
+				ModelControl::Model* m_Ptr{ nullptr };
+				size_t m_CunNum{ 0 };
+				bool m_IsActive = false;
 
-				const auto IsEditModel(const ModelControl::Model* tgt, size_t id) const noexcept { return (ModelEditMode && ModelEdit == tgt && ModelEditCutNum == id); }
-				bool IsEditMode() { return this->ModelEdit != nullptr && this->ModelEditMode; }
+				const auto IsEditModel(const ModelControl::Model* tgt, size_t id) const noexcept { return (this->m_IsActive && m_Ptr == tgt && m_CunNum == id); }
+				bool IsEditMode() { return this->m_Ptr != nullptr && this->m_IsActive; }
 				bool Switch() {
-					if (this->ModelEdit != nullptr && !ModelEditMode) {
-						ModelEditMode = true;
+					if (this->m_Ptr != nullptr && !m_IsActive) {
+						m_IsActive = true;
 						return true;
 					}
 					return false;
 				}
 				void SetModelEdit(ModelControl::Model* tmp, int value) noexcept {
-					ModelEdit = tmp;
-					ModelEditCutNum = value;
+					m_Ptr = tmp;
+					m_CunNum = value;
 				}
 				void ResetModelEdit(void) noexcept {
-					ModelEdit = nullptr;
-					ModelEditCutNum = 0;
+					m_Ptr = nullptr;
+					m_CunNum = 0;
 				}
 				auto GetModeName(void) const noexcept {
 					std::string mode = "NORMAL";
-					if (this->ModelEdit->isBGModel) {
+					if (this->m_Ptr->isBGModel) {
 						mode = ModelType[0];
 					}
-					else if (!this->ModelEdit->IsNearShadow) {
+					else if (!this->m_Ptr->IsNearShadow) {
 						mode = ModelType[1];
 					}
-					else if (this->ModelEdit->IsFarShadow) {
+					else if (this->m_Ptr->IsFarShadow) {
 						mode = ModelType[2];
 					}
 					return mode;
 				}
 				void ChangeMode(void) noexcept {
 					if (
-						!this->ModelEdit->isBGModel &&
-						this->ModelEdit->IsNearShadow &&
-						!this->ModelEdit->IsFarShadow
+						!this->m_Ptr->isBGModel &&
+						this->m_Ptr->IsNearShadow &&
+						!this->m_Ptr->IsFarShadow
 						) {
 						//ƒm[ƒ}ƒ‹‚È‚çBGƒ‚ƒfƒ‹‚É
-						this->ModelEdit->isBGModel = true;
+						this->m_Ptr->isBGModel = true;
 					}
 					else if (
-						this->ModelEdit->isBGModel &&
-						this->ModelEdit->IsNearShadow &&
-						!this->ModelEdit->IsFarShadow
+						this->m_Ptr->isBGModel &&
+						this->m_Ptr->IsNearShadow &&
+						!this->m_Ptr->IsFarShadow
 						) {
 						//BG‚È‚ç‹ß‹——£‰e‚È‚µƒ‚ƒfƒ‹‚É
-						this->ModelEdit->isBGModel = false;
-						this->ModelEdit->IsNearShadow = false;
+						this->m_Ptr->isBGModel = false;
+						this->m_Ptr->IsNearShadow = false;
 					}
 					else if (
-						!this->ModelEdit->isBGModel &&
-						!this->ModelEdit->IsNearShadow &&
-						!this->ModelEdit->IsFarShadow
+						!this->m_Ptr->isBGModel &&
+						!this->m_Ptr->IsNearShadow &&
+						!this->m_Ptr->IsFarShadow
 						) {
 						//‹ß‹——£‰e‚È‚µ‚È‚ç‰“‹——£‰e‚È‚µƒ‚ƒfƒ‹‚É
-						this->ModelEdit->IsNearShadow = true;
-						this->ModelEdit->IsFarShadow = true;
+						this->m_Ptr->IsNearShadow = true;
+						this->m_Ptr->IsFarShadow = true;
 					}
 					else if (
-						!this->ModelEdit->isBGModel &&
-						this->ModelEdit->IsNearShadow &&
-						this->ModelEdit->IsFarShadow
+						!this->m_Ptr->isBGModel &&
+						this->m_Ptr->IsNearShadow &&
+						this->m_Ptr->IsFarShadow
 						) {
 						//‰“‹——£‰e‚È‚µ‚È‚çƒm[ƒ}ƒ‹ƒ‚ƒfƒ‹‚É
-						this->ModelEdit->IsFarShadow = false;
-						this->ModelEdit->isBGModel = false;
+						this->m_Ptr->IsFarShadow = false;
+						this->m_Ptr->isBGModel = false;
 					}
 					else {
 						//‰½‚©–â‘è‚ª‚ ‚Á‚½‚çnormal‚É
-						this->ModelEdit->isBGModel = false;
-						this->ModelEdit->IsNearShadow = true;
-						this->ModelEdit->IsFarShadow = false;
+						this->m_Ptr->isBGModel = false;
+						this->m_Ptr->IsNearShadow = true;
+						this->m_Ptr->IsFarShadow = false;
 					}
 				}
 			};
@@ -206,8 +206,7 @@ namespace FPS_n2 {
 			int fog[3]{ -1,-1,-1 };									//
 			float fog_range[2]{ -1.f,-1.f };						//
 			std::vector<size_t> RankID;								//
-			size_t camsel{ 0 };										//
-			int camsel_buf{ 0 };									//
+			size_t camsel{ 0 }, camsel_buf{ 0 };					//
 			switchs ChangeCamSel;									//
 			switchs ChangeStart;									//
 			float Per_Change{ 1.f };								//
@@ -460,7 +459,7 @@ namespace FPS_n2 {
 
 						x_now = OffsetCalc(x_p, x_s);
 						//”»’è‰‰ŽZ
-						if (!m_EditModel.ModelEditMode) {
+						if (!m_EditModel.m_IsActive) {
 							SeekBer_Calc(x_p, x_s, y_p, y_s);
 							if (!PressSeek) {
 								if (MouseClick.press()) {
@@ -494,7 +493,7 @@ namespace FPS_n2 {
 																break;
 															}
 														}
-														if (!EditModelInfo || m_EditModel.ModelEdit == nullptr) {
+														if (!EditModelInfo || m_EditModel.m_Ptr == nullptr) {
 															m_ChangeModel.Set(tmp, i);
 														}
 													}
@@ -566,7 +565,7 @@ namespace FPS_n2 {
 							int y2 = y1 + 32;
 							if (MouseClick.trigger() && in2_(mouse_x, mouse_y, x1, y1, x2, y2)) {
 								m_EditModel.ResetModelEdit();
-								m_EditModel.ModelEditMode = false;
+								m_EditModel.m_IsActive = false;
 								/*
 								if (!Start.on()) {
 									ModelEditIn = true;
@@ -575,12 +574,12 @@ namespace FPS_n2 {
 							}
 						}
 						//info
-						if (m_EditModel.ModelEditMode) {
-							auto& c = m_EditModel.ModelEdit->CutDetail[m_EditModel.ModelEditCutNum];
+						if (m_EditModel.m_IsActive) {
+							auto& c = m_EditModel.m_Ptr->CutDetail[m_EditModel.m_CunNum];
 							//AnimeSel
 							CharaEdit[0].Update([&]() {
 								if (MouseClick.trigger()) {
-									++c.animsel %= m_EditModel.ModelEdit->obj.get_anime().size();
+									++c.animsel %= m_EditModel.m_Ptr->obj.get_anime().size();
 									ModelEdit_PhysicsReset = true;
 								}
 							}, std::to_string(c.animsel));
@@ -674,7 +673,7 @@ namespace FPS_n2 {
 											}
 										}
 										if (xx < x1 + width_Next) {
-											if (!m_EditModel.ModelEditMode && in2_(mouse_x, mouse_y, xx, y_p, x1 + width_Next, y_p + y_s - 1)) {
+											if (!m_EditModel.m_IsActive && in2_(mouse_x, mouse_y, xx, y_p, x1 + width_Next, y_p + y_s - 1)) {
 												int y1 = y_p + ((mouse_y - y_p) / hight) * hight;
 												SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 												DrawBox(xx, y1, x1 + width_Next, y1 + hight, GetColor(255, 255, 255), TRUE);
@@ -712,7 +711,7 @@ namespace FPS_n2 {
 
 										DrawLine(x1, y_p + y_s, x1, y_p + y_s + y_hight, GetColor(128, 128, 128), 1);
 
-										if (!m_EditModel.ModelEditMode && in2_(mouse_x, mouse_y, x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight)) {
+										if (!m_EditModel.m_IsActive && in2_(mouse_x, mouse_y, x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight)) {
 											DrawBox(x1, y_p + y_s, x1 + width_Next, y_p + y_s + y_hight, GetColor(255, 0, 0), TRUE);
 										}
 									}
@@ -780,7 +779,7 @@ namespace FPS_n2 {
 							DrawLine(x_now + X_now + width_Time, y_p, x_now + X_now + width_Time, y_p + y_s, GetColor(255, 255, 255), 3);
 						}
 						//OverRay
-						if (m_EditModel.ModelEditMode) {
+						if (m_EditModel.m_IsActive) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, 64);
 							DrawBox(x_p, y_p, x_p + x_s, y_p + y_s, GetColor(0, 0, 0), TRUE);
 							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
@@ -843,9 +842,9 @@ namespace FPS_n2 {
 								int p2 = 2;
 								//Name
 								{
-									const auto* sel = LSClass.GetArgFromPath(m_EditModel.ModelEdit->Path);
+									const auto* sel = LSClass.GetArgFromPath(m_EditModel.m_Ptr->Path);
 									if (sel != nullptr) {
-										Fonts.Get(hight).Get_handle().DrawStringFormat(x_p + x_s / 2, y1, GetColor(255, 255, 255), sel->Base + "(" + std::to_string(m_EditModel.ModelEdit->BaseID) + ")");
+										Fonts.Get(hight).Get_handle().DrawStringFormat(x_p + x_s / 2, y1, GetColor(255, 255, 255), sel->Base + "(" + std::to_string(m_EditModel.m_Ptr->BaseID) + ")");
 									}
 									Fonts.Get(hight).Get_handle().DrawString(x_p, y1, "Name", GetColor(255, 255, 255));
 									y1 += hight + p2;
@@ -950,9 +949,9 @@ namespace FPS_n2 {
 				MouseClick.GetInput((GetMouseInput_M() & MOUSE_INPUT_LEFT) != 0);
 				SpeedUp.GetInput(CheckHitKey(KEY_INPUT_RIGHT) != 0);
 				SpeedDown.GetInput(CheckHitKey(KEY_INPUT_LEFT) != 0);
-				Start.GetInput((!m_EditModel.ModelEditMode && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
+				Start.GetInput((!m_EditModel.m_IsActive && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
 				ModelEditIn = false;
-				if ((!m_EditModel.ModelEditMode && (SpeedUp.trigger() || SpeedDown.trigger())) || Start.trigger()) {
+				if ((!m_EditModel.m_IsActive && (SpeedUp.trigger() || SpeedDown.trigger())) || Start.trigger()) {
 					if (SpeedUp.trigger()) { spd_x++; }
 					if (SpeedDown.trigger()) { spd_x--; }
 					if (Start.trigger()) { spd_x = Start.on() ? 10 : 0; }
@@ -1547,7 +1546,7 @@ namespace FPS_n2 {
 									switch (m_CutInfoUpdate[m_Counter].CutSel) {
 									case CAMERA_1:
 									{
-										camsel_buf = (int)(NAMES.size()) / 2;
+										camsel_buf = NAMES.size() / 2;
 										camsel = RankID[camsel_buf];
 
 										m_CutInfoUpdate[m_Counter].m_RandcamvecSet.Set(0.f, 0.f, 0.f);
@@ -1827,7 +1826,7 @@ namespace FPS_n2 {
 										ChangeCamSel.GetInput((CheckHitKey(KEY_INPUT_DOWN) != 0) && (Per_Change <= 0.001f));
 										if (ChangeCamSel.trigger() || (Per_Change <= 0.01f)) {
 											m_CutInfoUpdate[m_Counter].Forcus[0].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
-											++camsel_buf %= (int)(NAMES.size());
+											++camsel_buf %= NAMES.size();
 											camsel = RankID[camsel_buf];
 											m_CutInfoUpdate[m_Counter].Forcus[1].Set(NAMES[camsel], 0, "NECK", VECTOR_ref::zero());
 											Per_Change = 1.f;
