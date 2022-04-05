@@ -246,7 +246,6 @@ namespace FPS_n2 {
 			VECTOR_ref m_RandcamposBuf;								//
 			float Black_Buf{ 0.f };									//
 			float White_Buf{ 0.f };									//
-			std::vector<CharaInfoEdit> CharaEdit;					//
 #define EditMode
 #ifdef EditMode
 			//エディター
@@ -257,6 +256,7 @@ namespace FPS_n2 {
 			bool ModelEdit_PhysicsReset{ false };					//
 			bool ModelEditIn{ false };								//
 			bool PressSeek{ false };								//
+			std::vector<CharaInfoEdit> CharaEdit;					//
 		private:
 			//calc
 			int OffsetCalc(int x_p, int x_s)noexcept {
