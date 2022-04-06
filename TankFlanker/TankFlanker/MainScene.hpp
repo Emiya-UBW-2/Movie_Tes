@@ -207,8 +207,6 @@ namespace FPS_n2 {
 			float fog_range[2]{ -1.f,-1.f };						//
 			std::vector<size_t> RankID;								//
 			size_t camsel{ 0 }, camsel_buf{ 0 };					//
-			switchs ChangeCamSel;									//
-			switchs ChangeStart;									//
 			float Per_Change{ 1.f };								//
 			float Change1Time{ 1.f };								//
 			size_t m_Counter{ 0 };									//カット
@@ -223,18 +221,10 @@ namespace FPS_n2 {
 			SoundHandle BGM;										//データ
 			int BGM_Frequency;										//
 			MV1 Guide;												//
-			switchs SpeedUp;										//
-			switchs SpeedDown;										//
+			switchs ChangeCamSel, ChangeStart;						//
+			switchs SpeedUp, SpeedDown;								//
 			switchs Start;											//
 			switchs MouseClick;										//
-			int changeSeekID{ -1 };									//
-			int x_now{ -1 };										//
-			int BaseWidth{ 1920 / 64 };								//
-			int WidthPer{ 2000000 };								//
-			int X_now{ 0 };											//
-			int CutNow{ 0 };										//
-			Change_Model m_ChangeModel;								//
-			Edit_Model m_EditModel;									//
 			int spd_x{ 10 };										//
 			bool isFreepos{ false };								//
 			int x_m{ 0 }, y_m{ 0 };									//
@@ -246,7 +236,7 @@ namespace FPS_n2 {
 			VECTOR_ref m_RandcamposBuf;								//
 			float Black_Buf{ 0.f };									//
 			float White_Buf{ 0.f };									//
-#define EditMode
+//#define EditMode
 #ifdef EditMode
 			//エディター
 		private:
@@ -257,6 +247,14 @@ namespace FPS_n2 {
 			bool ModelEditIn{ false };								//
 			bool PressSeek{ false };								//
 			std::vector<CharaInfoEdit> CharaEdit;					//
+			int BaseWidth{ 1920 / 64 };								//
+			int changeSeekID{ -1 };									//
+			int x_now{ -1 };										//
+			int WidthPer{ 2000000 };								//
+			int X_now{ 0 };											//
+			int CutNow{ 0 };										//
+			Change_Model m_ChangeModel;								//
+			Edit_Model m_EditModel;									//
 		private:
 			//calc
 			int OffsetCalc(int x_p, int x_s)noexcept {
@@ -949,9 +947,15 @@ namespace FPS_n2 {
 				MouseClick.GetInput((GetMouseInput_M() & MOUSE_INPUT_LEFT) != 0);
 				SpeedUp.GetInput(CheckHitKey(KEY_INPUT_RIGHT) != 0);
 				SpeedDown.GetInput(CheckHitKey(KEY_INPUT_LEFT) != 0);
-				Start.GetInput((!m_EditModel.m_IsActive && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
+				bool isEditActive = true;
+#ifdef EditMode
+				isEditActive = m_EditModel.m_IsActive;
+				Start.GetInput((!isEditActive && CheckHitKey(KEY_INPUT_SPACE) != 0) || ModelEditIn);
 				ModelEditIn = false;
-				if ((!m_EditModel.m_IsActive && (SpeedUp.trigger() || SpeedDown.trigger())) || Start.trigger()) {
+#else
+				Start.GetInput(CheckHitKey(KEY_INPUT_SPACE) != 0);
+#endif
+				if ((!isEditActive && (SpeedUp.trigger() || SpeedDown.trigger())) || Start.trigger()) {
 					if (SpeedUp.trigger()) { spd_x++; }
 					if (SpeedDown.trigger()) { spd_x--; }
 					if (Start.trigger()) { spd_x = Start.on() ? 10 : 0; }
@@ -1377,7 +1381,7 @@ namespace FPS_n2 {
 									auto* m = models.Get(n, 0);
 									RankID[m->Rank - 1] = &n - &NAMES.front();
 
-									printfDx("Rank%d = %s,(%s)\n", m->Rank, m->FrontID.c_str(), n.c_str());
+									//printfDx("Rank%d = %s,(%s)\n", m->Rank, m->FrontID.c_str(), n.c_str());
 								}
 
 								for (auto& n : NAMES) {
@@ -1506,8 +1510,8 @@ namespace FPS_n2 {
 									else {
 										cam_near = std::min(cam_near, std::clamp(cam_far / 10.f, 2.f, 1000.f));
 									}
-									printfDx("FAR  = %.2f\n", cam_far);
-									printfDx("NEAR = %.2f\n", cam_near);
+									//printfDx("FAR  = %.2f\n", cam_far);
+									//printfDx("NEAR = %.2f\n", cam_near);
 
 									if (std::abs(m_CutInfo[m_Counter].Aim_camera.near_ - cam_near) > 1000.f) { m_CutInfo[m_Counter].Aim_camera.near_ = cam_near; }
 									easing_set(&m_CutInfo[m_Counter].Aim_camera.near_, cam_near, 0.5f);
@@ -2060,8 +2064,9 @@ namespace FPS_n2 {
 				m_CutInfoUpdate.clear();
 				BGM.Dispose();
 				grassmodel.Dispose();
-
+#ifdef EditMode
 				Editer_Dispose();
+#endif
 			}
 			//
 			void UI_Draw(void) noexcept  override {
