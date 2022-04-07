@@ -18,8 +18,9 @@ namespace FPS_n2 {
 	static const auto GetMocroSec(void) noexcept {
 		return GetNowHiPerformanceCount() * (int)(GameSpeed*1000.f) / 1000;
 	}
+
 	template <class T>
-	static void easing_set_SetSpeed(T* first, const T& aim, const float& ratio) {
+	static void easing_set_SetSpeed(T* first, const T& aim, const float& ratio) noexcept {
 		if (ratio == 0.f) {
 			*first = aim;
 		}
@@ -30,7 +31,7 @@ namespace FPS_n2 {
 
 	//ファイル走査
 	std::vector<WIN32_FIND_DATA> data_t;
-	void GetFileNames(std::string path_t) {
+	void GetFileNames(std::string path_t) noexcept {
 		data_t.clear();
 		WIN32_FIND_DATA win32fdt;
 		HANDLE hFind = FindFirstFile((path_t + "*").c_str(), &win32fdt);
@@ -45,6 +46,7 @@ namespace FPS_n2 {
 		} //else{ return false; }
 		FindClose(hFind);
 	}
+
 	//フォントプール
 	class FontPool {
 	public:
@@ -54,14 +56,14 @@ namespace FPS_n2 {
 		public:
 			const auto& Get_size(void)const noexcept { return size; }
 			const auto& Get_handle(void)const noexcept { return handle; }
-			void Set(int siz_t) {
+			void Set(int siz_t) noexcept {
 				this->size = siz_t;
 				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE, -1, 2);
 			}
 		};
 	private:
 		std::vector<Fonthave> havehandle;
-		size_t Add(int siz_t) {
+		size_t Add(int siz_t) noexcept {
 			for (auto& h : this->havehandle) {
 				if (h.Get_size() == siz_t) {
 					return &h - &this->havehandle.front();
@@ -72,16 +74,16 @@ namespace FPS_n2 {
 			return this->havehandle.size() - 1;
 		}
 	public:
-		Fonthave& Get(int siz_t) { return this->havehandle[Add(siz_t)]; }
+		Fonthave& Get(int siz_t) noexcept { return this->havehandle[Add(siz_t)]; }
 	};
 	FontPool Fonts;
+
 	//エフェクトリソース
 	class EffectControl {
 		LONGLONG Update_effect_was = 0;					//エフェクトのアップデートタイミングタイマー
 	public:
 		bool Update_effect_f{ true };					//エフェクトのアップデートタイミングフラグ
 		std::vector<EffekseerEffectHandle> effsorce;	/*エフェクトリソース*/
-
 		void Init(void) noexcept {
 			GetFileNames("data/effect/");
 			for (auto& d : data_t) {
@@ -95,14 +97,12 @@ namespace FPS_n2 {
 			effsorce.back() = EffekseerEffectHandle::load("data/effect/gndsmk.efk");								//戦車用エフェクト
 			Update_effect_was = GetMocroSec();
 		}
-
 		void Calc(void) noexcept {
 			Update_effect_f = ((GetMocroSec() - Update_effect_was) >= 1000000 / 60);
 			if (Update_effect_f) {
 				Update_effect_was = GetMocroSec();
 			}
 		}
-
 		void Dispose(void) noexcept {
 			for (auto& e : effsorce) {
 				e.Dispose();
@@ -110,6 +110,7 @@ namespace FPS_n2 {
 		}
 	};
 	EffectControl effectControl;
+
 	//ライト
 	class LightPool {
 		class Lights {
@@ -121,7 +122,7 @@ namespace FPS_n2 {
 		int now = 0;
 		VECTOR_ref campos;
 	public:
-		void Put(const VECTOR_ref& pos) {
+		void Put(const VECTOR_ref& pos) noexcept {
 			if ((pos - campos).size() >= 10.f) { return; }
 			if (handles[now].handle.get() != -1) {
 				handles[now].handle.Dispose();
@@ -131,8 +132,7 @@ namespace FPS_n2 {
 			SetLightDifColorHandle(handles[now].handle.get(), GetColorF(1.f, 1.f, 0.f, 1.f));
 			++now %= handles.size();
 		}
-
-		void Update(const VECTOR_ref& campos_t) {
+		void Update(const VECTOR_ref& campos_t) noexcept {
 			campos = campos_t;
 			for (auto& h : handles) {
 				if (h.handle.get() != -1) {
@@ -150,7 +150,6 @@ namespace FPS_n2 {
 		std::array<EffectS, 256> effcs_G;					/*エフェクト*/
 		int G_cnt = 0;
 	public:
-		//
 		void Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
 			this->effcs_G[this->G_cnt].Stop();
 			this->effcs_G[this->G_cnt].Set(pos_t, nomal_t, scale);
@@ -163,7 +162,6 @@ namespace FPS_n2 {
 			}
 			return cnt;
 		}
-		//
 		void Set_Effect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept { this->effcs[(int)ef_].Set(pos_t, nomal_t, scale); }
 		void Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
 		void SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
@@ -191,7 +189,6 @@ namespace FPS_n2 {
 		class shader_Vertex {
 		public:
 			VERTEX3DSHADER Screen_vertex[6] = { 0.0f };
-
 			// 頂点データの準備
 			void Set(std::shared_ptr<DXDraw>& DrawPts_t) noexcept {
 				int xp1 = 0;
@@ -219,20 +216,20 @@ namespace FPS_n2 {
 		int pscbhandle{ -1 };
 		int pscbhandle2{ -1 };
 	public:
-		void Init(std::string vs, std::string ps) {
+		void Init(std::string vs, std::string ps) noexcept {
 			this->vshandle = LoadVertexShader(("shader/" + vs).c_str());	// 頂点シェーダーバイナリコードの読み込み
 			this->pscbhandle = CreateShaderConstantBuffer(sizeof(float) * 4);
 			this->pscbhandle2 = CreateShaderConstantBuffer(sizeof(float) * 4);
 			this->pshandle = LoadPixelShader(("shader/" + ps).c_str());		// ピクセルシェーダーバイナリコードの読み込み
 		}
-		void Set_dispsize(int dispx, int dispy) {
+		void Set_dispsize(int dispx, int dispy) noexcept {
 			FLOAT2* dispsize = (FLOAT2*)GetBufferShaderConstantBuffer(this->pscbhandle);			// ピクセルシェーダー用の定数バッファのアドレスを取得
 			dispsize->u = float(dispx);
 			dispsize->v = float(dispy);
 			UpdateShaderConstantBuffer(this->pscbhandle);								// ピクセルシェーダー用の定数バッファを更新して書き込んだ内容を反映する
 			SetShaderConstantBuffer(this->pscbhandle, DX_SHADERTYPE_PIXEL, 2);		// ピクセルシェーダー用の定数バッファを定数バッファレジスタ2にセット
 		}
-		void Set_param(float param1, float param2, float param3, float param4) {
+		void Set_param(float param1, float param2, float param3, float param4) noexcept {
 			FLOAT4* f4 = (FLOAT4*)GetBufferShaderConstantBuffer(this->pscbhandle2);			// ピクセルシェーダー用の定数バッファのアドレスを取得
 			f4->x = param1;
 			f4->y = param2;
@@ -241,7 +238,7 @@ namespace FPS_n2 {
 			UpdateShaderConstantBuffer(this->pscbhandle2);							// ピクセルシェーダー用の定数バッファを更新して書き込んだ内容を反映する
 			SetShaderConstantBuffer(this->pscbhandle2, DX_SHADERTYPE_PIXEL, 3);		// ピクセルシェーダー用の定数バッファを定数バッファレジスタ3にセット
 		}
-		void Draw_lamda(std::function<void()> doing) {
+		void Draw_lamda(std::function<void()> doing) noexcept {
 			SetUseVertexShader(this->vshandle);		// 使用する頂点シェーダーをセット
 			SetUsePixelShader(this->pshandle);		// 使用するピクセルシェーダーをセット
 			MV1SetUseOrigShader(TRUE);
@@ -250,7 +247,7 @@ namespace FPS_n2 {
 			SetUseVertexShader(-1);					// 使用する頂点シェーダーをセット
 			SetUsePixelShader(-1);					// 使用するピクセルシェーダーをセット
 		}
-		void Draw(shader_Vertex& Screen_vertex) {
+		void Draw(shader_Vertex& Screen_vertex) noexcept {
 			Draw_lamda([&] {DrawPolygon3DToShader(Screen_vertex.Screen_vertex, 2); });
 		}
 	};
@@ -259,8 +256,7 @@ namespace FPS_n2 {
 	//
 	class LoadScriptClass {
 	private:
-		class VARIABLE {
-		public:
+		struct VARIABLE{
 			std::string Base;
 			std::string After;
 		};
@@ -466,7 +462,6 @@ namespace FPS_n2 {
 				On = on;
 				Off = off;
 			}
-
 			bool IsIn(size_t value) const noexcept {
 				return On <= value && value <= Off;
 			}
@@ -479,7 +474,6 @@ namespace FPS_n2 {
 		bool isFirstCut = false;
 	public:
 		const auto& GetSwitch(void) const noexcept { return a_switch; }
-
 		void Init(int startFrame, int ofset) noexcept {
 			this->Switch.resize(this->Switch.size() + 1);
 			this->Switch.back().SetSwitch(startFrame, startFrame + ofset);
@@ -539,21 +533,19 @@ namespace FPS_n2 {
 	public:
 		CutInfoClass Blur;
 		int animsel = -1;
-		bool isloop = false;
-		float animspeed = 0.f;
+		bool isloop{ false };
+		float animspeed{ 0.f };
 		MATRIX_ref mat_p;
 		//matrix用情報
 		VECTOR_ref pos_p;
 		float Yrad1_p;
 		float Yrad2_p;
-
-		bool usemat = false;
-		float startframe = 0.f;
-		float PhysicsSpeed_ = -1.f;
-
-		float OpacityRate = -1.f;
-		float OpacityRate_Dist = -1.f;
-		float OpacityRate_Per = -1.f;
+		bool usemat{ false };
+		float startframe{ 0.f };
+		float PhysicsSpeed_{ -1.f };
+		float OpacityRate{ -1.f };
+		float OpacityRate_Dist{ -1.f };
+		float OpacityRate_Per{ -1.f };
 	};
 	class CutAttachDetail {
 	public:
@@ -563,88 +555,42 @@ namespace FPS_n2 {
 	class ModelControl {
 	public:
 		class Model {
-		public:
-			bool isBGModel = false;
-			bool IsNearShadow = true;
-			bool IsFarShadow = false;
-			bool isBase = true;
-			std::string Path;
-			size_t BaseID = 0;
-
-			size_t numBase = 0;
-			float PhysicsSpeed = 1.f;
-
-			float b_run = 0;
-			float b_runrange = 0;
-
+			float b_run{ 0.f };
+			float b_runrange{ 0.f };
 			std::vector<std::pair<int, std::string>> FrameNum;
-			MV1 obj;
 			moves move;
-			//private:
-			bool isDraw = false;
-			bool isEndLoad = false;
-		public:
-			CutInfoClass Cutinfo;
-			std::vector<CutinfoDetail> CutDetail;//カットの詳細
-			float OpacityRate = 1.f;
-			float OpacityRate_Dist = 1.f;
-			float OpacityRate_Per = 1.f;
 			int Anim_Sel = 0;
-
-			bool isFarPhysics = false;
-			bool isOutFrustum = false;
-			bool isBigModel = false;
 			int DrawCount;
-
-			MATRIX_ref mat_p;
-			//matrix用情報
+			MATRIX_ref mat_p;			//matrix用情報
 			VECTOR_ref pos_p;
-
 			float Yrad1_p;
 			float Zrad1_p;
 			float Yrad2_p;
-
-			VECTOR_ref Aim_p;
-			VECTOR_ref OLDPos_p;
-			VECTOR_ref OLDVec_p;
-			float dist;
-			float OLDDist;
-			float pos_z_p;
-			bool firststart = true;
-			float Yradaddbuf_p;
-			float Yradadd_p;
-			float Zrad1buf_p;
-			float animspd;
-			float xposition = 0.f;
-
-			VECTOR_ref footEffPos;
-			bool footflag = true;
-			bool footok = false;
-			float foottime = 0.f;
-			int footLR{ 0 };
-
-			std::array<int, 2> GuideNum;
-
-			bool canUpdate = true;
-
-			bool Lookok = false;
-			bool LookLR = false;
-			float Looktime = 0.f;
-
-			bool Turbook = false;
-			float Turbotime = 0.f;
-			float TurboSpeed = 0.f;
-
-			std::string NearID = "";
-			VECTOR_ref Nearest;
-
-			std::string FrontID = "";
-			float FrontLength;
-			int Rank = -1;
-
 			int prevID = -1;
-			float AnimChange = 0.f;
-
+			float AnimChange{ 0.f };
+		public:
+			bool isBGModel{ false };
+			bool IsNearShadow = true;
+			bool IsFarShadow{ false };
+			bool isBase = true;
+			std::string Path;
+			size_t BaseID = 0;
+			size_t numBase = 0;
+			MV1 obj;
+			float PhysicsSpeed{ 1.f };
+			float OpacityRate{ 1.f };
+			float OpacityRate_Dist{ 1.f };
+			float OpacityRate_Per{ 1.f };
+			CutInfoClass Cutinfo;
+			std::vector<CutinfoDetail> CutDetail;//カットの詳細
+			bool isDraw{ false };
+			bool isEndLoad{ false };
+			bool isBigModel{ false };
+			bool isFarPhysics{ false };
+			bool isOutFrustum{ false };
+			bool canUpdate{ true };
+			float animspd;
+		public:
 			Model(void) noexcept {
 				isDraw = false;
 				isEndLoad = false;
@@ -654,13 +600,11 @@ namespace FPS_n2 {
 
 				animspd = 1.f;
 			}
-
 			void Init(int startFrame, int ofset) noexcept {
 				this->CutDetail.resize(this->CutDetail.size() + 1);
 				this->Cutinfo.Switch.resize(this->Cutinfo.Switch.size() + 1);
 				this->Cutinfo.Switch.back().SetSwitch(startFrame, startFrame + ofset);
 			}
-
 			void AddFrame(std::string_view FrameName) noexcept {
 				size_t siz = obj.frame_num();
 				for (size_t i = 0; i < siz; i++) {
@@ -680,7 +624,6 @@ namespace FPS_n2 {
 				}
 				return VECTOR_ref::zero();
 			}
-
 			static void Sel_AnimNum(MV1&model, int sel, float pers) noexcept {
 				for (auto& anim_t : model.get_anime()) {
 					model.get_anime(&anim_t - &model.get_anime().front()).per = (&anim_t - &model.get_anime().front() == sel) ? pers : (1.f - pers);
@@ -755,7 +698,6 @@ namespace FPS_n2 {
 	public:
 		const auto& GetMax(void) const noexcept { return Max; }
 		const auto& GetModel(void) const noexcept { return model; }
-
 		ModelControl(void) noexcept {
 			model.resize(64);
 			Max = 0;
@@ -880,7 +822,6 @@ namespace FPS_n2 {
 				//
 			}
 		}
-
 		void Set(void) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
@@ -1009,14 +950,6 @@ namespace FPS_n2 {
 					Base = m_base;
 					Per = m_per;
 				}
-				/*
-				void Set(float m_p, float m_base, float m_per, float m_rand, float m_randbase, float m_randper) noexcept {
-					Ans = m_p;
-					Base = m_base;
-					Per = m_per;
-					Rand_.Set(m_rand, m_randbase, m_randper);
-				}
-				*/
 				void Update(void) noexcept {
 					Rand_.UpdateRand();
 					easing_set_SetSpeed(&this->Ans, this->Base + this->Rand_.Ans, this->Per);
@@ -1039,17 +972,15 @@ namespace FPS_n2 {
 			bool isblur = false;
 			int xsize = -1;
 			int ysize = -1;
-		public:
 			CutInfoClass Cutinfo;
 			std::vector<CutinfoDetail> CutDetail;//オンにするカット
 			std::string Path;
-
+		public:
 			void Init(int startFrame, int ofset) noexcept {
 				this->CutDetail.resize(this->CutDetail.size() + 1);
 				this->Cutinfo.Switch.resize(this->Cutinfo.Switch.size() + 1);
 				this->Cutinfo.Switch.back().SetSwitch(startFrame, startFrame + ofset);
 			}
-
 			void SetBright(int b_r, int b_g, int b_b) noexcept {
 				Bright_R = b_r;
 				Bright_G = b_g;
@@ -1240,7 +1171,7 @@ namespace FPS_n2 {
 		VECTOR_ref Add;
 	public:
 		float Per = 1.f;
-
+	public:
 		void SetUse(bool value) noexcept { Use = value; }
 		const auto& GetIsUse(void) const noexcept { return Use; }
 		void Init(void) noexcept {
@@ -1288,7 +1219,6 @@ namespace FPS_n2 {
 	class Cut_Info_First {
 	public:
 		LONGLONG TimeLimit{ 0 };
-
 		bool UsePrevAim{ false };
 		bool IsResetPhysics{ false };
 		cam_info Aim_camera;
@@ -1296,18 +1226,15 @@ namespace FPS_n2 {
 		bool isResetRandCampos{ false };
 		bool isResetRandCamvec{ false };
 		bool isResetRandCamup{ false };
-
 		int bright[3]{ -1,-1,-1 };
-
 		int fog[3]{ -1,-1,-1 };
 		float fog_range[2]{ -1.f,-1.f };
-	public:
 		std::vector<ForcusControl> Forcus;
 	public:
 		//Getter
 		const auto& GetTimeLimit(void) const noexcept { return TimeLimit; }
 		void SetTimeLimit(LONGLONG value) noexcept { TimeLimit = value; }
-	public:
+		//
 		Cut_Info_First(void) noexcept {
 			Aim_camera.campos = VECTOR_ref::vget(0, 10, -30);
 			Aim_camera.camvec = VECTOR_ref::vget(0, 10, 0);
@@ -1318,14 +1245,12 @@ namespace FPS_n2 {
 		}
 		~Cut_Info_First(void) noexcept {
 		}
-		//
 		void SetPrev(const Cut_Info_First& tgt) noexcept {
 			if (this->UsePrevAim) {
 				this->Aim_camera = tgt.Aim_camera;
 				this->cam_per = tgt.cam_per;
 			}
 		}
-		//
 		bool LoadScript(const std::string &func, const std::vector<std::string>& args) noexcept {
 			//Campos
 			if (func.find("SetCampos_NoneRad") != std::string::npos) {
@@ -1390,7 +1315,6 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		//
 	};
 	class Cut_Info_Update {
 	private:
@@ -1404,20 +1328,15 @@ namespace FPS_n2 {
 		VECTOR_ref m_RandcamvecSet;
 		float m_RandcamposPer;
 		VECTOR_ref m_RandcamposSet;
-	public:
 		std::vector<ForcusControl> Forcus;
 		bool IsUsePrevBuf{ false };
-
 		size_t CutSel = 0;
 		size_t OLDCutSel = SIZE_MAX;
-
 		float campos_per{ 0.f };
 		float camvec_per{ 0.f };
 		float camup_per{ 0.f };
-
 		cam_info CameraNotFirst;
 		cam_info CameraNotFirst_Vec;
-
 		bool IsSetBlack{ false };
 		float Black_Per = 1.f;
 		float Black = 0.f;
@@ -1448,7 +1367,6 @@ namespace FPS_n2 {
 		}
 		~Cut_Info_Update(void) noexcept {
 		}
-
 		void SetForce(float camvecPer, std::string_view ModelPath, int ModelID, std::string_view Frame, const VECTOR_ref& Add) noexcept {
 			this->camvec_per = camvecPer;
 			this->Forcus.resize(this->Forcus.size() + 1);
@@ -1598,6 +1516,7 @@ namespace FPS_n2 {
 			int IndexNum = -1, VerNum = -1;	/*hits*/
 			int vnum = -1, pnum = -1;		/*hits*/
 			MV1_REF_POLYGONLIST RefMesh{};	/*hits*/
+		public:
 			//初期化
 			void Init(std::string pngpath, std::string mv1path) noexcept {
 				SetUseASyncLoadFlag(FALSE);
@@ -1619,7 +1538,6 @@ namespace FPS_n2 {
 				this->hitsver.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
 				this->hitsind.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
 			}
-
 			void Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
 				this->hitss++;
 				Set_start();
@@ -1661,7 +1579,6 @@ namespace FPS_n2 {
 				this->vnum += this->RefMesh.VertexNum;
 				this->pnum += this->RefMesh.PolygonNum * 3;
 			}
-
 			void Update(void) noexcept {
 				this->VerBuf = CreateVertexBuffer(this->VerNum, DX_VERTEX_TYPE_NORMAL_3D);
 				this->IndexBuf = CreateIndexBuffer(this->IndexNum, DX_INDEX_TYPE_32BIT);
@@ -1673,13 +1590,10 @@ namespace FPS_n2 {
 			}
 		};
 		class grass_t {
-		private:
-			//std::shared_ptr<Map> MAPPTs{ nullptr };
 		public:
 			bool canlook = true;
 			Model_Instance inst;
 		public:
-
 			void Init(int total, int sel) {
 				switch (sel) {
 				case 0:
@@ -1697,7 +1611,6 @@ namespace FPS_n2 {
 
 				this->inst.Set_start();
 			}
-
 			void Set_one(void) noexcept {
 				this->inst.Set_one();
 			}
@@ -1705,7 +1618,6 @@ namespace FPS_n2 {
 				canlook = true;
 				this->inst.Update();
 			}
-
 			void Dispose(void) noexcept {
 				this->inst.hitsver.clear();
 				this->inst.hitsind.clear();
@@ -1713,7 +1625,6 @@ namespace FPS_n2 {
 				this->inst.hits.Dispose();
 				this->inst.hits_pic.Dispose();
 			}
-
 			/*視界外か否かを判断*/
 			void Check_CameraViewClip(const VECTOR_ref& min, const VECTOR_ref& max) noexcept {
 				this->canlook = true;
@@ -1722,7 +1633,6 @@ namespace FPS_n2 {
 					return;
 				}
 			}
-
 			void Draw(void) noexcept {
 				if (this->canlook) {
 					this->inst.Draw();
