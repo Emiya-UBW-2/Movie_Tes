@@ -955,7 +955,7 @@ namespace FPS_n2 {
 
 				SetUseASyncLoadFlag(FALSE);
 				BGM = SoundHandle::Load("data/sound.wav");
-				BGM.vol(0);
+				//BGM.vol(0);
 				///*
 				//*/
 				//ƒvƒŒƒC—pˆÓ
@@ -1003,7 +1003,7 @@ namespace FPS_n2 {
 					GameSpeed = (float)(spd_x) / 10.f;
 					if (NowTimeWait >= 0) {
 						if (GameSpeed >= 0.1f) {
-							SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+							//SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
 							SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
 							if (!BGM.check()) {
 								BGM.play(DX_PLAYTYPE_BACK, FALSE);
@@ -1028,7 +1028,7 @@ namespace FPS_n2 {
 						BGM_Frequency = GetFrequencySoundMem(BGM.get());
 						BGM.play(DX_PLAYTYPE_BACK, TRUE);
 						//BGM.vol(64);
-						SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+						//SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
 
 						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
 
