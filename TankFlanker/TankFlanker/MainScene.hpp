@@ -235,7 +235,47 @@ namespace FPS_n2 {
 			VECTOR_ref m_RandcamposBuf;								//
 			float Black_Buf{ 0.f };									//
 			float White_Buf{ 0.f };									//
-//#define EditMode
+
+
+			std::string AirCarrier = "data/model/aircraftcarrier/model.mv1";
+			std::string TomCat = "data/model/F14/model.mv1";
+			struct F14Args_Wheel {
+				float Rad{ 0.f };
+				VECTOR_ref Prev;
+			};
+			struct F14Args {
+				float pWingOpen{ 1.f }, pWopentime{ 0.f };
+				float pCheck{ 0.f };
+				std::vector<F14Args_Wheel> Wheels;
+
+				int FrontWheel = -1;
+				float FrontYBase = 0.f;
+
+				moves move;
+				float Yrad, YradAdd;
+				float Xrad, XradAim;
+				float Yadd, Zadd;
+				bool AimFlag = false;
+				bool AimFlag2 = false;
+				VECTOR_ref Aim;
+
+				bool TaxStop = false;
+				float DiffTimer{ 0.f };
+				bool DiffOn = false;
+
+				float StartTimer{ 0.f };
+			};
+			std::array<F14Args, 64> Check_F14;
+			float DiffPer = 0.f;
+
+			MATRIX_ref Frontmat;
+			struct F14Wheels {
+				int sel{ 0 };
+				MATRIX_ref mat;
+			};
+			std::vector<F14Wheels> WheelFrames;
+
+#define EditMode
 #ifdef EditMode
 			//エディター
 		private:
@@ -867,12 +907,14 @@ namespace FPS_n2 {
 					printfDx("\n");
 				}
 				//
+				/*
 				for (const auto& m : models.GetModel()) {
 					const auto* sel = LSClass.GetArgFromPath(m.Path);
 					if (sel != nullptr) {
 						printfDx((" " + sel->Base + "(" + std::to_string(m.BaseID) + ") = %d\n").c_str(), m.DrawCount);
 					}
 				}
+				//*/
 
 				if (LookMovie.on()) {
 					movie.DrawExtendGraph(DrawParts->disp_x * 3 / 4, DrawParts->disp_y * 1 / 5, DrawParts->disp_x, DrawParts->disp_y, FALSE);
@@ -918,7 +960,7 @@ namespace FPS_n2 {
 				//*/
 				//プレイ用意
 				GameSpeed = (float)(spd_x) / 10.f;
-				PostPassParts->Set_Bright(255, 255, 255);
+				PostPassParts->Set_Bright(255, 240, 234);
 				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
 				WaitTime = (m_Counter != 0) ? 0 : 1000000;
 				NowTimeWait = -WaitTime;
@@ -1013,6 +1055,214 @@ namespace FPS_n2 {
 						//0
 						if (m_Counter == SEL) {
 							if (isFirstLoop) {
+								//
+								WheelFrames.clear();
+								int FrontWheel = 0;
+								for (int f = 0; f < models.Get(TomCat, 0)->obj.frame_num(); f++) {
+									if (models.Get(TomCat, 0)->obj.frame_name(f).find("回転") != std::string::npos) {
+										WheelFrames.resize(WheelFrames.size() + 1);
+										WheelFrames.back().sel = f;
+
+										auto f2 = models.Get(TomCat, 0)->obj.frame_parent(f);
+										if (models.Get(TomCat, 0)->obj.frame_name(f2).find("先") != std::string::npos) {
+											FrontWheel = (int)f2;
+										}
+									}
+								}
+								//
+								for (int i = 0; i < 1; i++) {
+									Check_F14[i].pWingOpen = 1.f;
+									Check_F14[i].pWopentime = 0.5f;
+									Check_F14[i].Wheels.resize(WheelFrames.size());
+									Check_F14[i].FrontWheel = FrontWheel;
+									Check_F14[i].move.pos.Set(-300.f, 0.f, 0.f);
+
+									Check_F14[i].Xrad = 0.f;
+									Check_F14[i].XradAim = 0.f;
+									Check_F14[i].Yrad = -90.f;
+									Check_F14[i].YradAdd = 0.f;
+
+									Check_F14[i].AimFlag = false;
+									Check_F14[i].AimFlag2 = false;
+									Check_F14[i].TaxStop = false;
+									Check_F14[i].DiffOn = false;
+									Check_F14[i].DiffTimer = 3.f;
+									Check_F14[i].Yadd = 0.f;
+									Check_F14[i].Zadd = 0.f;
+
+									Check_F14[i].StartTimer = 3.f;
+									DiffPer = 0.f;
+								}
+								//
+							}
+
+							auto* A = models.Get(AirCarrier, 0);
+							for (int i = 0; i < 1; i++) {
+								auto* M = models.Get(TomCat, i);
+								if (!Check_F14[i].AimFlag2) {
+									if (!Check_F14[i].AimFlag) {
+										if (Check_F14[i].Yrad < -5.f) {
+											easing_set(&Check_F14[i].YradAdd, 5.f, 0.95f);
+										}
+										else {
+											easing_set(&Check_F14[i].YradAdd, 0.f, 0.95f);
+											if (Check_F14[i].YradAdd <= 0.01f) {
+												Check_F14[i].YradAdd = 0.f;
+												Check_F14[i].AimFlag = true;
+												Check_F14[i].Aim = A->obj.frame(47);
+											}
+										}
+									}
+									else {
+										auto aim = (Check_F14[i].Aim - Check_F14[i].move.pos);
+										if (
+											(!Check_F14[i].TaxStop && aim.size() > 5.f) ||
+											(Check_F14[i].TaxStop && aim.size() > 50.f)
+											) {
+											aim.y(0);
+											auto zvec = MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad)).zvec();
+											zvec.y(0);
+											auto zasin = zvec.Norm().cross(aim.Norm()).y();
+											if (zasin > 0.01f) {
+												easing_set(&Check_F14[i].YradAdd, -5.f, 0.9f);
+											}
+											else if (zasin < -0.01f) {
+												easing_set(&Check_F14[i].YradAdd, 5.f, 0.9f);
+											}
+											else {
+												easing_set(&Check_F14[i].YradAdd, 0.f, 0.95f);
+												if (Check_F14[i].TaxStop && !Check_F14[i].DiffOn) {
+													Check_F14[i].DiffOn = true;
+												}
+											}
+										}
+										else {
+											if (!Check_F14[i].TaxStop) {
+												Check_F14[i].TaxStop = true;
+												Check_F14[i].Aim = A->obj.frame(58);
+											}
+											else {
+												Check_F14[i].Yadd = -100.f;
+												Check_F14[i].AimFlag2 = true;
+												Check_F14[i].YradAdd = 0.f;
+											}
+										}
+									}
+								}
+								else {
+									if (Check_F14[i].Yadd <= 100.f) {
+										Check_F14[i].Yadd += 300.f / FPS * GameSpeed;
+									}
+								}
+								//
+								{
+									auto OLD = Check_F14[i].Zadd;
+									if (Check_F14[i].StartTimer > 0.f) {
+										if (!Check_F14[i].TaxStop) {
+											easing_set(&Check_F14[i].Zadd, -12.5f, 0.95f);
+										}
+										else {
+											easing_set(&Check_F14[i].Zadd, 0.f, 0.95f);
+										}
+									}
+									else {
+										float temp = -84.f*60.f;
+										if (Check_F14[i].Zadd > temp) {
+											Check_F14[i].Zadd += -5.f*60.f / FPS * GameSpeed;
+										}
+										else {
+											Check_F14[i].Zadd = temp;
+										}
+									}
+									if (!Check_F14[i].AimFlag2) {
+										float temp = -std::abs(Check_F14[i].Zadd - OLD)*3.f;
+										float rand = Check_F14[i].YradAdd / 2.f;
+										float aim = std::clamp(temp + GetRandf(rand), -4.f, 4.f);
+										easing_set(&Check_F14[i].XradAim, aim, 0.95f);
+									}
+									else {
+										easing_set(&Check_F14[i].XradAim, 7.f, 0.95f);
+									}
+									if (isFirstLoop) {
+										Check_F14[i].XradAim = 0.f;
+									}
+									easing_set(&Check_F14[i].Xrad, Check_F14[i].XradAim, 0.95f);
+								}
+								if (Check_F14[i].DiffOn) {
+									if (Check_F14[i].DiffTimer > 0.f) {
+										Check_F14[i].DiffTimer -= 1.f / FPS * GameSpeed;
+									}
+									else {
+										Check_F14[i].DiffTimer = 0.f;
+
+										if (A->obj.get_anime(0).per <= 0.95f) {
+											easing_set(&DiffPer, 0.5f / 60.f, 0.95f);
+										}
+										else {
+											if (A->obj.get_anime(0).per >= 1.f) {
+												A->obj.get_anime(0).per = 1.f;
+												DiffPer = 0.f;
+												if (Check_F14[i].StartTimer > 0.f) {
+													Check_F14[i].StartTimer -= 1.f / FPS * GameSpeed;
+												}
+												else {
+													Check_F14[i].StartTimer = 0.f;
+												}
+											}
+											else {
+												easing_set(&DiffPer, 0.f, 0.95f);
+											}
+										}
+										A->obj.get_anime(0).per += DiffPer;
+									}
+								}
+
+								Check_F14[i].Yrad += Check_F14[i].YradAdd / FPS * GameSpeed;
+
+								Check_F14[i].move.mat = MATRIX_ref::RotX(deg2rad(Check_F14[i].Xrad)) * MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad));
+								Check_F14[i].move.vec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, Check_F14[i].Yadd, Check_F14[i].Zadd) * (1.f / FPS * GameSpeed), MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad)));
+								Check_F14[i].move.pos += Check_F14[i].move.vec;
+
+								M->obj.get_anime(0).per = 1.f;
+								M->obj.get_anime(1).per = Check_F14[i].pWingOpen;
+								easing_set(&M->obj.get_anime(2).per, sin(deg2rad(std::min(Check_F14[i].pCheck * 2.0f + 180.f, 360.f))), 0.9f);
+								easing_set(&M->obj.get_anime(3).per, sin(deg2rad(std::max(Check_F14[i].pCheck * 2.0f - 180.f, 0.f))), 0.9f);
+								easing_set(&M->obj.get_anime(4).per, sin(deg2rad(Check_F14[i].pCheck * 1.5f)), 0.9f);
+								//
+								if (Check_F14[i].AimFlag) {
+									if (Check_F14[i].pWingOpen > 0.1f) {
+										Check_F14[i].pWingOpen -= 0.5f / FPS * GameSpeed;
+									}
+									else {
+										Check_F14[i].pWingOpen -= 0.15f / FPS * GameSpeed;
+										if (Check_F14[i].pWingOpen <= 0.f) {
+											Check_F14[i].pWingOpen = 0.f;
+											if (Check_F14[i].pWopentime > 0.f) {
+												Check_F14[i].pWopentime -= 1.f / FPS * GameSpeed;
+											}
+											else {
+												Check_F14[i].pWopentime = 0.f;
+												if (Check_F14[i].pCheck < 10.f) {
+													Check_F14[i].pCheck += 60.f / FPS * GameSpeed;
+												}
+												else {
+													if (Check_F14[i].pCheck < 350.f) {
+														Check_F14[i].pCheck += 120.f / FPS * GameSpeed;
+													}
+													else {
+														if (Check_F14[i].pCheck < 360.f) {
+															Check_F14[i].pCheck += 60.f / FPS * GameSpeed;
+														}
+														else {
+															Check_F14[i].pCheck = 360.f;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+								//
 							}
 						}
 						SEL++;
@@ -1155,6 +1405,51 @@ namespace FPS_n2 {
 				graphs.Update();
 				models.Update();
 				{
+					//*
+					for (int i = 0; i < 1; i++) {
+						auto* M = models.Get(TomCat, i);
+						//全体移動
+						M->obj.SetMatrix(Check_F14[i].move.MatIn());
+						//フレーム移動
+						if (!Check_F14[i].AimFlag2) {
+							if (Check_F14[i].FrontWheel >= 0) {
+								auto sel = Check_F14[i].FrontWheel;
+								M->obj.frame_Reset(sel);
+								auto Ysus = M->obj.frame(sel).y();
+								if (isFirstLoop) {
+									Check_F14[i].FrontYBase = Ysus;
+									Frontmat = M->obj.GetFrameLocalMatrix(sel);
+								}
+								M->obj.SetFrameLocalMatrix(sel,
+									Frontmat
+									*
+									MATRIX_ref::Mtrans(VECTOR_ref::vget(0, -(Check_F14[i].FrontYBase - Ysus), 0))
+								);
+							}
+						}
+						for (auto& Sel : WheelFrames) {
+							M->obj.frame_Reset(Sel.sel);
+							auto frame = M->obj.frame(Sel.sel);
+							auto& W = Check_F14[i].Wheels[&Sel - &WheelFrames.front()];
+							if (isFirstLoop) {
+								Sel.mat = M->obj.GetFrameLocalMatrix(Sel.sel);
+								W.Prev = frame;
+							}
+							//
+							auto vec1 = frame - W.Prev;
+
+							W.Rad += vec1.size() * M->obj.GetMatrix().zvec().dot(vec1.Norm()) * 180.f / 15.f;
+							W.Prev = frame;
+							//
+							M->obj.SetFrameLocalMatrix(Sel.sel,
+								MATRIX_ref::RotAxis(MATRIX_ref::Vtrans(Check_F14[i].move.mat.xvec(), M->obj.GetFrameLocalWorldMatrix(Sel.sel).GetRot().Inverse()),
+									deg2rad(W.Rad)) * Sel.mat);
+						}
+					}
+					//*/
+					//
+				}
+				{
 					//models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
 					//ModelEdit_PhysicsReset = false;
 					isFirstLoop = false;
@@ -1178,7 +1473,7 @@ namespace FPS_n2 {
 				m_CutInfo.clear();
 				m_CutInfoUpdate.clear();
 				BGM.Dispose();
-				grassmodel.Dispose();
+				//grassmodel.Dispose();
 #ifdef EditMode
 				Editer_Dispose();
 #endif
@@ -1260,7 +1555,7 @@ namespace FPS_n2 {
 					graphs.Draw(DrawParts->disp_y);
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				grassmodel.Draw(camera_buf);
+				//grassmodel.Draw(camera_buf);
 			}
 			//
 			void LAST_Draw(void) noexcept override {

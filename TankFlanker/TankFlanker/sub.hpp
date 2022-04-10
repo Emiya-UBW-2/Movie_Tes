@@ -47,6 +47,9 @@ namespace FPS_n2 {
 		FindClose(hFind);
 	}
 
+	//
+	static float GetRandf(float m_arg) noexcept { return -m_arg + (float)(GetRand((int)(m_arg * 2.f * 10000.f))) / 10000.f; }
+
 	//フォントプール
 	class FontPool {
 	public:
@@ -251,8 +254,6 @@ namespace FPS_n2 {
 			Draw_lamda([&] {DrawPolygon3DToShader(Screen_vertex.Screen_vertex, 2); });
 		}
 	};
-
-	static float GetRandf(float m_arg) noexcept { return -m_arg + (float)(GetRand((int)(m_arg * 2.f * 10000.f))) / 10000.f; }
 	//
 	class LoadScriptClass {
 	private:

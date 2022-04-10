@@ -206,8 +206,8 @@ namespace FPS_n2 {
 				}
 				PutMsg("ƒ‚ƒfƒ‹‚ÌMV1•ÏŠ·Š®—¹\n");
 				//
-				grassmodel.Init();
-				PutMsg("‘‚Ì¶¬Š®—¹\n");
+				//grassmodel.Init();
+				//PutMsg("‘‚Ì¶¬Š®—¹\n");
 			}
 			bool Update(void) noexcept override {
 				return false;

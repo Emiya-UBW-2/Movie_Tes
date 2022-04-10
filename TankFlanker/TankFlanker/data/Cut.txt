@@ -1,116 +1,80 @@
 //
 		SetArg(Teio, "data/umamusume/teio/model.pmx");
 		SetArg(Nice, "data/umamusume/nice/model.pmx");
-		SetArg(Tanhoiza, "data/umamusume/tanhoiza/model.pmx");
-		SetArg(Turbo, "data/umamusume/turbo/model.pmx");
-		SetArg(Ikuno, "data/umamusume/ikuno/model.pmx");
-		SetArg(Rice, "data/umamusume/rice/model.pmx");
-		SetArg(Burbon, "data/umamusume/burbon/model.pmx");
-		SetArg(MAC, "data/umamusume/mac/model.pmx");
-		SetArg(SPE, "data/umamusume/spe/model.pmx");
-		SetArg(SZK, "data/umamusume/suzuka/model.pmx");
-		SetArg(Rudolf2, "data/umamusume/rudolf2/model.pmx");
+		SetArg(Urara, "data/umamusume/urara/model.pmx");
+		SetArg(Mayano, "data/umamusume/topgun/model.pmx");
+		SetArg(Brian, "data/umamusume/brian/model.pmx");
+		SetArg(Amazon, "data/umamusume/amazon/model.pmx");
 
-		SetArg(MAP, "data/model/map/model.mv1");
 		SetArg(SKY, "data/model/sky/model.mv1");
 		SetArg(SUN, "data/model/sun/model.mv1");
+		SetArg(AirCarrier, "data/model/aircraftcarrier/model.pmx");
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
+
+		SetArg(TomCat, "data/model/F14/model.pmx");
 
 //モデル読み込み
 		LoadModel(Teio, 1);
 		LoadModel(Nice, 1);
-		LoadModel(Tanhoiza, 1);
-		LoadModel(Turbo, 1);
-		LoadModel(Ikuno, 1);
-		LoadModel(Rice, 1);
-		LoadModel(Burbon, 1);
-		LoadModel(MAC, 1);
-		LoadModel(SPE, 1);
-		LoadModel(SZK, 1);
-		LoadModel(Rudolf2, 1);
+		LoadModel(Urara, 1);
+		LoadModel(Mayano, 1);
+		LoadModel(Brian, 1);
+		LoadModel(Amazon, 1);
 
 		LoadModel(SKY, 1);
 		LoadModel(SUN, 1);
-		LoadModel(MAP, 1);
 		LoadModel(GATE, 1);//ゲート
+		LoadModel(AirCarrier, 1);
+		LoadModel(TomCat, 1);
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
 		SetModelMode(GATE, 0, FAR_TRUE);
-		SetModelMode(MAP, 0, FAR_TRUE);
-		//SetModelMode(MAP, 0, NEAR_FALSE);
 		SetModelMode(SKY, 0, SKY_TRUE);
 		SetModelMode(SUN, 0, SKY_TRUE);
+		SetModelMode(AirCarrier, 0, FAR_TRUE);
+		//SetModelMode(AirCarrier, 0, NEAR_FALSE);
 //カット設定
 //0
 	//0
 		SetCut(300.0);
-		SetCamForcus(Teio, 0, NECK, 0.0, 0.0, 0.0);
-		SetCampos_Attach(1, 90.0, 20.0 , 0.0);
-		//SetCampos_NoneRad( 2300.0,100,0);
-		SetCamInfo(15, 2.0, 100.0, 0.0);
+		SetCamForcus(Mayano, 0, NECK, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad( 100.0 , 40 , 200);
+		SetCamInfo(45, 4.0, 500.0, 0.0);
 
-		SetUpdateEnable();
-		SetUpdatePer(0.0);
-		SetUpdateCamForcus(0.0, Teio, 0, NECK, 0.0, 0.0, 0.0);
-		SetUpdateCamForcus(0.0, Teio, 0, NECK, 0.0, 0.0, 0.0);
+			SetDrawModel(TomCat, 0, 200);
 
-		//SetUpdateCamvec(0.0, -1.0, 3.0, 0.0);
-		//SetUpdateCampos(0.9, 40.0, 25.0, 1.0);
-		//SetVectorUpdateCamvec(0.0, 0.0, -120.0);
-		//SetVectorUpdateCampos(0.0, 0.0, -60.0);
+			SetDrawModel(AirCarrier, 0, 200);
+			SetModelMat(AirCarrier, 0, 0, 0.0, -253.75, 0.0, 0.0);
 
-			SetDrawModel(MAP, 0, 6);
-			SetModelMat(MAP, 0, 0, 0.0, 0.0, -2300.0, 0.0);
+			//SetDrawModel(GATE, 0, 6);
 
-			SetDrawModel(GATE, 0, 6);
+			SetDrawModel(SKY, 0, 200);
+			SetDrawModel(SUN, 0, 200);
 
-			SetDrawModel(SKY, 0, 6);
-			SetDrawModel(SUN, 0, 6);
+			//SetDrawModel(Teio, 0, 20);
+			//SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			//SetModelAnime(Teio, 0, 0, TRUE, 1.0, 0);
 
-			SetDrawModel(Turbo, 0, 20);
-			SetModelMat(Turbo, 0, 0.0, 0.0, 0.0, -200.0, 0.0);
-			SetModelAnime(Turbo, 0, 0, TRUE, 1.0, 3);
+			//SetDrawModel(Nice, 0, 20);
+			//SetModelMat(Nice, 0, 0.0, 0.0, 0.0, -100.0, 0.0);
+			//SetModelAnime(Nice, 0, 0, TRUE, 1.0, 14);
 
-			SetDrawModel(Rice, 0, 20);
-			SetModelMat(Rice, 0, 0.0, 0.0, 0.0, -180.0, 0.0);
-			SetModelAnime(Rice, 0, 0, TRUE, 1.0, 15);
+			//SetDrawModel(Urara, 0, 20);
+			//SetModelMat(Urara, 0, 0.0, 0.0, 0.0, -20.0, 0.0);
+			//SetModelAnime(Urara, 0, 0, TRUE, 1.0, 14);
 
-			SetDrawModel(Burbon, 0, 20);
-			SetModelMat(Burbon, 0, 0.0, 0.0, 0.0, -160.0, 0.0);
-			SetModelAnime(Burbon, 0, 0, TRUE, 1.0, 9);
+			SetDrawModel(Mayano, 0, 20);
+			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Mayano, 0, 0, TRUE, 1.0, 14);
 
-			SetDrawModel(Ikuno, 0, 20);
-			SetModelMat(Ikuno, 0, 0.0, 0.0, 0.0, -140.0, 0.0);
-			SetModelAnime(Ikuno, 0, 0, TRUE, 1.0, 5);
+			//SetDrawModel(Brian, 0, 20);
+			//SetModelMat(Brian, 0, 0.0, 0.0, 0.0, -100.0, 0.0);
+			//SetModelAnime(Brian, 0, 0, TRUE, 1.0, 14);
 
-			SetDrawModel(Tanhoiza, 0, 20);
-			SetModelMat(Tanhoiza, 0, 0.0, 0.0, 0.0, -120.0, 0.0);
-			SetModelAnime(Tanhoiza, 0, 0, TRUE, 1.0, 8);
+			//SetDrawModel(Amazon, 0, 20);
+			//SetModelMat(Amazon, 0, 0.0, 0.0, 0.0, -40.0, 0.0);
+			//SetModelAnime(Amazon, 0, 0, TRUE, 1.0, 14);
 
-			SetDrawModel(Nice, 0, 20);
-			SetModelMat(Nice, 0, 0.0, 0.0, 0.0, -100.0, 0.0);
-			SetModelAnime(Nice, 0, 0, TRUE, 1.0, 14);
-
-			SetDrawModel(SPE, 0, 20);
-			SetModelMat(SPE, 0, 0.0, 0.0, 0.0, -80.0, 0.0);
-			SetModelAnime(SPE, 0, 0, TRUE, 1.0, 11);
-
-			SetDrawModel(SZK, 0, 20);
-			SetModelMat(SZK, 0, 0.0, 0.0, 0.0, -60.0, 0.0);
-			SetModelAnime(SZK, 0, 0, TRUE, 1.0, 7);
-
-			SetDrawModel(MAC, 0, 20);
-			SetModelMat(MAC, 0, 0.0, 0.0, 0.0, -40.0, 0.0);
-			SetModelAnime(MAC, 0, 0, TRUE, 1.0, 20);
-
-			SetDrawModel(Rudolf2, 0, 20);
-			SetModelMat(Rudolf2, 0, 0.0, 0.0, 0.0, -20.0, 0.0);
-			SetModelAnime(Rudolf2, 0, 0, TRUE, 1.0, 1);
-
-			SetDrawModel(Teio, 0, 20);
-			SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			SetModelAnime(Teio, 0, 0, TRUE, 1.0, 0);
-			
 			SetNextResetPhysics();
 
 //LAST

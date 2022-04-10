@@ -13,6 +13,6 @@ namespace FPS_n2 {
 		std::vector<Cut_Info_Update> m_CutInfoUpdate;
 		CutInfoClass attached;
 		std::vector<CutAttachDetail> attachedDetail;
-		Grass grassmodel;
+		//Grass grassmodel;
 	}
 }
