@@ -11,6 +11,11 @@
 		SetArg(AirCarrier, "data/model/aircraftcarrier/model.pmx");
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
 
+		SetArg(Crew1, "data/model/crew1/model.pmx");
+		SetArg(Crew2, "data/model/crew2/model.pmx");
+		SetArg(Crew3, "data/model/crew3/model.pmx");
+		SetArg(Crew4, "data/model/crew4/model.pmx");
+
 		SetArg(TomCat, "data/model/F14/model.pmx");
 
 //モデル読み込み
@@ -25,6 +30,12 @@
 		LoadModel(SUN, 1);
 		LoadModel(GATE, 1);//ゲート
 		LoadModel(AirCarrier, 1);
+
+		LoadModel(Crew1, 1);
+		LoadModel(Crew2, 1);
+		LoadModel(Crew3, 1);
+		LoadModel(Crew4, 1);
+
 		LoadModel(TomCat, 1);
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
@@ -55,6 +66,16 @@
 			SetDrawModel(Mayano, 0, 20);
 			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			SetModelAnime(Mayano, 0, 0, FALSE, 0.75, 0);
+
+			SetDrawModel(Crew2, 0, 20);
+			SetModelMat(Crew2, 0, -120.0, -250.0, 0.0, 50.0, 0.0);
+			SetModelAnime(Crew2, 0, 0, FALSE, 1.05, 0);
+
+			//SetDrawModel(Crew3, 0, 20);
+			//SetModelMat(Crew3, 0, 0.0, 0.0, 0.0, -30.0, 0.0);
+
+			//SetDrawModel(Crew4, 0, 20);
+			//SetModelMat(Crew4, 0, 0.0, 0.0, 0.0, -40.0, 0.0);
 	//1
 		SetCut(2.5);
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 0.0, 0.0);
@@ -63,14 +84,37 @@
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 0.0, 0.0);
-	//1
-		SetCut(300.0);
+	//2
+		SetCut(8.0);
 		SetCamForcus(Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
 		SetCampos_Attach( 1, 0.f , 0.f, 40.f);
 		SetCamInfo(15, 1.0, 100.0, 0.0);
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
+	//2
+		SetCut(12.2);
+		SetCamForcus(Crew1, 0, HEAD, 2.0, 0.0, 0.0);
+		SetCampos_Attach( 1, -15.f , -5.f, -30.f);
+		SetCamInfo(25, 1.0, 60.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Crew1, 0, HEAD, 2.0, 0.0, 0.0);
+		SetCamPosRand(10.f,10.f,10.f,0.9f);
+
+			SetDrawModel(Crew1, 0, 20);
+			SetModelMat(Crew1, 0, 200.0, -350.0, 0.0, -650.0, 0.0);
+			SetModelAnime(Crew1, 0, 0, FALSE, 0.75, 0);
+	//3
+		SetCut(300.0);
+		SetCamForcus(TomCat, 0, CANOPY, 0.0, -20.0, 0.0);
+		SetCampos_Attach( 1, 0.f , -5.f, -30.f);
+		SetCamInfo(45, 1.0, 500.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, -20.0, 0.0);
+		SetCamVecRand(1.f,1.f,1.f,0.9f);
+
 //LAST
 
 

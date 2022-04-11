@@ -1025,7 +1025,7 @@ namespace FPS_n2 {
 						isfast = false;
 						BGM_Frequency = GetFrequencySoundMem(BGM.get());
 						BGM.play(DX_PLAYTYPE_BACK, TRUE);
-						BGM.vol(64);
+						BGM.vol(192);
 						//SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
 
 						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
@@ -1105,7 +1105,7 @@ namespace FPS_n2 {
 								if (!Check_F14[i].AimFlag2) {
 									if (!Check_F14[i].AimFlag) {
 										if (Check_F14[i].Yrad < -5.f) {
-											easing_set(&Check_F14[i].YradAdd, 5.f, 0.95f);
+											easing_set(&Check_F14[i].YradAdd, 9.f, 0.95f);
 										}
 										else {
 											easing_set(&Check_F14[i].YradAdd, 0.f, 0.95f);
@@ -1162,7 +1162,7 @@ namespace FPS_n2 {
 									auto OLD = Check_F14[i].Zadd;
 									if (Check_F14[i].StartTimer > 0.f) {
 										if (!Check_F14[i].TaxStop) {
-											easing_set(&Check_F14[i].Zadd, -12.5f, 0.95f);
+											easing_set(&Check_F14[i].Zadd, -24.f, 0.95f);
 										}
 										else {
 											easing_set(&Check_F14[i].Zadd, 0.f, 0.95f);
