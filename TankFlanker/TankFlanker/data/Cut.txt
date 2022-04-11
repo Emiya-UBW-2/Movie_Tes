@@ -36,47 +36,41 @@
 //ÉJÉbÉgê›íË
 //0
 	//0
-		SetCut(300.0);
-		SetCamForcus(Mayano, 0, NECK, 0.0, 0.0, 0.0);
-		SetCampos_NoneRad( 100.0 , 40 , 200);
-		SetCamInfo(45, 4.0, 500.0, 0.0);
+		SetCut(1.5);
+		SetCamForcus(Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 20.f , -2.f, -4.f);
+		SetCamInfo(15, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
 
 			SetDrawModel(TomCat, 0, 200);
 
 			SetDrawModel(AirCarrier, 0, 200);
 			SetModelMat(AirCarrier, 0, 0, 0.0, -253.75, 0.0, 0.0);
 
-			//SetDrawModel(GATE, 0, 6);
-
 			SetDrawModel(SKY, 0, 200);
 			SetDrawModel(SUN, 0, 200);
 
-			//SetDrawModel(Teio, 0, 20);
-			//SetModelMat(Teio, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			//SetModelAnime(Teio, 0, 0, TRUE, 1.0, 0);
-
-			//SetDrawModel(Nice, 0, 20);
-			//SetModelMat(Nice, 0, 0.0, 0.0, 0.0, -100.0, 0.0);
-			//SetModelAnime(Nice, 0, 0, TRUE, 1.0, 14);
-
-			//SetDrawModel(Urara, 0, 20);
-			//SetModelMat(Urara, 0, 0.0, 0.0, 0.0, -20.0, 0.0);
-			//SetModelAnime(Urara, 0, 0, TRUE, 1.0, 14);
-
 			SetDrawModel(Mayano, 0, 20);
 			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			SetModelAnime(Mayano, 0, 0, TRUE, 1.0, 14);
+			SetModelAnime(Mayano, 0, 0, FALSE, 0.75, 0);
+	//1
+		SetCut(2.5);
+		SetCamForcus(TomCat, 0, CANOPY, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 100.f , -30.f, 0.f);
+		SetCamInfo(45, 1.0, 500.0, 0.0);
 
-			//SetDrawModel(Brian, 0, 20);
-			//SetModelMat(Brian, 0, 0.0, 0.0, 0.0, -100.0, 0.0);
-			//SetModelAnime(Brian, 0, 0, TRUE, 1.0, 14);
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 0.0, 0.0);
+	//1
+		SetCut(300.0);
+		SetCamForcus(Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 0.f , 0.f, 40.f);
+		SetCamInfo(15, 1.0, 100.0, 0.0);
 
-			//SetDrawModel(Amazon, 0, 20);
-			//SetModelMat(Amazon, 0, 0.0, 0.0, 0.0, -40.0, 0.0);
-			//SetModelAnime(Amazon, 0, 0, TRUE, 1.0, 14);
-
-			SetNextResetPhysics();
-
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
 //LAST
 
 

@@ -956,8 +956,6 @@ namespace FPS_n2 {
 				SetUseASyncLoadFlag(FALSE);
 				BGM = SoundHandle::Load("data/sound.wav");
 				//BGM.vol(0);
-				///*
-				//*/
 				//ƒvƒŒƒC—pˆÓ
 				GameSpeed = (float)(spd_x) / 10.f;
 				PostPassParts->Set_Bright(255, 240, 234);
@@ -1027,7 +1025,7 @@ namespace FPS_n2 {
 						isfast = false;
 						BGM_Frequency = GetFrequencySoundMem(BGM.get());
 						BGM.play(DX_PLAYTYPE_BACK, TRUE);
-						//BGM.vol(64);
+						BGM.vol(64);
 						//SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
 
 						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
@@ -1054,7 +1052,12 @@ namespace FPS_n2 {
 						int SEL = 0;
 						//0
 						if (m_Counter == SEL) {
-							if (isFirstLoop) {
+						}
+						SEL++;
+
+						//
+						{
+							if (isFirstLoop && m_Counter == 0) {
 								//
 								WheelFrames.clear();
 								int FrontWheel = 0;
@@ -1183,7 +1186,7 @@ namespace FPS_n2 {
 									else {
 										easing_set(&Check_F14[i].XradAim, 7.f, 0.95f);
 									}
-									if (isFirstLoop) {
+									if (isFirstLoop && m_Counter == 0) {
 										Check_F14[i].XradAim = 0.f;
 									}
 									easing_set(&Check_F14[i].Xrad, Check_F14[i].XradAim, 0.95f);
@@ -1265,7 +1268,6 @@ namespace FPS_n2 {
 								//
 							}
 						}
-						SEL++;
 					}
 					//
 					{

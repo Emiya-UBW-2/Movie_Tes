@@ -839,6 +839,8 @@ namespace FPS_n2 {
 					m.AddFrame("‰E‚Ğ‚´");
 					m.AddFrame("‰E‚Â‚Üæ");
 					m.AddFrame("¶‚Â‚Üæ");
+
+					m.AddFrame("·¬ÉËß°");
 					MV1::SetAnime(&(m.obj), m.obj);
 				}
 			}
@@ -904,9 +906,18 @@ namespace FPS_n2 {
 					if (center != VECTOR_ref::zero()) {
 						//center += (center - GetCameraPosition()).Norm()*-7.f;
 
+
+						if (CheckCameraViewClip_Box(
+							(center - VECTOR_ref::vget(-5.f, -10.f, -5.f)).get(),
+							(center - VECTOR_ref::vget(5.f, 10.f, 5.f)).get()
+						) == TRUE) {
+							m.isOutFrustum = true;
+						}
+						/*
 						if (CheckCameraViewClip(center.get()) == TRUE) {
 							m.isOutFrustum = true;
 						}
+						//*/
 					}
 					else {
 						m.isBigModel = true;
@@ -1210,6 +1221,10 @@ namespace FPS_n2 {
 			}
 			else if (frame == "FAR_TRUE") {
 				this->Frame = "‰E‚Ğ‚´";
+			}
+
+			else if (frame == "CANOPY") {
+				this->Frame = "·¬ÉËß°";
 			}
 			this->Add = add;
 		}
