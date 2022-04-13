@@ -968,6 +968,8 @@ namespace FPS_n2 {
 				boards.resize(boards.size() + 1);
 				boards.back() = GraphHandle::Load("data/picture/mac.png");
 
+				boards.resize(boards.size() + 1);
+				boards.back() = GraphHandle::Load("data/picture/brian.png");
 				//ƒvƒŒƒC—pˆÓ
 				GameSpeed = (float)(spd_x) / 10.f;
 				PostPassParts->Set_Bright(255, 240, 234);
@@ -1529,26 +1531,37 @@ namespace FPS_n2 {
 					SetFogStartEnd(fog_range[0], fog_range[1]);
 				}
 
-				DrawBillboard3D(VECTOR_ref::vget(898.f, 107.f, 287.f).get(),
-					0.5f, 0.5f,
-					22.f, 0.f,
-					boards[0].get(),
-					TRUE
-				);
+				if(m_Counter==5){
+					DrawBillboard3D(VECTOR_ref::vget(898.f, 107.f, 287.f).get(),
+						0.5f, 0.5f,
+						22.f, 0.f,
+						boards[0].get(),
+						TRUE
+					);
 
-				DrawBillboard3D(VECTOR_ref::vget(820.f, 106.f, 275.f).get(),
-					0.5f, 0.5f,
-					21.f, 0.f,
-					boards[1].get(),
-					TRUE
-				);
+					DrawBillboard3D(VECTOR_ref::vget(820.f, 106.f, 275.f).get(),
+						0.5f, 0.5f,
+						21.f, 0.f,
+						boards[1].get(),
+						TRUE
+					);
 
-				DrawBillboard3D(VECTOR_ref::vget(826.f, 106.f, 280.f).get(),
-					0.5f, 0.5f,
-					23.f, 0.f,
-					boards[2].get(),
-					TRUE
-				);
+					DrawBillboard3D(VECTOR_ref::vget(826.f, 106.f, 280.f).get(),
+						0.5f, 0.5f,
+						23.f, 0.f,
+						boards[2].get(),
+						TRUE
+					);
+				}
+
+				if (m_Counter == 6) {
+					DrawBillboard3D(VECTOR_ref::vget(86.4f, 18.5f, 105.2f).get(),
+						0.5f, 0.5f,
+						8.5f, 0.f,
+						boards[3].get(),
+						TRUE
+					);
+				}
 
 				models.CheckInCamera(camera_main.far_);
 				//+201 = 67x3

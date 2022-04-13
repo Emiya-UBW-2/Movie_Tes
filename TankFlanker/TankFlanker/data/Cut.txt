@@ -133,8 +133,19 @@
 		SetUpdateCampos(0.9);
 		SetVectorUpdateCampos(10,0,0);
 
-			SetDrawModel(GROUND, 0, 1);
+			SetDrawModel(GROUND, 0, 2);
 	//6
+		SetCut(24.0);
+		SetCamvec(31.4f, 23.2f, 100.2f);
+		SetCampos_Attach( 1, 100.f , -5.f, -10.f);
+		SetCamInfo(20, 2.0, 120.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamvec(0.9);
+		SetVectorUpdateCamvec(0,0,1);
+		SetUpdateCampos(0.9);
+		SetVectorUpdateCampos(0,0,1);
+	//7
 		SetCut(300.0);
 
 		SetCamForcus(Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
