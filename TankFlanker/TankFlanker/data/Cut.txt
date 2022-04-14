@@ -133,7 +133,7 @@
 		SetUpdateCampos(0.9);
 		SetVectorUpdateCampos(10,0,0);
 
-			SetDrawModel(GROUND, 0, 2);
+			SetDrawModel(GROUND, 0, 3);
 	//6
 		SetCut(24.0);
 		SetCamvec(31.4f, 23.2f, 100.2f);
@@ -145,6 +145,17 @@
 		SetVectorUpdateCamvec(0,0,1);
 		SetUpdateCampos(0.9);
 		SetVectorUpdateCampos(0,0,1);
+	//6
+		SetCut(27.0);
+		SetCamvec(-210.0f, 22.3f, 331.9f);
+		SetCampos_NoneRad(-300.0f, 7.3f, 351.9f);
+		SetCamInfo(25, 0.1, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamvec(0.9);
+		SetVectorUpdateCamvec(0,0,2);
+		SetUpdateCampos(0.9);
+		SetVectorUpdateCampos(0,0,2);
 	//7
 		SetCut(300.0);
 

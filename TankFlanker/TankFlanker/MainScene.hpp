@@ -970,6 +970,9 @@ namespace FPS_n2 {
 
 				boards.resize(boards.size() + 1);
 				boards.back() = GraphHandle::Load("data/picture/brian.png");
+
+				boards.resize(boards.size() + 1);
+				boards.back() = GraphHandle::Load("data/picture/laurel.png");
 				//ƒvƒŒƒC—pˆÓ
 				GameSpeed = (float)(spd_x) / 10.f;
 				PostPassParts->Set_Bright(255, 240, 234);
@@ -1562,6 +1565,13 @@ namespace FPS_n2 {
 						TRUE
 					);
 				}
+
+				DrawBillboard3D(VECTOR_ref::vget(-220.0f, 26.3f, 351.9f).get(),
+					0.5f, 0.5f,
+					68.5f, 0.f,
+					boards[4].get(),
+					TRUE
+				);
 
 				models.CheckInCamera(camera_main.far_);
 				//+201 = 67x3
