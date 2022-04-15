@@ -77,7 +77,7 @@ namespace FPS_n2 {
 				//‰¹ˆÊ’uŽw’è
 				Set3DSoundListenerPosAndFrontPosAndUpVec(camera_main.campos.get(), camera_main.camvec.get(), camera_main.camup.get());
 				//‰e—pˆÓ
-				DrawParts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(camera_main.far_, 20.f, camera_main.far_), VECTOR_ref::vget(300.f, 40.f, 300.f));//MAIN_LOOP‚Ìnear‚Í‚±‚ê (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
+				DrawParts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(camera_main.far_, 20.f, camera_main.far_), VECTOR_ref::vget(3000.f, 60.f, 3000.f));//MAIN_LOOP‚Ìnear‚Í‚±‚ê (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
 			}
 			virtual void UI_Draw(void) noexcept {}
 			virtual void BG_Draw(void) noexcept {

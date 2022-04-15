@@ -123,13 +123,12 @@
 		SetCamVecRand(1.f,1.f,1.f,0.9f);
 	//5
 		SetCut(18.0);
-		SetCamForcus(TomCat, 0, CANOPY, 30.0, 2.0, -40.0);
-		SetCampos_Attach( 1, 30.f , -5.f, -20.f);
-		SetCamInfo(45, 1.0, 500.0, 0.0);
+		SetCamForcus(TomCat, 0, CANOPY, 0.0, 2.0, 40.0);
+		SetCampos_Attach( 1, 0.f , 400.f, -20.f);
+		SetCamInfo(35, 1.0, 500.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 30.0, 2.0, -40.0);
-		SetCamVecRand(1.f,1.f,1.f,0.9f);
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 2.0, 40.0);
 
 
 

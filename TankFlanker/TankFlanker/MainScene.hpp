@@ -1518,7 +1518,7 @@ namespace FPS_n2 {
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
 				//todo:‹¤’Ê‚Ì‰eƒ‚ƒfƒ‹‚ðŽg—p
-				//models.Draw(false, false, TRUE);
+				models.Draw(false, false, TRUE);
 			}
 			void Shadow_Draw(void) noexcept override {
 				//+52
