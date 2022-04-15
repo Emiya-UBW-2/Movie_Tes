@@ -1534,7 +1534,7 @@ namespace FPS_n2 {
 					SetFogStartEnd(fog_range[0], fog_range[1]);
 				}
 
-				if(m_Counter==5){
+				if(m_Counter==6){
 					DrawBillboard3D(VECTOR_ref::vget(898.f, 107.f, 287.f).get(),
 						0.5f, 0.5f,
 						22.f, 0.f,
@@ -1557,7 +1557,7 @@ namespace FPS_n2 {
 					);
 				}
 
-				if (m_Counter == 6) {
+				if (m_Counter == 7) {
 					DrawBillboard3D(VECTOR_ref::vget(86.4f, 18.5f, 105.2f).get(),
 						0.5f, 0.5f,
 						8.5f, 0.f,
@@ -1566,12 +1566,14 @@ namespace FPS_n2 {
 					);
 				}
 
-				DrawBillboard3D(VECTOR_ref::vget(-220.0f, 26.3f, 351.9f).get(),
-					0.5f, 0.5f,
-					68.5f, 0.f,
-					boards[4].get(),
-					TRUE
-				);
+				if (m_Counter == 8) {
+					DrawBillboard3D(VECTOR_ref::vget(-220.0f, 26.3f, 351.9f).get(),
+						0.5f, 0.5f,
+						68.5f, 0.f,
+						boards[4].get(),
+						TRUE
+					);
+				}
 
 				models.CheckInCamera(camera_main.far_);
 				//+201 = 67x3
