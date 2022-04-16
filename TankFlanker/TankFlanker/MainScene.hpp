@@ -292,7 +292,7 @@ namespace FPS_n2 {
 			int BaseWidth{ 1920 / 64 };								//
 			int changeSeekID{ -1 };									//
 			int x_now{ -1 };										//
-			int WidthPer{ 2000000 };								//
+			int WidthPer{ 600000 };								//
 			int X_now{ 0 };											//
 			int CutNow{ 0 };										//
 			Change_Model m_ChangeModel;								//
