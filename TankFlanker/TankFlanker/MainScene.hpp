@@ -240,6 +240,7 @@ namespace FPS_n2 {
 			float White_Buf{ 0.f };									//
 
 
+			std::string Mayano = "data/umamusume/topgun/model.mv1";
 			std::string AirCarrier = "data/model/aircraftcarrier/model.mv1";
 			std::string TomCat = "data/model/F14/model.mv1";
 			struct F14Args_Wheel {
@@ -950,7 +951,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				//m_Counter = 7;
+				m_Counter = 10;
 				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
@@ -1072,6 +1073,29 @@ namespace FPS_n2 {
 						}
 						SEL++;
 
+
+
+						//0
+						if (m_Counter == 15 || m_Counter == 16) {
+							auto* M = models.Get(Mayano, 0);
+							auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+							inf.pos_p.xadd(2.2f*-60.f / FPS * GameSpeed);
+
+							inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+							M->obj.SetMatrix(inf.mat_p);
+						}
+						if (m_Counter == 20 || m_Counter == 21 || m_Counter == 22) {
+							auto* M = models.Get(Mayano, 0);
+							auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+							inf.pos_p.xadd(3.5f*-60.f / FPS * GameSpeed);
+
+							inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+							M->obj.SetMatrix(inf.mat_p);
+						}
 						//
 						{
 							if (isFirstLoop && m_Counter == 0) {
@@ -1106,7 +1130,7 @@ namespace FPS_n2 {
 									Check_F14[i].AimFlag2 = false;
 									Check_F14[i].TaxStop = false;
 									Check_F14[i].DiffOn = false;
-									Check_F14[i].DiffTimer = 3.f;
+									Check_F14[i].DiffTimer = 1.5f;
 									Check_F14[i].Yadd = 0.f;
 									Check_F14[i].Zadd = 0.f;
 
@@ -1183,7 +1207,7 @@ namespace FPS_n2 {
 												easing_set(&Check_F14[i].Zadd, -24.f, 0.95f);
 											}
 											else {
-												easing_set(&Check_F14[i].Zadd, -39.5f, 0.995f);
+												easing_set(&Check_F14[i].Zadd, -36.5f, 0.995f);
 											}
 										}
 										else {
@@ -1371,6 +1395,9 @@ namespace FPS_n2 {
 							if (m_CutInfo[m_Counter].isResetRandCampos) { m_RandcamposBuf.clear(); }
 							if (m_CutInfo[m_Counter].isResetRandCamvec) { m_RandcamvecBuf.clear(); }
 							if (m_CutInfo[m_Counter].isResetRandCamup) { m_RandcamupBuf.clear(); }
+
+							u.CameraNotFirst.campos = m_CutInfo[m_Counter].Aim_camera.campos;
+							u.CameraNotFirst.camvec = m_CutInfo[m_Counter].Aim_camera.camvec;
 						}
 						else {
 							u.Update(m_CutInfo[m_Counter], models, m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
@@ -1539,7 +1566,7 @@ namespace FPS_n2 {
 					SetFogStartEnd(fog_range[0], fog_range[1]);
 				}
 
-				if(m_Counter==6){
+				if (m_Counter == 6) {
 					DrawBillboard3D(VECTOR_ref::vget(898.f, 107.f, 287.f).get(),
 						0.5f, 0.5f,
 						22.f, 0.f,
