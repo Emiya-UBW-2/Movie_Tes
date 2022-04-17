@@ -1183,7 +1183,7 @@ namespace FPS_n2 {
 												easing_set(&Check_F14[i].Zadd, -24.f, 0.95f);
 											}
 											else {
-												easing_set(&Check_F14[i].Zadd, -30.5f, 0.95f);
+												easing_set(&Check_F14[i].Zadd, -39.5f, 0.995f);
 											}
 										}
 										else {

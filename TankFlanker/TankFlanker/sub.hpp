@@ -841,6 +841,8 @@ namespace FPS_n2 {
 					m.AddFrame("¶‚Â‚Üæ");
 
 					m.AddFrame("·¬ÉËß°");
+					m.AddFrame("‘O‰ñ“]");
+					
 					MV1::SetAnime(&(m.obj), m.obj);
 				}
 			}
@@ -1225,6 +1227,9 @@ namespace FPS_n2 {
 
 			else if (frame == "CANOPY") {
 				this->Frame = "·¬ÉËß°";
+			}
+			else if (frame == "FRONTWHEEL") {
+				this->Frame = "‘O‰ñ“]";
 			}
 			this->Add = add;
 		}

@@ -180,20 +180,54 @@
 			SetModelMat(Mayano, 0, 90.0, 458.0, 1.0, -348.0, 0.0);
 			SetModelAnime(Mayano, 0, 1, TRUE, 0.5, 0);
 	//9
-		SetCut(37.0);
+		SetCut(31.4);
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
-		SetCampos_Attach( 1, -400.f , 2.f, -20.f);
-		SetCamInfo(15, 0.1, 500.0, 0.0);
+		SetCampos_Attach( 1, -400.f , 4.f, -20.f);
+		SetCamInfo(15, 10.0, 700.0, 0.0);
 		SetCamVecRand(5.f,3.f,5.f,0.9f);
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
 	//9
+		SetCut(33.2);
+		SetCamForcus(TomCat, 0, FRONTWHEEL, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 0.f , 4.f, 140.f);
+		SetCamInfo(25, 5.0, 700.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, TomCat, 0, FRONTWHEEL, 0.0, 0.0, 0.0);
+	//9
+		SetCut(34.5);
+		SetCamForcus(TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
+		SetCampos_NoneRad(-431.9f, 250.f, 356.9f);
+		SetCamInfo(35, 100.0, 1500.0, 0.0);
+		SetCamVecRand(50.f,20.f,50.f,0.9f);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
+	//9
+		SetCut(36.0);
+		SetPrevCamInfo();
+		SetCamVecRand(40.f,10.f,40.f,0.9f);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
+		SetUpdateCamfov(0.95, 25);
+	//9
+		SetCut(37.0);
+		SetPrevCamInfo();
+		SetCamVecRand(30.f,5.f,30.f,0.9f);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
+		SetUpdateCamfov(0.95, 15);
+	//9
 		SetCut(500.0);
 		SetCamvec(-210.0f, 22.3f, 331.9f);
-		SetCampos_NoneRad(-300.0f, 7.3f, 351.9f);
+		SetCampos_NoneRad(-300.0f, 30.3f, 351.9f);
 		SetCamInfo(15, 0.1, 100.0, 0.0);
 
+			SetDrawModel(GROUND, 0, 4);
 //LAST
 
 
