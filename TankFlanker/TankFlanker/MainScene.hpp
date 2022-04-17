@@ -221,6 +221,16 @@ namespace FPS_n2 {
 			SoundHandle BGM;										//データ
 
 			std::vector<GraphHandle> boards;
+			MV1 sea;						//海
+
+			//海
+			int PixelShaderHandle;
+			int VertexShaderHandle;
+			int vscbhandle;
+			int pscbhandle;
+			float g_fTime;
+			int OldTime;
+
 
 			int BGM_Frequency;										//
 			switchs ChangeCamSel, ChangeStart;						//
@@ -968,12 +978,30 @@ namespace FPS_n2 {
 				boards.back() = GraphHandle::Load("data/picture/teio.png");
 				boards.resize(boards.size() + 1);
 				boards.back() = GraphHandle::Load("data/picture/mac.png");
+				boards.resize(boards.size() + 1);
+				boards.back() = GraphHandle::Load("data/picture/urara.png");
+				boards.resize(boards.size() + 1);
+				boards.back() = GraphHandle::Load("data/picture/laurel.png");
 
 				boards.resize(boards.size() + 1);
 				boards.back() = GraphHandle::Load("data/picture/brian.png");
 
 				boards.resize(boards.size() + 1);
 				boards.back() = GraphHandle::Load("data/picture/laurel.png");
+
+				MV1::Load("data/model/sea/model.mv1", &this->sea, true);	//海
+
+
+				this->vscbhandle = CreateShaderConstantBuffer(sizeof(float) * 4);
+				this->VertexShaderHandle = LoadVertexShader("shader/NormalMesh_DirLight_PhongVS.vso");	// 頂点シェーダーを読み込む
+				this->pscbhandle = CreateShaderConstantBuffer(sizeof(float) * 4);
+				this->PixelShaderHandle = LoadPixelShader("shader/NormalMesh_DirLight_PhongPS.pso");	// ピクセルシェーダーを読み込む
+				this->g_fTime = 0.f;
+				this->OldTime = GetNowCount();
+
+				this->sea.SetPosition(VECTOR_ref::vget(0, -253.75, 0));
+				this->sea.SetScale(VECTOR_ref::vget(20, 20, 20));
+
 				//プレイ用意
 				GameSpeed = (float)(spd_x) / 10.f;
 				PostPassParts->Set_Bright(255, 240, 234);
@@ -1073,7 +1101,11 @@ namespace FPS_n2 {
 						}
 						SEL++;
 
-
+						{
+							auto Time = GetNowCount();	// 現在の時間を得る
+							this->g_fTime += float(Time - this->OldTime) / 1000.0f*0.5f;
+							this->OldTime = Time;				// 現在の時間を保存
+						}
 
 						//0
 						if (m_Counter == 15 || m_Counter == 16) {
@@ -1587,13 +1619,20 @@ namespace FPS_n2 {
 						boards[2].get(),
 						TRUE
 					);
+
+					DrawBillboard3D(VECTOR_ref::vget(750.f, 99.f, 282.f).get(),
+						0.5f, 0.5f,
+						15.f, 0.f,
+						boards[3].get(),
+						TRUE
+					);
 				}
 
 				if (m_Counter == 7) {
 					DrawBillboard3D(VECTOR_ref::vget(86.4f, 18.5f, 105.2f).get(),
 						0.5f, 0.5f,
 						8.5f, 0.f,
-						boards[3].get(),
+						boards[5].get(),
 						TRUE
 					);
 				}
@@ -1602,10 +1641,34 @@ namespace FPS_n2 {
 					DrawBillboard3D(VECTOR_ref::vget(-220.0f, 26.3f, 351.9f).get(),
 						0.5f, 0.5f,
 						68.5f, 0.f,
-						boards[4].get(),
+						boards[6].get(),
 						TRUE
 					);
 				}
+
+				{
+					SetFogStartEnd(12500.0f, 20000.f);
+					SetFogColor(126, 168, 193);
+					SetUseVertexShader(this->VertexShaderHandle);	// 使用する頂点シェーダーをセット
+					SetUsePixelShader(this->PixelShaderHandle);	// 使用するピクセルシェーダーをセット
+					{
+						FLOAT4 *f4;
+						//
+						f4 = (FLOAT4 *)GetBufferShaderConstantBuffer(this->vscbhandle);		// 頂点シェーダー用の定数バッファのアドレスを取得
+						f4->x = this->g_fTime;
+						UpdateShaderConstantBuffer(this->vscbhandle);						// 頂点シェーダー用の定数バッファを更新して書き込んだ内容を反映する
+						SetShaderConstantBuffer(this->vscbhandle, DX_SHADERTYPE_VERTEX, 4);	// 頂点シェーダーの定数バッファを定数バッファレジスタ４にセット
+						//
+						f4 = (FLOAT4 *)GetBufferShaderConstantBuffer(this->pscbhandle);		// ピクセルシェーダー用の定数バッファのアドレスを取得
+						f4->x = this->g_fTime;
+						UpdateShaderConstantBuffer(this->pscbhandle);						// ピクセルシェーダー用の定数バッファを更新して書き込んだ内容を反映する
+						SetShaderConstantBuffer(this->pscbhandle, DX_SHADERTYPE_PIXEL, 3);	// ピクセルシェーダー用の定数バッファを定数バッファレジスタ３にセット
+					}
+					MV1SetUseOrigShader(TRUE);
+					this->sea.DrawModel();
+					MV1SetUseOrigShader(FALSE);
+				}
+
 
 				models.CheckInCamera(camera_main.far_);
 				//+201 = 67x3

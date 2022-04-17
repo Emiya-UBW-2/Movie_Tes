@@ -36,7 +36,7 @@
 		LoadModel(AirCarrier, 1);
 
 		LoadModel(Crew1, 6);
-		LoadModel(Crew2, 1);
+		LoadModel(Crew2, 2);
 		LoadModel(Crew3, 1);
 		LoadModel(Crew4, 1);
 
@@ -64,7 +64,7 @@
 
 			SetDrawModel(TomCat, 0, 200);
 
-			SetDrawModel(AirCarrier, 0, 200);
+			SetDrawModel(AirCarrier, 0, 6);
 			SetModelMat(AirCarrier, 0, 0, 0.0, -253.75, 0.0, 0.0);
 
 			SetDrawModel(SKY, 0, 200);
@@ -89,7 +89,7 @@
 
 
 
-			SetDrawModel(Crew1, 3, 15);
+			SetDrawModel(Crew1, 3, 9);
 			SetModelMat(Crew1, 3, -140.0, -250.0, 0.0, -975.0, 0.0);
 			SetModelAnime(Crew1, 3, 1, TRUE, 0.0, 0);
 
@@ -202,7 +202,7 @@
 			SetDrawModel(Mayano, 0, 1);
 			SetModelMat(Mayano, 0, 90.0, 458.0, 1.0, -348.0, 0.0);
 			SetModelAnime(Mayano, 0, 1, TRUE, 0.5, 0);
-	//11
+	//10
 		SetCut(31.4);
 		SetCamForcus(TomCat, 0, FRONTWHEEL, 0.0, 0.0, 0.0);
 		SetCampos_Attach( 1, 0.f , 4.f, 140.f);
@@ -211,7 +211,9 @@
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, TomCat, 0, FRONTWHEEL, 0.0, 0.0, 0.0);
-	//10
+
+			SetDrawModel(AirCarrier, 0, 5);
+	//11
 		SetCut(33.2);
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
 		SetCampos_Attach( 1, -400.f , 4.f, -20.f);
@@ -220,6 +222,10 @@
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
+
+			SetDrawModel(Crew1, 3, 4);
+			SetModelMat(Crew1, 3, -140.0, -250.0, 0.0, -975.0, 0.0);
+			SetModelAnime(Crew1, 3, 2, TRUE, 0.0, 0);
 	//12
 		SetCut(34.5);
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
@@ -278,13 +284,15 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
 		
-			SetDrawModel(Crew1, 2, 5);
-			SetModelMat(Crew1, 2, 30.0, -104.0, 0.0, -970.0, 0.0);
-			SetModelAnime(Crew1, 2, 1, TRUE, 0.0, 0);
+			SetDrawModel(Crew2, 1, 5);
+			SetModelMat(Crew2, 1, 30.0, -104.0, 0.0, -970.0, 0.0);
+			SetModelAnime(Crew2, 1, 1, TRUE, 1.0, 5);
 
 			SetDrawModel(Crew3, 0, 5);
 			SetModelMat(Crew3, 0, -20.0, -371.0, 0.0, -711.0, 0.0);
 			SetModelAnime(Crew3, 0, 0, TRUE, 0.85, 0);
+
+			SetDrawModel(AirCarrier, 0, 2);
 	//18
 		SetCut(46.0);
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 5.0, 0.0);
@@ -320,7 +328,7 @@
 
 		SetUpdateEnable();
 		SetUpdateCamvec(0.9);
-		SetVectorUpdateCamvec(-260.0,0,0);
+		SetVectorUpdateCamvec(-250.0,0,0);
 
 			SetDrawModel(Mayano, 0, 3);
 			SetModelMat(Mayano, 0, 90.0, 700.0, 1.0, -348.0, 0.0);
@@ -340,7 +348,7 @@
 		SetCamVecRand(10.f,5.f,10.f,0.9f);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.95f, Mayano, 0, RIGHT_EYE, -90.0, 0.0, 2.0);
+		SetUpdateCamForcus(0.95f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, 2.0);
 		BlackOut(0.9f);
 	//
 		SetCut(500.0);
