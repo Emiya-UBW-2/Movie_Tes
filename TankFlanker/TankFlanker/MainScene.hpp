@@ -1647,8 +1647,8 @@ namespace FPS_n2 {
 				}
 
 				{
-					SetFogStartEnd(12500.0f, 20000.f);
-					SetFogColor(126, 168, 193);
+					//SetFogStartEnd(12500.0f, 20000.f);
+					//SetFogColor(126, 168, 193);
 					SetUseVertexShader(this->VertexShaderHandle);	// 使用する頂点シェーダーをセット
 					SetUsePixelShader(this->PixelShaderHandle);	// 使用するピクセルシェーダーをセット
 					{

@@ -360,4 +360,14 @@
 
 
 //テロップはじめ
+
+		SetTelopTime(56.5,1.0);
+		SetTelop(200,520,32,"12 26",LEFT);
+
+		AddTelopTime(1.0,1.0);
+		SetTelop(200,520,32,"12 27",LEFT);
+
+		AddTelopTime(1.0,0.8);
+		SetTelop(200,520,32,"12 28",LEFT);
+
 //テロップ終わり
