@@ -61,7 +61,7 @@ namespace FPS_n2 {
 			const auto& Get_handle(void)const noexcept { return handle; }
 			void Set(int siz_t) noexcept {
 				this->size = siz_t;
-				this->handle = FontHandle::Create(siz_t, DX_FONTTYPE_EDGE, -1, 2);
+				this->handle = FontHandle::Create("x14y24pxHeadUpDaisy",siz_t, DX_FONTTYPE_EDGE, -1, 2);
 			}
 		};
 	private:
@@ -406,13 +406,13 @@ namespace FPS_n2 {
 					switch (this->LMR)
 					{
 					case 0:
-						Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+						Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(218, 224, 209));
 						break;
 					case 1:
-						Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+						Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(218, 224, 209));
 						break;
 					case 2:
-						Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(255, 255, 255));
+						Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(218, 224, 209));
 						break;
 					default:
 						break;
@@ -428,6 +428,48 @@ namespace FPS_n2 {
 		void Init(void) noexcept {
 			StartF = 0;
 			ContiF = 0;
+			//
+			StartF = (LONGLONG)(1000000.f * 52.0f);
+			ContiF = (LONGLONG)(1000000.f * 0.3f);
+
+			int m = 12;
+			int d = 24;
+
+			int MIN = 24;
+			int MAX = 7 + 31 + 30 + 9 - 1;
+			float Pers = 0.3f;
+			for (int i = MIN; i < MIN + MAX; i++) {
+				Texts.resize(Texts.size() + 1);
+
+
+				std::string tmp = (m < 10 ? "0" : "") + std::to_string(m) + " / " + (d < 10 ? "0" : "") + std::to_string(d);
+				Texts.back().Set(y_r(300), y_r(620), y_r(32), tmp, StartF, ContiF, 0);
+				StartF += ContiF;
+
+				float Per = (float)(i - MIN) / MAX;
+				if (Per<=0.2f) {
+					Pers -= 0.016f;
+				}
+				else if (Per >= 0.8f) {
+					Pers += 0.04f;
+				}
+
+				Pers = std::clamp(Pers, 0.01f, 10.f);
+
+				ContiF = (LONGLONG)(1000000.f * Pers);
+
+				d++;
+				if (m == 4 || m == 6) {
+					if (d > 30) { d = 1; ++m; }
+				}
+				else if (m == 2) {
+					if (d > 28) { d = 1; ++m; }
+				}
+				else {
+					if (d > 31) { d = 1; ++m; }
+				}
+				if (m > 12) { m = 1; }
+			}
 		}
 		void LoadTelop(const std::string &func, const std::vector<std::string>& args) noexcept {
 			if (func.find("SetTelopTime") != std::string::npos) {

@@ -225,7 +225,7 @@
 
 			SetDrawModel(Crew1, 3, 4);
 			SetModelMat(Crew1, 3, -140.0, -250.0, 0.0, -975.0, 0.0);
-			SetModelAnime(Crew1, 3, 2, TRUE, 0.0, 0);
+			SetModelAnime(Crew1, 3, 2, TRUE, 0.5, 0);
 	//12
 		SetCut(34.5);
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 3.0, 0.0);
@@ -360,14 +360,4 @@
 
 
 //テロップはじめ
-
-		SetTelopTime(56.5,1.0);
-		SetTelop(200,520,32,"12 26",LEFT);
-
-		AddTelopTime(1.0,1.0);
-		SetTelop(200,520,32,"12 27",LEFT);
-
-		AddTelopTime(1.0,0.8);
-		SetTelop(200,520,32,"12 28",LEFT);
-
 //テロップ終わり
