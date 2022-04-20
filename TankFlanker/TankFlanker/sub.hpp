@@ -406,13 +406,13 @@ namespace FPS_n2 {
 					switch (this->LMR)
 					{
 					case 0:
-						Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(218, 224, 209));
+						Fonts.Get(this->size).Get_handle().DrawString(this->xpos, this->ypos, this->str, GetColor(236, 222, 197));
 						break;
 					case 1:
-						Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(218, 224, 209));
+						Fonts.Get(this->size).Get_handle().DrawString_MID(this->xpos, this->ypos, this->str, GetColor(236, 222, 197));
 						break;
 					case 2:
-						Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(218, 224, 209));
+						Fonts.Get(this->size).Get_handle().DrawString_RIGHT(this->xpos, this->ypos, this->str, GetColor(236, 222, 197));
 						break;
 					default:
 						break;
