@@ -97,6 +97,9 @@ namespace FPS_n2 {
 					else if (this->m_Ptr->IsFarShadow) {
 						mode = ModelType[2];
 					}
+					else if (!this->m_Ptr->ShadowDrawActive) {
+						mode = ModelType[3];
+					}
 					return mode;
 				}
 				void ChangeMode(void) noexcept {
@@ -230,7 +233,9 @@ namespace FPS_n2 {
 			int pscbhandle;
 			float g_fTime;
 			int OldTime;
+			//
 
+			std::vector<GraphHandle> movie_pic;						//
 
 			int BGM_Frequency;										//
 			switchs ChangeCamSel, ChangeStart;						//
@@ -477,6 +482,9 @@ namespace FPS_n2 {
 
 				movie = GraphHandle::Load("data/base_movie2.mp4");
 				PauseMovieToGraph(movie.get());
+
+				movie_pic.emplace_back(GraphHandle::Load("data/picture/slot.mp4"));
+				movie_pic.emplace_back(GraphHandle::Load("data/picture/meter.mp4"));
 			}
 			void Editer_Calc(void)noexcept {
 				auto* DrawParts = DXDraw::Instance();
@@ -961,7 +969,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				m_Counter = 10;
+				m_Counter = 20;
 				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
@@ -1577,16 +1585,16 @@ namespace FPS_n2 {
 				//“ÁŽê
 				//+12
 				SetDrawAlphaTest(DX_CMP_GREATER, 128);
-				models.Draw(false, true);
+				models.Draw(false, true, true);
 				SetDrawAlphaTest(-1, 0);
 			}
 			void Shadow_Draw_NearFar(void) noexcept override {
 				//todo:‹¤’Ê‚Ì‰eƒ‚ƒfƒ‹‚ðŽg—p
-				models.Draw(false, false, TRUE);
+				models.Draw(false, false, true, TRUE);
 			}
 			void Shadow_Draw(void) noexcept override {
 				//+52
-				models.Draw(true, false, FALSE);
+				models.Draw(true, false, true, FALSE);
 			}
 			void Main_Draw(void) noexcept override {
 				auto* DrawParts = DXDraw::Instance();
@@ -1678,11 +1686,11 @@ namespace FPS_n2 {
 				if (camera_main.near_ - 1.f < camfar&& camfar < camera_main.near_ + 1.f) {
 				}
 				else if (camera_main.far_ - 1.f < camfar&& camfar < camera_main.far_ + 1.f) {
-					models.Draw(false, false, FALSE);
+					models.Draw(false, false, false, FALSE);
 				}
 				//far
 				else {
-					models.Draw(false, false, TRUE);
+					models.Draw(false, false, false, TRUE);
 				}
 				if (isFreepos) {
 					VECTOR_ref vec = (camera_buf.camvec - camera_buf.campos);
@@ -1719,6 +1727,19 @@ namespace FPS_n2 {
 
 				Editer_Draw();
 #endif
+				auto* DrawParts = DXDraw::Instance();
+				if (m_Counter == 33) {
+					if (isFirstLoop) {
+						PlayMovieToGraph(movie_pic[0].get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
+					}
+					movie_pic[0].DrawExtendGraph(0, 0, DrawParts->disp_x, DrawParts->disp_y, false);
+				}
+				if (m_Counter == 34) {
+					if (isFirstLoop) {
+						PlayMovieToGraph(movie_pic[1].get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
+					}
+					movie_pic[1].DrawExtendGraph(0, 0, DrawParts->disp_x, DrawParts->disp_y, false);
+				}
 			}
 		};
 	};

@@ -171,6 +171,10 @@ namespace FPS_n2 {
 							if (args[2] == ModelType[2]) {
 								t->IsFarShadow = true;
 							}
+							if (args[2] == ModelType[3]) {
+								t->ShadowDrawActive = false;
+							}
+
 						}
 					}
 					//ƒeƒƒbƒv

@@ -11,6 +11,7 @@
 		SetArg(AirCarrier, "data/model/aircraftcarrier/model.pmx");
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
 		SetArg(GROUND, "data/model/ground/model.pmx");
+		SetArg(LOAD, "data/model/load/model.mv1");//馬道
 
 		SetArg(Crew1, "data/model/crew1/model.pmx");
 		SetArg(Crew2, "data/model/crew2/model.pmx");
@@ -32,6 +33,7 @@
 		LoadModel(GATE, 1);//ゲート
 
 		LoadModel(GROUND, 1);
+		LoadModel(LOAD, 1);
 
 		LoadModel(AirCarrier, 1);
 
@@ -44,6 +46,8 @@
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
 		SetModelMode(GROUND, 0, FAR_TRUE);
+
+		SetModelMode(LOAD, 0, SHADOW_DISACTIVE);
 
 		SetModelMode(GATE, 0, FAR_TRUE);
 		SetModelMode(SKY, 0, SKY_TRUE);
@@ -62,7 +66,7 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_FINGER, 0.0, 0.0, 0.0);
 
-			SetDrawModel(TomCat, 0, 200);
+			SetDrawModel(TomCat, 0, 20);
 
 			SetDrawModel(AirCarrier, 0, 6);
 			SetModelMat(AirCarrier, 0, 0, 0.0, -253.75, 0.0, 0.0);
@@ -342,7 +346,7 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.95f, Mayano, 0, RIGHT_EYE, -90.0, 0.0, 2.0);
 	//22
-		SetCut(57.5);
+		SetCut(60.0);
 		SetPrevCamInfo();
 		SetCampos_Attach( 1, -60.f , 20.f, -30.f);
 		SetCamVecRand(10.f,5.f,10.f,0.9f);
@@ -350,11 +354,127 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.95f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, 2.0);
 		BlackOut(0.9f);
-	//
+	//23
+		SetCut(62.5);
+		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, -5.0, 0.0);
+		SetCampos_Attach( 1, -30.f , -5.f, 20.f);
+		SetCamInfo(15, 5.0, 80.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamvec(0.9);
+		SetVectorUpdateCamvec(0.0,1.0,0.0);
+
+			SetDrawModel(LOAD, 0, 11);
+
+			SetDrawModel(Brian, 0, 1);
+			SetModelMat(Brian, 0, 0.0, 0.0, 0.0, -70.0, 0.0);
+			SetModelAnime(Brian, 0, 1, FALSE, 0.1, 0);
+
+			BlackIn(0.9f);
+	//24
+		SetCut(64.25);
+		SetCamvec(0.0f, 10.0f, 0.0f);
+		SetCampos_NoneRad(0.0f, 10.0f, 10.0f);
+		SetCamInfo(10, 15.0, 120.0, 0.0);
+
+			SetDrawModel(Mayano, 0, 1);
+			SetModelMat(Mayano, 0, 0.0, -5.0, 0.0, -20.0, 0.0);
+			SetModelAnime(Mayano, 0, 4, FALSE, 0.6, 0);
+
+			SetDrawModel(Brian, 0, 5);
+			SetModelAnime(Brian, 0, 1, FALSE, 0.65, 0);
+	//25
+		SetCut(66.25);
+		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 0.f , 0.f, 10.f);
+		SetCamInfo(35, 3.0, 20.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+
+			SetDrawModel(Mayano, 0, 2);
+			SetModelAnime(Mayano, 0, 5, TRUE, 1.0, 0);
+	//26
+		SetCut(67.0);
+		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 0.f , 1.f, -10.f);
+		SetCamInfo(35, 3.0, 20.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.0f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+	//27
+		SetCut(69.3);
+		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+		SetCampos_Attach( 1, 0.f , 0.f, 10.f);
+		SetCamInfo(35, 3.0, 20.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+	//28
+		SetCut(70.3);
+		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, -10.0, 0.0);
+		SetCampos_NoneRad(0.0f, 2.0f, 10.0f);
+		SetCamInfo(15, 15.0, 120.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Brian, 0, RIGHT_EYE, 0.0, -10.0, 0.0);
+	//29
+		SetCut(71.3);
+		SetCamvec(0.0f, 3.0f, 0.0f);
+		SetCampos_NoneRad(0.0f, 3.0f, 10.0f);
+		SetCamInfo(5, 40.0, 250.0, 0.0);
+
+			SetDrawModel(Mayano, 0, 10);
+			SetModelMat(Mayano, 0, 0.0, -5.0, 0.0, -66.0, 0.0);
+			SetModelAnime(Mayano, 0, 6, TRUE, 0.35, 0);
+
+			SetDrawModel(Brian, 0, 10);
+			SetModelMat(Brian, 0, 0.0, 5.0, 0.0, -70.0, 0.0);
+			SetModelAnime(Brian, 0, 2, TRUE, 0.35, 10);
+	//30
+		SetCut(72.3);
+		SetCamvec(0.0f, 17.0f, -68.0f);
+		SetCampos_Attach( 1, 20.f , 0.f, 0.f);
+		SetCamInfo(15, 10.0, 50.0, 0.0);
+	//31
+		SetCut(72.95);
+		SetCamvec(0.0f, 17.0f, -68.0f);
+		SetCampos_Attach( 1, 0.f , -5.f, -30.f);
+		SetCamInfo(25, 10.0, 50.0, 0.0);
+		SetFog(0,0,0 ,400.0,800.0);
+
+		SetUpdateEnable();
+		SetUpdateCamfov(0.999, 35);
+	//32
+		SetCut(73.35);
+		SetPrevCamInfo();
+
+		SetUpdateEnable();
+		BlackOut(0.9f);
+	//33
+		SetCut(74.0);
+		SetPrevCamInfo();
+
+		SetFog();
+
+		SetUpdateEnable();
+		BlackIn(0.f);
+	//34
+		SetCut(75.0);
+		SetPrevCamInfo();
+
+		SetFog();
+
+		SetUpdateEnable();
+		BlackIn(0.f);
+	//35
 		SetCut(500.0);
-		SetCamvec(-210.0f, 22.3f, 331.9f);
-		SetCampos_NoneRad(-300.0f, 30.3f, 351.9f);
-		SetCamInfo(15, 0.1, 100.0, 0.0);
+		SetPrevCamInfo();
+
+		SetFog();
+
+		SetUpdateEnable();
+		BlackIn(0.f);
 //LAST
 
 

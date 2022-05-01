@@ -613,6 +613,7 @@ namespace FPS_n2 {
 			float AnimChange{ 0.f };
 		public:
 			bool isBGModel{ false };
+			bool ShadowDrawActive{ true };//‰e‚ð‘‚«ž‚Þ‚©
 			bool IsNearShadow = true;
 			bool IsFarShadow{ false };
 			bool isBase = true;
@@ -678,7 +679,7 @@ namespace FPS_n2 {
 				}
 				if (prevID != ID) {
 					AnimChange = 1.f;
-					this->obj.get_anime(ID).time = this->obj.get_anime(prevID).time;
+					//this->obj.get_anime(ID).time = this->obj.get_anime(prevID).time;
 				}
 				prevID = ID;
 				Sel_AnimNum(this->obj, ID, AnimChange);
@@ -912,11 +913,12 @@ namespace FPS_n2 {
 			SetUseLighting(TRUE);
 			SetFogEnable(fog_e);
 		}
-		void Draw(bool innearshadow, bool infarshadow, int isCheckFar = -1) noexcept {
+		void Draw(bool innearshadow, bool infarshadow,bool ShadowActive, int isCheckFar = -1) noexcept {
 			if (infarshadow) {
 				for (size_t i = 0; i < Max; i++) {
 					auto& m = model[i];
 					if (!m.isBGModel && m.IsFarShadow) {
+						if (ShadowActive && !m.ShadowDrawActive) { continue; }
 						m.Draw(isCheckFar);
 					}
 				}
@@ -925,6 +927,7 @@ namespace FPS_n2 {
 				for (size_t i = 0; i < Max; i++) {
 					auto& m = model[i];
 					if (!m.isBGModel && m.IsNearShadow) {
+						if (ShadowActive && !m.ShadowDrawActive) { continue; }
 						m.Draw(isCheckFar);
 					}
 				}
@@ -933,6 +936,7 @@ namespace FPS_n2 {
 				for (size_t i = 0; i < Max; i++) {
 					auto& m = model[i];
 					if (!m.isBGModel) {
+						if (ShadowActive && !m.ShadowDrawActive) { continue; }
 						m.Draw(isCheckFar);
 					}
 				}

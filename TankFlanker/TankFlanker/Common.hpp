@@ -2,7 +2,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		std::array<std::string, 3> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE" };
+		std::array<std::string, 4> ModelType{ "SKY_TRUE","NEAR_FALSE","FAR_TRUE","SHADOW_DISACTIVE" };
 
 		std::vector<std::string> NAMES;
 		ModelControl models;
