@@ -258,6 +258,7 @@ namespace FPS_n2 {
 			std::string Mayano = "data/umamusume/topgun/model.mv1";
 			std::string AirCarrier = "data/model/aircraftcarrier/model.mv1";
 			std::string TomCat = "data/model/F14/model.mv1";
+			std::string TomCat_UP = "data/model/F14_UP/model.mv1";
 			struct F14Args_Wheel {
 				float Rad{ 0.f };
 				VECTOR_ref Prev;
@@ -969,7 +970,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				m_Counter = 20;
+				m_Counter = 30;
 				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
@@ -1137,6 +1138,7 @@ namespace FPS_n2 {
 							M->obj.SetMatrix(inf.mat_p);
 						}
 						//
+						if (m_Counter<=20)
 						{
 							if (isFirstLoop && m_Counter == 0) {
 								//
@@ -1354,6 +1356,28 @@ namespace FPS_n2 {
 								//
 							}
 						}
+						if (m_Counter == 35 || m_Counter == 36)
+						{
+							//*
+							for (int i = 0; i < 1; i++) {
+								auto* M = models.Get(TomCat_UP, i);
+								if (isFirstLoop) {
+									Check_F14[i].move.pos.clear();
+									Check_F14[i].move.mat.clear();
+
+									Check_F14[i].Yadd = 0.f;
+									Check_F14[i].Zadd = -64.f*60.f;
+
+									Check_F14[i].Yrad = 0.f;
+								}
+								Check_F14[i].move.vec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, Check_F14[i].Yadd, Check_F14[i].Zadd) * (1.f / FPS * GameSpeed), MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad)));
+								Check_F14[i].move.pos += Check_F14[i].move.vec;
+
+
+								M->obj.SetMatrix(Check_F14[i].move.MatIn());
+							}
+						}
+						//
 					}
 					//
 					{
@@ -1495,6 +1519,7 @@ namespace FPS_n2 {
 				}
 				graphs.Update();
 				models.Update();
+				if (m_Counter <= 20)
 				{
 					//*
 					for (int i = 0; i < 1; i++) {

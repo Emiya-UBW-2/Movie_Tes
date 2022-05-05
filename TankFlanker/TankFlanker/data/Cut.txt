@@ -19,6 +19,7 @@
 		SetArg(Crew4, "data/model/crew4/model.pmx");
 
 		SetArg(TomCat, "data/model/F14/model.pmx");
+		SetArg(TomCat_UP, "data/model/F14_UP/model.pmx");
 
 //ÉÇÉfÉãì«Ç›çûÇ›
 		LoadModel(Teio, 1);
@@ -43,6 +44,7 @@
 		LoadModel(Crew4, 1);
 
 		LoadModel(TomCat, 1);
+		LoadModel(TomCat_UP, 1);
 //ÉÇÉfÉãì«Ç›çûÇ›èIÇÌÇË
 	//æØ¿ØÃﬂ
 		SetModelMode(GROUND, 0, FAR_TRUE);
@@ -382,7 +384,7 @@
 			SetModelAnime(Mayano, 0, 4, FALSE, 0.6, 0);
 
 			SetDrawModel(Brian, 0, 5);
-			SetModelAnime(Brian, 0, 1, FALSE, 0.65, 0);
+			SetModelAnime(Brian, 0, 1, FALSE, 0.675, 3);
 	//25
 		SetCut(66.25);
 		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
@@ -424,11 +426,11 @@
 		SetCampos_NoneRad(0.0f, 3.0f, 10.0f);
 		SetCamInfo(5, 40.0, 250.0, 0.0);
 
-			SetDrawModel(Mayano, 0, 10);
+			SetDrawModel(Mayano, 0, 4);
 			SetModelMat(Mayano, 0, 0.0, -5.0, 0.0, -66.0, 0.0);
 			SetModelAnime(Mayano, 0, 6, TRUE, 0.35, 0);
 
-			SetDrawModel(Brian, 0, 10);
+			SetDrawModel(Brian, 0, 4);
 			SetModelMat(Brian, 0, 0.0, 5.0, 0.0, -70.0, 0.0);
 			SetModelAnime(Brian, 0, 2, TRUE, 0.35, 10);
 	//30
@@ -462,19 +464,27 @@
 	//34
 		SetCut(75.0);
 		SetPrevCamInfo();
-
-		SetFog();
-
-		SetUpdateEnable();
-		BlackIn(0.f);
 	//35
-		SetCut(500.0);
-		SetPrevCamInfo();
-
-		SetFog();
+		SetCut(76.0);
+		SetCampos_Attach( 1, 70.f , -20.f, 20.f);
+		SetCamInfo(25, 10.0, 200.0, 0.0);
+		SetCamVecRand(5.f,2.f,5.f,0.95f);
 
 		SetUpdateEnable();
-		BlackIn(0.f);
+		SetUpdateCamForcus(0.f, TomCat_UP, 0, CANOPY, 0.0, -15.0, 135.0);
+
+			SetDrawModel(TomCat_UP, 0, 1);
+			SetModelAnime(TomCat_UP, 0, 0, FALSE, 1.5, 0);
+	//37
+
+	//36
+		SetCut(500.0);
+
+		SetCampos_Attach( 1, 70.f , -24.f, 20.f);
+		SetCamInfo(25, 10.0, 200.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.f, TomCat_UP, 0, CANOPY, 0.0, -15.0, 135.0);
 //LAST
 
 
