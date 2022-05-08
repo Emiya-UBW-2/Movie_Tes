@@ -971,7 +971,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				m_Counter = 30;
-				m_Counter = 0;
+				//m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1377,6 +1377,8 @@ namespace FPS_n2 {
 								M->obj.SetMatrix(Check_F14[i].move.MatIn());
 							}
 						}
+						//
+
 						//
 					}
 					//

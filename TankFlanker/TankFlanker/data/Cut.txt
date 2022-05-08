@@ -5,6 +5,8 @@
 		SetArg(Mayano, "data/umamusume/topgun/model.pmx");
 		SetArg(Brian, "data/umamusume/brian/model.pmx");
 		SetArg(Amazon, "data/umamusume/amazon/model.pmx");
+		SetArg(Palmer, "data/umamusume/palmer/model.pmx");
+		
 
 		SetArg(SKY, "data/model/sky/model.mv1");
 		SetArg(SUN, "data/model/sun/model.mv1");
@@ -12,6 +14,8 @@
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
 		SetArg(GROUND, "data/model/ground/model.pmx");
 		SetArg(LOAD, "data/model/load/model.mv1");//馬道
+
+		SetArg(MAP, "data/model/map/model.mv1");
 
 		SetArg(Crew1, "data/model/crew1/model.pmx");
 		SetArg(Crew2, "data/model/crew2/model.pmx");
@@ -28,10 +32,12 @@
 		LoadModel(Mayano, 1);
 		LoadModel(Brian, 1);
 		LoadModel(Amazon, 1);
+		LoadModel(Palmer, 1);
 
 		LoadModel(SKY, 1);
 		LoadModel(SUN, 1);
 		LoadModel(GATE, 1);//ゲート
+		LoadModel(MAP, 1);
 
 		LoadModel(GROUND, 1);
 		LoadModel(LOAD, 1);
@@ -48,6 +54,7 @@
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
 		SetModelMode(GROUND, 0, FAR_TRUE);
+		SetModelMode(MAP, 0, FAR_TRUE);
 
 		SetModelMode(LOAD, 0, SHADOW_DISACTIVE);
 
@@ -476,8 +483,30 @@
 			SetDrawModel(TomCat_UP, 0, 1);
 			SetModelAnime(TomCat_UP, 0, 0, FALSE, 1.5, 0);
 	//37
+		SetCut(80.0);
+		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, -7.0, -5.0);
+		SetCampos_Attach( 1, 20.f , 13.f, -40.f);
+		SetCamInfo(30, 3.0, 200.0, 0.0);
+		SetCamVecRand(2.f,1.f,1.f,0.9f);
 
-	//36
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.0f, Mayano, 0, RIGHT_EYE, 0.0, -7.0, -5.0);
+
+			SetDrawModel(MAP, 0, 4);
+			SetModelMat(MAP, 0, -90.0, -2400.0, 0.0, 0.0, 0.0);
+
+			SetDrawModel(Mayano, 0, 4);
+			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Mayano, 0, 3, TRUE, 1.25, 0);
+
+			SetDrawModel(Palmer, 0, 4);
+			SetModelMat(Palmer, 0, 0.0, 10.0, 0.0, -30.0, 0.0);
+			SetModelAnime(Palmer, 0, 0, TRUE, 1.25, 14);
+
+			SetDrawModel(Teio, 0, 4);
+			SetModelMat(Teio, 0, 0.0, -10.0, 0.0, -18.0, 0.0);
+			SetModelAnime(Teio, 0, 0, TRUE, 1.25, 6);
+	//38
 		SetCut(500.0);
 
 		SetCampos_Attach( 1, 70.f , -24.f, 20.f);
