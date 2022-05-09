@@ -469,10 +469,10 @@
 		SetUpdateEnable();
 		BlackIn(0.f);
 	//34
-		SetCut(75.0);
+		SetCut(74.9);
 		SetPrevCamInfo();
 	//35
-		SetCut(76.0);
+		SetCut(75.8);
 		SetCampos_Attach( 1, 70.f , -20.f, 20.f);
 		SetCamInfo(25, 10.0, 200.0, 0.0);
 		SetCamVecRand(5.f,2.f,5.f,0.95f);
@@ -482,30 +482,50 @@
 
 			SetDrawModel(TomCat_UP, 0, 1);
 			SetModelAnime(TomCat_UP, 0, 0, FALSE, 1.5, 0);
-	//37
-		SetCut(80.0);
+	//36
+		SetCut(77.855);
 		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, -7.0, -5.0);
-		SetCampos_Attach( 1, 20.f , 13.f, -40.f);
-		SetCamInfo(30, 3.0, 200.0, 0.0);
-		SetCamVecRand(2.f,1.f,1.f,0.9f);
+		SetCampos_Attach( 1, 20.f , 16.f, -40.f);
+		SetCamInfo(30, 3.0, 100.0, 0.0);
+		SetCamVecRand(4.f,4.f,4.f,0.9f);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.0f, Mayano, 0, RIGHT_EYE, 0.0, -7.0, -5.0);
+		SetUpdateCamForcus(0.8f, Mayano, 0, RIGHT_EYE, -6.0, -7.0, -25.0);
 
-			SetDrawModel(MAP, 0, 4);
+			SetDrawModel(MAP, 0, 2);
 			SetModelMat(MAP, 0, -90.0, -2400.0, 0.0, 0.0, 0.0);
 
-			SetDrawModel(Mayano, 0, 4);
+			SetDrawModel(Mayano, 0, 2);
 			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			SetModelAnime(Mayano, 0, 3, TRUE, 1.25, 0);
 
-			SetDrawModel(Palmer, 0, 4);
+			SetDrawModel(Palmer, 0, 2);
 			SetModelMat(Palmer, 0, 0.0, 10.0, 0.0, -30.0, 0.0);
 			SetModelAnime(Palmer, 0, 0, TRUE, 1.25, 14);
 
-			SetDrawModel(Teio, 0, 4);
+			SetDrawModel(Teio, 0, 2);
 			SetModelMat(Teio, 0, 0.0, -10.0, 0.0, -18.0, 0.0);
 			SetModelAnime(Teio, 0, 0, TRUE, 1.25, 6);
+	//37
+		SetCut(79.865);
+		SetCamForcus(Mayano, 0, RIGHT_EYE, -3.0, -2.0, -11.0);
+		SetCampos_Attach( 1, 20.f , 16.f, -40.f);
+		SetCamInfo(10, 3.0, 60.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.8f, Mayano, 0, RIGHT_EYE, -3.0, -2.0, -11.0);
+	//37
+		SetCut(83.0);
+		SetCamForcus(TomCat, 0, CANOPY, 0.0, 2.0, 40.0);
+		SetCampos_Attach( 1, 20.f , 400.f, 0.f);
+		SetCamInfo(35, 1.0, 500.0, 0.0);
+		SetCamVecRand(10.f,4.f,10.f,0.95f);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.f, TomCat, 0, CANOPY, 0.0, 2.0, 40.0);
+		
+			SetDrawModel(TomCat, 0, 20);
+			SetModelAnime(TomCat, 0, 5, FALSE, 1.0, 0);
 	//38
 		SetCut(500.0);
 

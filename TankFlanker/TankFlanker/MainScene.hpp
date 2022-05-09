@@ -254,6 +254,8 @@ namespace FPS_n2 {
 			float Black_Buf{ 0.f };									//
 			float White_Buf{ 0.f };									//
 
+			std::string Teio = "data/umamusume/teio/model.mv1";
+			std::string Palmer = "data/umamusume/palmer/model.mv1";
 
 			std::string Mayano = "data/umamusume/topgun/model.mv1";
 			std::string AirCarrier = "data/model/aircraftcarrier/model.mv1";
@@ -971,7 +973,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				m_Counter = 30;
-				//m_Counter = 0;
+				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1362,7 +1364,7 @@ namespace FPS_n2 {
 							for (int i = 0; i < 1; i++) {
 								auto* M = models.Get(TomCat_UP, i);
 								if (isFirstLoop) {
-									Check_F14[i].move.pos.clear();
+									Check_F14[i].move.pos.Set(0, 100.f, 0);
 									Check_F14[i].move.mat.clear();
 
 									Check_F14[i].Yadd = 0.f;
@@ -1378,8 +1380,57 @@ namespace FPS_n2 {
 							}
 						}
 						//
+						if (m_Counter == 36 || m_Counter == 37) {
+							{
+								auto* M = models.Get(Mayano, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
 
+								inf.pos_p.zadd(3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+							{
+								auto* M = models.Get(Palmer, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+							{
+								auto* M = models.Get(Teio, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+						}
 						//
+						if (m_Counter == 38) {
+							for (int i = 0; i < 1; i++) {
+								auto* M = models.Get(TomCat, i);
+								if (isFirstLoop) {
+									Check_F14[i].move.pos.Set(0, 100.f, 0);
+									Check_F14[i].move.mat.clear();
+
+									Check_F14[i].Yadd = 0.f;
+									Check_F14[i].Zadd = -64.f*60.f;
+
+									Check_F14[i].Yrad = 0.f;
+								}
+								Check_F14[i].move.vec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, Check_F14[i].Yadd, Check_F14[i].Zadd) * (1.f / FPS * GameSpeed), MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad)));
+								Check_F14[i].move.pos += Check_F14[i].move.vec;
+
+								M->obj.SetMatrix(Check_F14[i].move.MatIn());
+							}
+						}
 					}
 					//
 					{
