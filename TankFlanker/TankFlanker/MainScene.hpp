@@ -975,7 +975,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				m_Counter = 30;
+				m_Counter = 35;
 				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
@@ -1468,6 +1468,28 @@ namespace FPS_n2 {
 							}
 						}
 						//
+						if (m_Counter == 40 || m_Counter == 41) {
+							{
+								auto* M = models.Get(Mayano, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(1.5f * 3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+							{
+								auto* M = models.Get(Brian, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(1.5f * 3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+						}
 					}
 					//
 					{

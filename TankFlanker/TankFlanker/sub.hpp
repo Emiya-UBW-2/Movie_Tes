@@ -1541,7 +1541,7 @@ namespace FPS_n2 {
 			if (this->isUseNotFirst) {
 				VECTOR_ref vec;
 				bool isforcus = false;
-#if 0
+#if 1
 				for (auto&f : Forcus) {
 					if (f.GetIsUse()) {
 						vec += f.GetForce(models);
