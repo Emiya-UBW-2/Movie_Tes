@@ -256,8 +256,11 @@ namespace FPS_n2 {
 
 			std::string Teio = "data/umamusume/teio/model.mv1";
 			std::string Palmer = "data/umamusume/palmer/model.mv1";
-
 			std::string Mayano = "data/umamusume/topgun/model.mv1";
+			std::string Brian = "data/umamusume/brian/model.mv1";
+			std::string Tanhoiza = "data/umamusume/tanhoiza/model.mv1";
+
+
 			std::string AirCarrier = "data/model/aircraftcarrier/model.mv1";
 			std::string TomCat = "data/model/F14/model.mv1";
 			std::string TomCat_UP = "data/model/F14_UP/model.mv1";
@@ -1385,7 +1388,7 @@ namespace FPS_n2 {
 								auto* M = models.Get(Mayano, 0);
 								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
 
-								inf.pos_p.zadd(3.5f*-60.f / FPS * GameSpeed);
+								inf.pos_p.zadd(1.01f * 3.5f*-60.f / FPS * GameSpeed);
 
 								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
 
@@ -1431,6 +1434,40 @@ namespace FPS_n2 {
 								M->obj.SetMatrix(Check_F14[i].move.MatIn());
 							}
 						}
+						//
+						if (m_Counter == 39) {
+							{
+								auto* M = models.Get(Mayano, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(1.15f * 3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+							{
+								auto* M = models.Get(Brian, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(1.15f * 3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+							{
+								auto* M = models.Get(Tanhoiza, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								inf.pos_p.zadd(3.5f*-60.f / FPS * GameSpeed);
+
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+
+								M->obj.SetMatrix(inf.mat_p);
+							}
+						}
+						//
 					}
 					//
 					{
@@ -1521,7 +1558,7 @@ namespace FPS_n2 {
 
 							u.CameraNotFirst.camvec += u.CameraNotFirst_Vec.camvec*(1.f / FPS * GameSpeed);
 							u.CameraNotFirst.campos += u.CameraNotFirst_Vec.campos*(1.f / FPS * GameSpeed);
-
+							u.CameraNotFirst.camup += u.CameraNotFirst_Vec.camup*(1.f / FPS * GameSpeed);
 							//
 							if (attached.GetSwitch() && attached_override) {
 								m_CutInfo[m_Counter].Aim_camera.campos = m_CutInfo[m_Counter].Aim_camera.camvec + attachedDetail[attached.nowcut].poscam;
