@@ -1468,7 +1468,7 @@ namespace FPS_n2 {
 							}
 						}
 						//
-						if (m_Counter == 40 || m_Counter == 41) {
+						if (m_Counter == 40 || m_Counter == 41 || m_Counter == 42 || m_Counter == 43) {
 							{
 								auto* M = models.Get(Mayano, 0);
 								auto& inf = M->CutDetail[M->Cutinfo.nowcut];

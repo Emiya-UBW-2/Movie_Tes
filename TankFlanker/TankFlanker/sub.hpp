@@ -1267,7 +1267,7 @@ namespace FPS_n2 {
 			else if (frame == "RIGHT_FINGER") {
 				this->Frame = "右人指２";
 			}
-			else if (frame == "FAR_TRUE") {
+			else if (frame == "RIGHTLEG") {
 				this->Frame = "右ひざ";
 			}
 
