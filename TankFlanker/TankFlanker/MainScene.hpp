@@ -976,7 +976,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				m_Counter = 35;
-				m_Counter = 0;
+				//m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1487,6 +1487,28 @@ namespace FPS_n2 {
 
 								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
 
+								M->obj.SetMatrix(inf.mat_p);
+							}
+						}
+						if (m_Counter == 44) {
+							{
+								auto* M = models.Get(Mayano, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								easing_set_SetSpeed(&inf.animspeed, 0.f, 0.975f);
+
+								inf.pos_p.zadd(inf.animspeed *0.95f * 3.5f*-60.f / FPS * GameSpeed);
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+								M->obj.SetMatrix(inf.mat_p);
+							}
+							{
+								auto* M = models.Get(Brian, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								easing_set_SetSpeed(&inf.animspeed, 0.f, 0.975f);
+
+								inf.pos_p.zadd(inf.animspeed *1.0f * 3.5f*-60.f / FPS * GameSpeed);
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
 								M->obj.SetMatrix(inf.mat_p);
 							}
 						}

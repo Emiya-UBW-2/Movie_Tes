@@ -586,14 +586,14 @@
 		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHTLEG, 0.0, 0.0, -50.0);
 		SetUpdateCamForcus(0.9f, Brian, 0, RIGHTLEG, 0.0, 0.0, -50.0);
 
-			SetDrawModel(MAP, 0, 3);
+			SetDrawModel(MAP, 0,43);
 			SetModelMat(MAP, 0, -90.0, -2250.0, 0.0, 0.0, 0.0);
 
-			SetDrawModel(Mayano, 0, 3);
+			SetDrawModel(Mayano, 0, 4);
 			SetModelMat(Mayano, 0, 0.0, -5.0, 0.0, 1000.0, 0.0);
 			SetModelAnime(Mayano, 0, 3, TRUE, 1.75, 0);
 
-			SetDrawModel(Brian, 0, 3);
+			SetDrawModel(Brian, 0, 4);
 			SetModelMat(Brian, 0, 0.0, 5.0 -10, 0.0, 1000.0, 0.0);
 			SetModelAnime(Brian, 0, 3, TRUE, 1.75, 3);
 	//42
@@ -606,7 +606,7 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Mayano, 0, UPPER, 0.0, 0.0, -50.0);
 		SetUpdateCamForcus(0.9f, Brian, 0, UPPER, 0.0, 0.0, -50.0);
-	//42
+	//43
 		SetCut(92.527);//
 		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
 		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
@@ -617,6 +617,11 @@
 		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, -50.0);
 		SetUpdateCamForcus(0.9f, Brian, 0, RIGHT_EYE, 0.0, 0.0, -50.0);
 		SetUpdateCamfov(0.9f,20);
+	//44
+		SetCut(95.527);//
+		SetCamForcus(Mayano, 0, UPPER, 0.0, 0.0, -200.0);
+		SetCampos_Attach( 1, 100.0f , 15.0f, 0.f);
+		SetCamInfo(45, 3.0, 100.0, 0.0);
 	//41
 		SetCut(500.0);
 
