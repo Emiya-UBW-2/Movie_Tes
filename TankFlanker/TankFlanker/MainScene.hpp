@@ -293,6 +293,9 @@ namespace FPS_n2 {
 			std::array<F14Args, 64> Check_F14;
 			float DiffPer = 0.f;
 
+
+			bool Flag44 = false;
+
 			MATRIX_ref Frontmat;
 			struct F14Wheels {
 				int sel{ 0 };
@@ -975,7 +978,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set_EnvLight(VECTOR_ref::vget(5000.f, 50.f, 5000.f), VECTOR_ref::vget(-5000.f, -10.f, -5000.f), VECTOR_ref::vget(-0.3f, -0.5f, -0.2f), GetColorF(0.42f, 0.41f, 0.40f, 0.f));
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
-				m_Counter = 35;
+				m_Counter = 32;
 				//m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
@@ -1061,7 +1064,7 @@ namespace FPS_n2 {
 					GameSpeed = (float)(spd_x) / 10.f;
 					if (NowTimeWait >= 0) {
 						if (GameSpeed >= 0.1f) {
-							//SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+							SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
 							SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
 							if (!BGM.check()) {
 								BGM.play(DX_PLAYTYPE_BACK, FALSE);
@@ -1086,7 +1089,7 @@ namespace FPS_n2 {
 						BGM_Frequency = GetFrequencySoundMem(BGM.get());
 						BGM.play(DX_PLAYTYPE_BACK, TRUE);
 						BGM.vol(192);
-						//SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
+						SetSoundCurrentTime((LONGLONG)(NowTimeWait / 1000), BGM.get());
 
 						SetFrequencySoundMem((int)((float)BGM_Frequency * GameSpeed), BGM.get());
 
@@ -1494,10 +1497,14 @@ namespace FPS_n2 {
 							{
 								auto* M = models.Get(Mayano, 0);
 								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+								if (!Flag44) {
+									easing_set_SetSpeed(&inf.animspeed, 0.f, 0.95f);
+								}
+								else {
+									easing_set_SetSpeed(&inf.animspeed, 2.f, 0.9f);
+								}
 
-								easing_set_SetSpeed(&inf.animspeed, 0.f, 0.975f);
-
-								inf.pos_p.zadd(inf.animspeed *0.95f * 3.5f*-60.f / FPS * GameSpeed);
+								inf.pos_p.zadd(inf.animspeed *0.985f * 3.5f*-60.f / FPS * GameSpeed);
 								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
 								M->obj.SetMatrix(inf.mat_p);
 							}
@@ -1505,7 +1512,18 @@ namespace FPS_n2 {
 								auto* M = models.Get(Brian, 0);
 								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
 
-								easing_set_SetSpeed(&inf.animspeed, 0.f, 0.975f);
+								if (!Flag44) {
+									easing_set_SetSpeed(&inf.animspeed, 0.f, 0.95f);
+								}
+								else {
+									easing_set_SetSpeed(&inf.animspeed, 2.f, 0.9f);
+								}
+
+								if (!Flag44) {
+									if (inf.animspeed <= 0.05f) {
+										Flag44 = true;
+									}
+								}
 
 								inf.pos_p.zadd(inf.animspeed *1.0f * 3.5f*-60.f / FPS * GameSpeed);
 								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
