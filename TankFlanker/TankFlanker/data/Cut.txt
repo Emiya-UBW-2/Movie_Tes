@@ -623,6 +623,19 @@
 		SetCamForcus(Mayano, 0, UPPER, 0.0, -6.0, -118.0);
 		SetCampos_Attach( 1, 100.0f , 40.0f, 0.f);
 		SetCamInfo(25, 30.0, 200.0, 0.0);
+	//45
+		SetCut(100.0);//
+		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, 0.0, -10.0);
+		SetCampos_Attach( 1, 6.0f , -1.0f, -30.f);
+		SetCamInfo(7.5, 3.0, 100.0, 0.0);
+		SetCamVecRand(1.f,1.f,1.f,0.9f);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, -10.0);
+
+			SetDrawModel(Mayano, 0, 4);
+			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Mayano, 0, 8, FALSE, 1.25, 1);
 	//41
 		SetCut(500.0);
 
