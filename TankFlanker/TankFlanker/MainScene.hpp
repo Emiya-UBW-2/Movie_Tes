@@ -279,7 +279,8 @@ namespace FPS_n2 {
 
 				moves move;
 				float Yrad, YradAdd;
-				float Xrad, XradAim;
+				float Xrad, XradAdd, XradAim;
+				float Zrad, ZradAdd;
 				float Yadd, Zadd;
 				bool AimFlag = false;
 				bool AimFlag2 = false;
@@ -1541,6 +1542,51 @@ namespace FPS_n2 {
 								inf.pos_p.zadd(per45 * 3.5f*-60.f / FPS * GameSpeed);
 								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
 								M->obj.SetMatrix(inf.mat_p);
+							}
+						}
+						if (m_Counter == 46) {
+							{
+								auto* M = models.Get(Mayano, 0);
+								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+
+								easing_set_SetSpeed(&per45, 0.f, 0.995f);
+
+								inf.pos_p.zadd(per45 * 3.5f*-60.f / FPS * GameSpeed);
+								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
+								M->obj.SetMatrix(inf.mat_p);
+							}
+						}
+						if (m_Counter == 47) {
+							for (int i = 0; i < 1; i++) {
+								auto* M = models.Get(TomCat, i);
+								if (isFirstLoop) {
+									Check_F14[i].move.pos.Set(0, 100.f, 2000.f);
+									Check_F14[i].move.mat.clear();
+
+									Check_F14[i].Yadd = 0.f;
+									Check_F14[i].Zadd = -60.f*60.f;
+
+									Check_F14[i].Yrad = 0.f;
+									Check_F14[i].Xrad = 0.f;
+
+									Check_F14[i].XradAdd = 0.f;
+								}
+								Check_F14[i].Xrad += Check_F14[i].XradAdd / FPS * GameSpeed;
+
+								if (Check_F14[i].Xrad > 90.f) {
+									easing_set_SetSpeed(&Check_F14[i].XradAdd, 0.f, 0.95f);
+									Check_F14[i].Zadd = -90.f*60.f;
+								}
+								else {
+									easing_set_SetSpeed(&Check_F14[i].XradAdd, 10.f, 0.95f);
+								}
+
+
+								Check_F14[i].move.mat = MATRIX_ref::RotX(deg2rad(Check_F14[i].Xrad)) * MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad));
+								Check_F14[i].move.vec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, Check_F14[i].Yadd, Check_F14[i].Zadd) * (1.f / FPS * GameSpeed), Check_F14[i].move.mat);
+								Check_F14[i].move.pos += Check_F14[i].move.vec;
+
+								M->obj.SetMatrix(Check_F14[i].move.MatIn());
 							}
 						}
 					}
