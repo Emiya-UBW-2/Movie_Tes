@@ -12,6 +12,7 @@
 		SetArg(SUN, "data/model/sun/model.mv1");
 		SetArg(AirCarrier, "data/model/aircraftcarrier/model.pmx");
 		SetArg(GATE, "data/model/map/model_gate.mv1");//ゲート
+		SetArg(GOAL, "data/model/map/goal.mv1");//ゲート
 		SetArg(GROUND, "data/model/ground/model.pmx");
 		SetArg(LOAD, "data/model/load/model.mv1");//馬道
 
@@ -37,6 +38,7 @@
 
 		LoadModel(SKY, 1);
 		LoadModel(SUN, 1);
+		LoadModel(GOAL, 1);
 		LoadModel(GATE, 1);//ゲート
 		LoadModel(MAP, 1);
 
@@ -59,6 +61,7 @@
 
 		SetModelMode(LOAD, 0, SHADOW_DISACTIVE);
 
+		SetModelMode(GOAL, 0, FAR_TRUE);
 		SetModelMode(GATE, 0, FAR_TRUE);
 		SetModelMode(SKY, 0, SKY_TRUE);
 		SetModelMode(SUN, 0, SKY_TRUE);
@@ -194,7 +197,7 @@
 		SetVectorUpdateCampos(0,0,1);
 	//8
 		SetCut(27.0);
-		SetCamvec(-210.0f, 22.3f, 331.9f);
+		SetCamvec(-210.0f, 26.3f, 331.9f);
 		SetCampos_NoneRad(-300.0f, 7.3f, 351.9f);
 		SetCamInfo(25, 0.1, 100.0, 0.0);
 
@@ -229,13 +232,13 @@
 			SetDrawModel(AirCarrier, 0, 5);
 	//11
 		SetCut(33.2);
-		SetCamForcus(TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
+		SetCamForcus(TomCat, 0, CANOPY, 0.0, -25.0, -10.0);
 		SetCampos_Attach( 1, -400.f , 4.f, -20.f);
-		SetCamInfo(15, 10.0, 700.0, 0.0);
-		SetCamVecRand(5.f,3.f,5.f,0.9f);
+		SetCamInfo(10, 10.0, 700.0, 0.0);
+		SetCamVecRand(6.f,4.f,6.f,0.9f);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
+		SetUpdateCamForcus(0.9f, TomCat, 0, CANOPY, 0.0, -25.0, -10.0);
 
 			SetDrawModel(Crew1, 3, 4);
 			SetModelMat(Crew1, 3, -140.0, -250.0, 0.0, -975.0, 0.0);
@@ -394,7 +397,7 @@
 			SetDrawModel(Brian, 0, 5);
 			SetModelAnime(Brian, 0, 1, FALSE, 0.675, 3);
 	//25
-		SetCut(66.25);
+		SetCut(66.15);
 		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
 		SetCampos_Attach( 1, 0.f , 0.f, 10.f);
 		SetCamInfo(35, 3.0, 20.0, 0.0);
@@ -402,7 +405,7 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
 
-			SetDrawModel(Mayano, 0, 2);
+			SetDrawModel(Mayano, 0, 1);
 			SetModelAnime(Mayano, 0, 5, TRUE, 1.0, 0);
 	//26
 		SetCut(67.0);
@@ -412,6 +415,9 @@
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.0f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
+
+			SetDrawModel(Mayano, 0, 1);
+			SetModelAnime(Mayano, 0, 5, TRUE, 1.25, 0);
 	//27
 		SetCut(69.3);
 		SetCamForcus(Brian, 0, RIGHT_EYE, 0.0, 0.0, 0.0);
@@ -623,6 +629,10 @@
 		SetCamForcus(Mayano, 0, UPPER, 0.0, -6.0, -118.0);
 		SetCampos_Attach( 1, 100.0f , 40.0f, 0.f);
 		SetCamInfo(25, 30.0, 200.0, 0.0);
+
+		
+			SetDrawModel(GOAL, 0, 1);
+			SetModelMat(GOAL, 0, 90.0, -60.0, 0.0, -553.7, 0.0);
 	//45
 		SetCut(99.25);//
 		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, 0.0, -10.0);
@@ -632,6 +642,9 @@
 
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_EYE, 0.0, 0.0, -20.0);
+
+			SetDrawModel(GOAL, 0, 1);
+			SetModelMat(GOAL, 0, 90.0, -60.0, 0.0, 300.0, 0.0);
 
 			SetDrawModel(Mayano, 0, 1);
 			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -663,11 +676,25 @@
 
 			SetDrawModel(Mayano, 0, 1);
 			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			SetModelAnime(Mayano, 0, 9, FALSE, 0.25, 60);
+			SetModelAnime(Mayano, 0, 9, FALSE, 1.0, 55);
 
-		BlackIn(0.2f);
 	//48
 		SetCut(105.0);//
+		SetCamForcus(Mayano, 0, RIGHT_EYE, 0.0, 1.0, 0.0);
+		SetCampos_Attach( 1, -15.0f , -15.0f, 30.f);
+		SetCamInfo(5.0, 3.0, 200.0, 0.0);
+		SetCamVecRand(0.5f,0.5f,0.5f,0.95f);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Mayano, 0, RIGHT_EYE, 0.0, 2.0, .0);
+		SetUpdateCamfov(0.95f,25);
+
+			SetDrawModel(TomCat, 0, 1);
+			SetModelAnime(TomCat, 0, 5, FALSE, 0.0, 0);
+
+			SetDrawModel(Mayano, 0, 1);
+			SetModelMat(Mayano, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Mayano, 0, 10, TRUE, 1.0, 0);
 	//49
 		SetCut(111.5);//
 		SetCamForcus(TomCat, 0, CANOPY, 0.0, 2.0, 0.0);
@@ -679,7 +706,7 @@
 		SetUpdateCamForcus(0.5f, TomCat, 0, CANOPY, 0.0, 10.0, -10.0);
 		SetUpdateCampos(0.5);
 		SetVectorUpdateCampos(0.0,1000.0,-3500.0);
-		SetUpdateCamfov(0.95f,35);
+		SetUpdateCamfov(0.975f,35);
 		
 			SetDrawModel(TomCat, 0, 2);
 			SetModelAnime(TomCat, 0, 5, FALSE, 0.0, 60);
@@ -696,4 +723,48 @@
 
 
 //テロップはじめ
+	//テロップ3
+		SetTelopTime(1.5, 4.0);
+		SetTelop(1280, 840, 24, "モデル", RIGHT);
+		SetTelop(1280, 780, 16, "  かもたろ サマ", LEFT);
+		SetTelop(1280, 800, 32, " マヤノトップガン", LEFT);
+		SetTelop(1280, 880, 16, "  かもたろ サマ", LEFT);
+		SetTelop(1280, 900, 32, " ナリタブライアン", LEFT);
+	//テロップ6
+		AddTelopTime(6.0, 4.0);
+		SetTelop(1280, 840, 24, "モデル", RIGHT);
+		SetTelop(1280, 780, 16, "  よけち サマ", LEFT);
+		SetTelop(1280, 800, 32, " タイマンレディ", LEFT);
+		SetTelop(1280, 880, 16, "  つかさ サマ", LEFT);
+		SetTelop(1280, 900, 32, " うらら", LEFT);
+	//テロップ6
+		AddTelopTime(6.0, 4.0);
+		SetTelop(1280, 840, 24, "モデル", RIGHT);
+		SetTelop(1280, 780, 16, "  ShiniNet サマ", LEFT);
+		SetTelop(1280, 800, 32, "ゴーOドシップ", LEFT);
+		SetTelop(1280, 880, 16, "   めがねねこP サマ", LEFT);
+		SetTelop(1280, 900, 32, " クウボ クルー", LEFT);
+	//テロップ6
+		AddTelopTime(6.0, 4.0);
+		SetTelop(1280, 840, 24, "モデル", RIGHT);
+		SetTelop(1280, 780, 16, "  タンソク ヌマチジンサマ ", LEFT);
+		SetTelop(1280, 800, 32, " エンターモブイズ", LEFT);
+		SetTelop(1280, 880, 16, "   のべサマ", LEFT);
+		SetTelop(1280, 900, 32, " チカ バドウ", LEFT);
+	//テロップ6
+		AddTelopTime(6.0, 4.0);
+		SetTelop(1280, 840, 24, "モデル", RIGHT);
+		SetTelop(1280, 760, 16, "  ppp21 サマ", LEFT);
+		SetTelop(1280, 780, 32, "ササかまスタジアム", LEFT);
+		SetTelop(1280, 830, 16, "  Led/オリヅルP サマ", LEFT);
+		SetTelop(1280, 850, 32, " なんちゃって ケイバジョウ セット", LEFT);
+		SetTelop(1280, 900, 16, "  サンチュウP サマ", LEFT);
+		SetTelop(1280, 920, 32, " トレセンがくえん グラウンド", LEFT);
+	//テロップ6
+		AddTelopTime(6.0, 4.0);
+		SetTelop(1280, 840, 24, "モデル", RIGHT);
+		SetTelop(1280, 780, 16, "  つかさ サマ", LEFT);
+		SetTelop(1280, 800, 32, " ていおーV2", LEFT);
+		SetTelop(1280, 880, 16, "  ShiniNet サマ", LEFT);
+		SetTelop(1280, 900, 32, " メジOマoクイーン", LEFT);
 //テロップ終わり

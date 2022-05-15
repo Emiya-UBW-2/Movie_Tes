@@ -463,7 +463,7 @@ namespace FPS_n2 {
 					if (d > 30) { d = 1; ++m; }
 				}
 				else if (m == 2) {
-					if (d > 28) { d = 1; ++m; }
+					if (d > 29) { d = 1; ++m; }
 				}
 				else {
 					if (d > 31) { d = 1; ++m; }

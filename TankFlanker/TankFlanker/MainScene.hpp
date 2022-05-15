@@ -981,7 +981,7 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				models.Get(SUN, 0)->obj.SetMatrix(MATRIX_ref::RotVec2(VECTOR_ref::up(), (VECTOR_ref)(Get_Light_vec().Norm())) * MATRIX_ref::Mtrans(Get_Light_vec().Norm() * -1500.f));
 				m_Counter = 40;
-				//m_Counter = 0;
+				m_Counter = 0;
 				models.Start(m_Counter);
 				graphs.Start(m_Counter);
 				attached.Start(m_Counter);
@@ -1565,7 +1565,27 @@ namespace FPS_n2 {
 								M->obj.SetMatrix(Check_F14[i].move.MatIn());
 							}
 						}
-						if (m_Counter == 49 || m_Counter == 50) {
+						if (m_Counter == 48) {
+							for (int i = 0; i < 1; i++) {
+								auto* M = models.Get(TomCat, i);
+								if (isFirstLoop) {
+									Check_F14[i].move.pos.Set(220, 180.f, -260.f);
+									Check_F14[i].move.mat.clear();
+
+									Check_F14[i].Yadd = 0.f;
+									Check_F14[i].Zadd = -0.2f*60.f;
+
+									Check_F14[i].Yrad = 40.f;
+									Check_F14[i].Xrad = 0.f;
+								}
+
+								Check_F14[i].move.mat = MATRIX_ref::RotZ(deg2rad(60)) * MATRIX_ref::RotX(deg2rad(Check_F14[i].Xrad)) * MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad));
+								Check_F14[i].move.vec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, Check_F14[i].Yadd, Check_F14[i].Zadd) * (1.f / FPS * GameSpeed), Check_F14[i].move.mat);
+								Check_F14[i].move.pos += Check_F14[i].move.vec;
+
+								M->obj.SetMatrix(Check_F14[i].move.MatIn());
+							}
+						}						if (m_Counter == 49 || m_Counter == 50) {
 							for (int i = 0; i < 1; i++) {
 								auto* M = models.Get(TomCat, i);
 								if (isFirstLoop) {

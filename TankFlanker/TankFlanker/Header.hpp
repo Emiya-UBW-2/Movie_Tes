@@ -8,7 +8,7 @@
 
 #endif // _DEBUG
 
-#define DEBUG
+//#define DEBUG
 
 
 #include <D3D11.h>
