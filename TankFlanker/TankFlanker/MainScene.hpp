@@ -1545,18 +1545,27 @@ namespace FPS_n2 {
 							}
 						}
 						if (m_Counter == 46) {
-							{
-								auto* M = models.Get(Mayano, 0);
-								auto& inf = M->CutDetail[M->Cutinfo.nowcut];
+							for (int i = 0; i < 1; i++) {
+								auto* M = models.Get(TomCat, i);
+								if (isFirstLoop) {
+									Check_F14[i].move.pos.Set(75, 75.f, 400.f);
+									Check_F14[i].move.mat.clear();
 
-								easing_set_SetSpeed(&per45, 0.f, 0.995f);
+									Check_F14[i].Yadd = 0.f;
+									Check_F14[i].Zadd = -10.f*60.f;
 
-								inf.pos_p.zadd(per45 * 3.5f*-60.f / FPS * GameSpeed);
-								inf.mat_p = MATRIX_ref::RotY(deg2rad(inf.Yrad1_p)) * MATRIX_ref::Mtrans(inf.pos_p) * MATRIX_ref::RotY(deg2rad(inf.Yrad2_p));
-								M->obj.SetMatrix(inf.mat_p);
+									Check_F14[i].Yrad = 0.f;
+									Check_F14[i].Xrad = 0.f;
+								}
+
+								Check_F14[i].move.mat = MATRIX_ref::RotZ(deg2rad(30)) * MATRIX_ref::RotX(deg2rad(Check_F14[i].Xrad)) * MATRIX_ref::RotY(deg2rad(Check_F14[i].Yrad));
+								Check_F14[i].move.vec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, Check_F14[i].Yadd, Check_F14[i].Zadd) * (1.f / FPS * GameSpeed), Check_F14[i].move.mat);
+								Check_F14[i].move.pos += Check_F14[i].move.vec;
+
+								M->obj.SetMatrix(Check_F14[i].move.MatIn());
 							}
 						}
-						if (m_Counter == 47) {
+						if (m_Counter == 49 || m_Counter == 50) {
 							for (int i = 0; i < 1; i++) {
 								auto* M = models.Get(TomCat, i);
 								if (isFirstLoop) {
