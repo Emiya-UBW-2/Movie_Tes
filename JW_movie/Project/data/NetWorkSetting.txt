@@ -1,0 +1,15 @@
+Setting0_Port=10850
+Setting0_IP1=127
+Setting0_IP2=0
+Setting0_IP3=0
+Setting0_IP4=1
+Setting1_Port=10850
+Setting1_IP1=58
+Setting1_IP2=188
+Setting1_IP3=85
+Setting1_IP4=163
+Setting2_Port=10850
+Setting2_IP1=127
+Setting2_IP2=0
+Setting2_IP3=0
+Setting2_IP4=1

@@ -1,0 +1,16 @@
+grass_level=0
+DoF=true
+bloom=true
+shadow=true
+usevr=false
+SSAO=true
+fov=90.000000
+vsync=true
+SE=0.300000
+VOICE=1.000000
+BGM=1.000000
+AllWaysFront=false
+aberration=true
+DirectXVer=11
+SSR=true
+MotionBlur=true
