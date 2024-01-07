@@ -683,13 +683,13 @@ namespace FPS_n2 {
 					auto* Fonts = FontPool::Instance();
 					switch (this->LMR) {
 					case 0:
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(this->size, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(236, 222, 197), GetColor(0, 0, 0), this->str);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(this->size, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
 						break;
 					case 1:
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(this->size, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(236, 222, 197), GetColor(0, 0, 0), this->str);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(this->size, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
 						break;
 					case 2:
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(this->size, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(236, 222, 197), GetColor(0, 0, 0), this->str);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(this->size, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
 						break;
 					default:
 						break;
@@ -1042,7 +1042,7 @@ namespace FPS_n2 {
 				m.isDraw = m.Cutinfo.GetSwitch();
 			}
 		}
-		void FirstUpdate(int Counter, bool isFirstLoop) noexcept {
+		void FirstUpdate(size_t Counter, bool isFirstLoop) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
 				while (true) {
@@ -1430,7 +1430,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void FirstUpdate(int Counter, bool isFirstLoop) noexcept {
+		void FirstUpdate(size_t Counter, bool isFirstLoop) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
 				while (true) {

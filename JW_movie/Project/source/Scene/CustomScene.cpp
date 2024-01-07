@@ -8,188 +8,42 @@ namespace FPS_n2 {
 		//
 		void			CustomScene::Load_Sub(void) noexcept {
 			{
+				SetUseASyncLoadFlag(FALSE);
+				//graphs.Load((float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)), 0, 1.f, 0.5f, LOGO1);
 				//
-				{
-					SetUseASyncLoadFlag(FALSE);
-					graphs.Load((float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)), 0, 1.f, 0.5f, LOGO1);
-					//
-					TLClass.Init();
-					//
-					SetUseASyncLoadFlag(FALSE);
-					mdata = FileRead_open("data/Cut.txt", FALSE);
-					cnt = 0;
-					SetUseASyncLoadFlag(TRUE);
-					clsDx();
-					NowTime = GetNowHiPerformanceCount();
-					TotalTime = GetNowHiPerformanceCount();
-				}
+				SetUseASyncLoadFlag(FALSE);
+				int mdata = FileRead_open("data/Cut.txt", FALSE);
+				m_LoadUtil.StartLoad();
 				//
 				while (FileRead_eof(mdata) == 0) {
-					LSClass.LoadScript(getparams::Getstr(mdata));
-					const auto& args = LSClass.Getargs();
-					const auto& func = LSClass.Getfunc();
+					m_LoadUtil.LoadOnce(mdata);
+					const auto& func = m_LoadUtil.GetFunc();
 					if (func == "") { continue; }
 					//変数登録
-					LSClass.SetArgs(&NAMES);
+					m_LoadUtil.CheckArgments();
 					//モデル読み込み
-					if (func.find("LoadModel") != std::string::npos) {
-						for (int i = 0; i < std::stoi(args[1]); i++) {
-							models.Load(args[0]);
-						}
-					}
-					//カット
+					m_LoadUtil.LoadModel();
 					//新規カット
-					if (func.find("SetCut") != std::string::npos) {
-						m_CutInfo.resize(m_CutInfo.size() + 1);
-						m_CutInfo.back().SetTimeLimit((LONGLONG)(1000000.f * std::stof(args[0])));
-						m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
-					}
+					m_LoadUtil.SetNewCut();
 					//Camposの指定
-					else if (func.find("SetCampos_Attach") != std::string::npos) {
-						auto startFrame = (int)(m_CutInfo.size()) - 1;
-						attached.Switch.resize(attached.Switch.size() + 1);
-						attached.Switch.back().SetSwitch(startFrame, startFrame + (std::stoi(args[0]) - 1));
-						attachedDetail.resize(attachedDetail.size() + 1);
-						attachedDetail.back().poscam.Set(std::stof(args[1]), std::stof(args[2]), std::stof(args[3]));
-					}
-					else {
-						//カメラ座標周り
-						if (m_CutInfo.size() > 0) {
-							if (m_CutInfo.back().LoadScript(func, args)) {
-								m_CutInfoUpdate.back().CameraNotFirst = m_CutInfo.back().Aim_camera;
-							}
-						}
-						if (m_CutInfoUpdate.size() > 0) {
-							m_CutInfoUpdate.back().LoadScript(func, args);
-						}
-						//画像描画
-						if (func.find("SetDrawGraph") != std::string::npos) {
-							auto startFrame = (int)(m_CutInfo.size()) - 1;
-							size_t in_str = args[1].find("~");
-							if (in_str != std::string::npos) {
-								int start_t = std::stoi(args[1].substr(0, in_str));
-								int end_t = std::stoi(args[1].substr(in_str + 1));
-								for (int i = start_t; i <= end_t; i++) {
-									graphs.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
-								}
-							}
-							else {
-								graphs.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
-							}
-						}
-						else if (func.find("SetGraphBlur") != std::string::npos) {
-							auto startFrame = (int)(m_CutInfo.size()) - 1;
-							graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().Blur.Init(startFrame, std::stoi(args[2]) - 1);
-						}
-						else if (func.find("SetGraphOpacityRate") != std::string::npos) {
-							graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-							graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = 0.f;
-							graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate = std::stof(args[2]);
-						}
-						else if (func.find("SetGraphOpacityEasing") != std::string::npos) {
-							graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-							graphs.Get(args[0], std::stoi(args[1]))->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
-						}
-						//モデル描画
-						else if (func.find("SetDrawModel") != std::string::npos) {
-							auto startFrame = (int)(m_CutInfo.size()) - 1;
-							size_t in_str = args[1].find("~");
-							if (in_str != std::string::npos) {
-								int start_t = std::stoi(args[1].substr(0, in_str));
-								int end_t = std::stoi(args[1].substr(in_str + 1));
-								for (int i = start_t; i <= end_t; i++) {
-									models.Get(args[0], i)->Init(startFrame, std::stoi(args[2]) - 1);
-								}
-							}
-							else {
-								models.Get(args[0], std::stoi(args[1]))->Init(startFrame, std::stoi(args[2]) - 1);
-							}
-						}
-						else if (func.find("SetModelAnime") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							t->CutDetail.back().animsel = std::stoi(args[2]);
-							t->CutDetail.back().isloop = (args[3].find("TRUE") != std::string::npos);
-							t->CutDetail.back().animspeed = std::stof(args[4]);
-							t->CutDetail.back().startframe = std::stof(args[5]);
-						}
-						else if (func.find("SetModelMat") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							t->CutDetail.back().usemat = true;
-
-							t->CutDetail.back().Yrad1_p = std::stof(args[2]);
-							t->CutDetail.back().pos_p = VECTOR_ref::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5]));
-							t->CutDetail.back().Yrad2_p = std::stof(args[6]);
-
-							t->CutDetail.back().mat_p = MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad1_p)) * MATRIX_ref::Mtrans(t->CutDetail.back().pos_p) * MATRIX_ref::RotY(deg2rad(t->CutDetail.back().Yrad2_p));
-						}
-						else if (func.find("SetModelPhysicsSpeed") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							t->CutDetail.back().PhysicsSpeed_ = std::stof(args[2]);
-						}
-						else if (func.find("SetModelOpacityRate") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							t->CutDetail.back().OpacityRate = std::stof(args[2]);
-						}
-						else if (func.find("SetModelMotionRate") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							t->CutDetail.back().animspeed_Dist = std::stof(args[2]);
-							t->CutDetail.back().animspeed_Per = std::stof(args[3]);
-						}
-						else if (func.find("SetModelOpacityEasing") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							t->CutDetail.back().OpacityRate_Dist = std::stof(args[2]);
-							t->CutDetail.back().OpacityRate_Per = std::stof(args[3]);
-						}
-						//どの距離で描画するかをセット
-						else if (func.find("SetModelMode") != std::string::npos) {
-							auto* t = models.Get(args[0], std::stoi(args[1]));
-							if (args[2] == Model_Type[0]) {
-								t->isBGModel = true;
-							}
-							if (args[2] == Model_Type[1]) {
-								t->IsNearShadow = false;
-							}
-							if (args[2] == Model_Type[2]) {
-								t->IsFarShadow = true;
-							}
-							if (args[2] == Model_Type[3]) {
-								t->ShadowDrawActive = false;
-							}
-
-						}
-					}
+					m_LoadUtil.SetCamPos_Attach();
+					m_LoadUtil.SetCamPos_None();
+					//画像描画
+					m_LoadUtil.SetDrawGraph();
+					//モデル描画
+					m_LoadUtil.SetDrawModel();
 					//テロップ
-					TLClass.LoadTelop(func, args);
-					//END
-					PutMsg("ロード%3d完了 : %s\n", ++cnt, func.c_str());
+					m_LoadUtil.LoadTelop();
 					if (ProcessMessage() != 0) {}
 				}
 				FileRead_close(mdata);
 				//
 				SetUseASyncLoadFlag(FALSE);
-				PutMsg("非同期読み込みオブジェクトの読み込み待ち…\n");
-				{
-					int prenum = GetASyncLoadNum(), prenumAll = prenum;
-					while (ProcessMessage() == 0 && GetASyncLoadNum() != 0) {
-						if (prenum != GetASyncLoadNum()) {
-							prenum = GetASyncLoadNum();
-							PutMsg("ロード%3d完了(%d/%d)\n", cnt, prenum, prenumAll);
-							cnt++;
-							continue;
-						}
-					}
-				}
-				PutMsg("モデルのセット完了\n");
-				//モデルの事前処理(非同期)
-				models.Set();
-				PutMsg("モデルのセット完了\n");
-				//モデルのMV1保存
-				for (auto& n : NAMES) {
-					if (n.find(".pmx") != std::string::npos) {
-						MV1SaveModelToMV1File(models.Get(n, 0)->obj.get(), (n.substr(0, n.find(".pmx")) + ".mv1").c_str(), MV1_SAVETYPE_NORMAL, -1, 1, 1, 1, 0, 0);
-					}
-				}
-				PutMsg("モデルのMV1変換完了\n");
+				m_LoadUtil.WaitAsyncLoad();
+				//
+				m_LoadUtil.WaitModelSet();
+				//
+				m_LoadUtil.WaitMV1Save();
 			}
 
 			auto* SE = SoundPool::Instance();
@@ -257,16 +111,12 @@ namespace FPS_n2 {
 				//
 				m_Counter = 10;
 				m_Counter = 0;
-				models.Start(m_Counter);
-				graphs.Start(m_Counter);
-				attached.Start(m_Counter);
-
-				Pic3Back = GraphHandle::Load(Pic3BackName);
-				PicBack1 = GraphHandle::Load(PicBack1Name);
-				GraphFilter(PicBack1.get(), DX_GRAPH_FILTER_GAUSS, 16, 1600);
-				PicBack1Per.Set(0.f, 0.f, -5.f);
-				PicBack1Per2.Set(0.f, 0.f, -5.f);
-
+				//
+				m_LoadUtil.Start(m_Counter);
+#ifdef EditMode
+				m_LoadUtil.Editer_Init();
+#endif
+				//
 				SetTransColor(0, 255, 0);
 				Pic_Scene.resize(14);
 
@@ -277,22 +127,6 @@ namespace FPS_n2 {
 								itr->Set(0, 0, 1, 4); itr++;
 								itr->Set(0, 1, 4, 4); itr++;
 								itr->Set(0, 2, 5, 3); itr++;
-								//
-								//
-								itr->Set(2, 0, 9, 6); itr++;
-								itr->Set(2, 1, 10, 6); itr++;
-								//
-								itr->Set(3, 0, 3, 20); itr++;
-								itr->Set(3, 1, 3, 8); itr++;
-								itr->Set(3, 2, 5, 8); itr++;
-								itr->Set(3, 3, 1, 6); itr++;
-								itr->Set(3, 4, 2, 6); itr++;
-								//
-								itr->Set(4, 0, 9, 6); itr++;
-								itr->Set(4, 1, 8, 6); itr++;
-								itr->Set(4, 2, 12, 4); itr++;
-								//
-								itr->Set(5, 0, 3, 3); itr++;
 				//*/
 
 				SetUseASyncLoadFlag(FALSE);
@@ -303,7 +137,7 @@ namespace FPS_n2 {
 				//プレイ用意
 				GameSpeed = (float)(spd_x) / 10.f;
 				PostPassParts->Set_Bright(255, 240, 234);
-				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0);
+				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_LoadUtil.GetCutInfo()[m_Counter - 1].GetTimeLimit() : 0);
 				WaitTime = (m_Counter != 0) ? 0 : 1000000;
 				NowTimeWait = -WaitTime;
 				m_RandcamupBuf.clear();
@@ -311,11 +145,6 @@ namespace FPS_n2 {
 				m_RandcamposBuf.clear();
 				ResetPhysics = true;
 				Start.Set(true);
-				m_CutInfo_Buf = m_CutInfo;
-				m_CutInfoUpdate_Buf = m_CutInfoUpdate;
-#ifdef EditMode
-				Editer_Init();
-#endif
 			}
 			m_LightHandle = CreatePointLightHandle(VECTOR_ref::vget(0.f, 0.f, 0.f).get(),
 				8.0f*Scale_Rate,
@@ -355,20 +184,19 @@ namespace FPS_n2 {
 			ObjMngr->LateExecuteObject();
 
 			{
-				if (Time_Over()) { return false; }
+				if (m_Counter >= m_LoadUtil.GetCutInfo().size()) { return false; }
+				auto& NowCut = m_LoadUtil.GetCutInfo().at(m_Counter);
 
 				auto* PostPassParts = PostPassEffect::Instance();
 
 				auto time = GetMocroSec() - BaseTime;
 
-				MouseClick.Execute((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
 				SpeedUp.Execute(CheckHitKeyWithCheck(KEY_INPUT_RIGHT) != 0);
 				SpeedDown.Execute(CheckHitKeyWithCheck(KEY_INPUT_LEFT) != 0);
 				bool isEditActive = true;
 #ifdef EditMode
-				isEditActive = m_EditModel.m_IsActive;
-				Start.Execute((!isEditActive && CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0) || ModelEditIn);
-				ModelEditIn = false;
+				isEditActive = m_LoadUtil.GetEditIsActive();
+				Start.Execute((!isEditActive && CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0) || m_LoadUtil.PutModelEditIn());
 #else
 				Start.Execute(CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0);
 #endif
@@ -386,19 +214,13 @@ namespace FPS_n2 {
 								BGM.play(DX_PLAYTYPE_BACK, FALSE);
 							}
 #ifdef EditMode
-							if (GetMovieStateToGraph(movie.get()) == 0) {
-								PlayMovieToGraph(movie.get(), 2, DX_MOVIEPLAYTYPE_BCANCEL);
-								SeekMovieToGraph(movie.get(), (int)(NowTimeWait / 1000));
-							}
-							SetPlaySpeedRateMovieToGraph(movie.get(), (double)GameSpeed);
+							m_LoadUtil.Editer_UpdateMovie((int)(NowTimeWait / 1000));
 #endif
 						}
 						else {
 							BGM.stop();
 #ifdef EditMode
-							if (GetMovieStateToGraph(movie.get()) == 1) {
-								PauseMovieToGraph(movie.get());
-							}
+							m_LoadUtil.Editer_StopMovie();
 #endif
 
 						}
@@ -435,13 +257,7 @@ namespace FPS_n2 {
 				}
 				//カットの処理
 				{
-					{
-						if (attached.Update_((int)m_Counter)) {
-							attached.Update_((int)m_Counter);
-						}
-						models.FirstUpdate((int)m_Counter, isFirstLoop);
-						graphs.FirstUpdate((int)m_Counter, isFirstLoop);
-					}
+					m_LoadUtil.FirstUpdate((int)m_Counter, isFirstLoop);
 					//
 					{
 						int SEL = 0;
@@ -497,7 +313,7 @@ namespace FPS_n2 {
 							sec = 7.1f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 								SE->Get((int)SoundEnum::Movievoice4).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 1)->GetFrameMat("右ひざ");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("右ひざ");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 						}
@@ -528,7 +344,7 @@ namespace FPS_n2 {
 							sec = 11.3f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 								SE->Get((int)SoundEnum::Movievoice4).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 0)->GetFrameMat("上半身");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 0)->GetFrameMat("上半身");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 						}
@@ -540,7 +356,7 @@ namespace FPS_n2 {
 						}
 						if (m_Counter == 7) {
 							for (int i = 0; i < 30; i++) {
-								sec = 12.4 + 0.25f*i;
+								sec = 12.4f + 0.25f*i;
 								if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 									continue;
@@ -551,25 +367,25 @@ namespace FPS_n2 {
 							sec = 13.6f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 1)->GetFrameMat("上半身");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_reco, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 							sec = 14.0f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 1)->GetFrameMat("上半身");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_reco, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 							sec = 14.1f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 1)->GetFrameMat("上半身");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_reco, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 							sec = 14.3f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
 								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 1)->GetFrameMat("上半身");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 						}
@@ -605,7 +421,7 @@ namespace FPS_n2 {
 							sec = 22.6f;
 							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60+10) {
 								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = models.Get(Soldier, 2)->GetFrameMat("上半身");
+								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 2)->GetFrameMat("上半身");
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
 							}
 						}
@@ -630,7 +446,7 @@ namespace FPS_n2 {
 							}
 						}
 
-						auto mat = models.Get(Suit, 0)->GetFrameMat("銃口先");
+						auto mat = m_LoadUtil.Getmodels().Get(Suit, 0)->GetFrameMat("銃口先");
 						SetLightEnableHandle(m_LightHandle, FALSE);
 						SetLightPositionHandle(m_LightHandle, mat.pos().get());
 						if (m_Counter == 9) {
@@ -681,17 +497,20 @@ namespace FPS_n2 {
 
 							}
 						}
+						if (m_Counter == 15) {
+							SE->Get((int)SoundEnum::Env).StopAll(0);
+						}
 					}
 					for (auto& p : Pic_Scene) {
 						p.Execute();
 					}
 					//
-					{
-						auto& u = m_CutInfoUpdate[m_Counter];
-						if (isFirstLoop) {
-							if (m_Counter > 0) {
-								m_CutInfo[m_Counter].SetPrev(m_CutInfo[m_Counter - 1]);
-							}
+					if (isFirstLoop) {
+						if (m_Counter > 0) {
+							NowCut.SetPrev(m_LoadUtil.GetCutInfo()[m_Counter - 1]);
+						}
+						{
+							auto& u = m_LoadUtil.GetCutInfoUpdate()[m_Counter];
 							if (u.IsUsePrevBuf) {
 								//
 								auto White_Set = u.IsSetWhite;
@@ -702,7 +521,7 @@ namespace FPS_n2 {
 								auto Black_Per = u.Black_Per;
 								auto Black = u.Black;
 								//
-								u = m_CutInfoUpdate[m_Counter - 1];
+								u = m_LoadUtil.GetCutInfoUpdate()[m_Counter - 1];
 								//
 								if (White_Set) {
 									u.IsSetWhite = White_Set;
@@ -715,110 +534,72 @@ namespace FPS_n2 {
 									u.Black = Black;
 								}
 							}
-							//
-							if (m_CutInfo[m_Counter].bright[0] >= 0) {
-								PostPassParts->Set_Bright(m_CutInfo[m_Counter].bright[0], m_CutInfo[m_Counter].bright[1], m_CutInfo[m_Counter].bright[2]);
-							}
+						}
+						//
+						if (NowCut.bright[0] >= 0) {
+							PostPassParts->Set_Bright(NowCut.bright[0], NowCut.bright[1], NowCut.bright[2]);
+						}
 
-							if (m_CutInfo[m_Counter].fog[0] >= 0) {
-								fog[0] = m_CutInfo[m_Counter].fog[0];
-								fog[1] = m_CutInfo[m_Counter].fog[1];
-								fog[2] = m_CutInfo[m_Counter].fog[2];
-								fog_range[0] = m_CutInfo[m_Counter].fog_range[0];
-								fog_range[1] = m_CutInfo[m_Counter].fog_range[1];
-							}
-							else if (m_CutInfo[m_Counter].fog[0] == -2) {
-								fog[0] = 128;
-								fog[1] = 128;
-								fog[2] = 128;
-								fog_range[0] = 200.f;
-								fog_range[1] = 300000.f;
-							}
-							//
+						if (NowCut.fog[0] >= 0) {
+							fog[0] = NowCut.fog[0];
+							fog[1] = NowCut.fog[1];
+							fog[2] = NowCut.fog[2];
+							fog_range[0] = NowCut.fog_range[0];
+							fog_range[1] = NowCut.fog_range[1];
+						}
+						else if (NowCut.fog[0] == -2) {
+							fog[0] = 128;
+							fog[1] = 128;
+							fog[2] = 128;
+							fog_range[0] = 200.f;
+							fog_range[1] = 300000.f;
+						}
+						//
+						{
 							VECTOR_ref vec;
 							bool isforcus = false;
-#if 1
-							for (auto&f : m_CutInfo[m_Counter].Forcus) {
+							for (auto&f : NowCut.Forcus) {
 								if (f.GetIsUse()) {
-									vec += f.GetForce(models);
+									vec += f.GetForce(m_LoadUtil.Getmodels());
 									isforcus = true;
 								}
 							}
 							if (isforcus) {
-								auto pos_t = m_CutInfo[m_Counter].Aim_camera.GetCamPos();
-								auto vec_t = m_CutInfo[m_Counter].Aim_camera.GetCamVec();
-								auto up_t = m_CutInfo[m_Counter].Aim_camera.GetCamUp();
-								vec_t = vec / (float)(m_CutInfo[m_Counter].Forcus.size());
-								m_CutInfo[m_Counter].Aim_camera.SetCamPos(pos_t, vec_t, up_t);
+								m_LoadUtil.ChamgeAimCamvec(m_Counter, vec / (float)(NowCut.Forcus.size()));
 							}
-#else
-							for (auto&f : m_CutInfo[m_Counter].Forcus) {
-								if (f.GetIsUse()) {
-									vec += f.GetForce(models) * f.Per;
-									isforcus = true;
-								}
-							}
-							if (isforcus) {
-								m_CutInfo[m_Counter].Aim_camera.GetCamVec() = vec;
-							}
-#endif
-							//
-							if (attached.GetSwitch() && attached_override) {
-								auto pos_t = m_CutInfo[m_Counter].Aim_camera.GetCamPos();
-								auto vec_t = m_CutInfo[m_Counter].Aim_camera.GetCamVec();
-								auto up_t = m_CutInfo[m_Counter].Aim_camera.GetCamUp();
-								pos_t = m_CutInfo[m_Counter].Aim_camera.GetCamVec() + attachedDetail[attached.nowcut].poscam;
-								m_CutInfo[m_Counter].Aim_camera.SetCamPos(pos_t, vec_t, up_t);
-							}
-							if (m_CutInfo[m_Counter].isResetRandCampos) { m_RandcamposBuf.clear(); }
-							if (m_CutInfo[m_Counter].isResetRandCamvec) { m_RandcamvecBuf.clear(); }
-							if (m_CutInfo[m_Counter].isResetRandCamup) { m_RandcamupBuf.clear(); }
-
-							auto pos_t = u.CameraNotFirst.GetCamPos();
-							auto vec_t = u.CameraNotFirst.GetCamVec();
-							auto up_t = u.CameraNotFirst.GetCamUp();
-							pos_t = m_CutInfo[m_Counter].Aim_camera.GetCamPos();
-							vec_t = m_CutInfo[m_Counter].Aim_camera.GetCamVec();
-							u.CameraNotFirst.SetCamPos(pos_t, vec_t, up_t);
 						}
-						else {
-							u.Update(m_CutInfo[m_Counter], models, m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
-							auto pos_t = u.CameraNotFirst.GetCamPos();
-							auto vec_t = u.CameraNotFirst.GetCamVec();
-							auto up_t = u.CameraNotFirst.GetCamUp();
-							pos_t += u.CameraNotFirst_Vec.GetCamPos()*(1.f / FPS * GameSpeed);
-							vec_t += u.CameraNotFirst_Vec.GetCamVec()*(1.f / FPS * GameSpeed);
-							up_t += u.CameraNotFirst_Vec.GetCamUp()*(1.f / FPS * GameSpeed);
-							u.CameraNotFirst.SetCamPos(pos_t, vec_t, up_t);
-							//
-							if (attached.GetSwitch() && attached_override) {
-								auto pos_t2 = m_CutInfo[m_Counter].Aim_camera.GetCamPos();
-								auto vec_t2 = m_CutInfo[m_Counter].Aim_camera.GetCamVec();
-								auto up_t2 = m_CutInfo[m_Counter].Aim_camera.GetCamUp();
-								pos_t2 = m_CutInfo[m_Counter].Aim_camera.GetCamVec() + attachedDetail[attached.nowcut].poscam;
-								m_CutInfo[m_Counter].Aim_camera.SetCamPos(pos_t2, vec_t2, up_t2);
-							}
-
-							easing_set_SetSpeed(&Black_Buf, u.Black, u.Black_Per);
-							easing_set_SetSpeed(&White_Buf, u.White, u.White_Per);
+						//
+						if (m_LoadUtil.Getattached().GetSwitch()) {
+							m_LoadUtil.ChamgeAimCampos(m_Counter, NowCut.Aim_camera.GetCamVec() + m_LoadUtil.GetattachedDetail());
 						}
+						if (NowCut.isResetRandCampos) { m_RandcamposBuf.clear(); }
+						if (NowCut.isResetRandCamvec) { m_RandcamvecBuf.clear(); }
+						if (NowCut.isResetRandCamup) { m_RandcamupBuf.clear(); }
+						m_LoadUtil.ChamgeaNotFirstCampos(m_Counter, NowCut.Aim_camera.GetCamPos());
+						m_LoadUtil.ChamgeaNotFirstCamvec(m_Counter, NowCut.Aim_camera.GetCamVec());
+					}
+					else {
+						auto& u = m_LoadUtil.GetCutInfoUpdate()[m_Counter];
+						u.Update(NowCut, m_LoadUtil.Getmodels(), m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
+
+						auto pos_t = u.CameraNotFirst.GetCamPos() + u.CameraNotFirst_Vec.GetCamPos()*(1.f / FPS * GameSpeed);
+						auto vec_t = u.CameraNotFirst.GetCamVec() + u.CameraNotFirst_Vec.GetCamVec()*(1.f / FPS * GameSpeed);
+						auto up_t = u.CameraNotFirst.GetCamUp() + u.CameraNotFirst_Vec.GetCamUp()*(1.f / FPS * GameSpeed);
+						m_LoadUtil.ChamgeaNotFirstCampos(m_Counter, pos_t);
+						m_LoadUtil.ChamgeaNotFirstCamvec(m_Counter, vec_t);
+						m_LoadUtil.ChamgeaNotFirstCamup(m_Counter, up_t);
+						//
+						if (m_LoadUtil.Getattached().GetSwitch()) {
+							m_LoadUtil.ChamgeAimCampos(m_Counter, NowCut.Aim_camera.GetCamVec() + m_LoadUtil.GetattachedDetail());
+						}
+
+						easing_set_SetSpeed(&Black_Buf, u.Black, u.Black_Per);
+						easing_set_SetSpeed(&White_Buf, u.White, u.White_Per);
 					}
 					//
-					auto pos_t = camera_buf.GetCamPos();
-					auto vec_t = camera_buf.GetCamVec();
-					auto up_t = camera_buf.GetCamUp();
-					auto fov_t = camera_buf.GetCamFov();
-					auto near_t = camera_buf.GetCamNear();
+					m_LoadUtil.UpdateCam(m_Counter, &camera_buf);
+					//
 					auto far_t = camera_buf.GetCamFar();
-
-					easing_set_SetSpeed(&pos_t, m_CutInfo[m_Counter].Aim_camera.GetCamPos(), m_CutInfo[m_Counter].cam_per);
-					easing_set_SetSpeed(&vec_t, m_CutInfo[m_Counter].Aim_camera.GetCamVec(), m_CutInfo[m_Counter].cam_per);
-					easing_set_SetSpeed(&up_t, m_CutInfo[m_Counter].Aim_camera.GetCamUp(), m_CutInfo[m_Counter].cam_per);
-					easing_set_SetSpeed(&fov_t, m_CutInfo[m_Counter].Aim_camera.GetCamFov(), m_CutInfo[m_Counter].cam_per);
-					easing_set_SetSpeed(&far_t, m_CutInfo[m_Counter].Aim_camera.GetCamFar(), m_CutInfo[m_Counter].cam_per);
-					easing_set_SetSpeed(&near_t, m_CutInfo[m_Counter].Aim_camera.GetCamNear(), m_CutInfo[m_Counter].cam_per);
-					camera_buf.SetCamPos(pos_t, vec_t, up_t);
-					camera_buf.SetCamInfo(fov_t, near_t, far_t);
 					if (m_Counter >= 17) {
 						float sec = 33.f;
 						if ((sec*1000.f) < (NowTimeWait / 1000)) {
@@ -858,7 +639,7 @@ namespace FPS_n2 {
 						auto up_t2 = DrawParts->SetMainCamera().GetCamUp();
 						//pos_t2 = VECTOR_ref::vget(0, 0, 0) + GetVector(x_rm, y_rm)*r_rm;
 						vec_t2 = VECTOR_ref::vget(0, 0, 0);
-						DrawParts->SetMainCamera().SetCamPos(pos_t2, vec_t, up_t);
+						DrawParts->SetMainCamera().SetCamPos(pos_t2, vec_t2, up_t2);
 
 						if (x_sav == -1) {
 							x_sav = x_m;
@@ -867,22 +648,21 @@ namespace FPS_n2 {
 						SetMousePoint(x_sav, y_sav);
 					}
 				}
-				graphs.Update();
-				models.Update();
-				{
-					models.SetPhysics(ResetPhysics || ModelEdit_PhysicsReset);
-					ModelEdit_PhysicsReset = false;
-					isFirstLoop = false;
-					if (NowTimeWait > m_CutInfo[m_Counter%m_CutInfo.size()].GetTimeLimit()) {
-						isFirstLoop = true;
-						if (m_CutInfo[m_Counter].IsResetPhysics) {
-							ResetPhysics = true;
-						}
-						++m_Counter;
+				bool IsPhysicsResetOverride = false;
+#ifdef EditMode
+				IsPhysicsResetOverride = m_LoadUtil.PutModelEdit_PhysicsReset();
+#endif
+				m_LoadUtil.LateUpdate(ResetPhysics || IsPhysicsResetOverride);
+				isFirstLoop = false;
+				if (NowTimeWait > NowCut.GetTimeLimit()) {
+					isFirstLoop = true;
+					if (NowCut.IsResetPhysics) {
+						ResetPhysics = true;
 					}
-					else {
-						ResetPhysics = false;
-					}
+					++m_Counter;
+				}
+				else {
+					ResetPhysics = false;
 				}
 			}
 
@@ -900,131 +680,76 @@ namespace FPS_n2 {
 			ObjMngr->DisposeObject();
 			OptionParts->Set_Shadow(true);
 			EffectControl::Dispose();
-			{
-				m_CutInfo.clear();
-				m_CutInfoUpdate.clear();
-				BGM.Dispose();
-				//grassmodel.Dispose();
-#ifdef EditMode
-				Editer_Dispose();
-#endif
-			}
+			m_LoadUtil.Dispose();
+			BGM.Dispose();
 		}
 
 		void			CustomScene::BG_Draw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
-			models.Draw_Far();
+			m_LoadUtil.BG_Draw();
 		}
 		void			CustomScene::ShadowDraw_Far_Sub(void) noexcept {
-			//特殊
-			//+12
-			SetDrawAlphaTest(DX_CMP_GREATER, 128);
-			models.Draw(false, true, true);
-			SetDrawAlphaTest(-1, 0);
+			m_LoadUtil.ShadowDraw_Far();
 		}
 		void			CustomScene::ShadowDraw_NearFar_Sub(void) noexcept {
-			//todo:共通の影モデルを使用
-			models.Draw(false, false, true, TRUE);
-			//models.Draw(true, false, true, FALSE);
+			m_LoadUtil.ShadowDraw_NearFar();
 		}
 
 		void			CustomScene::ShadowDraw_Sub(void) noexcept {
 			//this->m_BackGround->Shadow_Draw();
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->DrawObject_Shadow();
-			//+52
-			models.Draw(true, false, true, FALSE);
+			m_LoadUtil.ShadowDraw();
 		}
 		void			CustomScene::MainDraw_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->DrawObject();
-			{
-				auto* DrawParts = DXDraw::Instance();
-
-				if (!isFreepos) {
-					SetFogEnable(TRUE);
-					SetFogDensity(0.01f);
-					SetFogColor(fog[0], fog[1], fog[2]);
-					SetFogStartEnd(fog_range[0], fog_range[1]);
-				}
-
-				models.CheckInCamera(DrawParts->GetMainCamera().GetCamFar());
-				//+201 = 67x3
-				auto camfar = GetCameraFar();
-				//カメラのfarが適正範囲の設定の場合
-				//near
-				if (DrawParts->GetMainCamera().GetCamNear() - 1.f < camfar&& camfar < DrawParts->GetMainCamera().GetCamNear() + 1.f) {
-					SetDrawMode(DX_DRAWMODE_NEAREST);
-				}
-				else if (DrawParts->GetMainCamera().GetCamFar() - 1.f < camfar&& camfar < DrawParts->GetMainCamera().GetCamFar() + 1.f) {
-					models.Draw(false, false, false, FALSE);
-				}
-				//far
-				else {
-					models.Draw(false, false, false, TRUE);
-				}
-				if (isFreepos) {
-					VECTOR_ref vec = (camera_buf.GetCamVec() - camera_buf.GetCamPos());
-					float range = vec.size();
-					vec = vec.Norm()*camera_buf.GetCamFar();
-					DrawCone3D(
-						camera_buf.GetCamPos().get(),
-						(camera_buf.GetCamPos() + vec).get(),
-						std::tan(camera_buf.GetCamFov()) * range,
-						8, GetColor(255, 0, 0), GetColor(255, 0, 0), FALSE);
-				}
-
-				SetFogEnable(FALSE);
-				if (!isFreepos) {
-					if (Black_Buf != 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Black_Buf));
-						DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-					}
-					if (White_Buf != 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*White_Buf));
-						DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(255, 255, 255), TRUE);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-					}
-					graphs.Draw(DrawParts->m_DispYSize);
-				}
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				//grassmodel.Draw(camera_buf);
+			if (!isFreepos) {
+				SetFogEnable(TRUE);
+				SetFogDensity(0.01f);
+				SetFogColor(fog[0], fog[1], fog[2]);
+				SetFogStartEnd(fog_range[0], fog_range[1]);
+			}
+			m_LoadUtil.MainDraw();
+			SetFogEnable(FALSE);
+			if (!isFreepos) {
+				m_LoadUtil.MainDrawGraph();
+			}
+			//
+			if (isFreepos) {
+				VECTOR_ref vec = (camera_buf.GetCamVec() - camera_buf.GetCamPos());
+				float range = vec.size();
+				vec = vec.Norm()*camera_buf.GetCamFar();
+				DrawCone3D(
+					camera_buf.GetCamPos().get(),
+					(camera_buf.GetCamPos() + vec).get(),
+					std::tan(camera_buf.GetCamFov()) * range,
+					8, GetColor(255, 0, 0), GetColor(255, 0, 0), FALSE);
 			}
 		}
 
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
-			{
-				auto* DrawParts = DXDraw::Instance();
-
-				if (LookMovie.on()) {
-					movie1.DrawExtendGraph(0, 0, DrawParts->m_DispXSize / 2, DrawParts->m_DispYSize / 2, FALSE);
-					movie2.DrawExtendGraph(DrawParts->m_DispXSize / 2, DrawParts->m_DispYSize / 2, DrawParts->m_DispXSize, DrawParts->m_DispYSize, FALSE);
+			if (!isFreepos) {
+				if (NowTimeWait > 0) {
+					m_LoadUtil.DrawUI(NowTimeWait);
 				}
-
-				if (!isFreepos && NowTimeWait > 0) {
-					TLClass.Draw(NowTimeWait);
+				if (Black_Buf != 0.f) {
+					auto* DrawParts = DXDraw::Instance();
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Black_Buf));
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
-
-				if (!isFreepos) {
-					if (Black_Buf != 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Black_Buf));
-						DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-					}
+				if (White_Buf != 0.f) {
+					auto* DrawParts = DXDraw::Instance();
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*White_Buf));
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(255, 255, 255), TRUE);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
-			{
 #ifdef EditMode
-				clsDx();
-				//printfDx("Time : %.2f\n\n", (float)(NowTimeWait/1000)/1000.f);
-				Editer_Calc();
-
-				Editer_Draw();
+			m_LoadUtil.Editer_DrawUI(m_Counter, NowTimeWait);
 #endif
-			}
 		}
 	};
 };
