@@ -3,59 +3,62 @@
 //
 #include "Scene/TitleScene.hpp"
 #include "Scene/CustomScene.hpp"
-#include "ObjectManager.hpp"
+
 
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	DXDraw::Create();								//汎用
-	SetMainWindowText("JW");						//タイトル
-	//MV1SetLoadModelUsePackDraw(TRUE);
-	PostPassEffect::Create();						//シェーダー
-	FPS_n2::Sceneclass::ObjectManager::Create();
-#ifdef DEBUG
-	auto* DebugParts = DebugClass::Instance();		//デバッグ
-#endif // DEBUG
-	auto* DrawParts = DXDraw::Instance();
+	SetDoubleStartValidFlag(TRUE);
+	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
+	DXLib_ref::Create();
+	//使用するボタンの指定
+	auto* Pad = PadControl::Instance();
+	Pad->SetIsUseButton(PADS::MOVE_W, true);
+	Pad->SetIsUseButton(PADS::MOVE_A, true);
+	Pad->SetIsUseButton(PADS::MOVE_S, true);
+	Pad->SetIsUseButton(PADS::MOVE_D, true);
+	Pad->SetIsUseButton(PADS::MOVE_STICK, true);
+	Pad->SetIsUseButton(PADS::DIR_UP, false);
+	Pad->SetIsUseButton(PADS::DIR_DOWN, false);
+	Pad->SetIsUseButton(PADS::DIR_LEFT, false);
+	Pad->SetIsUseButton(PADS::DIR_RIGHT, false);
+	Pad->SetIsUseButton(PADS::DIR_STICK, true);
+	Pad->SetIsUseButton(PADS::LEAN_L, true);//UIのみ
+	Pad->SetIsUseButton(PADS::LEAN_R, true);//UIのみ
+	Pad->SetIsUseButton(PADS::RELOAD, true);//UIのみ
+	Pad->SetIsUseButton(PADS::INTERACT, true);//UIのみ
+	Pad->SetIsUseButton(PADS::THROW, false);
+	Pad->SetIsUseButton(PADS::MELEE, false);
+	Pad->SetIsUseButton(PADS::JUMP, true);
+	Pad->SetIsUseButton(PADS::INVENTORY, false);
+	Pad->SetIsUseButton(PADS::RUN, false);
+	Pad->SetIsUseButton(PADS::WALK, true);
+	Pad->SetIsUseButton(PADS::SHOT, true);
+	Pad->SetIsUseButton(PADS::AIM, true);
+	Pad->SetIsUseButton(PADS::ULT, true);
+	Pad->SetIsUseButton(PADS::SQUAT, false);
+	Pad->SetIsUseButton(PADS::PRONE, false);
+	Pad->SetIsUseButton(PADS::CHECK, false);
+	//
+	auto* DXLib_refParts = DXLib_ref::Instance();
+	if (!DXLib_refParts->StartLogic()) { return 0; }
+	//追加設定
+	std::string Name = "AA" + std::to_string(GetNowHiPerformanceCount());
+	SetMainWindowText(Name.c_str());						//タイトル
+	//SetUseHalfLambertLighting(TRUE);
+	MV1SetLoadModelReMakeNormal(TRUE);
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
-	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
-	//シーンコントロール
-	auto scene = std::make_unique<SceneControl>(Titlescene);
+	auto CustomScenePtr = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
+
+
 	//遷移先指定
-	Titlescene->Set_Next(Customscene);
-	Customscene->Set_Next(Titlescene);
-	//繰り返し
-	while (true) {
-		scene->StartScene();
-		while (true) {
-			if ((ProcessMessage() != 0) || (CheckHitKeyWithCheck(KEY_INPUT_ESCAPE) != 0)) { return 0; }
-			FPS = GetFPS();
-#ifdef DEBUG
-			clsDx();
-			DebugParts->SetStartPoint();
-#endif // DEBUG
-#ifdef DEBUG
-			DebugParts->SetPoint("Execute start");
-#endif // DEBUG
-			if (scene->Execute()) { break; }		//更新
-			scene->Draw();							//描画
-			//デバッグ
-#ifdef DEBUG
-			DebugParts->DebugWindow(1920 - 300, 50);
-			//TestDrawShadowMap(DrawParts->m_Shadow[0].GetHandle(), 0, 0, 960, 540);
-#else
-			{
-				auto* Fonts = FontPool::Instance();
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, y_r(1920 - 8), y_r(8), GetColor(255, 255, 255), GetColor(0, 0, 0), "%5.2f FPS", FPS);
-			}
-#endif // DEBUG
-			DrawParts->Screen_Flip();				//画面の反映
-		}
-		bool isTitle = (scene->GetNowScene() == Titlescene);
-		if (isTitle) {
-			Titlescene->Set_Next(Customscene);
-		}
-		scene->NextScene();							//次のシーンへ移行
-	}
+	Titlescene->SetNextSceneList(0, CustomScenePtr);
+	CustomScenePtr->SetNextSceneList(0, Titlescene);
+
+	auto* SceneParts = SceneControl::Instance();
+	SceneParts->AddList(Titlescene);
+	SceneParts->AddList(CustomScenePtr);
+	//最初の読み込み
+	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;
 }

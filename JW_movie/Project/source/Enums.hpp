@@ -7,52 +7,24 @@ namespace FPS_n2 {
 
 	static const float Scale_Rate{ 12.5f };
 
-	namespace Sceneclass {
-		enum class ObjType {
-			Human,
-			Ammo,
-			FallObj,
-			Gun,
-			Magazine,
-			Lower,
-			Upper,
-			Barrel,
-			UnderRail,
-			Sight,
-			MuzzleAdapter,
-			MovieObj,
-			Max,
-		};
-		enum class SoundEnum {
-			RunFoot = (int)SoundEnumCommon::Num,
-			StandUp,
-			SlideFoot,
-			StandupFoot,
-			Heart,
-			//
-			Env,
-			Env2,
-			//
-			Movievoice1,
-			Movievoice2,
-			Movievoice3,
-			Movievoice4,
-			Movievoice5,
-			Movievoice6,
-			Movievoice7,
-			Movievoice8,
-			Movievoice9,
-			Movievoice10,
-		};
-		enum class CharaTypeID {
-			Mine,
-			Team,
-			Enemy,
-		};
+	enum class ObjType : uint8_t {
+		MovieObj,
 	};
-
-	typedef char PlayerID;
-	typedef short HitPoint;
+	enum class SoundEnum : uint8_t {
+		RunFoot = (int)SoundEnumCommon::Num,
+		StandUp,
+		SlideFoot,
+		StandupFoot,
+		Heart,
+		//
+		Env,
+		Env2,
+	};
+	enum class CharaTypeID {
+		Mine,
+		Team,
+		Enemy,
+	};
 
 	static const char* Model_Type[4] = { "SKY_TRUE","NEAR_FALSE","FAR_TRUE","SHADOW_DISACTIVE" };
 };

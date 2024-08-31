@@ -1,5 +1,4 @@
 #include	"CustomScene.hpp"
-#include "../ObjectManager.hpp"
 
 #include "../sub.hpp"
 
@@ -9,7 +8,7 @@ namespace FPS_n2 {
 		void			CustomScene::Load_Sub(void) noexcept {
 			{
 				SetUseASyncLoadFlag(FALSE);
-				//graphs.Load((float)(y_r(1920 * 1 / 2)), (float)(y_r(1080 * 1 / 2)), 0, 1.f, 0.5f, LOGO1);
+				//graphs.Load((float)(DrawParts->GetScreenY(1920 * 1 / 2)), (float)(DrawParts->GetScreenY(1080 * 1 / 2)), 0, 1.f, 0.5f, LOGO1);
 				//
 				SetUseASyncLoadFlag(FALSE);
 				int mdata = FileRead_open("data/Cut.txt", FALSE);
@@ -47,30 +46,12 @@ namespace FPS_n2 {
 			}
 
 			auto* SE = SoundPool::Instance();
-			SE->Add((int)SoundEnum::Movievoice1, 1, "data/Sound/SE/voice/death_04.wav");
-			SE->Add((int)SoundEnum::Movievoice2, 1, "data/Sound/SE/voice/voice_male_breathing_01.wav");
-			SE->Add((int)SoundEnum::Movievoice3, 1, "data/Sound/SE/voice/death_01.wav");
-			SE->Add((int)SoundEnum::Movievoice4, 1, "data/Sound/SE/gun/autoM870/2.wav");
-			SE->Add((int)SoundEnum::Movievoice5, 3, "data/Sound/SE/gun/auto1911/2.wav");
-			SE->Add((int)SoundEnum::Movievoice6, 1, "data/Sound/SE/breakbone.wav");
-			SE->Add((int)SoundEnum::Movievoice7, 1, "data/Sound/SE/kick.wav");
-			SE->Add((int)SoundEnum::Movievoice8, 1, "data/Sound/SE/moivievoice1.wav");
-			SE->Add((int)SoundEnum::Movievoice9, 1, "data/Sound/SE/gun/auto1911/3.wav");
-			SE->Add((int)SoundEnum::Movievoice10, 1, "data/Sound/SE/gun/auto1911/4.wav");
-			//
-
 			SE->Add((int)SoundEnum::StandUp, 3, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
 
 
-
-
-			SE->Get((int)SoundEnum::Movievoice1).SetVol_Local(128);
-			SE->Get((int)SoundEnum::Movievoice2).SetVol_Local(32);
-			SE->Get((int)SoundEnum::Movievoice3).SetVol_Local(128);
-			SE->Get((int)SoundEnum::Movievoice8).SetVol_Local(64);
 			SE->Get((int)SoundEnum::StandUp).SetVol_Local(128);
 			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 			SE->Get((int)SoundEnum::StandupFoot).SetVol_Local(128);
@@ -79,29 +60,12 @@ namespace FPS_n2 {
 		}
 		void			CustomScene::Set_Sub(void) noexcept {
 			clsDx();
-			auto* OptionParts = OPTION::Instance();
+			auto* DrawParts = DXDraw::Instance();
 			//
-			SetAmbientLight(VECTOR_ref::vget(-0.2f, -0.8f, -0.4f), GetColorF(1.f, 1.f, 1.f, 0.0f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.f, Scale_Rate*6.f));
-			SetShadowDir(GetLightVec(), 0);
-			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.f, Scale_Rate*6.f));
-			auto shadow2 = GetLightVec();
-			shadow2.x(-shadow2.x());
-			shadow2.z(-shadow2.z());
-			SetShadowDir(shadow2, 1);
-			//
-			DeleteLightHandleAll();
-			SetLightEnable(TRUE);
-			ChangeLightTypeDir(GetLightVec().get());
-			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
-			SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
-			SetLightAmbColor(GetColorF(0.5f, 0.5f, 0.5f, 1.f));
-			//
-			OptionParts->Set_Shadow(true);
+			DrawParts->SetAmbientLight(Vector3DX::vget(-0.2f, -0.8f, -0.4f), GetColorF(1.f, 1.f, 1.f, 0.0f));
 			{
-				auto* PostPassParts = PostPassEffect::Instance();
 				//
-				camera_buf.SetCamPos(VECTOR_ref::vget(0, 20, -20), VECTOR_ref::vget(0, 20, 0), VECTOR_ref::up());
+				camera_buf.SetCamPos(Vector3DX::vget(0, 20, -20), Vector3DX::vget(0, 20, 0), Vector3DX::up());
 				camera_buf.SetCamInfo(deg2rad(15), 1.f, 200.f);
 				fog[0] = 128;
 				fog[1] = 128;
@@ -136,24 +100,18 @@ namespace FPS_n2 {
 
 				//プレイ用意
 				GameSpeed = (float)(spd_x) / 10.f;
-				PostPassParts->Set_Bright(255, 240, 234);
 				BaseTime = GetMocroSec() - (m_Counter > 0 ? m_LoadUtil.GetCutInfo()[m_Counter - 1].GetTimeLimit() : 0);
 				WaitTime = (m_Counter != 0) ? 0 : 1000000;
 				NowTimeWait = -WaitTime;
-				m_RandcamupBuf.clear();
-				m_RandcamvecBuf.clear();
-				m_RandcamposBuf.clear();
+				m_RandcamupBuf = Vector3DX::zero();
+				m_RandcamvecBuf = Vector3DX::zero();
+				m_RandcamposBuf = Vector3DX::zero();
 				ResetPhysics = true;
 				Start.Set(true);
 			}
-			m_LightHandle = CreatePointLightHandle(VECTOR_ref::vget(0.f, 0.f, 0.f).get(),
-				8.0f*Scale_Rate,
-				0.001f,
-				0.012f,
-				0.004f);
-			SetLightDifColorHandle(m_LightHandle, GetColorF(1.f, 1.f, 0.5f, 1.f));
-			SetLightSpcColorHandle(m_LightHandle, GetColorF(1.f, 1.f, 0.5f, 1.f));
-			SetLightAmbColorHandle(m_LightHandle, GetColorF(1.f, 1.f, 0.5f, 1.f));
+#ifdef _USE_EFFEKSEER_
+			EffectControl::Init();				//
+#endif
 		}
 		bool			CustomScene::Update_Sub(void) noexcept {
 			if (DXDraw::Instance()->IsPause()) {
@@ -165,12 +123,7 @@ namespace FPS_n2 {
 
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = KeyGuideClass::Instance();
-				KeyGuide->Reset();
-			},
-				[&]() {
-				auto* KeyGuide = KeyGuideClass::Instance();
-				KeyGuide->Reset();
+				//auto* KeyGuide = PadControl::Instance();
 				//KeyGuide->AddGuide("MM.jpg", "離して見る");
 			}
 			);
@@ -187,7 +140,7 @@ namespace FPS_n2 {
 				if (m_Counter >= m_LoadUtil.GetCutInfo().size()) { return false; }
 				auto& NowCut = m_LoadUtil.GetCutInfo().at(m_Counter);
 
-				auto* PostPassParts = PostPassEffect::Instance();
+				//auto* PostPassParts = PostPassEffect::Instance();
 
 				auto time = GetMocroSec() - BaseTime;
 
@@ -248,10 +201,7 @@ namespace FPS_n2 {
 					else {
 						if (issecond) {
 							issecond = false;
-							DrawParts->Update_Shadow([&] { ShadowDraw_Far_Sub(); },
-								VECTOR_ref::vget(100.f*Scale_Rate, 10.f*Scale_Rate, 100.f*Scale_Rate),
-								VECTOR_ref::vget(-100.f*Scale_Rate, -0.1f*Scale_Rate, -100.f*Scale_Rate),
-								2);
+							DrawParts->Update_Shadow([&] { ShadowDraw_Far_Sub(); }, Vector3DX::zero(), true);
 						}
 					}
 				}
@@ -269,236 +219,61 @@ namespace FPS_n2 {
 						//
 						auto* SE = SoundPool::Instance();
 						float sec = 0.f;
+						float NowSec = static_cast<float>(NowTimeWait) / 1000.f;
 						//
 						if (m_Counter == 0 || m_Counter == 1) {
 							for (int i = 0; i < 30; i++) {
 								sec = 0.5f*i;
-								if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+								if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 									continue;
 								}
 
 								sec = 0.15f + 0.5f*i;
-								if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+								if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 									continue;
 								}
 
 								sec = 0.1f + 0.5f*i;
-								if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+								if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 									continue;
 								}
 							}
 						}
 						if (m_Counter == 1) {
 							sec = 3.1f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::StandUp).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+							if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+								SE->Get((int)SoundEnum::StandUp).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 							}
 						}
 						if (m_Counter == 2) {
 							sec = 3.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+							if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+								SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 							}
 						}
 						if (m_Counter == 3) {
 							sec = 5.5f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
-						if (m_Counter == 3) {
-							sec = 7.1f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice4).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("右ひざ");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-						}
-						if (m_Counter == 3) {
-							sec = 5.8f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice8).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
-						//
-						if (m_Counter == 4) {
-							sec = 7.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000/60) {
-								SE->Get((int)SoundEnum::Movievoice1).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-							sec = 7.9f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice2).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
-						if (m_Counter == 6) {
-							sec = 11.5f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice3).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
-						if (m_Counter == 6) {
-							sec = 11.3f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice4).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 0)->GetFrameMat("上半身");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-						}
-						if (m_Counter == 6) {
-							sec = 11.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::Movievoice6).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+							if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+								SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 							}
 						}
 						if (m_Counter == 7) {
 							for (int i = 0; i < 30; i++) {
 								sec = 12.4f + 0.25f*i;
-								if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+								if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f) {
+									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 									continue;
 								}
 							}
 						}
-						if (m_Counter == 9) {
-							sec = 13.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_reco, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-							sec = 14.0f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_reco, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-							sec = 14.1f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_reco, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-							sec = 14.3f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 1)->GetFrameMat("上半身");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-						}
-						if (m_Counter == 10) {
-							sec = 14.9f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::Movievoice7).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
-						if (m_Counter == 10) {
-							sec = 15.1f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::Movievoice6).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
-						if (m_Counter == 10) {
-							sec = 14.5f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-							sec = 15.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-						}
 						if (m_Counter == 12) {
 							sec = 19.3f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
+							if ((sec*1000.f) < NowSec && NowSec < (sec*1000.f) + 1000.f / 60.f + 10.f) {
+								SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, Vector3DX::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
 							}
-						}
-						if (m_Counter == 12) {
-							sec = 22.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60+10) {
-								SE->Get((int)SoundEnum::Movievoice5).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-								auto mat = m_LoadUtil.Getmodels().Get(Soldier, 2)->GetFrameMat("上半身");
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_hitblood, mat.pos(), VECTOR_ref::front(), 12.5f, 2.f);
-							}
-						}
-						if (m_Counter == 12) {
-							sec = 19.1f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60) {
-								SE->Get((int)SoundEnum::Movievoice2).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 50.f);
-							}
-							sec = 22.2f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::Movievoice2).StopAll(0);
-							}
-						}
-						if (m_Counter == 14) {
-							sec = 26.4f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::Movievoice9).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 150.f);
-							}
-							sec = 27.2f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 1000 / 60 + 10) {
-								SE->Get((int)SoundEnum::Movievoice10).Play_3D(0, VECTOR_ref::vget(0.f, 0.f, 0.f), Scale_Rate * 150.f);
-							}
-						}
-
-						auto mat = m_LoadUtil.Getmodels().Get(Suit, 0)->GetFrameMat("銃口先");
-						SetLightEnableHandle(m_LightHandle, FALSE);
-						SetLightPositionHandle(m_LightHandle, mat.pos().get());
-						if (m_Counter == 9) {
-							sec = 13.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-							sec = 14.0f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-							sec = 14.1f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-							sec = 14.3f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-						}
-						if (m_Counter == 10) {
-							sec = 14.5f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-							sec = 15.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-						}
-						if (m_Counter == 12) {
-							sec = 22.6f;
-							if ((sec*1000.f) < (NowTimeWait / 1000) && (NowTimeWait / 1000) < (sec*1000.f) + 100) {
-								SetLightEnableHandle(m_LightHandle, TRUE);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f, 2.f);
-
-							}
-						}
-						if (m_Counter == 15) {
-							SE->Get((int)SoundEnum::Env).StopAll(0);
 						}
 					}
 					for (auto& p : Pic_Scene) {
@@ -515,31 +290,27 @@ namespace FPS_n2 {
 								//
 								auto White_Set = u.IsSetWhite;
 								auto White_Per = u.White_Per;
-								auto White = u.White;
+								auto WhitePrev = u.White;
 
 								auto Black_Set = u.IsSetBlack;
 								auto Black_Per = u.Black_Per;
-								auto Black = u.Black;
+								auto BlackPrev = u.Black;
 								//
 								u = m_LoadUtil.GetCutInfoUpdate()[m_Counter - 1];
 								//
 								if (White_Set) {
 									u.IsSetWhite = White_Set;
 									u.White_Per = White_Per;
-									u.White = White;
+									u.White = WhitePrev;
 								}
 								if (Black_Set) {
 									u.IsSetBlack = Black_Set;
 									u.Black_Per = Black_Per;
-									u.Black = Black;
+									u.Black = BlackPrev;
 								}
 							}
 						}
 						//
-						if (NowCut.bright[0] >= 0) {
-							PostPassParts->Set_Bright(NowCut.bright[0], NowCut.bright[1], NowCut.bright[2]);
-						}
-
 						if (NowCut.fog[0] >= 0) {
 							fog[0] = NowCut.fog[0];
 							fog[1] = NowCut.fog[1];
@@ -556,7 +327,7 @@ namespace FPS_n2 {
 						}
 						//
 						{
-							VECTOR_ref vec;
+							Vector3DX vec;
 							bool isforcus = false;
 							for (auto&f : NowCut.Forcus) {
 								if (f.GetIsUse()) {
@@ -572,9 +343,9 @@ namespace FPS_n2 {
 						if (m_LoadUtil.Getattached().GetSwitch()) {
 							m_LoadUtil.ChamgeAimCampos(m_Counter, NowCut.Aim_camera.GetCamVec() + m_LoadUtil.GetattachedDetail());
 						}
-						if (NowCut.isResetRandCampos) { m_RandcamposBuf.clear(); }
-						if (NowCut.isResetRandCamvec) { m_RandcamvecBuf.clear(); }
-						if (NowCut.isResetRandCamup) { m_RandcamupBuf.clear(); }
+						if (NowCut.isResetRandCampos) { m_RandcamposBuf = Vector3DX::zero(); }
+						if (NowCut.isResetRandCamvec) { m_RandcamvecBuf = Vector3DX::zero(); }
+						if (NowCut.isResetRandCamup) { m_RandcamupBuf = Vector3DX::zero(); }
 						m_LoadUtil.ChamgeaNotFirstCampos(m_Counter, NowCut.Aim_camera.GetCamPos());
 						m_LoadUtil.ChamgeaNotFirstCamvec(m_Counter, NowCut.Aim_camera.GetCamVec());
 					}
@@ -582,9 +353,9 @@ namespace FPS_n2 {
 						auto& u = m_LoadUtil.GetCutInfoUpdate()[m_Counter];
 						u.Update(NowCut, m_LoadUtil.Getmodels(), m_RandcamupBuf, m_RandcamvecBuf, m_RandcamposBuf);
 
-						auto pos_t = u.CameraNotFirst.GetCamPos() + u.CameraNotFirst_Vec.GetCamPos()*(1.f / FPS * GameSpeed);
-						auto vec_t = u.CameraNotFirst.GetCamVec() + u.CameraNotFirst_Vec.GetCamVec()*(1.f / FPS * GameSpeed);
-						auto up_t = u.CameraNotFirst.GetCamUp() + u.CameraNotFirst_Vec.GetCamUp()*(1.f / FPS * GameSpeed);
+						auto pos_t = u.CameraNotFirst.GetCamPos() + u.CameraNotFirst_Vec.GetCamPos()*(1.f / DrawParts->GetFps() * GameSpeed);
+						auto vec_t = u.CameraNotFirst.GetCamVec() + u.CameraNotFirst_Vec.GetCamVec()*(1.f / DrawParts->GetFps() * GameSpeed);
+						auto up_t = u.CameraNotFirst.GetCamUp() + u.CameraNotFirst_Vec.GetCamUp()*(1.f / DrawParts->GetFps() * GameSpeed);
 						m_LoadUtil.ChamgeaNotFirstCampos(m_Counter, pos_t);
 						m_LoadUtil.ChamgeaNotFirstCamvec(m_Counter, vec_t);
 						m_LoadUtil.ChamgeaNotFirstCamup(m_Counter, up_t);
@@ -602,8 +373,9 @@ namespace FPS_n2 {
 					auto far_t = camera_buf.GetCamFar();
 					if (m_Counter >= 17) {
 						float sec = 33.f;
-						if ((sec*1000.f) < (NowTimeWait / 1000)) {
-							float per = std::clamp((float)(NowTimeWait / 1000) / 1000.f - sec, 0.f, 1.f);
+						float NowSec = static_cast<float>(NowTimeWait) / 1000.f;
+						if ((sec*1000.f) < NowSec) {
+							float per = std::clamp(NowSec / 1000.f - sec, 0.f, 1.f);
 							PostPassEffect::Instance()->Set_DoFNearFar(Lerp(1.f * Scale_Rate,far_t,per), far_t, 0.5f*Scale_Rate, far_t);
 						}
 						else {
@@ -634,11 +406,11 @@ namespace FPS_n2 {
 						r_rm = std::clamp(r_rm + (float)(GetMouseWheelRotVol())*10.f, 5.f, 6000.f);
 
 						DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 1.f, 1000.f);
-						auto pos_t2 = DrawParts->SetMainCamera().GetCamPos();
-						auto vec_t2 = DrawParts->SetMainCamera().GetCamVec();
-						auto up_t2 = DrawParts->SetMainCamera().GetCamUp();
-						//pos_t2 = VECTOR_ref::vget(0, 0, 0) + GetVector(x_rm, y_rm)*r_rm;
-						vec_t2 = VECTOR_ref::vget(0, 0, 0);
+						Vector3DX pos_t2 = DrawParts->SetMainCamera().GetCamPos();
+						Vector3DX vec_t2 = DrawParts->SetMainCamera().GetCamVec();
+						Vector3DX up_t2 = DrawParts->SetMainCamera().GetCamUp();
+						//pos_t2 = Vector3DX::vget(0, 0, 0) + GetVector(x_rm, y_rm)*r_rm;
+						vec_t2 = Vector3DX::vget(0, 0, 0);
 						DrawParts->SetMainCamera().SetCamPos(pos_t2, vec_t2, up_t2);
 
 						if (x_sav == -1) {
@@ -675,10 +447,8 @@ namespace FPS_n2 {
 		}
 		void			CustomScene::Dispose_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
-			auto* OptionParts = OPTION::Instance();
 
-			ObjMngr->DisposeObject();
-			OptionParts->Set_Shadow(true);
+			ObjMngr->DeleteAll();
 			EffectControl::Dispose();
 			m_LoadUtil.Dispose();
 			BGM.Dispose();
@@ -686,25 +456,22 @@ namespace FPS_n2 {
 
 		void			CustomScene::BG_Draw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+			DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
 			m_LoadUtil.BG_Draw();
 		}
 		void			CustomScene::ShadowDraw_Far_Sub(void) noexcept {
 			m_LoadUtil.ShadowDraw_Far();
 		}
-		void			CustomScene::ShadowDraw_NearFar_Sub(void) noexcept {
-			m_LoadUtil.ShadowDraw_NearFar();
-		}
-
 		void			CustomScene::ShadowDraw_Sub(void) noexcept {
 			//this->m_BackGround->Shadow_Draw();
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject_Shadow();
+			ObjMngr->Draw_Shadow();
+			m_LoadUtil.ShadowDraw_NearFar();
 			m_LoadUtil.ShadowDraw();
 		}
 		void			CustomScene::MainDraw_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject();
+			ObjMngr->Draw();
 			if (!isFreepos) {
 				SetFogEnable(TRUE);
 				SetFogDensity(0.01f);
@@ -718,9 +485,9 @@ namespace FPS_n2 {
 			}
 			//
 			if (isFreepos) {
-				VECTOR_ref vec = (camera_buf.GetCamVec() - camera_buf.GetCamPos());
-				float range = vec.size();
-				vec = vec.Norm()*camera_buf.GetCamFar();
+				Vector3DX vec = (camera_buf.GetCamVec() - camera_buf.GetCamPos());
+				float range = vec.magnitude();
+				vec = vec.normalized() *camera_buf.GetCamFar();
 				DrawCone3D(
 					camera_buf.GetCamPos().get(),
 					(camera_buf.GetCamPos() + vec).get(),
@@ -737,13 +504,13 @@ namespace FPS_n2 {
 				if (Black_Buf != 0.f) {
 					auto* DrawParts = DXDraw::Instance();
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*Black_Buf));
-					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+					DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 				if (White_Buf != 0.f) {
 					auto* DrawParts = DXDraw::Instance();
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*White_Buf));
-					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(255, 255, 255), TRUE);
+					DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(255, 255, 255), TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 			}

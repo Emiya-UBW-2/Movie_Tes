@@ -36,17 +36,8 @@
     <ClInclude Include="source\Header.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\ObjectBase.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ObjectManager.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="source\Scene\TitleScene.hpp">
       <Filter>ソース ファイル\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\ObjectBase_before.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\Scene\CustomScene.hpp">
       <Filter>ソース ファイル\Scene</Filter>
@@ -65,17 +56,11 @@
     <ClCompile Include="source\main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="source\ObjectManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="source\Scene\TitleScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="source\sub.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScene\Object\ObjectBase.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\Scene\CustomScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>

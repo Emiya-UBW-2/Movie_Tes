@@ -68,8 +68,12 @@ PS_OUTPUT main(PS_INPUT PSInput)
 	float far_min = caminfo.y;
 	float far_max = caminfo.w;
 
+	//–³‚µ
+	if (Depth == 0.f) {
+		per = 0.f;
+	}
 	//‹ß
-	if (Depth < near_max) {
+	else if (Depth < near_max) {
 		per = 1.f - (Depth - near_min) / (near_max - near_min);
 	}
 	//’†
