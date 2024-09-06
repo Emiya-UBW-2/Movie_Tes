@@ -201,7 +201,7 @@ namespace FPS_n2 {
 					else {
 						if (issecond) {
 							issecond = false;
-							DrawParts->Update_Shadow([&] { ShadowDraw_Far_Sub(); }, Vector3DX::zero(), true);
+							DrawParts->Update_Shadow([&] { ShadowDraw_Far_Sub(); }, Vector3DX::zero(), true, false);
 						}
 					}
 				}
