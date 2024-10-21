@@ -12,13 +12,8 @@ namespace FPS_n2 {
 	};
 	enum class SoundEnum : uint8_t {
 		RunFoot = (int)SoundEnumCommon::Num,
-		StandUp,
-		SlideFoot,
-		StandupFoot,
-		Heart,
-		//
-		Env,
-		Env2,
+		KendoKun,
+		Taiko1,
 	};
 	static const char* Model_Type[4] = { "SKY_TRUE","NEAR_FALSE","FAR_TRUE","SHADOW_DISACTIVE" };
 };

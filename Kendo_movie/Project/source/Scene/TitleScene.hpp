@@ -4,13 +4,6 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class TitleScene : public TEMPSCENE {
-		private:
-			int select{ 0 };
-			std::array<float, 2> SelYadd{};
-
-			float GameStart{ 0.f };
-		public:
-			const auto SelMode() const noexcept { return select; }
 		public:
 			TitleScene(void) noexcept { }
 			void			Set_Sub(void) noexcept override;

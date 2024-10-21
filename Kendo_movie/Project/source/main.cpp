@@ -1,14 +1,14 @@
 #include"Header.hpp"
 
 //
-#include "Scene/TitleScene.hpp"
 #include "Scene/CustomScene.hpp"
+#include "Scene/TitleScene.hpp"
 
 
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetDoubleStartValidFlag(TRUE);
-	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
+	//SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXLib_ref::Create();
 	//使用するボタンの指定
 	auto* Pad = PadControl::Instance();

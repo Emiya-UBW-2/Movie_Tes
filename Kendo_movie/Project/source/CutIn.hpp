@@ -170,7 +170,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			const auto GetFrame(std::string_view FrameName) const noexcept {
+			const auto		GetFrame(std::string_view FrameName) const noexcept {
 				for (auto& F : FrameNum) {
 					if (F.second == FrameName) {
 						return static_cast<Vector3DX>(obj.GetFramePosition(F.first));
@@ -178,7 +178,7 @@ namespace FPS_n2 {
 				}
 				return Vector3DX::zero();
 			}
-			const auto GetFrameMat(std::string_view FrameName) const noexcept {
+			const auto		GetFrameMat(std::string_view FrameName) const noexcept {
 				for (auto& F : FrameNum) {
 					if (F.second == FrameName) {
 						return obj.GetFrameLocalWorldMatrix(F.first);
@@ -186,7 +186,7 @@ namespace FPS_n2 {
 				}
 				return Matrix4x4DX::identity();
 			}
-			static void			Sel_AnimNum(MV1& model, int sel, float pers) noexcept {
+			static void		Sel_AnimNum(MV1& model, int sel, float pers) noexcept {
 				for (int i = 0, Num = static_cast<int>(model.GetAnimNum()); i < Num; ++i) {
 					model.SetAnim(i).SetPer((i == sel) ? pers : (1.f - pers));
 				}
@@ -298,7 +298,7 @@ namespace FPS_n2 {
 			MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);/*DX_LOADMODEL_PHYSICS_REALTIME*/
 			Max++;
 		}
-		Model* Get(std::string_view Path, size_t Sel = 0) noexcept {
+		Model*			Get(std::string_view Path, size_t Sel = 0) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				if (model[i].Path == Path && model[i].BaseID == Sel) {
 					return &(model[i]);
@@ -396,7 +396,7 @@ namespace FPS_n2 {
 				//
 			}
 		}
-		void			Set(void) noexcept {
+		void			SetAfterLoad(void) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
 				//
@@ -419,6 +419,14 @@ namespace FPS_n2 {
 					m.AddFrame("eŒûæ");
 
 					MV1::SetAnime(&(m.obj), m.obj);
+				}
+			}
+			//ƒ‚ƒfƒ‹‚ÌMV1•Û‘¶
+			for (size_t i = 0; i < Max; i++) {
+				auto& m = model[i];
+				if ((m.Path.find(".pmx") != std::string::npos) && (m.BaseID == 0)) {
+					m.obj.SaveModelToMV1File((m.Path.substr(0, m.Path.find(".pmx")) + ".mv1").c_str(), MV1_SAVETYPE_NORMAL, -1, 1, 1, 1, 0, 0);
+					//m.obj.SaveModelToMV1File((m.Path.substr(0, m.Path.find(".pmx")) + ".mv1").c_str());
 				}
 			}
 		}
@@ -1147,15 +1155,12 @@ namespace FPS_n2 {
 					Vector3DX vec_t = Camera.Aim_camera.GetCamVec();
 					Vector3DX up_t = Camera.Aim_camera.GetCamUp();
 					float fov_t = Camera.Aim_camera.GetCamFov();
-					float near_t = Camera.Aim_camera.GetCamNear();
-					float far_t = Camera.Aim_camera.GetCamFar();
-
 					easing_set_SetSpeed(&pos_t, this->CameraNotFirst.GetCamPos() + *m_RandcamposBuf, this->campos_per);
 					easing_set_SetSpeed(&vec_t, this->CameraNotFirst.GetCamVec() + *m_RandcamvecBuf, this->camvec_per);
 					easing_set_SetSpeed(&up_t, this->CameraNotFirst.GetCamUp() + *m_RandcamupBuf, this->camup_per);
 					easing_set_SetSpeed(&fov_t, this->CameraNotFirst.GetCamFov(), this->fov_per);
 					Camera.Aim_camera.SetCamPos(pos_t, vec_t, up_t);
-					Camera.Aim_camera.SetCamInfo(fov_t, near_t, far_t);
+					Camera.Aim_camera.SetCamInfo(fov_t, Camera.Aim_camera.GetCamNear(), Camera.Aim_camera.GetCamFar());
 				}
 			}
 		}

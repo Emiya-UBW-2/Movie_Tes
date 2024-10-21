@@ -15,6 +15,28 @@ namespace FPS_n2 {
 			*first = Lerp(*first, aim, (1.f - std::powf(ratio, 60.f / DrawParts->GetFps() * GameSpeed)));
 		}
 	};
+
+	static void			easing_set_SetSpeed(Camera3DInfo* first, const Camera3DInfo& aim, const float& ratio) noexcept {
+		if (ratio == 0.f) {
+			*first = aim;
+		}
+		else {
+			Vector3DX pos_t = first->GetCamPos();
+			Vector3DX vec_t = first->GetCamVec();
+			Vector3DX up_t = first->GetCamUp();
+			float fov_t = first->GetCamFov();
+			float near_t = first->GetCamNear();
+			float far_t = first->GetCamFar();
+			easing_set_SetSpeed(&pos_t, aim.GetCamPos(), ratio);
+			easing_set_SetSpeed(&vec_t, aim.GetCamVec(), ratio);
+			easing_set_SetSpeed(&up_t, aim.GetCamUp(), ratio);
+			easing_set_SetSpeed(&fov_t, aim.GetCamFov(), ratio);
+			easing_set_SetSpeed(&far_t, aim.GetCamFar(), ratio);
+			easing_set_SetSpeed(&near_t, aim.GetCamNear(), ratio);
+			first->SetCamPos(pos_t, vec_t, up_t);
+			first->SetCamInfo(fov_t, near_t, far_t);
+		}
+	};
 	//
 	class TelopClass : public SingletonBase<TelopClass> {
 	private:

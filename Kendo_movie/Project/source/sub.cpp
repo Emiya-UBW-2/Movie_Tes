@@ -8,20 +8,17 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			CommonBattleResource::Load(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Add((int)SoundEnum::StandUp, 3, "data/Sound/SE/move/sliding.wav");
-			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
-			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
-			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
+			SE->Add((int)SoundEnum::Taiko1, 1, "data/Sound/SE/taiko.wav", false);
+			SE->Add((int)SoundEnum::KendoKun, 1, "data/Sound/Voice/kendokun.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Get((int)SoundEnum::StandUp).SetVol_Local(128);
-			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
-			SE->Get((int)SoundEnum::StandupFoot).SetVol_Local(128);
-
-			SE->Get((int)SoundEnum::Env).SetVol_Local(128);
+			SE->Get((int)SoundEnum::Taiko1).SetVol_Local(128);
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			SE->Delete((int)SoundEnum::Taiko1);
+			SE->Delete((int)SoundEnum::KendoKun);
 		}
 	};
 };

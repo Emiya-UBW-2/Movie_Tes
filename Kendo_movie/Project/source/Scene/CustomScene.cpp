@@ -127,6 +127,11 @@ namespace FPS_n2 {
 #endif
 				//’Ç‰Áˆ—
 				if (m_Counter == 0) {
+					if (isFirstLoop) {
+						auto* SE = SoundPool::Instance();
+						SE->Get((int)SoundEnum::Taiko1).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						SE->Get((int)SoundEnum::KendoKun).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					}
 				}
 				//
 				if (isFirstLoop) {
