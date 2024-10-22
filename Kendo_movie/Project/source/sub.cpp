@@ -2,8 +2,6 @@
 
 const FPS_n2::Sceneclass::CommonBattleResource* SingletonBase<FPS_n2::Sceneclass::CommonBattleResource>::m_Singleton = nullptr;
 
-const FPS_n2::TelopClass* SingletonBase<FPS_n2::TelopClass>::m_Singleton = nullptr;
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			CommonBattleResource::Load(void) noexcept {

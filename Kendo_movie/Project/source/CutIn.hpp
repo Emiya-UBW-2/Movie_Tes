@@ -298,7 +298,7 @@ namespace FPS_n2 {
 			MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);/*DX_LOADMODEL_PHYSICS_REALTIME*/
 			Max++;
 		}
-		Model*			Get(std::string_view Path, size_t Sel = 0) noexcept {
+		Model* Get(std::string_view Path, size_t Sel = 0) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				if (model[i].Path == Path && model[i].BaseID == Sel) {
 					return &(model[i]);
@@ -313,7 +313,7 @@ namespace FPS_n2 {
 				m.isDraw = m.Cutinfo.GetSwitch();
 			}
 		}
-		void			FirstUpdate(size_t Counter, bool isFirstLoop) noexcept {
+		void			FirstUpdate(size_t Counter, bool isFirstLoop, bool reset_p) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
 				while (true) {
@@ -370,6 +370,14 @@ namespace FPS_n2 {
 				}
 			}
 			//++P_cnt %= 2;
+
+			for (size_t i = 0; i < Max; i++) {
+				auto& m = model[i];
+				if (m.isDraw) {
+					m.Update(m.canUpdate);/**/
+				}
+			}
+			SetPhysics(reset_p);
 		}
 		void			SetPhysics(bool reset_p) noexcept {
 			if (reset_p) {
@@ -427,14 +435,6 @@ namespace FPS_n2 {
 				if ((m.Path.find(".pmx") != std::string::npos) && (m.BaseID == 0)) {
 					m.obj.SaveModelToMV1File((m.Path.substr(0, m.Path.find(".pmx")) + ".mv1").c_str(), MV1_SAVETYPE_NORMAL, -1, 1, 1, 1, 0, 0);
 					//m.obj.SaveModelToMV1File((m.Path.substr(0, m.Path.find(".pmx")) + ".mv1").c_str());
-				}
-			}
-		}
-		void			Update(void) noexcept {
-			for (size_t i = 0; i < Max; i++) {
-				auto& m = model[i];
-				if (m.isDraw) {
-					m.Update(m.canUpdate);/**/
 				}
 			}
 		}
@@ -712,6 +712,12 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		void			Set(void) noexcept {
+			for (size_t i = 0; i < Max; i++) {
+				auto& m = model[i];
+				m.isDraw = false;
+			}
+		}
 		void			FirstUpdate(size_t Counter, bool isFirstLoop) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
@@ -745,14 +751,6 @@ namespace FPS_n2 {
 					break;
 				}
 			}
-		}
-		void			Set(void) noexcept {
-			for (size_t i = 0; i < Max; i++) {
-				auto& m = model[i];
-				m.isDraw = false;
-			}
-		}
-		void			Update(void) noexcept {
 			for (size_t i = 0; i < Max; i++) {
 				auto& m = model[i];
 				m.Update();
@@ -828,24 +826,54 @@ namespace FPS_n2 {
 			this->Add = add;
 		}
 	public:
-		const auto&	GetIsUse(void) const noexcept { return Use; }
+		const auto& GetIsUse(void) const noexcept { return Use; }
 		const auto	GetForce() const noexcept { return FPS_n2::ModelControl::Instance()->Get(this->Path, this->ID)->GetFrame(this->Frame) + this->Add; }
 	};
 	class Cut_Info_First {
 	public:
-		LONGLONG TimeLimit{ 0 };
-		bool UsePrevAim{ false };
-		bool IsResetPhysics{ false };
 		Camera3DInfo Aim_camera;
 		float cam_per{ 0.f };
 		bool isResetRandCampos{ false };
 		bool isResetRandCamvec{ false };
 		bool isResetRandCamup{ false };
+	private:
+		bool IsResetPhysics{ false };
 		FogParam Fog{};
 		std::vector<ForcusControl> Forcus;
+		LONGLONG TimeLimit{ 0 };
+		bool UsePrevAim{ false };
 	public:
 		//Getter
+		const auto& GetIsResetPhysics(void) const noexcept { return IsResetPhysics; }
 		const auto& GetTimeLimit(void) const noexcept { return TimeLimit; }
+		bool			GetForcusCenter(Vector3DX* vec) const noexcept {
+			bool isforcus = false;
+			for (auto& f : Forcus) {
+				if (f.GetIsUse()) {
+					if (!isforcus) {
+						*vec = Vector3DX::zero();
+					}
+					*vec += f.GetForce();
+					isforcus = true;
+				}
+			}
+			if (isforcus) {
+				*vec = *vec / (float)(Forcus.size());
+			}
+			return isforcus;
+		}
+		void			UpdateCam(Camera3DInfo* cam) const noexcept { easing_set_SetSpeed(cam, Aim_camera, cam_per); }
+		void			SetUpFog(void) noexcept {
+			if (Fog.fog[0] >= 0) {
+				SetFogEnable(TRUE);
+				Fog.SetFog();
+			}
+			else if (Fog.fog[0] == -2) {
+				FogParam Tmp{}; Tmp.Reset();
+				SetFogEnable(TRUE);
+				Tmp.SetFog();
+			}
+		}
 		//
 		Cut_Info_First(LONGLONG value) noexcept {
 			TimeLimit = value;
@@ -854,15 +882,14 @@ namespace FPS_n2 {
 			cam_per = 0.95f;
 			IsResetPhysics = false;
 		}
-		~Cut_Info_First(void) noexcept {
-		}
+		~Cut_Info_First(void) noexcept {}
 		void			SetPrev(const Cut_Info_First& tgt) noexcept {
 			if (this->UsePrevAim) {
 				this->Aim_camera = tgt.Aim_camera;
 				this->cam_per = tgt.cam_per;
 			}
 		}
-		bool LoadScript(const std::string& func, const std::vector<std::string>& args) noexcept {
+		void LoadScript(const std::string& func, const std::vector<std::string>& args) noexcept {
 			//Campos
 			if (func.find("SetCampos_NoneRad") != std::string::npos) {
 				this->Aim_camera.SetCamPos(
@@ -870,7 +897,6 @@ namespace FPS_n2 {
 					this->Aim_camera.GetCamVec(),
 					this->Aim_camera.GetCamUp()
 				);
-				return true;
 			}
 			//Camvec
 			else if (func.find("SetCamvec") != std::string::npos) {
@@ -879,7 +905,6 @@ namespace FPS_n2 {
 					Vector3DX::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2])),
 					this->Aim_camera.GetCamUp()
 				);
-				return true;
 			}
 			else if (func.find("SetCamForcus") != std::string::npos) {
 				this->Forcus.emplace_back(ForcusControl(args[0], std::stol(args[1]), args[2], Vector3DX::vget(std::stof(args[3]), std::stof(args[4]), std::stof(args[5]))));
@@ -891,7 +916,6 @@ namespace FPS_n2 {
 					this->Aim_camera.GetCamVec(),
 					Vector3DX::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2]))
 				);
-				return true;
 			}
 			//Else
 			else if (func.find("SetCamInfo") != std::string::npos) {
@@ -928,7 +952,6 @@ namespace FPS_n2 {
 					this->Fog.fog[0] = -2;
 				}
 			}
-			return false;
 		}
 	};
 	class Cut_Info_Update {
@@ -936,7 +959,9 @@ namespace FPS_n2 {
 		bool isUseNotFirst{ false };
 		float NotFirst_per = -1.f;
 		float fov_per{ 0.f };
-	public:
+		Camera3DInfo CameraNotFirst;
+		Camera3DInfo CameraNotFirst_After;
+		Camera3DInfo CameraNotFirst_Vec;
 		float m_RandcamupPer;
 		Vector3DX m_RandcamupSet;
 		float m_RandcamvecPer;
@@ -944,14 +969,12 @@ namespace FPS_n2 {
 		float m_RandcamposPer;
 		Vector3DX m_RandcamposSet;
 		std::vector<ForcusControl> Forcus;
-		bool IsUsePrevBuf{ false };
 		size_t CutSel = 0;
 		size_t OLDCutSel = SIZE_MAX;
 		float campos_per{ 0.f };
 		float camvec_per{ 0.f };
 		float camup_per{ 0.f };
-		Camera3DInfo CameraNotFirst;
-		Camera3DInfo CameraNotFirst_Vec;
+		bool IsUsePrevBuf{ false };
 		bool IsSetBlack{ false };
 		float Black_Per = 1.f;
 		float Black = 0.f;
@@ -979,10 +1002,29 @@ namespace FPS_n2 {
 			Forcus.clear();
 		}
 		~Cut_Info_Update(void) noexcept {}
+	private:
 		void			SetForce(float camvecPer, std::string_view ModelPath, int ModelID, std::string_view Frame, const Vector3DX& Add) noexcept {
 			this->camvec_per = camvecPer;
 			this->Forcus.emplace_back(ForcusControl(ModelPath, ModelID, Frame, Add));
 		}
+		bool GetForcusCenter(Vector3DX* vec) const noexcept {
+			bool isforcus = false;
+			for (auto& f : Forcus) {
+				if (f.GetIsUse()) {
+					if (!isforcus) {
+						*vec = Vector3DX::zero();
+					}
+					*vec += f.GetForce();
+					isforcus = true;
+				}
+			}
+			if (isforcus) {
+				*vec = *vec / (float)(Forcus.size());
+			}
+			return isforcus;
+		}
+	public:
+		void			SetupCam(const Camera3DInfo& cam) noexcept { CameraNotFirst = cam; }
 		void			LoadScript(const std::string& func, const std::vector<std::string>& args) noexcept {
 			//カメラのアップデート
 			if (func.find("SetUpdateEnable") != std::string::npos) {
@@ -992,77 +1034,57 @@ namespace FPS_n2 {
 			else if (func.find("SetUpdateCamvec") != std::string::npos) {
 				this->camvec_per = std::stof(args[0]);
 				if (args.size() > 1) {
-					Vector3DX pos_t = this->CameraNotFirst.GetCamPos();
-					Vector3DX vec_t = this->CameraNotFirst.GetCamVec();
-					Vector3DX up_t = this->CameraNotFirst.GetCamUp();
 					this->CameraNotFirst.SetCamPos(
-						pos_t,
+						this->CameraNotFirst.GetCamPos(),
 						Vector3DX::vget(std::stof(args[1]), std::stof(args[2]), std::stof(args[3])),
-						up_t);
+						this->CameraNotFirst.GetCamUp());
 				}
 			}
 			else if (func.find("SetUpdateCamForcus") != std::string::npos) {
 				this->SetForce(std::stof(args[0]), args[1], std::stoi(args[2]), args[3], Vector3DX::vget(std::stof(args[4]), std::stof(args[5]), std::stof(args[6])));
 			}
 			else if (func.find("SetVectorUpdateCamvec") != std::string::npos) {
-				Vector3DX pos_t = this->CameraNotFirst_Vec.GetCamPos();
-				Vector3DX vec_t = this->CameraNotFirst_Vec.GetCamVec();
-				Vector3DX up_t = this->CameraNotFirst_Vec.GetCamUp();
 				this->CameraNotFirst_Vec.SetCamPos(
-					pos_t,
+					this->CameraNotFirst_Vec.GetCamPos(),
 					Vector3DX::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2])),
-					up_t);
+					this->CameraNotFirst_Vec.GetCamUp());
 			}
 			//campos
 			else if (func.find("SetUpdateCampos") != std::string::npos) {
 				this->campos_per = std::stof(args[0]);
 				if (args.size() > 1) {
-					Vector3DX pos_t = this->CameraNotFirst.GetCamPos();
-					Vector3DX vec_t = this->CameraNotFirst.GetCamVec();
-					Vector3DX up_t = this->CameraNotFirst.GetCamUp();
 					this->CameraNotFirst.SetCamPos(
 						Vector3DX::vget(std::stof(args[1]), std::stof(args[2]), std::stof(args[3])),
-						vec_t,
-						up_t);
+						this->CameraNotFirst.GetCamVec(),
+						this->CameraNotFirst.GetCamUp());
 				}
 			}
 			else if (func.find("SetVectorUpdateCampos") != std::string::npos) {
-				Vector3DX pos_t = this->CameraNotFirst_Vec.GetCamPos();
-				Vector3DX vec_t = this->CameraNotFirst_Vec.GetCamVec();
-				Vector3DX up_t = this->CameraNotFirst_Vec.GetCamUp();
 				this->CameraNotFirst_Vec.SetCamPos(
 					Vector3DX::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2])),
-					vec_t,
-					up_t);
+					this->CameraNotFirst_Vec.GetCamVec(),
+					this->CameraNotFirst_Vec.GetCamUp());
 			}
 			//camup
 			else if (func.find("SetUpdateCamup") != std::string::npos) {
 				this->camup_per = std::stof(args[0]);
 				if (args.size() > 1) {
-					Vector3DX pos_t = this->CameraNotFirst.GetCamPos();
-					Vector3DX vec_t = this->CameraNotFirst.GetCamVec();
-					Vector3DX up_t = this->CameraNotFirst.GetCamUp();
 					this->CameraNotFirst.SetCamPos(
-						pos_t,
-						vec_t,
+						this->CameraNotFirst.GetCamPos(),
+						this->CameraNotFirst.GetCamVec(),
 						Vector3DX::vget(std::stof(args[1]), std::stof(args[2]), std::stof(args[3])));
 				}
 			}
 			else if (func.find("SetVectorUpdateCamup") != std::string::npos) {
-				Vector3DX pos_t = this->CameraNotFirst_Vec.GetCamPos();
-				Vector3DX vec_t = this->CameraNotFirst_Vec.GetCamVec();
-				Vector3DX up_t = this->CameraNotFirst_Vec.GetCamUp();
 				this->CameraNotFirst_Vec.SetCamPos(
-					pos_t,
-					vec_t,
+					this->CameraNotFirst_Vec.GetCamPos(),
+					this->CameraNotFirst_Vec.GetCamVec(),
 					Vector3DX::vget(std::stof(args[0]), std::stof(args[1]), std::stof(args[2])));
 			}
 			//fov
 			else if (func.find("SetUpdateCamfov") != std::string::npos) {
 				this->fov_per = std::stof(args[0]);
-				float near_t = this->CameraNotFirst.GetCamNear();
-				float far_t = this->CameraNotFirst.GetCamFar();
-				this->CameraNotFirst.SetCamInfo(deg2rad(std::stof(args[1])), near_t, far_t);
+				this->CameraNotFirst.SetCamInfo(deg2rad(std::stof(args[1])), this->CameraNotFirst.GetCamNear(), this->CameraNotFirst.GetCamFar());
 			}
 			//easing
 			else if (func.find("SetUpdatePer") != std::string::npos) {
@@ -1108,12 +1130,19 @@ namespace FPS_n2 {
 				this->Black = 0.f;
 			}
 			//
+			CameraNotFirst_After = CameraNotFirst;
+		}
+		void			ResetCam(const Camera3DInfo& cam) noexcept {
+			CameraNotFirst_After.SetCamPos(cam.GetCamPos(), cam.GetCamVec(), CameraNotFirst_After.GetCamUp());
 		}
 		void			Update(Cut_Info_First& Camera,
 			Vector3DX* m_RandcamupBuf,
 			Vector3DX* m_RandcamvecBuf,
-			Vector3DX* m_RandcamposBuf
+			Vector3DX* m_RandcamposBuf,
+			float* pBlack,
+			float* pWhite
 		) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (this->NotFirst_per >= 0.f) {
 				Camera.cam_per = this->NotFirst_per;
 			}
@@ -1122,46 +1151,55 @@ namespace FPS_n2 {
 			easing_set_SetSpeed(m_RandcamupBuf, Vector3DX::vget(GetRandf(this->m_RandcamupSet.x), GetRandf(this->m_RandcamupSet.y), GetRandf(this->m_RandcamupSet.z)), this->m_RandcamupPer);
 			if (this->isUseNotFirst) {
 				Vector3DX vec;
-				bool isforcus = false;
-#if 1
-				for (auto& f : Forcus) {
-					if (f.GetIsUse()) {
-						vec += f.GetForce();
-						isforcus = true;
-					}
+				if (GetForcusCenter(&vec)) {
+					this->CameraNotFirst_After.SetCamPos(this->CameraNotFirst_After.GetCamPos(), vec, this->CameraNotFirst_After.GetCamUp());
 				}
-				if (isforcus) {
-					Vector3DX pos_t = this->CameraNotFirst.GetCamPos();
-					Vector3DX vec_t = this->CameraNotFirst.GetCamVec();
-					Vector3DX up_t = this->CameraNotFirst.GetCamUp();
-					this->CameraNotFirst.SetCamPos(
-						pos_t,
-						vec / (float)(Forcus.size()),
-						up_t);
-				}
-#else
-				for (auto& f : Forcus) {
-					if (f.GetIsUse()) {
-						vec += f.GetForce() * f.Per;
-						isforcus = true;
-					}
-				}
-				if (isforcus) {
-					this->CameraNotFirst.GetCamVec() = vec;
-				}
-#endif
 				{
 					Vector3DX pos_t = Camera.Aim_camera.GetCamPos();
 					Vector3DX vec_t = Camera.Aim_camera.GetCamVec();
 					Vector3DX up_t = Camera.Aim_camera.GetCamUp();
 					float fov_t = Camera.Aim_camera.GetCamFov();
-					easing_set_SetSpeed(&pos_t, this->CameraNotFirst.GetCamPos() + *m_RandcamposBuf, this->campos_per);
-					easing_set_SetSpeed(&vec_t, this->CameraNotFirst.GetCamVec() + *m_RandcamvecBuf, this->camvec_per);
-					easing_set_SetSpeed(&up_t, this->CameraNotFirst.GetCamUp() + *m_RandcamupBuf, this->camup_per);
-					easing_set_SetSpeed(&fov_t, this->CameraNotFirst.GetCamFov(), this->fov_per);
+					easing_set_SetSpeed(&pos_t, this->CameraNotFirst_After.GetCamPos() + *m_RandcamposBuf, this->campos_per);
+					easing_set_SetSpeed(&vec_t, this->CameraNotFirst_After.GetCamVec() + *m_RandcamvecBuf, this->camvec_per);
+					easing_set_SetSpeed(&up_t, this->CameraNotFirst_After.GetCamUp() + *m_RandcamupBuf, this->camup_per);
+					easing_set_SetSpeed(&fov_t, this->CameraNotFirst_After.GetCamFov(), this->fov_per);
 					Camera.Aim_camera.SetCamPos(pos_t, vec_t, up_t);
 					Camera.Aim_camera.SetCamInfo(fov_t, Camera.Aim_camera.GetCamNear(), Camera.Aim_camera.GetCamFar());
 				}
+			}
+
+			CameraNotFirst_After.SetCamPos(
+				CameraNotFirst_After.GetCamPos() + CameraNotFirst_Vec.GetCamPos() * (1.f / DrawParts->GetFps() * GameSpeed),
+				CameraNotFirst_After.GetCamVec() + CameraNotFirst_Vec.GetCamVec() * (1.f / DrawParts->GetFps() * GameSpeed),
+				CameraNotFirst_After.GetCamUp() + CameraNotFirst_Vec.GetCamUp() * (1.f / DrawParts->GetFps() * GameSpeed)
+			);
+			easing_set_SetSpeed(pBlack, Black, Black_Per);
+			easing_set_SetSpeed(pWhite, White, White_Per);
+		}
+		void			SetupByPrev(const Cut_Info_Update& Prev) {
+			if (!IsUsePrevBuf) {
+				return;
+			}
+			//
+			auto PrevWhite_Set = IsSetWhite;
+			auto PrevWhite_Per = White_Per;
+			auto PrevWhitePrev = White;
+
+			auto PrevBlack_Set = IsSetBlack;
+			auto PrevBlack_Per = Black_Per;
+			auto PrevBlackPrev = Black;
+			//
+			*this = Prev;
+			//
+			if (PrevWhite_Set) {
+				IsSetWhite = PrevWhite_Set;
+				White_Per = PrevWhite_Per;
+				White = PrevWhitePrev;
+			}
+			if (PrevBlack_Set) {
+				IsSetBlack = PrevBlack_Set;
+				Black_Per = PrevBlack_Per;
+				Black = PrevBlackPrev;
 			}
 		}
 	};

@@ -38,10 +38,7 @@ namespace FPS_n2 {
 		}
 	};
 	//
-	class TelopClass : public SingletonBase<TelopClass> {
-	private:
-		friend class SingletonBase<TelopClass>;
-	private:
+	class TelopClass {
 	private:
 		class Cut_tex {
 			int xpos = 0;
@@ -130,7 +127,7 @@ namespace FPS_n2 {
 		int animcountper{ 0 };
 		int animcountSpeed{ 4 };
 
-		void			Set(int FrameID, int LayerID, int totalNum, int FramePer) {
+		void			Set(int FrameID, int LayerID, int totalNum, int FramePer) noexcept {
 			m_FrameID = FrameID;
 			this->animcountSpeed = FramePer;
 			for (int i = 0; i < totalNum; i++) {
@@ -155,7 +152,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void			Draw(int x, int y, float scale) {
+		void			Draw(int x, int y, float scale) noexcept {
 			this->Pic[this->anim].DrawRotaGraph(x, y, scale, 0.f, true);
 		}
 	};

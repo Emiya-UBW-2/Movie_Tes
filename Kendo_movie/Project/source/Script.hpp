@@ -6,9 +6,9 @@
 #include "sub.hpp"
 //
 namespace FPS_n2 {
-	class LoadScriptClass : public SingletonBase<LoadScriptClass> {
-	private:
-		friend class SingletonBase<LoadScriptClass>;
+	static const char* Model_Type[4] = { "SKY_TRUE","NEAR_FALSE","FAR_TRUE","SHADOW_DISACTIVE" };
+
+	class LoadScriptClass {
 	private:
 		struct VARIABLE {
 			std::string Base;
@@ -180,14 +180,10 @@ namespace FPS_n2 {
 		}
 	public:
 		//Getter
-		const auto&		Getfunc(void) const noexcept { return m_Func; }
-		const auto&		Getargs(void) const noexcept { return m_Args; }
-		const auto*		GetArgFromPath(std::string_view Path) const noexcept { return m_Variable.GetArgFromPath(Path); }
+		const auto& Getfunc(void) const noexcept { return m_Func; }
+		const auto& Getargs(void) const noexcept { return m_Args; }
+		const auto* GetArgFromPath(std::string_view Path) const noexcept { return m_Variable.GetArgFromPath(Path); }
 	public:
-		//読み込み作業前
-		void			BeforeLoad() noexcept {
-			TelopClass::Instance()->Init();
-		}
 		//スクリプト読み込み処理
 		bool			LoadOnce(std::string_view func_t, int NowCut) noexcept {
 			m_Args.clear();
@@ -241,57 +237,47 @@ namespace FPS_n2 {
 					m_Variable.ChangeStr(&a1);
 				}
 			}
-			//テロップ
-			TelopClass::Instance()->LoadTelop(m_Func, m_Args);
 			//モデル描画
 			SetDrawModel(NowCut);
 			//画像描画
 			SetDrawGraph(NowCut);
 			return true;
 		}
-		//完全な読み込み終了後
-		void			AfterLoad() noexcept {
-			auto* ModelParts = FPS_n2::ModelControl::Instance();
-			ModelParts->SetAfterLoad();
-		}
 	};
 	class LoadUtil {
 	public:
+		LoadScriptClass					m_LoadScriptClass;
+		TelopClass						m_TelopClass;
+
 		std::vector<Cut_Info_First>		m_CutInfo;
 		std::vector<Cut_Info_Update>	m_CutInfoUpdate;
 		CutInfoClass					m_attached;
 		std::vector<Vector3DX>			m_PosCam;
-		LONGLONG						m_PrevLoadTime{ 0 };
+
 		Vector3DX		m_RandcamupBuf;
 		Vector3DX		m_RandcamvecBuf;
 		Vector3DX		m_RandcamposBuf;
+		float			Black_Buf{ 1.f };
+		float			White_Buf{ 0.f };
 	public:
-		auto			GetNowTime(size_t Counter) { return (Counter >= 0 ? m_CutInfo[Counter].GetTimeLimit() : 0); }
-		auto			IsEnd(size_t Counter) { return (Counter >= m_CutInfo.size()); }
-		auto			IsResetPhysics(size_t Counter) { return m_CutInfo[Counter].IsResetPhysics; }
+		auto			GetNowTime(size_t Counter) const noexcept { return (Counter >= 0 ? m_CutInfo[Counter].GetTimeLimit() : 0); }
+		auto			IsEnd(size_t Counter) const noexcept { return (Counter > m_CutInfo.size()); }
+		auto			IsResetPhysics(size_t Counter) const noexcept { return m_CutInfo[Counter].GetIsResetPhysics(); }
 	public:
 		void			Load(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			auto* LSParts = FPS_n2::LoadScriptClass::Instance();
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
 			//
-			LSParts->BeforeLoad();
+			m_TelopClass.Init();
 			//
 			int mdata = FileRead_open("data/Cut.txt", FALSE);
 			SetUseASyncLoadFlag(TRUE);
-			clsDx();
-			m_PrevLoadTime = GetNowHiPerformanceCount();
 			int NowCut = 0;
 			//
 			while (FileRead_eof(mdata) == 0) {
-				LONGLONG tim = (GetNowHiPerformanceCount() - m_PrevLoadTime);
-				if (tim >= 1000 * 1000 / FrameRate) {
-					m_PrevLoadTime = GetNowHiPerformanceCount();
-					GraphHandle::SetDraw_Screen((int32_t)(DX_SCREEN_BACK), true);
-				}
-				if (!LSParts->LoadOnce(getparams::Getstr(mdata), NowCut)) { continue; }
-				const auto& func = LSParts->Getfunc();
-				const auto& args = LSParts->Getargs();
 				if (ProcessMessage() != 0) {}
+				if (!m_LoadScriptClass.LoadOnce(getparams::Getstr(mdata), NowCut)) { continue; }
+				const auto& func = m_LoadScriptClass.Getfunc();
+				const auto& args = m_LoadScriptClass.Getargs();
 				//新規カット
 				if (func.find("SetCut") != std::string::npos) {
 					m_CutInfo.emplace_back(Cut_Info_First((LONGLONG)(1000000.f * std::stof(args[0]))));
@@ -303,67 +289,46 @@ namespace FPS_n2 {
 					m_attached.Switch.emplace_back(CutInfoClass::On_Off(NowCut, NowCut + (std::stoi(args[0]) - 1)));
 					m_PosCam.emplace_back(Vector3DX::vget(std::stof(args[1]), std::stof(args[2]), std::stof(args[3])));
 				}
+				else {
+					//テロップ
+					m_TelopClass.LoadTelop(func, args);
+				}
 				if (m_CutInfo.size() > 0) {
-					if (m_CutInfo.back().LoadScript(func, args)) {
-						m_CutInfoUpdate.back().CameraNotFirst = m_CutInfo.back().Aim_camera;
-					}
-				}
-				if (m_CutInfoUpdate.size() > 0) {
+					m_CutInfo.back().LoadScript(func, args);
+					m_CutInfoUpdate.back().SetupCam(m_CutInfo.back().Aim_camera);
 					m_CutInfoUpdate.back().LoadScript(func, args);
-				}
-				printfDx("ロード : %s\n", func.c_str());
-				if (tim >= 1000 * 1000 / FrameRate) {
-					DrawParts->Screen_Flip();
 				}
 			}
 			FileRead_close(mdata);
 			//
 			SetUseASyncLoadFlag(FALSE);
-			printfDx("非同期読み込みオブジェクトの読み込み待ち…(%d)\n", GetASyncLoadNum());
-			DrawParts->Screen_Flip();
 			while (ProcessMessage() == 0 && GetASyncLoadNum() != 0) {}
-			printfDx("読み込み完了\n");
-			LSParts->AfterLoad();
-			printfDx("モデルのMV1変換完了\n");
-			DrawParts->Screen_Flip();
+			ModelParts->SetAfterLoad();
 		}
-		void			Start(size_t StartCut) {
+		void			Start(size_t StartCut) noexcept {
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			auto* GraphParts = FPS_n2::GraphControl::Instance();
+			ModelParts->Start(StartCut);
+			GraphParts->Start(StartCut);
 			m_attached.Start(StartCut);
 			m_RandcamupBuf = Vector3DX::zero();
 			m_RandcamvecBuf = Vector3DX::zero();
 			m_RandcamposBuf = Vector3DX::zero();
 		}
-		void			FirstUpdate(size_t Counter) {
+		void			FirstUpdate(size_t Counter, bool isFirstLoop, bool reset_p) noexcept {
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			auto* GraphParts = FPS_n2::GraphControl::Instance();
 			m_attached.Update_(Counter);
-		}
-		void			Flip(size_t Counter, FogParam* pFog) {
-			SetupByPrev(Counter);
-			auto& ci = m_CutInfo[Counter];
-			if (ci.Fog.fog[0] >= 0) {
-				*pFog = ci.Fog;
+			ModelParts->FirstUpdate(Counter, isFirstLoop, reset_p);
+			GraphParts->FirstUpdate(Counter, isFirstLoop);
+			if (isFirstLoop) {
+				SetupByPrev(Counter);
+				SetUpFog(Counter);
+				ResetRandom(Counter);
 			}
-			else if (ci.Fog.fog[0] == -2) {
-				pFog->Reset();
+			else {
+				Update(Counter);
 			}
-			ResetRandom(Counter);
-			UpdateCam(Counter);
-		}
-		void			Update(size_t Counter, float* Black_Buf, float* White_Buf) {
-			auto* DrawParts = DXDraw::Instance();
-			auto& ci = m_CutInfo[Counter];
-			auto& u = m_CutInfoUpdate[Counter];
-			u.Update(ci, &m_RandcamupBuf, &m_RandcamvecBuf, &m_RandcamposBuf);
-			u.CameraNotFirst.SetCamPos(
-				u.CameraNotFirst.GetCamPos() + u.CameraNotFirst_Vec.GetCamPos() * (1.f / DrawParts->GetFps() * GameSpeed),
-				u.CameraNotFirst.GetCamVec() + u.CameraNotFirst_Vec.GetCamVec() * (1.f / DrawParts->GetFps() * GameSpeed),
-				u.CameraNotFirst.GetCamUp() + u.CameraNotFirst_Vec.GetCamUp() * (1.f / DrawParts->GetFps() * GameSpeed)
-			);
-			//
-			if (m_attached.GetSwitch()) {
-				ci.Aim_camera.SetCamPos(ci.Aim_camera.GetCamVec() + m_PosCam[m_attached.nowcut], ci.Aim_camera.GetCamVec(), ci.Aim_camera.GetCamUp());
-			}
-			easing_set_SetSpeed(Black_Buf, u.Black, u.Black_Per);
-			easing_set_SetSpeed(White_Buf, u.White, u.White_Per);
 			UpdateCam(Counter);
 		}
 		void			Dispose(void) noexcept {
@@ -373,66 +338,102 @@ namespace FPS_n2 {
 			m_LoadEditUtil.Editer_Dispose();
 #endif
 		}
+
+		void			BGDraw(void) const noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
+			ModelParts->Draw_Far();
+		}
+		void			ShadowFarDraw(void) const noexcept {
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			SetDrawAlphaTest(DX_CMP_GREATER, 128);
+			ModelParts->Draw(false, true, true);
+			SetDrawAlphaTest(-1, 0);
+		}
+		void			ShadowDraw(void) const noexcept {
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			ModelParts->Draw(false, false, true, TRUE);
+			ModelParts->Draw(true, false, true, FALSE);
+		}
+		void			SetShadowDraw(void) const noexcept {
+
+		}
+		void			MainDraw(void) const noexcept {
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			ModelParts->CheckInCamera();
+			auto* DrawParts = DXDraw::Instance();
+			auto camfar = GetCameraFar();
+			if (DrawParts->GetMainCamera().GetCamFar() - 1.f < camfar && camfar < DrawParts->GetMainCamera().GetCamFar() + 1.f) {
+				ModelParts->Draw(false, false, false, FALSE);
+			}
+			else {
+				ModelParts->Draw(false, false, false, TRUE);
+			}
+		}
+		void			UIDraw(LONGLONG NowTime) const noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			auto* GraphParts = FPS_n2::GraphControl::Instance();
+
+			SetDrawMode(DX_DRAWMODE_BILINEAR);
+			GraphParts->Draw();
+			SetDrawMode(DX_DRAWMODE_NEAREST);
+
+			if (NowTime > 0) {
+				m_TelopClass.Draw(NowTime);
+			}
+			if (Black_Buf != 0.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Buf));
+				DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			}
+			if (White_Buf != 0.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * White_Buf));
+				DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(255, 255, 255), TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			}
+		}
 	private:
-		void			SetupByPrev(size_t Counter) {
+		void			SetupByPrev(size_t Counter) noexcept {
 			auto& ci = m_CutInfo[Counter];
 			auto& u = m_CutInfoUpdate[Counter];
 			if (Counter > 0) {
 				ci.SetPrev(m_CutInfo[Counter - 1]);
 			}
-			if (u.IsUsePrevBuf) {
-				//
-				auto White_Set = u.IsSetWhite;
-				auto White_Per = u.White_Per;
-				auto WhitePrev = u.White;
-
-				auto Black_Set = u.IsSetBlack;
-				auto Black_Per = u.Black_Per;
-				auto BlackPrev = u.Black;
-				//
-				u = m_CutInfoUpdate[Counter - 1];
-				//
-				if (White_Set) {
-					u.IsSetWhite = White_Set;
-					u.White_Per = White_Per;
-					u.White = WhitePrev;
-				}
-				if (Black_Set) {
-					u.IsSetBlack = Black_Set;
-					u.Black_Per = Black_Per;
-					u.Black = BlackPrev;
-				}
-			}
+			u.SetupByPrev(m_CutInfoUpdate[Counter - 1]);
 		}
-		void			ResetRandom(size_t Counter) {
+		void			SetUpFog(size_t Counter) noexcept {
+			auto& ci = m_CutInfo[Counter];
+			ci.SetUpFog();
+		}
+		void			ResetRandom(size_t Counter) noexcept {
 			auto& ci = m_CutInfo[Counter];
 			auto& u = m_CutInfoUpdate[Counter];
-			{
-				Vector3DX vec;
-				bool isforcus = false;
-				for (auto& f : ci.Forcus) {
-					if (f.GetIsUse()) {
-						vec += f.GetForce();
-						isforcus = true;
-					}
-				}
-				if (isforcus) {
-					ci.Aim_camera.SetCamPos(ci.Aim_camera.GetCamPos(), vec / (float)(ci.Forcus.size()), ci.Aim_camera.GetCamUp());
-				}
+			Vector3DX vec;
+			if (ci.GetForcusCenter(&vec)) {
+				ci.Aim_camera.SetCamPos(ci.Aim_camera.GetCamPos(), vec, ci.Aim_camera.GetCamUp());
 			}
-			//
 			if (m_attached.GetSwitch()) {
 				ci.Aim_camera.SetCamPos(ci.Aim_camera.GetCamVec() + m_PosCam[m_attached.nowcut], ci.Aim_camera.GetCamVec(), ci.Aim_camera.GetCamUp());
 			}
 			if (ci.isResetRandCampos) { m_RandcamposBuf = Vector3DX::zero(); }
 			if (ci.isResetRandCamvec) { m_RandcamvecBuf = Vector3DX::zero(); }
 			if (ci.isResetRandCamup) { m_RandcamupBuf = Vector3DX::zero(); }
-			u.CameraNotFirst.SetCamPos(ci.Aim_camera.GetCamPos(), ci.Aim_camera.GetCamVec(), u.CameraNotFirst.GetCamUp());
+			u.ResetCam(ci.Aim_camera);
 		}
-		void			UpdateCam(size_t Counter) {
+		void			Update(size_t Counter) noexcept {
+			auto& ci = m_CutInfo[Counter];
+			auto& u = m_CutInfoUpdate[Counter];
+			u.Update(ci, &m_RandcamupBuf, &m_RandcamvecBuf, &m_RandcamposBuf, &Black_Buf, &White_Buf);
+			//
+			if (m_attached.GetSwitch()) {
+				ci.Aim_camera.SetCamPos(ci.Aim_camera.GetCamVec() + m_PosCam[m_attached.nowcut], ci.Aim_camera.GetCamVec(), ci.Aim_camera.GetCamUp());
+			}
+		}
+		void			UpdateCam(size_t Counter) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto& ci = m_CutInfo[Counter];
-			easing_set_SetSpeed(&DrawParts->SetMainCamera(), ci.Aim_camera, ci.cam_per);
+			ci.UpdateCam(&DrawParts->SetMainCamera());
 		}
 	};
 };

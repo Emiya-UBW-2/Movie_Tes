@@ -1,9 +1,9 @@
 #pragma once
 #include	"Header.hpp"
 
-#include "sub.hpp"
-#include "Script.hpp"
 #include "CutIn.hpp"
+#include "Script.hpp"
+#include "sub.hpp"
 //
 namespace FPS_n2 {
 #ifdef EditMode

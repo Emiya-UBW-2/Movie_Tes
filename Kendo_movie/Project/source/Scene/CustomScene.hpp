@@ -1,9 +1,9 @@
 #pragma once
-#include	"../Header.hpp"
-#include	"../sub.hpp"
-#include "../Script.hpp"
 #include "../CutIn.hpp"
 #include "../Editer.hpp"
+#include "../Header.hpp"
+#include "../Script.hpp"
+#include "../sub.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -17,23 +17,16 @@ namespace FPS_n2 {
 #ifdef EditMode
 			LoadEditUtil	m_LoadEditUtil;
 #endif
+			LONGLONG		m_BaseTime{ 0 }, m_NowTime{ 0 };
 			size_t			m_Counter{ 0 };//カット
+			int				m_count{ 0 };
 
 			SoundHandle		BGM;//データ
 			int				BGM_Frequency{ 0 };
 
-			int				spd_x{ 10 };
-			LONGLONG		m_BaseTime{ 0 }, m_NowTimeWait{ 0 };
-			bool			isFirstLoop{ true };//カット最初のループか
-			bool			ResetPhysics{ true };
-
 			switchs			Start, SpeedUp, SpeedDown;
-
-			int				m_count{ 0 };
-			float			Black_Buf{ 1.f };
-			float			White_Buf{ 0.f };
 		public:
-			CustomScene(void) noexcept { }
+			CustomScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;

@@ -1,8 +1,8 @@
-#include	"TitleScene.hpp"
-#include "../sub.hpp"
-#include "../Script.hpp"
 #include "../CutIn.hpp"
 #include "../Editer.hpp"
+#include "../Script.hpp"
+#include "../sub.hpp"
+#include	"TitleScene.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

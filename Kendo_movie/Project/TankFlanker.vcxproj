@@ -15,7 +15,6 @@
     <ClInclude Include="source\Editer.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
-    <ClInclude Include="source\MainScene\Object\MovieObj.hpp" />
     <ClInclude Include="source\Scene\CustomScene.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
     <ClInclude Include="source\Script.hpp" />
@@ -25,7 +24,6 @@
     <ClCompile Include="source\CutIn.cpp" />
     <ClCompile Include="source\Editer.cpp" />
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\MainScene\Object\MovieObj.cpp" />
     <ClCompile Include="source\Scene\CustomScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\Script.cpp" />

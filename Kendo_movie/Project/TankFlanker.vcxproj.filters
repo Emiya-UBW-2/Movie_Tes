@@ -19,9 +19,6 @@
     <Filter Include="ソース ファイル\MainScene">
       <UniqueIdentifier>{83422936-319b-4532-8063-ff7f98825515}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\MainScene\Object">
-      <UniqueIdentifier>{7e7d2c6d-acfb-42c0-8d84-c51bfae30724}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -38,9 +35,6 @@
     </ClInclude>
     <ClInclude Include="source\Scene\CustomScene.hpp">
       <Filter>ソース ファイル\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\MovieObj.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\Script.hpp">
       <Filter>ソース ファイル</Filter>
@@ -64,9 +58,6 @@
     </ClCompile>
     <ClCompile Include="source\Scene\CustomScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScene\Object\MovieObj.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\Script.cpp">
       <Filter>ソース ファイル</Filter>
