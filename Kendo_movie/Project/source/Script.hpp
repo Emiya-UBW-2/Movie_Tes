@@ -140,7 +140,16 @@ namespace FPS_n2 {
 		}
 		void			SetDrawGraph(int NowCut) noexcept {
 			auto* GraphParts = FPS_n2::GraphControl::Instance();
-			if (m_Func.find("SetDrawGraph") != std::string::npos) {
+			if (m_Func.find("LoadGraph") != std::string::npos) {
+				auto* DrawParts = DXDraw::Instance();
+				for (int i = 0, count = std::stoi(m_Args[1]); i < count; i++) {
+					GraphParts->Load(
+						(float)(DrawParts->GetScreenY(std::stoi(m_Args[2]))), (float)(DrawParts->GetScreenY(std::stoi(m_Args[3]))),
+						std::stof(m_Args[4]), std::stof(m_Args[5]), std::stof(m_Args[6]),
+						m_Args[0]);
+				}
+			}
+			else if (m_Func.find("SetDrawGraph") != std::string::npos) {
 				size_t in_str = m_Args[1].find("~");
 				if (in_str != std::string::npos) {
 					int start_t = std::stoi(m_Args[1].substr(0, in_str));
@@ -177,7 +186,6 @@ namespace FPS_n2 {
 	public:
 		//読み込み作業前
 		void			BeforeLoad() noexcept {
-			//GraphParts->Load((float)(DrawParts->GetScreenY(1920 * 1 / 2)), (float)(DrawParts->GetScreenY(1080 * 1 / 2)), 0, 1.f, 0.5f, LOGO1);
 			TelopClass::Instance()->Init();
 		}
 		//スクリプト読み込み処理

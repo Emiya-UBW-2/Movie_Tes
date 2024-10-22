@@ -1,12 +1,24 @@
 //
-		SetArg(Soldier, "data/model/Soldier/model.pmx");
-		SetArg(Stage, "data/model/stage/model.mv1");
+		SetArg(KenPic, "data/Picture/ken.png");
+		SetArg(SinPic, "data/Picture/sin.png");
+
+		SetArg(Kendo, "data/Charactor/Chara/model.pmx");
+		SetArg(Bamboo, "data/Weapon/Bamboo/model.pmx");
+
+		SetArg(Stage, "data/model/map/model_DISABLE.mv1");
+		SetArg(Sky, "data/model/sky/model.mv1");
 //モデル読み込み
-		LoadModel(Soldier, 6);
+		LoadModel(Kendo, 1);
+		LoadModel(Bamboo, 1);
 		LoadModel(Stage, 1);
+		LoadModel(Sky, 1);
+
+		LoadGraph(KenPic, 1, 960,540, 0.0, 1.0, 0.35);
+		LoadGraph(SinPic, 1, 960,540, 0.0, 1.0, 0.35);
 //モデル読み込み終わり
 	//ｾｯﾀｯﾌﾟ
 		SetModelMode(Stage, 0, FAR_TRUE);
+		SetModelMode(Sky, 0, SKY_TRUE);
 //カット設定
 //0
 	//0
@@ -14,36 +26,70 @@
 		SetBright(230, 245, 255);
 		BlackIn(0.1);
 
-		SetFog(0, 0, 0,50.f,200.f);
+		//SetFog(100, 110, 128, 50.f,200.f);
 
-		SetCamForcus(Soldier, 0, UPPER, 0.0, 0.0, 0.0);
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
 		SetCampos_NoneRad(-20.f , 14.f, 25.f);
 		SetCamInfo(25, 1.0, 100.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, Soldier, 0, UPPER, 1.0, 2.0, 0.0);
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 1.0, 2.0, 0.0);
 		SetUpdateCampos(0.9f);
-		SetCamPosRand(10.3f,10.3f,10.f,0.9f);
+			SetDrawGraph(KenPic, 0,1);
 
 			SetDrawModel(Stage, 0, 15);
 			SetModelMat(Stage, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
 
-			SetDrawModel(Soldier, 0, 1);
-			SetModelMat(Soldier, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			SetModelAnime(Soldier, 0, 0, FALSE, 0.7, 0);
+			SetDrawModel(Sky, 0, 15);
+			SetModelMat(Sky, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
+
+			SetDrawModel(Kendo, 0, 5);
+			SetModelMat(Kendo, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Kendo, 0, 0, FALSE, 1.0, 0);
+
+			SetDrawModel(Bamboo, 0, 5);
+			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Bamboo, 0, 0, FALSE, 1.0, 0);
 	//1
 		SetCut(3.25);
 
-		SetCamForcus(Soldier, 0, UPPER, 0.0, 2.0, 0.0);
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 2.0, 0.0);
 		SetCampos_Attach(1, 0.f , 34.f, 1.f);
 		SetCamInfo(45, 1.0, 100.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, Soldier, 0, UPPER, 0.0, 2.0, 0.0);
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
+			SetDrawGraph(SinPic, 0,1);
+	//2
+		SetCut(5.5);
 
-			SetDrawModel(Soldier, 0, 1);
-			SetModelMat(Soldier, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			SetModelAnime(Soldier, 0, 0, FALSE, 0.7, 0);
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(0.f , 14.f, 25.f);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
+		SetUpdateCampos(0.9f);
+	//3
+		SetCut(7.5);
+
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(0.f , 14.f, -50.f);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
+		SetUpdateCampos(0.9f);
+	//4
+		SetCut(10.5);
+
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(15.f , 14.f, -50.f);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
+		SetUpdateCampos(0.9f);
 	//50
 		SetCut(120.0);//
 		SetPrevCamInfo();

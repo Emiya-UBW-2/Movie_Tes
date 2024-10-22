@@ -214,7 +214,10 @@ namespace FPS_n2 {
 			else {
 				ModelParts->Draw(false, false, false, TRUE);
 			}
+
+			SetDrawMode(DX_DRAWMODE_BILINEAR);
 			GraphParts->Draw();
+			SetDrawMode(DX_DRAWMODE_NEAREST);
 		}
 		//
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
