@@ -8,8 +8,8 @@
 		SetArg(Stage, "data/model/map/model_DISABLE.mv1");
 		SetArg(Sky, "data/model/sky/model.mv1");
 //ÉÇÉfÉãì«Ç›çûÇ›
-		LoadModel(Kendo, 1);
-		LoadModel(Bamboo, 1);
+		LoadModel(Kendo, 2);
+		LoadModel(Bamboo, 2);
 		LoadModel(Stage, 1);
 		LoadModel(Sky, 1);
 
@@ -24,7 +24,13 @@
 	//0
 		SetCut(1.5);
 		SetBright(230, 245, 255);
-		BlackIn(0.1);
+		WhiteOut(0.1);
+
+			SetDrawGraph(KenPic, 0,2);
+	//1
+		SetCut(3.5);
+		SetBright(230, 245, 255);
+		WhiteIn(0.95);
 
 		//SetFog(100, 110, 128, 50.f,200.f);
 
@@ -35,52 +41,46 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 1.0, 2.0, 0.0);
 		SetUpdateCampos(0.9f);
-			SetDrawGraph(KenPic, 0,1);
-
 			SetDrawModel(Stage, 0, 15);
 			SetModelMat(Stage, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
 
 			SetDrawModel(Sky, 0, 15);
 			SetModelMat(Sky, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
 
-			SetDrawModel(Kendo, 0, 5);
-			SetModelMat(Kendo, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetDrawModel(Kendo, 0, 15);
+			SetModelMat(Kendo, 0, 0.0, 0.0, 0.0, 35.0, 0.0);
 			SetModelAnime(Kendo, 0, 0, FALSE, 1.0, 0);
 
-			SetDrawModel(Bamboo, 0, 5);
-			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			SetDrawModel(Bamboo, 0, 15);
+			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 35.0, 0.0);
 			SetModelAnime(Bamboo, 0, 0, FALSE, 1.0, 0);
-	//1
-		SetCut(3.25);
 
-		SetCamForcus(Kendo, 0, UPPER, 0.0, 2.0, 0.0);
-		SetCampos_Attach(1, 0.f , 34.f, 1.f);
-		SetCamInfo(45, 1.0, 100.0, 0.0);
+			SetDrawModel(Kendo, 1, 15);
+			SetModelMat(Kendo, 1, 180.0, 0.0, 0.0, -35.0, 0.0);
+			SetModelAnime(Kendo, 1, 0, FALSE, 1.0, 0);
 
-		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
-			SetDrawGraph(SinPic, 0,1);
+			SetDrawModel(Bamboo, 1, 15);
+			SetModelMat(Bamboo, 1, 180.0, 0.0, 0.0, -35.0, 0.0);
+			SetModelAnime(Bamboo, 1, 0, FALSE, 1.0, 0);
 	//2
 		SetCut(5.5);
 
-		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
-		SetCampos_NoneRad(0.f , 14.f, 25.f);
-		SetCamInfo(25, 1.0, 100.0, 0.0);
+		SetCamvec(0.f , 14.f, 0.f);
+		SetCampos_NoneRad(95.f , 14.f, 0.f);
+		SetCamInfo(35, 5.0, 500.0, 0.0);
 
-		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
-		SetUpdateCampos(0.9f);
-	//3
+			SetDrawGraph(SinPic, 0,1);
+	//4
 		SetCut(7.5);
 
-		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
-		SetCampos_NoneRad(0.f , 14.f, -50.f);
-		SetCamInfo(25, 1.0, 100.0, 0.0);
+		SetCamForcus(Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(15.f , 4.f, 30.f);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
+		SetUpdateCamForcus(0.9f, Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
 		SetUpdateCampos(0.9f);
-	//4
+	//5
 		SetCut(10.5);
 
 		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);

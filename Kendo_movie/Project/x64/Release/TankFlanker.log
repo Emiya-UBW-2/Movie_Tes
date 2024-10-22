@@ -1,7 +1,26 @@
-﻿  CustomScene.cpp
+﻿  Editer.cpp
+  CustomScene.cpp
+  TitleScene.cpp
+  Script.cpp
+  main.cpp
+C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\Kendo_movie\Project\source\Script.hpp(349,10): warning C4189: 'ModelParts': ローカル変数が初期化されましたが、参照されていません
+  (ソース ファイル 'source/Editer.cpp' をコンパイルしています)
+  
+C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\Kendo_movie\Project\source\Script.hpp(349,10): warning C4189: 'ModelParts': ローカル変数が初期化されましたが、参照されていません
+  (ソース ファイル 'source/Scene/TitleScene.cpp' をコンパイルしています)
+  
+C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\Kendo_movie\Project\source\Script.hpp(349,10): warning C4189: 'ModelParts': ローカル変数が初期化されましたが、参照されていません
+  (ソース ファイル 'source/main.cpp' をコンパイルしています)
+  
+C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\Kendo_movie\Project\source\Script.hpp(349,10): warning C4189: 'ModelParts': ローカル変数が初期化されましたが、参照されていません
+  (ソース ファイル 'source/Script.cpp' をコンパイルしています)
+  
+C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\Kendo_movie\Project\source\Script.hpp(349,10): warning C4189: 'ModelParts': ローカル変数が初期化されましたが、参照されていません
+  (ソース ファイル 'source/Scene/CustomScene.cpp' をコンパイルしています)
+  
   コード生成しています。
-  535 of 9327 functions ( 5.7%) were compiled, the rest were copied from previous compilation.
+  6 of 9262 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    254 functions had inline decision re-evaluated but remain unchanged
+    10 functions had inline decision re-evaluated but remain unchanged
   コード生成が終了しました。
   TankFlanker.vcxproj -> C:\Users\Yabushita_Maki\Documents\GitHub\Movie_Tes\Kendo_movie\Project\Game.exe

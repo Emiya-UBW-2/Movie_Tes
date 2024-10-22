@@ -257,8 +257,8 @@ namespace FPS_n2 {
 		Vector3DX		m_RandcamupBuf;
 		Vector3DX		m_RandcamvecBuf;
 		Vector3DX		m_RandcamposBuf;
-		float			Black_Buf{ 1.f };
-		float			White_Buf{ 0.f };
+		float			Black_Buf{ 0.f };
+		float			White_Buf{ 1.f };
 	public:
 		auto			GetNowTime(size_t Counter) const noexcept { return (Counter >= 0 ? m_CutInfo[Counter].GetTimeLimit() : 0); }
 		auto			IsEnd(size_t Counter) const noexcept { return (Counter > m_CutInfo.size()); }
@@ -348,7 +348,7 @@ namespace FPS_n2 {
 		void			ShadowFarDraw(void) const noexcept {
 			auto* ModelParts = FPS_n2::ModelControl::Instance();
 			SetDrawAlphaTest(DX_CMP_GREATER, 128);
-			ModelParts->Draw(false, true, true);
+			//ModelParts->Draw(false, true, true);
 			SetDrawAlphaTest(-1, 0);
 		}
 		void			ShadowDraw(void) const noexcept {
@@ -357,7 +357,9 @@ namespace FPS_n2 {
 			ModelParts->Draw(true, false, true, FALSE);
 		}
 		void			SetShadowDraw(void) const noexcept {
-
+			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			ModelParts->Draw(false, false, true, TRUE);
+			ModelParts->Draw(true, false, true, FALSE);
 		}
 		void			MainDraw(void) const noexcept {
 			auto* ModelParts = FPS_n2::ModelControl::Instance();
@@ -375,10 +377,6 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* GraphParts = FPS_n2::GraphControl::Instance();
 
-			SetDrawMode(DX_DRAWMODE_BILINEAR);
-			GraphParts->Draw();
-			SetDrawMode(DX_DRAWMODE_NEAREST);
-
 			if (NowTime > 0) {
 				m_TelopClass.Draw(NowTime);
 			}
@@ -392,6 +390,11 @@ namespace FPS_n2 {
 				DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(255, 255, 255), TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
+
+			SetDrawMode(DX_DRAWMODE_BILINEAR);
+			GraphParts->Draw();
+			SetDrawMode(DX_DRAWMODE_NEAREST);
+
 		}
 	private:
 		void			SetupByPrev(size_t Counter) noexcept {

@@ -36,6 +36,7 @@ namespace FPS_n2 {
 			void			BG_Draw_Sub(void) noexcept override;
 			void			ShadowDraw_Far_Sub(void) noexcept override;
 			void			ShadowDraw_Sub(void) noexcept override;
+			void			SetShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept  override;

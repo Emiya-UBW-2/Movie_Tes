@@ -10,7 +10,9 @@ namespace FPS_n2 {
 		}
 		void			CustomScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			DrawParts->SetAmbientLight(Vector3DX::vget(-0.2f, -0.8f, -0.4f), GetColorF(1.f, 1.f, 1.f, 0.0f));
+			Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
+			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 20, -20), Vector3DX::vget(0, 20, 0), Vector3DX::up());
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(15), 1.f, 200.f);
 #ifdef _USE_EFFEKSEER_
@@ -41,7 +43,7 @@ namespace FPS_n2 {
 
 				//プレイ用意
 				GameSpeed = 1.0f;
-				m_NowTime = (m_Counter != 0) ? m_LoadUtil.GetNowTime(m_Counter - 1) : -1000000;
+				m_NowTime = (m_Counter != 0) ? m_LoadUtil.GetNowTime(m_Counter - 1) : 0;
 				Start.Set(true);
 				m_count = 0;
 			}
@@ -84,8 +86,6 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//経過時間測定
-				m_NowTime += (LONGLONG)((float)deltatime * GameSpeed);
 				//待ち
 				if (m_NowTime >= 0) {
 					if (m_count == 0) {
@@ -105,7 +105,7 @@ namespace FPS_n2 {
 						}
 					}
 
-					bool isFirstLoop = false;
+					bool isFirstLoop = (m_NowTime==0);
 					bool ResetPhysics = false;
 					if (m_NowTime > m_LoadUtil.GetNowTime(m_Counter)) {
 						ResetPhysics = m_LoadUtil.IsResetPhysics(m_Counter);
@@ -133,6 +133,8 @@ namespace FPS_n2 {
 					auto far_t = DrawParts->SetMainCamera().GetCamFar();
 					PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
 				}
+				//経過時間測定
+				m_NowTime += (LONGLONG)((float)deltatime * GameSpeed);
 			}
 			//
 #ifdef _USE_EFFEKSEER_
@@ -154,6 +156,7 @@ namespace FPS_n2 {
 		void			CustomScene::BG_Draw_Sub(void) noexcept { m_LoadUtil.BGDraw(); }
 		void			CustomScene::ShadowDraw_Far_Sub(void) noexcept { m_LoadUtil.ShadowFarDraw(); }
 		void			CustomScene::ShadowDraw_Sub(void) noexcept { m_LoadUtil.ShadowDraw(); }
+		void			CustomScene::SetShadowDraw_Sub(void) noexcept { m_LoadUtil.SetShadowDraw(); }
 		void			CustomScene::MainDraw_Sub(void) noexcept { m_LoadUtil.MainDraw(); }
 		//
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {

@@ -11,7 +11,8 @@ namespace FPS_n2 {
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Get((int)SoundEnum::Taiko1).SetVol_Local(128);
+			SE->Get((int)SoundEnum::Taiko1).SetVol_Local(216);
+			SE->Get((int)SoundEnum::KendoKun).SetVol_Local(128);
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
