@@ -33,14 +33,14 @@ namespace FPS_n2 {
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
 			//
-			void			BG_Draw_Sub(void) noexcept override;
-			void			ShadowDraw_Far_Sub(void) noexcept override;
-			void			ShadowDraw_Sub(void) noexcept override;
-			void			SetShadowDraw_Sub(void) noexcept override;
-			void			MainDraw_Sub(void) noexcept override;
+			void			BG_Draw_Sub(void) const noexcept override;
+			void			ShadowDraw_Far_Sub(void) const noexcept override;
+			void			ShadowDraw_Sub(void) const noexcept override;
+			void			SetShadowDraw_Sub(void) const noexcept override;
+			void			MainDraw_Sub(void) const noexcept override;
 			//UI•\Ž¦
-			void			DrawUI_Base_Sub(void) noexcept  override;
-			void			DrawUI_In_Sub(void) noexcept override {}
+			void			DrawUI_Base_Sub(void) const noexcept  override;
+			void			DrawUI_In_Sub(void) const noexcept override {}
 		};
 	};
 };

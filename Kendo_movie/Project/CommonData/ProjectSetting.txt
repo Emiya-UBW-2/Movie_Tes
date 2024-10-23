@@ -1,3 +1,3 @@
-GodRay=false
+GodRay=true
 Distortion=false
 PBR=false

@@ -153,13 +153,13 @@ namespace FPS_n2 {
 			BGM.Dispose();
 		}
 		//
-		void			CustomScene::BG_Draw_Sub(void) noexcept { m_LoadUtil.BGDraw(); }
-		void			CustomScene::ShadowDraw_Far_Sub(void) noexcept { m_LoadUtil.ShadowFarDraw(); }
-		void			CustomScene::ShadowDraw_Sub(void) noexcept { m_LoadUtil.ShadowDraw(); }
-		void			CustomScene::SetShadowDraw_Sub(void) noexcept { m_LoadUtil.SetShadowDraw(); }
-		void			CustomScene::MainDraw_Sub(void) noexcept { m_LoadUtil.MainDraw(); }
+		void			CustomScene::BG_Draw_Sub(void) const noexcept { m_LoadUtil.BGDraw(); }
+		void			CustomScene::ShadowDraw_Far_Sub(void) const noexcept { m_LoadUtil.ShadowFarDraw(); }
+		void			CustomScene::ShadowDraw_Sub(void) const noexcept { m_LoadUtil.ShadowDraw(); }
+		void			CustomScene::SetShadowDraw_Sub(void) const noexcept { m_LoadUtil.SetShadowDraw(); }
+		void			CustomScene::MainDraw_Sub(void) const noexcept { m_LoadUtil.MainDraw(); }
 		//
-		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
+		void			CustomScene::DrawUI_Base_Sub(void) const noexcept {
 			m_LoadUtil.UIDraw(m_NowTime);
 #ifdef EditMode
 			m_LoadEditUtil.Editer_DrawUI(m_Counter, m_NowTime);

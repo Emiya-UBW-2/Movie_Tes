@@ -22,6 +22,6 @@ namespace FPS_n2 {
 			return true;
 		}
 
-		void			TitleScene::DrawUI_Base_Sub(void) noexcept {}
+		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {}
 	};
 };

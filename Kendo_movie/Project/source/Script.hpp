@@ -346,7 +346,7 @@ namespace FPS_n2 {
 			ModelParts->Draw_Far();
 		}
 		void			ShadowFarDraw(void) const noexcept {
-			auto* ModelParts = FPS_n2::ModelControl::Instance();
+			//auto* ModelParts = FPS_n2::ModelControl::Instance();
 			SetDrawAlphaTest(DX_CMP_GREATER, 128);
 			//ModelParts->Draw(false, true, true);
 			SetDrawAlphaTest(-1, 0);
