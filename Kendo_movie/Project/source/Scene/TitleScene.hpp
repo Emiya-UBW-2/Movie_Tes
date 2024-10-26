@@ -8,7 +8,7 @@ namespace FPS_n2 {
 			TitleScene(void) noexcept { }
 			void			Set_Sub(void) noexcept override;
 			//
-			bool			Update_Sub(void) noexcept override;
+			bool			Update_Sub(void) noexcept override { return false; }
 			void			Dispose_Sub(void) noexcept override{}
 			//
 			void			BG_Draw_Sub(void) const noexcept override {}
@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			void			ShadowDraw_Sub(void) const noexcept override {}
 			void			MainDraw_Sub(void) const noexcept override {}
 			//UI•\Ž¦
-			void			DrawUI_Base_Sub(void) const noexcept  override;
+			void			DrawUI_Base_Sub(void) const noexcept  override {}
 			void			DrawUI_In_Sub(void) const noexcept override {}
 		};
 	};

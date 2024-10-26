@@ -6,5 +6,3 @@
 using namespace DXLibRef;
 
 #include "Enums.hpp"
-
-//#define EditMode

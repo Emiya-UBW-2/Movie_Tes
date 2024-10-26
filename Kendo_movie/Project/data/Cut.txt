@@ -27,6 +27,9 @@
 		WhiteOut(0.1);
 
 			SetDrawGraph(KenPic, 0,2);
+
+			SetDrawSE(KendoKun);
+			SetDrawSE(Taiko1);
 	//1
 		SetCut(3.5);
 		SetBright(230, 245, 255);

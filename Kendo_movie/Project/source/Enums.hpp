@@ -7,5 +7,16 @@ namespace FPS_n2 {
 		RunFoot = (int)SoundEnumCommon::Num,
 		KendoKun,
 		Taiko1,
+		Max,
+	};
+
+	static const char* SoundID[(int)SoundEnum::Max] = {
+		"",
+		"",
+		"",
+		"",
+		"RunFoot",
+		"KendoKun",
+		"Taiko1",
 	};
 };
