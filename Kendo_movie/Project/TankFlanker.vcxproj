@@ -13,16 +13,16 @@
   <ItemGroup>
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
+    <ClInclude Include="source\MainScene\EventScene\EventScene.hpp" />
     <ClInclude Include="source\Scene\CustomScene.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
-    <ClInclude Include="source\Script.hpp" />
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\MainScene\EventScene\EventScene.cpp" />
     <ClCompile Include="source\Scene\CustomScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
-    <ClCompile Include="source\Script.cpp" />
     <ClCompile Include="source\sub.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

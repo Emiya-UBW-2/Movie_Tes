@@ -47,9 +47,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//
 	FPS_n2::Sceneclass::CommonBattleResource::Create();
-	FPS_n2::ModelControl::Create();
-	FPS_n2::GraphControl::Create();
-	FPS_n2::SEControl::Create();
 	//ÉVÅ[Éì
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto CustomScenePtr = std::make_shared<FPS_n2::Sceneclass::CustomScene>();

@@ -6,7 +6,7 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->Load();
 			BattleResourceMngr->Set();
-			m_LoadUtil.Load();
+			m_EventScene.Load();
 		}
 		void			CustomScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -18,17 +18,17 @@ namespace FPS_n2 {
 #ifdef _USE_EFFEKSEER_
 			EffectControl::Init();				//
 #endif
-			m_LoadUtil.Start(0);
+			m_EventScene.Start(0);
 			DrawParts->SetDistortionPer(120.f*4);
 		}
 		bool			CustomScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
 			Pad->ChangeGuide([&]() {});
 
-			m_LoadUtil.GetDeltaTime();
+			m_EventScene.GetDeltaTime();
 			if (DXDraw::Instance()->IsPause()) { return true; }
-			if (m_LoadUtil.IsEnd()) { return false; }
-			m_LoadUtil.Update();
+			if (m_EventScene.IsEnd()) { return false; }
+			m_EventScene.Update();
 			//
 #ifdef _USE_EFFEKSEER_
 			EffectControl::Execute();
@@ -36,20 +36,22 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			CustomScene::Dispose_Sub(void) noexcept {
-			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			BattleResourceMngr->Dispose();
 #ifdef _USE_EFFEKSEER_
 			EffectControl::Dispose();
 #endif
-			m_LoadUtil.Dispose();
+		}
+		void CustomScene::Dispose_Load_Sub(void) noexcept {
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			BattleResourceMngr->Dispose();
+			m_EventScene.Dispose_Load();
 		}
 		//
-		void			CustomScene::BG_Draw_Sub(void) const noexcept { m_LoadUtil.BGDraw(); }
+		void			CustomScene::BG_Draw_Sub(void) const noexcept { m_EventScene.BGDraw(); }
 		void			CustomScene::ShadowDraw_Far_Sub(void) const noexcept { }
-		void			CustomScene::ShadowDraw_Sub(void) const noexcept { m_LoadUtil.ShadowDraw(); }
-		void			CustomScene::SetShadowDraw_Sub(void) const noexcept { m_LoadUtil.SetShadowDraw(); }
-		void			CustomScene::MainDraw_Sub(void) const noexcept { m_LoadUtil.MainDraw(); }
+		void			CustomScene::ShadowDraw_Sub(void) const noexcept { m_EventScene.ShadowDraw(); }
+		void			CustomScene::SetShadowDraw_Sub(void) const noexcept { m_EventScene.SetShadowDraw(); }
+		void			CustomScene::MainDraw_Sub(void) const noexcept { m_EventScene.MainDraw(); }
 		//
-		void			CustomScene::DrawUI_Base_Sub(void) const noexcept { m_LoadUtil.UIDraw(); }
+		void			CustomScene::DrawUI_Base_Sub(void) const noexcept { m_EventScene.UIDraw(); }
 	};
 };

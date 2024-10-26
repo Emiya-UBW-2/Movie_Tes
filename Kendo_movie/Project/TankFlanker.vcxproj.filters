@@ -19,6 +19,9 @@
     <Filter Include="ソース ファイル\MainScene">
       <UniqueIdentifier>{83422936-319b-4532-8063-ff7f98825515}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\MainScene\EventScene">
+      <UniqueIdentifier>{6a5c22f4-012d-434e-8186-a283dca2948c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -36,8 +39,8 @@
     <ClInclude Include="source\Scene\CustomScene.hpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="source\Script.hpp">
-      <Filter>ソース ファイル</Filter>
+    <ClInclude Include="source\MainScene\EventScene\EventScene.hpp">
+      <Filter>ソース ファイル\MainScene\EventScene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -53,8 +56,8 @@
     <ClCompile Include="source\Scene\CustomScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="source\Script.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="source\MainScene\EventScene\EventScene.cpp">
+      <Filter>ソース ファイル\MainScene\EventScene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -94,13 +94,11 @@
 		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
 		SetUpdateCampos(0.9f);
 	//50
-		SetCut(120.0);//
+		SetCut(12.0);//
 		SetPrevCamInfo();
 
 		SetUpdateEnable();
 		WhiteOut(0.9f);
-	//
-		SetCut(500.0);
 //LAST
 
 
