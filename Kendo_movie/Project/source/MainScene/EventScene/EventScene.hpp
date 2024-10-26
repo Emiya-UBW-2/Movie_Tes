@@ -55,6 +55,9 @@ namespace FPS_n2 {
 				m_Var.resize(m_Var.size() + 1);
 				m_Var.back().Add(Base, After);
 			}
+			void			Dispose() {
+				m_Var.clear();
+			}
 		};
 		//
 		class CutInfoClass {
@@ -129,6 +132,9 @@ namespace FPS_n2 {
 						}
 					}
 				}
+			}
+			void			Dispose() {
+				Switch.clear();
 			}
 		};
 		//モデルコントロール
@@ -350,20 +356,21 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				void			Dispose(void) noexcept {
+					FrameNum.clear();
+					CutDetail.clear();
+				}
 			};
 		private:
 			std::vector<Model> model;
-			size_t Max = 0;
 			size_t P_cnt = 0;
 		public:
-			const auto& GetMax(void) const noexcept { return Max; }
-			const auto& GetModel(void) const noexcept { return model; }
-		public:
 			ModelControl(void) noexcept {
-				model.resize(64);
-				Max = 0;
+				Dispose();
 			}
-			~ModelControl(void) noexcept {}
+			~ModelControl(void) noexcept {
+				Dispose();
+			}
 		public:
 			void			Load(std::string_view Path) noexcept {
 				MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
@@ -372,49 +379,51 @@ namespace FPS_n2 {
 				}
 				MV1SetLoadModelPhysicsCalcPrecision(1);
 
-				for (size_t i = 0; i < Max; i++) {
-					if (model[i].isBase && model[i].Path == Path) {
-						model[Max].Path = Path;
-						model[Max].isBase = false;
-						model[Max].obj.Duplicate(model[i].obj);
-						model[i].numBase++;
-						model[Max].BaseID = model[i].numBase;
-						Max++;
+				if (model.size() == 0) {
+					model.resize(model.size() + 1);
+				}
+				for (auto& m : model) {
+					if (&m == &model.back()) { continue; }
+					if (m.isBase && m.Path == Path) {
+						model.back().Path = Path;
+						model.back().isBase = false;
+						model.back().obj.Duplicate(m.obj);
+						m.numBase++;
+						model.back().BaseID = m.numBase;
+						model.resize(model.size() + 1);
 						return;
 					}
 				}
-				model[Max].Path = Path;
-				model[Max].isBase = true;
-				model[Max].numBase = 0;
-				model[Max].BaseID = 0;
-				MV1::Load(model[Max].Path, &(model[Max].obj), DX_LOADMODEL_PHYSICS_REALTIME);/*DX_LOADMODEL_PHYSICS_REALTIME*/
-				Max++;
+				model.back().Path = Path;
+				model.back().isBase = true;
+				model.back().numBase = 0;
+				model.back().BaseID = 0;
+				MV1::Load(model.back().Path, &(model.back().obj), DX_LOADMODEL_PHYSICS_REALTIME);/*DX_LOADMODEL_PHYSICS_REALTIME*/
+				model.resize(model.size() + 1);
 			}
 			const Model* Get(std::string_view Path, size_t Sel = 0) const noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					if (model[i].Path == Path && model[i].BaseID == Sel) {
-						return &(model[i]);
+				for (auto& m : model) {
+					if (m.Path == Path && m.BaseID == Sel) {
+						return &(m);
 					}
 				}
 				return nullptr;
 			}
 			Model* Get(std::string_view Path, size_t Sel = 0) noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					if (model[i].Path == Path && model[i].BaseID == Sel) {
-						return &(model[i]);
+				for (auto& m : model) {
+					if (m.Path == Path && m.BaseID == Sel) {
+						return &(m);
 					}
 				}
 				return nullptr;
 			}
 			void			Start(size_t Counter) noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					m.Cutinfo.Start(Counter);
 				}
 			}
 			void			FirstUpdate(size_t Counter, bool isFirstLoop, bool reset_p) noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					while (true) {
 						m.Cutinfo.Update(Counter);
 						if (m.Cutinfo.GetisActive() && (m.Cutinfo.GetNowCut() < m.CutDetail.size())) {
@@ -427,14 +436,12 @@ namespace FPS_n2 {
 					}
 				}
 
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					m.canUpdate = true;
 				}
 				//++P_cnt %= 2;
 
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					if (m.Cutinfo.GetisActive()) {
 						m.Update(m.canUpdate);/**/
 					}
@@ -443,13 +450,12 @@ namespace FPS_n2 {
 			}
 			void			SetPhysics(bool reset_p) noexcept {
 				if (reset_p) {
-					for (size_t i = 0; i < Max; i++) {
-						model[i].SetPhysics(true, 1.f);
+					for (auto& m : model) {
+						m.SetPhysics(true, 1.f);
 					}
 				}
 				else {
-					for (size_t i = 0; i < Max; i++) {
-						auto& m = model[i];
+					for (auto& m : model) {
 						if (!m.isFarPhysics) {
 							m.SetPhysics(true, 1.f);
 							m.isFarPhysics = true;
@@ -459,8 +465,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetAfterLoad(void) noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					//
 					if (!m.isEndLoad && CheckHandleASyncLoad(m.obj.get()) == FALSE) {
 						m.isEndLoad = true;
@@ -484,8 +489,7 @@ namespace FPS_n2 {
 					}
 				}
 				//モデルのMV1保存
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					if ((m.Path.find(".pmx") != std::string::npos) && (m.BaseID == 0)) {
 						m.obj.SaveModelToMV1File((m.Path.substr(0, m.Path.find(".pmx")) + ".mv1").c_str(), MV1_SAVETYPE_NORMAL, -1, 1, 1, 1, 0, 0);
 						//m.obj.SaveModelToMV1File((m.Path.substr(0, m.Path.find(".pmx")) + ".mv1").c_str());
@@ -497,8 +501,7 @@ namespace FPS_n2 {
 				SetFogEnable(FALSE);
 				SetUseLighting(FALSE);
 				{
-					for (size_t i = 0; i < Max; i++) {
-						auto& m = model[i];
+					for (auto& m : model) {
 						if (m.isBGModel) {
 							m.Draw();
 						}
@@ -509,8 +512,7 @@ namespace FPS_n2 {
 			}
 			void			Draw(bool innearshadow, bool infarshadow, bool ShadowActive, int isCheckFar = -1) const noexcept {
 				if (infarshadow) {
-					for (size_t i = 0; i < Max; i++) {
-						auto& m = model[i];
+					for (auto& m : model) {
 						if (!m.isBGModel && m.IsFarShadow) {
 							if (ShadowActive && !m.ShadowDrawActive) { continue; }
 							m.Draw(isCheckFar);
@@ -518,8 +520,7 @@ namespace FPS_n2 {
 					}
 				}
 				else if (innearshadow) {
-					for (size_t i = 0; i < Max; i++) {
-						auto& m = model[i];
+					for (auto& m : model) {
 						if (!m.isBGModel && m.IsNearShadow) {
 							if (ShadowActive && !m.ShadowDrawActive) { continue; }
 							m.Draw(isCheckFar);
@@ -527,14 +528,19 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					for (size_t i = 0; i < Max; i++) {
-						auto& m = model[i];
+					for (auto& m : model) {
 						if (!m.isBGModel) {
 							if (ShadowActive && !m.ShadowDrawActive) { continue; }
 							m.Draw(isCheckFar);
 						}
 					}
 				}
+			}
+			void			Dispose() {
+				for (auto& m : model) {
+					m.Dispose();
+				}
+				model.clear();
 			}
 		};
 		class GraphControl {
@@ -632,6 +638,13 @@ namespace FPS_n2 {
 				std::vector<CutinfoDetail> CutDetail;//オンにするカット
 				std::string Path;
 			public:
+				Graph(void) noexcept {
+					CutDetail.clear();
+				}
+				void			Dispose(void) noexcept {
+					CutDetail.clear();
+				}
+
 				void			Init(int startFrame, int ofset) noexcept {
 					this->CutDetail.resize(this->CutDetail.size() + 1);
 					this->Cutinfo.AddCutSwitch(startFrame, ofset);
@@ -696,23 +709,24 @@ namespace FPS_n2 {
 				}
 			};
 			std::vector<Graph> model;
-			size_t Max = 0;
 		public:
 			GraphControl(void) noexcept {
-				model.resize(64);
-				Max = 0;
+				Dispose();
 			}
 			void			Load(float xp, float yp, float rad, float alpha, float scale, std::string_view Path) noexcept {
-				model[Max].Path = Path;
-				model[Max].Set(xp, yp, rad, alpha, scale, Path);
-				Max++;
+				if (model.size() == 0) {
+					model.resize(model.size() + 1);
+				}
+				model.back().Path = Path;
+				model.back().Set(xp, yp, rad, alpha, scale, Path);
+				model.resize(model.size() + 1);
 			}
 			Graph* Get(std::string_view Path, size_t Sel = 0) noexcept {
 				int Cnt = 0;
-				for (size_t i = 0; i < Max; i++) {
-					if (model[i].Path == Path) {
+				for (auto& m : model) {
+					if (m.Path == Path) {
 						if (Cnt >= Sel) {
-							return &(model[i]);
+							return &(m);
 						}
 						Cnt++;
 					}
@@ -720,14 +734,12 @@ namespace FPS_n2 {
 				return nullptr;
 			}
 			void			Start(size_t Counter) noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					m.Cutinfo.Start(Counter);
 				}
 			}
 			void			FirstUpdate(size_t Counter, bool isFirstLoop) noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					while (true) {
 						m.Cutinfo.Update(Counter);
 						if (m.Cutinfo.GetisActive() && (m.Cutinfo.GetNowCut() < m.CutDetail.size())) {
@@ -739,16 +751,20 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					m.Update();
 				}
 			}
 			void			Draw(void) const noexcept {
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					m.Draw();
 				}
+			}
+			void			Dispose() {
+				for (auto& m : model) {
+					m.Dispose();
+				}
+				model.clear();
 			}
 		};
 		class SEControl {
@@ -769,29 +785,29 @@ namespace FPS_n2 {
 				}
 			};
 			std::vector<SE> model;
-			size_t Max = 0;
 		public:
 			SEControl(void) noexcept {
-				model.resize(64);
-				Max = 0;
+				Dispose();
 			}
 
 			SE* Get(size_t Sel) noexcept { return &(model[Sel]); }
 
 			SE* GetLast() noexcept {
-				Max++;
-				return &(model[Max - 1]);
+				model.resize(model.size() + 1);
+				return &(model.back());
 			}
 
 
 			void			Update(size_t Counter, bool isFirstLoop) noexcept {
 				auto* SE = SoundPool::Instance();
-				for (size_t i = 0; i < Max; i++) {
-					auto& m = model[i];
+				for (auto& m : model) {
 					if (m.m_PlayCounter == Counter && isFirstLoop) {
 						SE->Get((int)m.m_SoundEnum).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
 				}
+			}
+			void			Dispose() {
+				model.clear();
 			}
 		};
 		class TelopClass {
@@ -873,6 +889,9 @@ namespace FPS_n2 {
 				for (auto& t : Texts) {
 					t.Draw(nowTimeWait);
 				}
+			}
+			void			Dispose() {
+				Texts.clear();
 			}
 		};
 
@@ -1026,7 +1045,9 @@ namespace FPS_n2 {
 				cam_per = 0.95f;
 				IsResetPhysics = false;
 			}
-			~Cut_Info_First(void) noexcept {}
+			~Cut_Info_First(void) noexcept {
+				Forcus.clear();
+			}
 			void			SetPrev(const Cut_Info_First& tgt) noexcept {
 				if (this->UsePrevAim) {
 					this->Aim_camera = tgt.Aim_camera;
@@ -1145,7 +1166,9 @@ namespace FPS_n2 {
 				m_RandcamposSet = Vector3DX::zero();
 				Forcus.clear();
 			}
-			~Cut_Info_Update(void) noexcept {}
+			~Cut_Info_Update(void) noexcept {
+				Forcus.clear();
+			}
 		private:
 			void			SetForce(float camvecPer, std::string_view ModelPath, int ModelID, std::string_view Frame, const Vector3DX& Add) noexcept {
 				this->camvec_per = camvecPer;
@@ -1509,8 +1532,6 @@ namespace FPS_n2 {
 	public:
 		void			Load(void) noexcept {
 			m_TelopClass.Init();
-			m_CutInfo.clear();
-			m_CutInfoUpdate.clear();
 			//
 			int mdata = FileRead_open("data/Cut.txt", FALSE);
 			SetUseASyncLoadFlag(TRUE);
@@ -1605,8 +1626,16 @@ namespace FPS_n2 {
 			m_NowTime += (LONGLONG)((float)deltatime);
 		}
 		void			Dispose_Load(void) noexcept {
+			m_Variable.Dispose();
+			m_ModelControl.Dispose();
+			m_GraphControl.Dispose();
+			m_SEControl.Dispose();
+			m_TelopClass.Dispose();
+			m_PosCamCut.Dispose();
+
 			m_CutInfo.clear();
 			m_CutInfoUpdate.clear();
+			m_PosCam.clear();
 		}
 
 		void			BGDraw(void) const noexcept {

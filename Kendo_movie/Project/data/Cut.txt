@@ -20,7 +20,6 @@
 		SetModelMode(Stage, 0, FAR_TRUE);
 		SetModelMode(Sky, 0, SKY_TRUE);
 //ÉJÉbÉgê›íË
-//0
 	//0
 		SetCut(1.5);
 		SetBright(230, 245, 255);
@@ -73,7 +72,7 @@
 		SetCamInfo(35, 5.0, 500.0, 0.0);
 
 			SetDrawGraph(SinPic, 0,1);
-	//4
+	//3
 		SetCut(7.5);
 
 		SetCamForcus(Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
@@ -83,7 +82,7 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
 		SetUpdateCampos(0.9f);
-	//5
+	//4
 		SetCut(10.5);
 
 		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
@@ -93,12 +92,14 @@
 		SetUpdateEnable();
 		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
 		SetUpdateCampos(0.9f);
-	//50
+	//5
 		SetCut(12.0);//
 		SetPrevCamInfo();
 
 		SetUpdateEnable();
 		WhiteOut(0.9f);
+	//END
+		//SetCut(60.0);
 //LAST
 
 
